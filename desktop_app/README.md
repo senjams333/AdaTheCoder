@@ -35,7 +35,7 @@ ada_coder/
   settings.py           remembers progress and choices between visits
   sync.py               downloads themes, lessons and characters, logs in, checks for app updates, shows website messages
   styles.py, widgets.py looks and small building blocks
-  config.py             version number, website address, run-time limit
+  config.py             version number, the API's address, run-time limit
 assets/
   web/                  the lesson page (lesson.html, lesson.css, lesson.js)
   images/               characters, logo and icon
@@ -61,8 +61,9 @@ The app downloads the themes in the background (`/api/v3/courses`) when it opens
 (`SYNC_EVERY` in `config.py`), and the avatar menu has **🔄 Check for new lessons**. New and changed themes
 show straight away (if the child is in a lesson, when they go back Home).
 
-To test against a website on your own computer: `python run.py --server http://127.0.0.1:5000`
-(remembered; `python run.py --server default` goes back to the real website).
+To test against the API on your own computer: `python run.py --server http://127.0.0.1:3000`
+(remembered; `python run.py --server default` goes back to the real one). `python run.py --check` prints
+whether the app can reach the API and which themes it gets.
 
 ## Try free and Upgrade
 
@@ -86,7 +87,7 @@ Before the app has been online it uses `data/courses.json`, with the lessons in 
 | Ada's Coding Club | Ada, Byte, Penny | Byte | Byte |
 
 Add a pack by putting pictures in `assets/images`, adding an entry to `ada_coder/themes.py`, and adding
-it to `PACKS` in the website's `app.py` so the admin can choose it. (Or skip all that: choose
+it to `PACKS` in `api/src/common/constants.ts` so the admin can choose it. (Or skip all that: choose
 "Your own characters" for the theme in the admin and upload three pictures.)
 
 ## How children's code runs
@@ -104,11 +105,11 @@ The app never runs the child's code inside itself. Each press of **Run** starts 
 ## Building installers
 
 1. Put the lesson videos in `vid/`.
-2. Raise `APP_VERSION` in `ada_coder/config.py` and check `SERVER_URL`.
+2. Raise `APP_VERSION` in `ada_coder/config.py` and check `DEFAULT_SERVER_URL` (the API's address, e.g. `https://api.adathecoder.com`).
 3. Windows: run `build_windows.bat` (with [Inno Setup 6](https://jrsoftware.org/isdl.php) installed you get
    `dist\AdaTheCoder-<version>-Windows-Setup.exe`, otherwise a zip).
    Mac: run `bash build_mac.sh` to get `dist/AdaTheCoder-<version>-Mac.dmg`.
-4. Upload the file in the website admin under **App versions** with the same version number.
+4. Upload the file in the admin under **App versions** with the same version number.
    Installed apps will tell families an update is ready.
 
 ## Where the app keeps its data

@@ -36,7 +36,9 @@ jobs:
         run: |
           set -o pipefail
           npm run test:e2e 2>&1 | tee jest.txt || {
-            grep -E "●|Expected|Received|Error:" jest.txt | head -40 | sed 's/^/::error::/'
+            # the whole failure report as one note (new lines encoded the way GitHub expects)
+            msg=$(awk '/●/{f=1} f' jest.txt | head -150 | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=API tests::${msg}"
             exit 1
           }
 
@@ -65,7 +67,8 @@ jobs:
         run: |
           set -o pipefail
           npm run build 2>&1 | tee build.txt || {
-            grep -iE "error|failed|warn" build.txt | head -40 | sed 's/^/::error::/'
+            msg=$(tail -80 build.txt | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=Website build::${msg}"
             exit 1
           }
 

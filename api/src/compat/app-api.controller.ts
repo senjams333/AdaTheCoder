@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, Ip, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, Ip, Post, Query, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -45,6 +45,7 @@ export class AppApiController {
 
   /** The app's log-in: { ok, name, email, licences: [theme ids] } or 401 { ok: false, error } */
   @Post('v3/login')
+  @HttpCode(200)
   async login(@Body() body: Record<string, unknown>, @Ip() ip: string, @Res() res: Response) {
     try {
       const { user } = await this.auth.login(
