@@ -2,7 +2,7 @@
 # 1. Commit the lesson videos (desktop_app/vid/).
 #    Videos are big: use Git LFS (git lfs track "*.mp4").
 # 2. Push a tag like v1.1.0 (matching APP_VERSION in desktop_app/ada_coder/config.py).
-# 3. Download both files from the workflow run's "Artifacts" and upload them in the website admin.
+# 3. Download both files from the workflow run's "Artifacts" and upload them in the admin (App versions).
 name: Build desktop apps
 
 on:
@@ -20,11 +20,6 @@ jobs:
       - name: Test the app
         working-directory: desktop_app
         run: python -m unittest discover tests
-      - name: Test the website
-        working-directory: website
-        run: |
-          pip install -r requirements.txt
-          python -m unittest discover tests
 
   windows:
     needs: test

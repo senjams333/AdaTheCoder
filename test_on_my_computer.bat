@@ -1,26 +1,27 @@
 @echo off
-REM Try the whole thing on one Windows computer: the website (with its admin) and the app, talking to each other.
-REM Needs Python 3.10, 3.11 or 3.12 from python.org (tick "Add Python to PATH" when installing).
+REM Runs the API, the website and the app together on Windows.
+REM Needs: Node.js 20 (nodejs.org), Python 3.10-3.12 (python.org, tick "Add Python to PATH"),
+REM and MySQL 8 with the database and user from api\.env (see api\README.md).
 setlocal
 cd /d "%~dp0"
+if not exist api\.env copy api\.env.example api\.env >nul
+if not exist web\.env.local copy web\.env.example web\.env.local >nul
+if not exist api\node_modules (cd api && call npm install --no-audit --no-fund && cd ..)
+if not exist web\node_modules (cd web && call npm install --no-audit --no-fund && cd ..)
+python -m pip install -q -r desktop_app\requirements.txt || goto :error
 
-echo Installing what the website and the app need (only slow the first time)...
-python -m pip install -q -r website\requirements.txt -r desktop_app\requirements.txt || goto :error
-
-echo Starting the website in its own window...
-start "Ada The Coder website (close this window to stop it)" /D "%~dp0website" cmd /k python app.py
-timeout /t 4 /nobreak >nul
-
-echo Opening the admin in your browser...
+start "Ada The Coder API (close to stop)" /D "%~dp0api" cmd /k npm run start:dev
+start "Ada The Coder website (close to stop)" /D "%~dp0web" cmd /k npm run dev
+echo Waiting for the API and the website to start...
+timeout /t 25 /nobreak >nul
 start "" http://127.0.0.1:5000/admin/login
 
-echo Starting the app, connected to the website on this computer...
 cd desktop_app
-python run.py --server http://127.0.0.1:5000 --check
-python run.py --server http://127.0.0.1:5000
+python run.py --server http://127.0.0.1:3000 --check
+python run.py --server http://127.0.0.1:3000
 goto :eof
 
 :error
-echo Something went wrong installing. Check that Python 3.10, 3.11 or 3.12 is installed and on PATH.
+echo Something went wrong. Check that Node.js 20 and Python 3.10-3.12 are installed.
 pause
 exit /b 1

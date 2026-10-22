@@ -1,0 +1,82 @@
+# Checks every push: type-checks and builds the API and the website, and runs the tests.
+# Problems show up as annotations on the run (file and line), and the run turns red.
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  api:
+    name: API (NestJS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Type check
+        run: |
+          set -o pipefail
+          npx tsc --noEmit -p tsconfig.json --pretty false 2>&1 | tee tsc.txt || {
+            sed -nE 's/^([^(]+)\(([0-9]+),([0-9]+)\): error (TS[0-9]+): (.*)$/::error file=api\/\1,line=\2,col=\3::\4 \5/p' tsc.txt
+            exit 1
+          }
+      - name: Build
+        run: npm run build
+      - name: Tests (in-memory database, no emails sent)
+        run: |
+          set -o pipefail
+          npm run test:e2e 2>&1 | tee jest.txt || {
+            grep -E "●|Expected|Received|Error:" jest.txt | head -40 | sed 's/^/::error::/'
+            exit 1
+          }
+
+  web:
+    name: Website (Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Type check
+        run: |
+          set -o pipefail
+          npx tsc --noEmit --pretty false 2>&1 | tee tsc.txt || {
+            sed -nE 's/^([^(]+)\(([0-9]+),([0-9]+)\): error (TS[0-9]+): (.*)$/::error file=web\/\1,line=\2,col=\3::\4 \5/p' tsc.txt
+            exit 1
+          }
+      - name: Build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build.txt || {
+            grep -iE "error|failed|warn" build.txt | head -40 | sed 's/^/::error::/'
+            exit 1
+          }
+
+  desktop:
+    name: Desktop app (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tests
+        working-directory: desktop_app
+        run: python -m unittest discover tests

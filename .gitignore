@@ -1,11 +1,13 @@
 __pycache__/
 *.pyc
 .env
-website/instance/
-website/uploads/*
-!website/uploads/.gitkeep
+.env.local
+node_modules/
+.next/
+dist/
+api/uploads/
 desktop_app/build/
 desktop_app/dist/
 .DS_Store
 .venv/
-website.log
+*.log

@@ -1,17 +1,28 @@
 #!/bin/bash
-# Try everything on one Ubuntu (or Mac) computer: the website with its admin, and the app, talking to each other.
+# Runs everything on one Ubuntu computer: MySQL, the API (NestJS), the website + admin (Next.js) and the app.
 #   bash test_on_my_computer.sh
-# Ubuntu 22.04 / 24.04: uses the Python that comes with Ubuntu. The first run asks for your password once,
-# to install the system pieces the app window and lesson videos need, then takes a few minutes to download.
+# First run: asks for your password once (system packages, MySQL) and downloads a lot (a few minutes).
+# Close the app (or press Ctrl+C) to stop everything.
 set -euo pipefail
 cd "$(dirname "$0")"
 HERE="$(pwd)"
-URL=http://127.0.0.1:5000
+API=http://127.0.0.1:3000
+WEB=http://127.0.0.1:5000
 
-# ---- 1. system pieces (Ubuntu / Debian only)
+# ---- 0. Node.js 18 or newer (via nvm if it's installed)
+if [ -s "$HOME/.nvm/nvm.sh" ]; then . "$HOME/.nvm/nvm.sh"; nvm use 20 >/dev/null 2>&1 || true; fi
+if ! command -v node >/dev/null 2>&1 || [ "$(node -p 'process.versions.node.split(".")[0]')" -lt 18 ]; then
+  echo "Node.js 18 or newer is needed (you have: $(node --version 2>/dev/null || echo none)). Install Node 20:"
+  echo "  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash"
+  echo "  source ~/.bashrc && nvm install 20"
+  echo "Then run this script again."
+  exit 1
+fi
+
+# ---- 1. system pieces for the app window and lesson videos (Ubuntu / Debian)
 if command -v apt-get >/dev/null 2>&1; then
   ALSA=libasound2t64; apt-cache show libasound2t64 >/dev/null 2>&1 || ALSA=libasound2
-  NEED=(python3-venv python3-pip
+  NEED=(python3-venv python3-pip curl
         libxcb-xinerama0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1
         libxcb-render-util0 libxcb-shape0 libxcb-randr0 libgl1 libegl1 libnss3 libxcomposite1 libxdamage1
         libxrandr2 libxtst6 libxkbfile1 "$ALSA"
@@ -23,54 +34,60 @@ if command -v apt-get >/dev/null 2>&1; then
     apt-cache show "$p" >/dev/null 2>&1 && MISSING+=("$p")   # skip names this Ubuntu doesn't have
   done
   if [ ${#MISSING[@]} -gt 0 ]; then
-    echo "Installing system pieces for the app window and videos (asks for your password):"
-    echo "  ${MISSING[*]}"
+    echo "Installing system pieces (asks for your password): ${MISSING[*]}"
     sudo apt-get update -qq
     sudo apt-get install -y "${MISSING[@]}"
   fi
 fi
 
-# ---- 2. a private Python environment in .venv (Ubuntu doesn't allow pip outside one)
-PY=python3
-"$PY" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)' || {
-  echo "Python 3.10 or newer is needed. On Ubuntu: sudo apt install python3"; exit 1; }
-if [ ! -x .venv/bin/python ]; then
-  echo "Making a Python environment in .venv ..."
-  "$PY" -m venv .venv
+# ---- 2. MySQL and the API
+[ -f api/.env ] || cp api/.env.example api/.env
+get() { grep -E "^$1=" api/.env | head -1 | cut -d= -f2-; }
+if ! mysql -h 127.0.0.1 -u "$(get DB_USER)" -p"$(get DB_PASSWORD)" -e "SELECT 1" "$(get DB_NAME)" >/dev/null 2>&1; then
+  echo "Setting up MySQL (database $(get DB_NAME), user $(get DB_USER))..."
+  bash api/setup_mysql.sh
 fi
+[ -d api/node_modules ] || (echo "Installing the API's packages..." && cd api && npm install --no-audit --no-fund)
+[ -d web/node_modules ] || (echo "Installing the website's packages..." && cd web && npm install --no-audit --no-fund)
+[ -f web/.env.local ] || cp web/.env.example web/.env.local
+
+PIDS=()
+stop_all() { for p in "${PIDS[@]:-}"; do [ -n "$p" ] && kill "$p" 2>/dev/null || true; done; }
+trap stop_all EXIT
+
+wait_for() {  # wait_for <url> <name> <log>
+  for _ in $(seq 1 90); do curl -s -o /dev/null "$1" && return 0; sleep 1; done
+  echo "$2 didn't start. The end of $3:"; tail -20 "$3"; exit 1
+}
+
+if curl -s "$API/api/health" | grep -q '"ok":true'; then
+  echo "The API is already running."
+else
+  echo "Starting the API at $API/api  (log: api.log)"
+  (cd api && npm run start:dev > "$HERE/api.log" 2>&1) & PIDS+=($!)
+  wait_for "$API/api/health" "The API" api.log
+fi
+
+if curl -s -o /dev/null "$WEB"; then
+  echo "The website is already running."
+else
+  echo "Starting the website at $WEB  (log: web.log)"
+  (cd web && npm run dev > "$HERE/web.log" 2>&1) & PIDS+=($!)
+  wait_for "$WEB" "The website" web.log
+fi
+
+# ---- 3. the desktop app (in a private Python environment, .venv)
+[ -x .venv/bin/python ] || python3 -m venv .venv
 VPY="$HERE/.venv/bin/python"
-echo "Installing what the website and the app need (slow only the first time)..."
 "$VPY" -m pip install -q --upgrade pip
-"$VPY" -m pip install -q -r website/requirements.txt -r desktop_app/requirements.txt
+"$VPY" -m pip install -q -r desktop_app/requirements.txt
 
-# ---- 3. the accounts API (auth-api/, NestJS + MySQL), if it's running
-if curl -s http://127.0.0.1:3000/api/health 2>/dev/null | grep -q '"ok":true'; then
-  export AUTH_API_URL=http://127.0.0.1:3000/api
-  echo "Accounts API found: sign-ups and log-ins go through it (and send the Brevo emails)."
-else
-  echo "Accounts API not running: the website keeps accounts itself. (To use it: see auth-api/README.md)"
-fi
-
-# ---- 4. the website
-if curl -s -o /dev/null "$URL" 2>/dev/null; then
-  echo "A website is already running at $URL, using it."
-  SITE=""
-else
-  echo "Starting the website at $URL  (log: website.log)"
-  (cd website && exec "$VPY" app.py > "$HERE/website.log" 2>&1) &
-  SITE=$!
-  trap '[ -n "$SITE" ] && kill $SITE 2>/dev/null; pkill -f "$HERE/website/app.py" 2>/dev/null || true' EXIT
-  for _ in $(seq 1 20); do curl -s -o /dev/null "$URL" 2>/dev/null && break; sleep 0.5; done
-fi
-
-# ---- 5. the admin in the browser, and the app
-(xdg-open "$URL/admin/login" >/dev/null 2>&1 || open "$URL/admin/login" >/dev/null 2>&1 || \
-  echo "Open $URL/admin/login in your browser.") &
+(xdg-open "$WEB/admin/login" >/dev/null 2>&1 || echo "Open $WEB/admin/login in your browser.") &
 echo
-echo "Admin:  $URL/admin/login   (first visit: create the admin account)"
+echo "Website:  $WEB          Admin: $WEB/admin/login (first visit: create the admin account)"
+echo "API:      $API/api"
 cd desktop_app
+"$VPY" run.py --server "$API" --check || true
 echo
-"$VPY" run.py --server "$URL" --check || true
-echo
-echo "Starting the app, connected to that website. Closing the app also stops the website."
-"$VPY" run.py --server "$URL"
+echo "Starting the app. Closing it stops the website and the API too."
+"$VPY" run.py --server "$API"
