@@ -83,6 +83,8 @@ jobs:
       - name: Tests
         working-directory: desktop_app
         run: python -m unittest discover tests
+      - name: Theme pack examples print what the lessons say
+        run: python themes/check_examples.py themes
 
   e2e:
     name: End-to-end (MySQL + API + website in a browser)
@@ -138,6 +140,11 @@ jobs:
           DB_NAME=admin_db nohup node dist/main > ../api.log 2>&1 &
           for i in $(seq 1 60); do curl -s http://127.0.0.1:3000/api/health | grep -q '"ok":true' && exit 0; sleep 1; done
           msg=$(tail -60 ../api.log | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g'); echo "::error title=API didn't start::${msg}"; exit 1
+      - name: Load the sample theme pack (npm run theme -- import)
+        run: |
+          cd api
+          DB_NAME=admin_db node dist/cli/theme-pack.js import ../themes/space
+          curl -s http://127.0.0.1:3000/api/v3/courses | grep -q '"Learn Coding in Space"' || { echo "::error title=Theme pack::space theme not in /api/v3/courses"; exit 1; }
       - name: Build and start the website
         run: |
           cd web && npm run build

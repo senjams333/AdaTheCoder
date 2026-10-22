@@ -1,0 +1,57 @@
+{
+  "slug": "space",
+  "name": "Learn Coding in Space",
+  "tagline": "Blast off and learn Python among the stars with Astro, Comet and Nova.",
+  "description": "Astro the astronaut, Comet the rocket and Nova the planet turn every lesson into a space mission.",
+  "features": ["Astro guides every mission", "Comet cheers when code works", "Space lessons: countdowns, planets and more"],
+  "pack": "custom",
+  "characters": [
+    { "name": "Astro", "picture": "pictures/astro.png" },
+    { "name": "Comet", "picture": "pictures/comet.png" },
+    { "name": "Nova", "picture": "pictures/nova.png" }
+  ],
+  "premium": true,
+  "price": "$2.99",
+  "freeLessons": 1,
+  "published": true,
+  "lessons": [
+    {
+      "slug": "space_hello",
+      "emoji": "👋",
+      "name": "HELLO, SPACE",
+      "title": "👋 HELLO, SPACE",
+      "subtitle": "Send your first message to the stars! 🚀",
+      "videoBundled": "vid/video2.mp4",
+      "defaultCodeFile": "code/01-hello-start.py",
+      "examples": [
+        { "label": "1️⃣ Say hello 🚀", "explain": "print() shows a message on the screen. The words go inside quotes.", "output": "Hello, space! 🚀", "codeFile": "code/01-hello-1.py" },
+        { "label": "2️⃣ The crew 🧑‍🚀", "explain": "Each print() starts a new line, so the crew says hello one by one.", "output": "🧑‍🚀 Astro is ready.\n☄️ Comet is ready.\n🪐 Nova is ready.\nLet's fly!", "codeFile": "code/01-hello-2.py" }
+      ]
+    },
+    {
+      "slug": "space_countdown",
+      "emoji": "⏱️",
+      "name": "COUNTDOWN",
+      "title": "⏱️ COUNTDOWN",
+      "subtitle": "Loops count down so the rocket can launch! 🔥",
+      "videoBundled": "vid/video9.mp4",
+      "defaultCodeFile": "code/02-countdown-start.py",
+      "examples": [
+        { "label": "1️⃣ 5, 4, 3, 2, 1 🚀", "explain": "range(5, 0, -1) counts 5, 4, 3, 2, 1. The for loop runs print() once for each number.", "output": "5\n4\n3\n2\n1\nBlast off! 🚀", "codeFile": "code/02-countdown-1.py" },
+        { "label": "2️⃣ Use up the fuel ⛽", "explain": "A while loop repeats while something is true. Here it stops when the fuel reaches 0.", "output": "Fuel left: 3\nFuel left: 2\nFuel left: 1\nTime to land! 🌕", "codeFile": "code/02-countdown-2.py" }
+      ]
+    },
+    {
+      "slug": "space_planets",
+      "emoji": "🪐",
+      "name": "PLANET LISTS",
+      "title": "🪐 PLANET LISTS",
+      "subtitle": "Keep all the planets in one list! 📋",
+      "videoBundled": "vid/video12.mp4",
+      "examples": [
+        { "label": "1️⃣ Visit each planet 🪐", "explain": "A list keeps many things in order. The for loop visits each planet in the list.", "output": "Visiting Mercury 🪐\nVisiting Venus 🪐\nVisiting Earth 🪐\nVisiting Mars 🪐", "codeFile": "code/03-planets-1.py" },
+        { "label": "2️⃣ Add a planet ➕", "explain": "append() adds to the end of the list, len() counts the list, and [-1] is the last one.", "output": "We know 5 planets now!\nThe biggest is Jupiter", "codeFile": "code/03-planets-2.py" }
+      ]
+    }
+  ]
+}

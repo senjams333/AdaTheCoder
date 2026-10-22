@@ -17,7 +17,10 @@
     "prestart:dev": "node scripts/check-node.js",
     "prestart:prod": "node scripts/check-node.js",
     "pretest": "node scripts/check-node.js",
-    "pretest:e2e": "node scripts/check-node.js"
+    "pretest:e2e": "node scripts/check-node.js",
+    "theme": "ts-node src/cli/theme-pack.ts",
+    "pretheme": "node scripts/check-node.js",
+    "theme:prod": "node dist/cli/theme-pack.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",

@@ -2,13 +2,14 @@
  *  Run: npm run test:e2e */
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { mkdtempSync } from 'fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { validationErrors } from '../src/common/validation';
 import { MailService } from '../src/mail/mail.service';
+import { ThemePackService } from '../src/packs/theme-pack.service';
 
 describe('Ada The Coder API', () => {
   let app: INestApplication;
@@ -150,6 +151,42 @@ describe('Ada The Coder API', () => {
     await request(http).post('/api/account/delete').set('Authorization', `Bearer ${parent}`).send({ password: 'wrong' }).expect(401);
     await request(http).post('/api/account/delete').set('Authorization', `Bearer ${parent}`).send({ password: 'newpass123' }).expect(200);
     await request(http).get('/api/account').set('Authorization', `Bearer ${parent}`).expect(401);
+  });
+
+  it('theme packs: import, re-import, export', async () => {
+    const packs = app.get(ThemePackService);
+    const pack = join(__dirname, '..', '..', 'themes', 'space');
+    expect(packs.check(pack).problems).toEqual([]);
+    // an earlier test made a "space" theme in the admin, with 17 copied lessons: the pack replaces them
+    const first = await packs.importPack(pack, { removeMissing: true });
+    expect(first).toMatchObject({ theme: 'space', created: false, lessonsAdded: 3, lessonsRemoved: 17, filesCopied: 3 });
+    const again = await packs.importPack(pack);
+    expect(again).toMatchObject({ lessonsAdded: 0, lessonsUpdated: 3, filesCopied: 0 }); // nothing changed: nothing copied
+    const space = (await request(http).get('/api/v3/courses')).body.courses.find((c: { id: string }) => c.id === 'space');
+    expect(space).toMatchObject({ name: 'Learn Coding in Space', premium: true, free_lessons: 1, pack: 'custom' });
+    expect(space.characters.map((c: { name: string }) => c.name)).toEqual(['Astro', 'Comet', 'Nova']);
+    expect(space.lessons.map((l: { id: string }) => l.id)).toEqual(['space_hello', 'space_countdown', 'space_planets']);
+    expect(space.lessons[1].examples[0].code).toContain('range(5, 0, -1)');
+
+    // export a built-in theme, check it, and import it back under a new name
+    const out = mkdtempSync(join(tmpdir(), 'ada-pack-'));
+    await packs.exportPack('fairies', out);
+    const exported = JSON.parse(readFileSync(join(out, 'theme.json'), 'utf8'));
+    expect(exported.lessons).toHaveLength(17);
+    exported.slug = 'fairies2';
+    exported.name = 'Fairies Again';
+    writeFileSync(join(out, 'theme.json'), JSON.stringify(exported));
+    expect(packs.check(out).problems).toEqual([]);
+    expect(await packs.importPack(out)).toMatchObject({ theme: 'fairies2', created: true, lessonsAdded: 17 });
+
+    // problems are listed, not imported
+    exported.lessons[0].examples = [];
+    exported.slug = 'bad slug';
+    writeFileSync(join(out, 'theme.json'), JSON.stringify(exported));
+    const { problems } = packs.check(out);
+    expect(problems.join(' ')).toContain('"slug" must use only letters');
+    expect(problems.join(' ')).toContain('add at least one example');
+    await expect(packs.importPack(out)).rejects.toThrow('has problems');
   });
 
   it('app update check', async () => {

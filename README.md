@@ -6,6 +6,7 @@ Python lessons for children aged 6 to 11. Three parts:
 | --- | --- |
 | `api/` | The backend: **NestJS + MySQL** (database `admin_db`). Parent accounts, the first admin, website text, themes with their lessons, characters and videos, app versions, parents and licences. Sends the **Brevo** emails when someone registers (a welcome to the parent, a notice to the admin). See `api/README.md`. |
 | `web/` | The website and the admin: **Next.js + Redux Toolkit** (RTK Query). Home page, sign up, log in, the parent's account page (downloads, themes, licences), privacy, and the whole admin. Everything comes from the API. See `web/README.md`. |
+| `themes/` | **Theme packs**: a folder per theme (theme.json, character pictures, example code as .py files, videos). `npm run theme -- import ../themes/space` in `api/` loads one; installed apps show it by themselves. See `themes/README.md`. |
 | `desktop_app/` | The Windows and Mac app children use (PyQt5). It downloads the themes and lessons from the API, logs parents in, and unlocks bought themes. See `desktop_app/README.md`. |
 
 ```
@@ -68,6 +69,18 @@ python -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
 python run.py --server http://127.0.0.1:3000
 ```
+
+## Adding themes
+
+New themes, lessons and videos never need a new `.exe`: the installed app downloads them from the API.
+Add them either way:
+
+- **In the admin**: Themes & lessons → Add a theme, then open it to add or edit lessons.
+- **As a theme pack** (a folder you write in your editor, see `themes/README.md`):
+  `cd api && npm run theme -- import ../themes/space`.
+
+A new `.exe` is only needed when the app itself changes (a new feature or a fix): raise `APP_VERSION`,
+build, and upload it in Admin → App versions; installed apps then offer the update.
 
 ## What the admin can do
 
