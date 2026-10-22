@@ -1,0 +1,87 @@
+[
+ {
+  "name": "home",
+  "path": "/",
+  "width": 1366
+ },
+ {
+  "name": "register",
+  "path": "/register",
+  "width": 1366
+ },
+ {
+  "name": "login",
+  "path": "/login",
+  "width": 1366
+ },
+ {
+  "name": "privacy",
+  "path": "/privacy",
+  "width": 1366
+ },
+ {
+  "name": "account",
+  "path": "/account",
+  "width": 1366
+ },
+ {
+  "name": "account-install",
+  "path": "/account",
+  "width": 1366
+ },
+ {
+  "name": "admin-login",
+  "path": "/admin/login",
+  "width": 1366
+ },
+ {
+  "name": "admin",
+  "path": "/admin",
+  "width": 1366
+ },
+ {
+  "name": "admin-content",
+  "path": "/admin/content",
+  "width": 1366
+ },
+ {
+  "name": "admin-themes",
+  "path": "/admin/themes",
+  "width": 1366
+ },
+ {
+  "name": "admin-theme",
+  "path": "/admin/themes/4",
+  "width": 1366
+ },
+ {
+  "name": "admin-theme-settings",
+  "path": "/admin/themes/4/settings",
+  "width": 1366
+ },
+ {
+  "name": "admin-lesson",
+  "path": "/admin/lessons/53",
+  "width": 1366
+ },
+ {
+  "name": "admin-releases",
+  "path": "/admin/releases",
+  "width": 1366
+ },
+ {
+  "name": "admin-parents",
+  "path": "/admin/parents",
+  "width": 1366
+ },
+ {
+  "name": "home-phone",
+  "path": "/",
+  "width": 390
+ },
+ {
+  "name": "account-phone",
+  "path": "/account",
+  "width": 390
+ }
+]
