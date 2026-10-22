@@ -6,6 +6,17 @@ When someone registers, two emails go out through **Brevo**: a welcome email to 
 
 ## Run it on Ubuntu
 
+Needs **Node.js 18 or newer** (20 recommended). Ubuntu's own `nodejs` package is often too old
+(`node --version` says v10 or v12). Install Node 20 with nvm, no sudo needed:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+nvm install 20
+```
+
+Then:
+
 ```bash
 cd auth-api
 bash setup_mysql.sh        # installs MySQL if needed, creates database admin_db and user Admin (from .env)

@@ -10,7 +10,14 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "test": "jest",
-    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand"
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
+    "check-node": "node scripts/check-node.js",
+    "prebuild": "node scripts/check-node.js",
+    "prestart": "node scripts/check-node.js",
+    "prestart:dev": "node scripts/check-node.js",
+    "prestart:prod": "node scripts/check-node.js",
+    "pretest": "node scripts/check-node.js",
+    "pretest:e2e": "node scripts/check-node.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
@@ -42,5 +49,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }
