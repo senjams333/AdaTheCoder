@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { ReactNode, useEffect, useRef } from 'react';
 import { Provider } from 'react-redux';
-import { AUTH_KEY, hydrate } from '@/lib/authSlice';
+import { arrived, AUTH_KEY, hydrate } from '@/lib/authSlice';
 import { clearOld } from '@/lib/flashSlice';
 import { AppStore, makeStore } from '@/lib/store';
 
@@ -41,6 +41,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   // a message survives the move to the next page, then goes away on the page after
   useEffect(() => {
     store.dispatch(clearOld(Date.now() - 1500));
+    store.dispatch(arrived());
   }, [pathname, store]);
 
   return <Provider store={store}>{children}</Provider>;
