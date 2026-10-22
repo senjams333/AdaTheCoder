@@ -43,7 +43,15 @@ echo "Installing what the website and the app need (slow only the first time)...
 "$VPY" -m pip install -q --upgrade pip
 "$VPY" -m pip install -q -r website/requirements.txt -r desktop_app/requirements.txt
 
-# ---- 3. the website
+# ---- 3. the accounts API (auth-api/, NestJS + MySQL), if it's running
+if curl -s http://127.0.0.1:3000/api/health 2>/dev/null | grep -q '"ok":true'; then
+  export AUTH_API_URL=http://127.0.0.1:3000/api
+  echo "Accounts API found: sign-ups and log-ins go through it (and send the Brevo emails)."
+else
+  echo "Accounts API not running: the website keeps accounts itself. (To use it: see auth-api/README.md)"
+fi
+
+# ---- 4. the website
 if curl -s -o /dev/null "$URL" 2>/dev/null; then
   echo "A website is already running at $URL, using it."
   SITE=""
@@ -55,7 +63,7 @@ else
   for _ in $(seq 1 20); do curl -s -o /dev/null "$URL" 2>/dev/null && break; sleep 0.5; done
 fi
 
-# ---- 4. the admin in the browser, and the app
+# ---- 5. the admin in the browser, and the app
 (xdg-open "$URL/admin/login" >/dev/null 2>&1 || open "$URL/admin/login" >/dev/null 2>&1 || \
   echo "Open $URL/admin/login in your browser.") &
 echo

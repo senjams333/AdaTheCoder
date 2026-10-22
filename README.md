@@ -5,6 +5,7 @@ Python lessons for children aged 6 to 11. Two parts:
 | Folder | What it is |
 |---|---|
 | `website/` | The website. Parents sign up, log in and download the app. Admins edit the website text, the themes (with their characters, price and free lessons), each theme's topics, lessons and videos, and the app versions. |
+| `auth-api/` | Optional accounts API (NestJS + MySQL `admin_db`): register and log in, with Brevo welcome emails to the parent and the admin. See `auth-api/README.md`. |
 | `desktop_app/` | The Windows and Mac app children use (PyQt5, start with `run.py`): themes of 17 lessons, each with a video, six examples and a code editor. Paid themes have free lessons to try, then Upgrade. See `desktop_app/README.md`. |
 
 They're connected: every time the app opens, it asks the website for lesson changes, new lesson videos, a message for kids, and "new version available" notices.
@@ -114,6 +115,24 @@ Then in the admin: **App versions → Upload a new version**, choose the compute
 Installed apps then show: *"A new version of Ada The Coder (1.1.0) is ready! Ask a grown-up to download it."* with a button to the download page.
 
 **Lesson and video changes never need a new build.** Edit them in **Admin → Themes & lessons**. New themes (even with new characters) need no new build either.
+
+## Accounts API (NestJS + MySQL)
+
+`auth-api/` keeps parent accounts in MySQL (database `admin_db`, user `Admin`) and sends the Brevo
+emails when someone registers: a welcome to the parent and a notice to the admin. To use it:
+
+```bash
+cd auth-api
+bash setup_mysql.sh      # MySQL + database + user, from auth-api/.env
+npm install
+npm run start:dev        # http://127.0.0.1:3000/api
+```
+
+Then start the website with `AUTH_API_URL=http://127.0.0.1:3000/api` (`test_on_my_computer.sh` does
+this by itself when the API is running). Parent sign-up, log-in, password changes and account deletion
+on the website and in the app then go through the API. The admin still logs in on the website. If the
+API is down, parents who have logged in before can still log in; new sign-ups wait until it's back.
+Parent accounts made before the API was switched on aren't in MySQL: those parents need to sign up again.
 
 ## The website's API (used by the app)
 

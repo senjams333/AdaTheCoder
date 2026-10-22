@@ -22,6 +22,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 from db import close_db, get_db, get_settings, init_db, now_iso, set_setting
+import auth_client
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PLATFORMS = {
@@ -220,11 +221,41 @@ def create_app(test_config=None):
         return dict(row, images=images, pack_label=label or pack["label"], characters_list=chars,
                     feature_list=[f.strip() for f in (row["features"] or "").splitlines() if f.strip()])
 
+    def mirror_parent(api_user, password):
+        """The website's copy of a parent the accounts API knows (made or updated at each log-in)."""
+        db = get_db()
+        email = api_user["email"].strip().lower()
+        row = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        if row:
+            db.execute("UPDATE users SET name = ?, password_hash = ? WHERE id = ?",
+                       (api_user.get("name") or row["name"], generate_password_hash(password), row["id"]))
+        else:
+            db.execute(
+                """INSERT INTO users (email, name, password_hash, role, child_name, child_age, city, country, created_at)
+                   VALUES (?, ?, ?, 'parent', ?, ?, ?, ?, ?)""",
+                (email, api_user.get("name") or email, generate_password_hash(password), api_user.get("childName"),
+                 api_user.get("childAge"), api_user.get("city"), api_user.get("country"), now_iso()))
+        db.commit()
+        return db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+
     def check_credentials(email, password):
         key = request.remote_addr or "unknown"
         if too_many_attempts(key):
             return None, "Too many tries. Wait 15 minutes, then try again."
-        user = get_db().execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        db = get_db()
+        user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        if auth_client.enabled() and not (user and user["role"] == "admin"):
+            # parents log in through the accounts API; admins always log in here
+            status, data = auth_client.login(email, password)
+            if status == "error":
+                record_failure(key)
+                return None, " ".join(data)
+            if status == "ok":
+                user = mirror_parent(data, password)
+                if not user["is_active"]:
+                    return None, "This account is turned off. Contact us to turn it back on."
+                return user, None
+            # the API can't be reached: the website's copy of the account still works
         if not user or not check_password_hash(user["password_hash"], password):
             record_failure(key)
             return None, "That email and password don't match. Check them and try again."
@@ -269,6 +300,16 @@ def create_app(test_config=None):
             errors.append("An account with this email already exists. Log in instead.")
         return clean, errors
 
+    def register_with_api(clean):
+        """With AUTH_API_URL set, the accounts API creates the account (and emails the parent and the admin).
+        Returns a list of problems, empty when it worked."""
+        if not auth_client.enabled():
+            return []
+        status, data = auth_client.register(clean)
+        if status == "offline":
+            return ["Accounts can't be created right now. Please try again in a few minutes."]
+        return data if status == "error" else []
+
     def create_parent(clean):
         db = get_db()
         cur = db.execute(
@@ -287,6 +328,8 @@ def create_app(test_config=None):
         form = request.form
         if request.method == "POST":
             clean, errors = check_registration(form)
+            if not errors:
+                errors = register_with_api(clean)
             if errors:
                 for e in errors:
                     flash(e, "error")
@@ -310,6 +353,8 @@ def create_app(test_config=None):
         if not isinstance(data, dict):
             return jsonify({"ok": False, "errors": ["Send the account details as JSON."]}), 400
         clean, errors = check_registration(data, need_password2=False)
+        if not errors:
+            errors = register_with_api(clean)
         if errors:
             exists = any("already exists" in e for e in errors)
             return jsonify({"ok": False, "errors": errors}), 409 if exists else 400
@@ -369,7 +414,12 @@ def create_app(test_config=None):
     @login_required
     def change_password():
         current, new = request.form.get("current", ""), request.form.get("new", "")
-        if not check_password_hash(g.user["password_hash"], current):
+        api_status = None
+        if auth_client.enabled() and g.user["role"] != "admin" and len(new) >= 8:
+            api_status, api_data = auth_client.change_password(g.user["email"], current, new)
+        if api_status == "offline":
+            flash("Passwords can't be changed right now. Please try again in a few minutes.", "error")
+        elif api_status == "error" or (api_status is None and not check_password_hash(g.user["password_hash"], current)):
             flash("Your current password isn't right.", "error")
         elif len(new) < 8:
             flash("Choose a new password with at least 8 characters.", "error")
@@ -387,7 +437,16 @@ def create_app(test_config=None):
     def delete_account():
         if g.user["role"] == "admin":
             abort(403)
-        if not check_password_hash(g.user["password_hash"], request.form.get("password", "")):
+        password = request.form.get("password", "")
+        if auth_client.enabled():
+            status, _ = auth_client.delete_account(g.user["email"], password)
+            if status == "offline":
+                flash("Accounts can't be deleted right now. Please try again in a few minutes.", "error")
+                return redirect(url_for("account") + "#settings")
+            if status == "error":
+                flash("Your password isn't right, so the account was not deleted.", "error")
+                return redirect(url_for("account") + "#settings")
+        elif not check_password_hash(g.user["password_hash"], password):
             flash("Your password isn't right, so the account was not deleted.", "error")
             return redirect(url_for("account") + "#settings")
         db = get_db()
