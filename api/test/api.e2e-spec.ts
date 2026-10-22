@@ -18,7 +18,8 @@ describe('Ada The Coder API', () => {
   let parent = '';
 
   beforeAll(async () => {
-    process.env.DB_TYPE = 'sqljs';
+    // in-memory database unless TEST_DB=mysql (then DB_HOST, DB_NAME... from the environment)
+    if (process.env.TEST_DB !== 'mysql') process.env.DB_TYPE = 'sqljs';
     process.env.JWT_SECRET = 'test-secret';
     process.env.UPLOAD_DIR = mkdtempSync(join(tmpdir(), 'ada-uploads-'));
     const mod = await Test.createTestingModule({ imports: [AppModule] })

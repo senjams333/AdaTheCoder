@@ -83,3 +83,73 @@ jobs:
       - name: Tests
         working-directory: desktop_app
         run: python -m unittest discover tests
+
+  e2e:
+    name: End-to-end (MySQL + API + website in a browser)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root-ci
+          MYSQL_DATABASE: admin_db
+          MYSQL_USER: Admin
+          MYSQL_PASSWORD: ci-only-password
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot-ci" --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_USER: Admin
+      DB_PASSWORD: ci-only-password
+      JWT_SECRET: ci-secret
+      SITE_URL: http://127.0.0.1:5000
+      API_PUBLIC_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3000/api
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: |
+          (cd api && npm install --no-audit --no-fund)
+          (cd web && npm install --no-audit --no-fund && npm install --no-save --no-audit --no-fund playwright@1.48.2)
+          (cd web && npx playwright install --with-deps chromium)
+      - name: API tests on MySQL
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot-ci -e "CREATE DATABASE admin_test; GRANT ALL ON admin_test.* TO 'Admin'@'%';"
+          cd api
+          set -o pipefail
+          TEST_DB=mysql DB_NAME=admin_test npm run test:e2e 2>&1 | tee jest.txt || {
+            msg=$(awk '/●/{f=1} f' jest.txt | head -150 | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=API tests on MySQL::${msg}"
+            exit 1
+          }
+      - name: Start the API (MySQL admin_db)
+        run: |
+          cd api && npm run build
+          DB_NAME=admin_db nohup node dist/main > ../api.log 2>&1 &
+          for i in $(seq 1 60); do curl -s http://127.0.0.1:3000/api/health | grep -q '"ok":true' && exit 0; sleep 1; done
+          msg=$(tail -60 ../api.log | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g'); echo "::error title=API didn't start::${msg}"; exit 1
+      - name: Build and start the website
+        run: |
+          cd web && npm run build
+          nohup npx next start -p 5000 -H 127.0.0.1 > ../web.log 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://127.0.0.1:5000 && exit 0; sleep 1; done
+          echo "::error title=Website didn't start::$(tail -40 ../web.log | tr '\n' ' ')"; exit 1
+      - name: Click through the website and admin
+        run: |
+          cd web
+          set -o pipefail
+          node e2e/smoke.mjs http://127.0.0.1:5000 http://127.0.0.1:3000/api 2>&1 | tee smoke.txt || {
+            msg=$(grep -A3 '^FAIL' smoke.txt | head -120 | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=Browser check::${msg}"
+            msg=$(tail -40 ../api.log | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g'); echo "::warning title=API log::${msg}"
+            exit 1
+          }
+          echo "::notice title=Browser check::$(grep -c '^PASS' smoke.txt) steps passed"
