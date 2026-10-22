@@ -87,6 +87,8 @@ jobs:
   e2e:
     name: End-to-end (MySQL + API + website in a browser)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     services:
       mysql:
         image: mysql:8.0
@@ -153,3 +155,14 @@ jobs:
             exit 1
           }
           echo "::notice title=Browser check::$(grep -c '^PASS' smoke.txt) steps passed"
+      - name: Screenshots of every page (saved to the ci-previews branch)
+        if: github.event_name != 'pull_request'
+        run: |
+          cd web
+          node e2e/screens.mjs http://127.0.0.1:5000 http://127.0.0.1:3000/api "$RUNNER_TEMP/shots"
+          cd "$RUNNER_TEMP/shots"
+          git init -q && git checkout -q -b ci-previews
+          git config user.name "github-actions" && git config user.email "github-actions@users.noreply.github.com"
+          echo "Screenshots of the website from commit $GITHUB_SHA" > README.md
+          git add -A && git commit -q -m "Screenshots for $GITHUB_SHA"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-previews
