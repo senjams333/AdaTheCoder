@@ -1,0 +1,71 @@
+# Runs the real website + API with demo content and saves screenshots of every page
+# to the "preview-shots" branch (used to build the preview page).
+name: Preview
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", "api/**", ".github/workflows/preview.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root-ci
+          MYSQL_DATABASE: admin_db
+          MYSQL_USER: Admin
+          MYSQL_PASSWORD: ci-only-password
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot-ci" --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: admin_db
+      DB_USER: Admin
+      DB_PASSWORD: ci-only-password
+      JWT_SECRET: preview-secret
+      SITE_URL: http://127.0.0.1:5000
+      API_PUBLIC_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3000/api
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: |
+          (cd api && npm install --no-audit --no-fund && npm run build)
+          (cd web && npm install --no-audit --no-fund && npm install --no-save --no-audit --no-fund playwright@1.48.2 && npx playwright install --with-deps chromium && npm run build)
+      - name: Start the API and the website
+        run: |
+          (cd api && nohup node dist/main > ../api.log 2>&1 &)
+          for i in $(seq 1 60); do curl -s http://127.0.0.1:3000/api/health | grep -q '"ok":true' && break; sleep 1; done
+          (cd web && nohup npx next start -p 5000 -H 127.0.0.1 > ../web.log 2>&1 &)
+          for i in $(seq 1 60); do curl -s -o /dev/null http://127.0.0.1:5000 && break; sleep 1; done
+      - name: Screenshots
+        run: cd web && node e2e/screens.mjs http://127.0.0.1:5000 http://127.0.0.1:3000/api ../shots
+      - name: Save to the preview-shots branch
+        run: |
+          cd shots
+          git init -q -b preview-shots
+          git config user.name "preview-bot"
+          git config user.email "preview-bot@users.noreply.github.com"
+          echo "Screenshots of commit ${GITHUB_SHA}" > README.md
+          git add -A
+          git commit -q -m "Screenshots of ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" preview-shots
+      - name: Logs if something failed
+        if: failure()
+        run: |
+          echo "::error title=API log::$(tail -40 api.log | tr '\n' ' ')"
+          echo "::error title=Website log::$(tail -40 web.log | tr '\n' ' ')"
