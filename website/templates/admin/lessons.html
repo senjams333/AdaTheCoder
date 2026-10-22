@@ -1,0 +1,91 @@
+{% extends "admin/base.html" %}
+{% block admin_title %}Lessons{% set others = courses|rejectattr('id', 'equalto', course.id)|list %}
+{% if others %}
+<form class="copy-lessons" method="post" action="{{ url_for('admin_course_copy', course_id=course.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label for="copy-from">Copy lessons from another theme</label>
+  <select id="copy-from" name="from">{% for c in others %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+  <button class="btn btn-small btn-ghost">Copy lessons</button>
+  <span class="help">Adds that theme's lessons and examples to this one (not uploaded videos). Lessons this theme already has are kept.</span>
+</form>
+{% endif %}
+{% endblock %}
+{% block admin_content %}
+<p class="crumbs"><a href="{{ url_for('admin_courses') }}">Themes</a> › {{ course.name }}</p>
+<div class="theme-head pack-{{ course.pack }}">
+  <span class="theme-head-pics{% if course.images|length > 1 %} many{% endif %}">{% for img in course.images %}<img src="{{ img }}" alt="">{% endfor %}</span>
+  <div class="theme-head-text">
+    <h1>{{ course.name }}</h1>
+    <p>{{ course.tagline }}</p>
+    <p class="course-meta">
+      <span class="pill">{{ course.pack_label }}</span>
+      {% if course.premium %}<span class="pill pill-sun">{{ course.price }} · first {{ course.free_lessons }} lessons free</span>{% else %}<span class="pill pill-sun">Free</span>{% endif %}
+      {% if course.published %}<span class="pill pill-green">In the app</span>{% else %}<span class="pill pill-grey">Hidden from the app</span>{% endif %}
+    </p>
+  </div>
+  <div class="theme-head-actions">
+    <a class="btn btn-small" href="{{ url_for('admin_lesson_edit', course=course.id) }}">+ Add a lesson</a>
+    <a class="btn btn-small btn-ghost" href="{{ url_for('admin_course_edit', course_id=course.id) }}">Theme settings</a>
+  </div>
+</div>
+
+{% if not course.published or not live %}
+<div class="app-warning">
+  <b>⚠️ The app doesn't show this theme yet</b>
+  {% if not course.published %}<span>It's hidden. Open <a href="{{ url_for('admin_course_edit', course_id=course.id) }}">Theme settings</a> and tick <i>Show this theme in the app</i>.</span>{% endif %}
+  {% if not live %}<span>It has no live lessons. <a href="{{ url_for('admin_lesson_edit', course=course.id) }}">Add a lesson</a> (with <i>Show in the app</i> ticked).</span>{% endif %}
+</div>
+{% else %}
+<div class="app-ok">✅ In the app: children see this theme the next time the app checks (within 3 minutes, or 🔄 Check for new lessons in the app's menu).</div>
+{% endif %}
+
+<h2 class="section-title">Lessons in this theme</h2>
+<p class="muted">The topics appear in the app's lesson list in this order. Use ▲ ▼ to move them. Click a topic to edit its lesson and video.
+{% if course.premium %}Lessons 1 to {{ course.free_lessons }} are free to try; the rest need a licence.{% endif %}</p>
+
+<div class="card table-wrap">
+  {% if lessons %}
+  <table>
+    <thead><tr><th>Order</th><th>Topic</th><th>Lesson ID</th><th>Video</th><th>Examples</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for l in lessons %}
+      <tr id="lesson-{{ l.id }}">
+        <td><div class="move">
+          <form method="post" action="{{ url_for('admin_lesson_move', lesson_id=l.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="direction" value="up"><button class="move-btn" title="Move up" {% if loop.first %}disabled{% endif %}>▲</button></form>
+          <span>{{ loop.index }}</span>
+          <form method="post" action="{{ url_for('admin_lesson_move', lesson_id=l.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="direction" value="down"><button class="move-btn" title="Move down" {% if loop.last %}disabled{% endif %}>▼</button></form>
+        </div></td>
+        <td>{{ l.emoji }} <a href="{{ url_for('admin_lesson_edit', lesson_id=l.id) }}">{{ l.name }}</a>{% if course.premium %}{% if loop.index <= course.free_lessons %} <span class="pill pill-green">Free</span>{% else %} <span class="pill pill-grey">🔒</span>{% endif %}{% endif %}<br><span class="muted">{{ l.subtitle }}</span></td>
+        <td><code>{{ l.slug }}</code></td>
+        <td>
+          {% if l.video_file %}<span class="pill pill-sun">Uploaded</span> <span class="muted">{{ (l.video_size / 1048576)|round(1) }} MB</span>
+          {% elif l.video_bundled %}<span class="pill">In the app</span> <span class="muted">{{ l.video_bundled }}</span>
+          {% else %}<span class="pill pill-grey">None</span>{% endif %}
+        </td>
+        <td>{{ l.example_count }}</td>
+        <td>{% if l.published %}<span class="pill pill-green">Live</span>{% else %}<span class="pill pill-grey">Hidden</span>{% endif %}</td>
+        <td><div class="actions">
+          <a class="btn btn-small btn-ghost" href="{{ url_for('admin_lesson_edit', lesson_id=l.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('admin_lesson_delete', lesson_id=l.id) }}" onsubmit="return confirm('Delete this lesson? Apps will stop showing it.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-small btn-danger">Delete</button>
+          </form>
+        </div></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>This theme has no lessons yet. <a href="{{ url_for('admin_lesson_edit', course=course.id) }}">Add the first one</a>, or start from a copy of another theme's lessons:</p>
+  {% endif %}
+</div>
+{% set others = courses|rejectattr('id', 'equalto', course.id)|list %}
+{% if others %}
+<form class="copy-lessons" method="post" action="{{ url_for('admin_course_copy', course_id=course.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label for="copy-from">Copy lessons from another theme</label>
+  <select id="copy-from" name="from">{% for c in others %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+  <button class="btn btn-small btn-ghost">Copy lessons</button>
+  <span class="help">Adds that theme's lessons and examples to this one (not uploaded videos). Lessons this theme already has are kept.</span>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,21 @@
+# One-click setup for https://render.com (Blueprint). A paid instance is needed for the persistent disk.
+services:
+  - type: web
+    name: ada-the-coder
+    runtime: python
+    rootDir: website
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 2 --timeout 300 --bind 0.0.0.0:$PORT app:app
+    disk:
+      name: ada-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: ADA_ENV
+        value: production
+      - key: ADA_SECRET_KEY
+        generateValue: true
+      - key: ADA_DATABASE
+        value: /data/ada.sqlite3
+      - key: ADA_UPLOAD_DIR
+        value: /data/uploads

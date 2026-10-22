@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block title %}My account | Ada The Coder{% endblock %}
+{% block body %}
+{% set u = current_user %}
+{% set premium = u.plan == 'premium' %}
+<a class="skip" href="#apps">Skip to your apps</a>
+{% if site.site_banner %}<div class="banner">{{ site.site_banner }}</div>{% endif %}
+<div class="acct-page">
+<div class="wrap acct-wrap">
+  <div class="acct-layout">
+      <section class="acct-panel" id="settings">
+        <a class="brand acct-brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='img/ada-face.png') }}" alt="">Ada The Coder</a>
+        <div class="acct-welcome acct-welcome-side">
+          <h1>Welcome, {{ u.name.split(' ')[0] }}! 👋</h1>
+          <p>{% if u.child_name %}Let's get {{ u.child_name }} coding with Ada The Coder{% else %}Your Ada The Coder account{% endif %}</p>
+        </div>
+        <h2 class="acct-title">My Account</h2>
+        <div class="acct-row"><span class="acct-label">Name</span><span class="acct-value">{{ u.name }}</span></div>
+        <div class="acct-row"><span class="acct-label">Email</span><span class="acct-value">{{ u.email.split("@")[0] }}<wbr>@{{ u.email.split("@", 1)[1] if "@" in u.email else "" }}</span></div>
+        <div class="acct-row"><span class="acct-label">City</span><span class="acct-value">{{ u.city or "Not added yet" }}</span></div>
+        <div class="acct-row"><span class="acct-label">Country</span><span class="acct-value">{{ u.country or "Not added yet" }}</span></div>
+        {% if u.child_name or u.child_age %}
+        <div class="acct-row"><span class="acct-label">Child</span><span class="acct-value">{{ u.child_name or "" }}{% if u.child_age %}{% if u.child_name %}, {% endif %}age {{ u.child_age }}{% endif %}</span></div>
+        {% endif %}
+        <div class="acct-row"><span class="acct-label">Plan</span><span class="acct-value">{% if premium %}<span class="acct-plan premium">Premium</span>{% else %}<span class="acct-plan free">Free</span>{% endif %}</span></div>
+        <div class="acct-row"><span class="acct-label">Member Since</span><span class="acct-value">{{ u.created_at[:10] }}</span></div>
+
+        <div class="acct-actions">
+          <button type="button" class="acct-btn" data-open-modal="details">Edit Details</button>
+          <button type="button" class="acct-btn acct-btn-ghost" data-open-modal="password">Change Password</button>
+          <button type="button" class="acct-link" data-open-modal="delete">Delete account</button>
+          {% if u.role == 'admin' %}<a class="acct-link acct-admin-link" href="{{ url_for('admin_dashboard') }}">Go to admin</a>{% endif %}
+          <form class="acct-logout" method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="acct-btn acct-btn-ghost acct-btn-block">Log out</button></form>
+        </div>
+
+        <dialog class="acct-modal" data-modal="details" aria-labelledby="det-title">
+          <button type="button" class="acct-modal-x" data-close-modal aria-label="Close">×</button>
+          <h2 id="det-title">Edit your details</h2>
+          <form method="post" action="{{ url_for('update_details') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="field"><label for="d_name">Your name</label><input id="d_name" name="name" type="text" maxlength="80" autocomplete="name" required value="{{ u.name }}"></div>
+            <div class="field"><label for="d_city">City</label><input id="d_city" name="city" type="text" maxlength="80" autocomplete="address-level2" required value="{{ u.city or '' }}"></div>
+            <div class="field"><label for="d_country">Country</label><input id="d_country" name="country" type="text" maxlength="80" autocomplete="country-name" required list="d-country-list" value="{{ u.country or '' }}">
+              <datalist id="d-country-list">{% for c in COUNTRIES %}<option value="{{ c }}">{% endfor %}</datalist></div>
+            <div class="acct-modal-buttons">
+              <button class="acct-btn">Save details</button>
+              <button type="button" class="acct-btn acct-btn-ghost" data-close-modal>Close</button>
+            </div>
+          </form>
+        </dialog>
+
+        <dialog class="acct-modal" data-modal="password" aria-labelledby="pw-title">
+          <button type="button" class="acct-modal-x" data-close-modal aria-label="Close">×</button>
+          <h2 id="pw-title">Change your password</h2>
+          <form method="post" action="{{ url_for('change_password') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="field"><label for="current">Current password</label><input id="current" name="current" type="password" autocomplete="current-password" required></div>
+            <div class="field"><label for="new">New password</label><input id="new" name="new" type="password" autocomplete="new-password" minlength="8" required><span class="help">At least 8 characters.</span></div>
+            <div class="acct-modal-buttons">
+              <button class="acct-btn">Save new password</button>
+              <button type="button" class="acct-btn acct-btn-ghost" data-close-modal>Close</button>
+            </div>
+          </form>
+        </dialog>
+
+        <dialog class="acct-modal" data-modal="delete" aria-labelledby="del-title">
+          <button type="button" class="acct-modal-x" data-close-modal aria-label="Close">×</button>
+          <h2 id="del-title">Delete your account?</h2>
+          <form method="post" action="{{ url_for('delete_account') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <p class="acct-text">This removes your name, email and child details from our records. The app on your computer keeps working.</p>
+            <div class="field"><label for="delpw">Type your password to confirm</label><input id="delpw" name="password" type="password" required></div>
+            <div class="acct-modal-buttons">
+              <button class="acct-btn acct-btn-danger">Delete my account</button>
+              <button type="button" class="acct-btn acct-btn-ghost" data-close-modal>Close</button>
+            </div>
+          </form>
+        </dialog>
+      </section>
+
+    <main class="acct-apps-col" id="apps">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}<ul class="flashes acct-flashes" role="status">{% for cat, msg in messages %}<li class="flash flash-{{ cat }}">{{ msg }}</li>{% endfor %}</ul>{% endif %}
+      {% endwith %}
+    <section class="acct-panel acct-shelf-panel" aria-labelledby="shelf-title">
+      <div class="acct-shelf-head">
+        <div>
+          <h2 id="shelf-title">Your apps</h2>
+          <p>Start with the free trial, then add themes whenever you like. New ones appear here as they come out.</p>
+        </div>
+      </div>
+
+      <div class="acct-shelf" tabindex="0" aria-label="Apps and themes, scroll to see more">
+        <article class="acct-card acct-card-trial">
+          <div class="acct-card-image"><span class="acct-tag acct-tag-free">FREE</span><img src="{{ url_for('static', filename='img/ada.webp') }}" alt=""></div>
+          <div class="acct-card-body">
+            <h3>Free Trial</h3>
+            <p>Try Ada The Coder for free. New lessons arrive by themselves.</p>
+            <div class="acct-card-actions">
+              {% for key, info in PLATFORMS.items() %}
+              {% set rel = releases.get(key) %}
+              <div class="acct-dl" data-platform="{{ key }}">
+                {% if rel %}
+                  <a class="acct-btn acct-btn-block" href="{{ url_for('download', platform=key) }}"><span aria-hidden="true">⬇</span> {{ info.label }}</a>
+                  <span class="acct-small">Version {{ rel.version }}, {{ (rel.size / 1048576)|round(1) }} MB<span class="yours" hidden> · your computer</span></span>
+                {% else %}
+                  <span class="acct-btn acct-btn-block is-off" aria-disabled="true">{{ info.label }}: coming soon</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            <button type="button" class="acct-help-btn" data-open-modal="install">How to install</button>
+          </div>
+        </article>
+
+        {% for c in courses %}
+        {% set licence = c.licence %}
+        <article class="acct-card theme-{{ c.pack }}{% if wanted == c.slug %} acct-card-wanted{% endif %}" id="theme-{{ c.slug }}">
+          <div class="acct-card-image{% if c.images|length > 1 %} many{% endif %}">
+            {% if licence %}<span class="acct-tag acct-tag-owned">✓ OWNED</span>{% else %}<span class="acct-tag">UPGRADE</span>{% endif %}
+            {% for img in c.images %}<img src="{{ img }}" alt="">{% endfor %}
+          </div>
+          <div class="acct-card-body">
+            <h3>{{ c.name }}</h3>
+            <p>{{ c.tagline }}</p>
+            <ul class="acct-features">{% for f in c.feature_list %}<li>{{ f }}</li>{% endfor %}</ul>
+            <div class="acct-card-actions">
+              {% if licence %}
+              <div class="acct-license">
+                <div class="acct-license-code"><strong>Your licence</strong><span class="js-licence">{{ licence }}</span></div>
+                <button type="button" class="acct-btn js-copy">Copy</button>
+              </div>
+              {% else %}
+              <div class="acct-price">{{ c.price }} <span>one-time</span></div>
+              <a class="acct-get acct-btn-block" href="mailto:{{ site.contact_email }}?subject={{ ('Licence for the ' ~ c.name ~ ' theme')|urlencode }}">Get Licence</a>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+      <dialog class="acct-modal acct-modal-wide" data-modal="install" aria-labelledby="inst-title">
+        <button type="button" class="acct-modal-x" data-close-modal aria-label="Close">×</button>
+        <h2 id="inst-title">How to install Ada The Coder</h2>
+        <p class="acct-text install-intro">About 5 minutes, and you only do it once. New lessons then arrive by themselves.</p>
+        <div class="install-tabs" role="tablist">
+          <button type="button" role="tab" class="install-tab" data-tab="windows" aria-selected="true">Windows</button>
+          <button type="button" role="tab" class="install-tab" data-tab="mac" aria-selected="false">Mac</button>
+        </div>
+        <div class="install-pane" data-pane="windows">
+          <p class="install-need">💻 Windows 10 or 11 · about 500 MB free</p>
+          <ol class="install-steps-list">
+            <li class="step">
+              <span class="step-num">1</span>
+              <div class="step-body">
+                <h3>Download the installer</h3>
+                <p>Click <b>⬇ Windows</b> on the Free Trial card. The file <b>AdaTheCoder Setup</b> saves to your Downloads folder.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num">2</span>
+              <div class="step-body">
+                <h3>Open the file</h3>
+                <p>Double-click <b>AdaTheCoder Setup</b> to start.</p>
+              <p class="step-tip">If a blue box says <b>“Windows protected your PC”</b>, click <b>More info</b> → <b>Run anyway</b>. If asked to allow changes, click <b>Yes</b>.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num">3</span>
+              <div class="step-body">
+                <h3>Follow the installer</h3>
+                <p>Click <b>Next</b>, tick <b>Create a desktop shortcut</b>, then <b>Install</b> and <b>Finish</b>.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num">4</span>
+              <div class="step-body">
+                <h3>Start coding!</h3>
+                <p>Open <b>Ada The Coder</b> from the desktop or Start menu and begin the first lesson.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <div class="install-pane" data-pane="mac" hidden>
+          <p class="install-need">🍎 macOS 11 (Big Sur) or newer · about 500 MB free</p>
+          <ol class="install-steps-list">
+            <li class="step">
+              <span class="step-num">1</span>
+              <div class="step-body">
+                <h3>Download the app</h3>
+                <p>Click <b>⬇ Mac</b> on the Free Trial card. A <b>.dmg</b> file saves to your Downloads folder.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num">2</span>
+              <div class="step-body">
+                <h3>Drag to Applications</h3>
+                <p>Double-click the file, then drag the <b>Ada The Coder</b> icon onto the <b>Applications</b> folder.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num">3</span>
+              <div class="step-body">
+                <h3>Open it the first time</h3>
+                <p>In Applications, <b>right-click</b> Ada The Coder → <b>Open</b> → <b>Open</b>.</p>
+              <p class="step-tip">Still blocked? Go to <b>System Settings → Privacy &amp; Security</b> and click <b>Open Anyway</b>.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num">4</span>
+              <div class="step-body">
+                <h3>Keep it handy</h3>
+                <p>Right-click the icon in the Dock → <b>Options</b> → <b>Keep in Dock</b>, so your child can find it again.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <p class="install-help">Stuck? Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> and we'll help you get set up.</p>
+        <div class="acct-modal-buttons"><button type="button" class="acct-btn" data-close-modal>Got it</button></div>
+      </dialog>
+      <footer class="acct-footer">
+        <span>© Ada The Coder</span>
+        <a href="{{ url_for('privacy') }}">Privacy</a>
+        <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>
+      </footer>
+    </main>
+  </div>
+</div>
+</div>
+<script>
+(function () { var w = document.querySelector(".acct-card-wanted"); if (w) w.scrollIntoView({block: "nearest", inline: "center"}); })();
+  (function () {
+    // The left panel's height is set from the screen size once, and only changes when the window
+    // width changes. Opening "How to install" or adding apps makes the page longer but never the panel.
+    var side = document.getElementById("settings"), lastWidth = 0;
+    function sizeSidebar() {
+      if (!side || window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
+      var h = Math.min(window.innerHeight, (screen.availHeight || window.innerHeight) - 100) - 32 - (side.dataset.offset | 0);
+      side.style.setProperty("--sidebar-h", Math.max(520, Math.round(h)) + "px");
+    }
+    sizeSidebar();
+    window.addEventListener("resize", sizeSidebar);
+    window.addEventListener("hashchange", function () { lastWidth = 0; setTimeout(sizeSidebar, 0); });
+    var ua = navigator.userAgent;
+    var mine = /Windows/i.test(ua) ? "windows" : (/Macintosh|Mac OS X/i.test(ua) ? "mac" : null);
+    var card = mine && document.querySelector('.acct-dl[data-platform="' + mine + '"]');
+    var link = card && card.querySelector("a");
+    if (card && card.querySelector(".yours")) card.querySelector(".yours").hidden = false;
+    document.querySelectorAll("[data-open-modal]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var d = document.querySelector('[data-modal="' + btn.dataset.openModal + '"]');
+        if (d) { var f = d.querySelector("form"); if (f) f.reset(); d.showModal(); }
+      });
+    });
+    document.querySelectorAll(".acct-modal").forEach(function (d) {
+      d.querySelectorAll("[data-close-modal]").forEach(function (b) { b.addEventListener("click", function () { d.close(); }); });
+      d.addEventListener("click", function (e) { if (e.target === d) d.close(); });  // click outside the box
+    });
+    // Windows / Mac tabs in the install pop-up; opens on the tab for this computer
+    function showTab(name) {
+      document.querySelectorAll(".install-tab").forEach(function (t) { t.setAttribute("aria-selected", t.dataset.tab === name ? "true" : "false"); });
+      document.querySelectorAll(".install-pane").forEach(function (p) { p.hidden = p.dataset.pane !== name; });
+    }
+    document.querySelectorAll(".install-tab").forEach(function (t) { t.addEventListener("click", function () { showTab(t.dataset.tab); }); });
+    if (mine) showTab(mine);
+    document.querySelectorAll(".js-copy").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var text = btn.parentNode.querySelector(".js-licence").textContent.trim();
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = "Copied!";
+          setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+        });
+      });
+    });
+  })();
+</script>
+{% endblock %}

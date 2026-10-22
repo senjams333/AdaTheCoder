@@ -1,0 +1,61 @@
+# Builds the Windows installer and Mac disk image automatically on GitHub.
+# 1. Commit the lesson videos (desktop_app/vid/).
+#    Videos are big: use Git LFS (git lfs track "*.mp4").
+# 2. Push a tag like v1.1.0 (matching APP_VERSION in desktop_app/ada_coder/config.py).
+# 3. Download both files from the workflow run's "Artifacts" and upload them in the website admin.
+name: Build desktop apps
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Test the app
+        working-directory: desktop_app
+        run: python -m unittest discover tests
+      - name: Test the website
+        working-directory: website
+        run: |
+          pip install -r requirements.txt
+          python -m unittest discover tests
+
+  windows:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: true }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Build installer
+        working-directory: desktop_app
+        run: .\build_windows.bat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AdaTheCoder-Windows
+          path: |
+            desktop_app/dist/AdaTheCoder-*-Windows-Setup.exe
+            desktop_app/dist/AdaTheCoder-*-Windows.zip
+
+  mac:
+    needs: test
+    runs-on: macos-13   # Intel runner: PyQt5's web view is most reliable there; runs on Apple Silicon via Rosetta
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: true }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Build disk image
+        working-directory: desktop_app
+        run: bash build_mac.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AdaTheCoder-Mac
+          path: desktop_app/dist/AdaTheCoder-*-Mac.dmg

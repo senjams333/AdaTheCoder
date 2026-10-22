@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block admin_title %}Overview{% endblock %}
+{% block admin_content %}
+<h1>Overview</h1>
+<div class="stats">
+  <div class="stat"><b>{{ stats.parents }}</b><span>parent accounts</span></div>
+  <div class="stat"><b>{{ stats.new_parents }}</b><span>new in the last 7 days</span></div>
+  <div class="stat"><b>{{ stats.downloads }}</b><span>app downloads</span></div>
+  <div class="stat"><b>{{ stats.lessons }}</b><span>live lessons in {{ stats.courses }} themes{% if stats.drafts %}, {{ stats.drafts }} hidden{% endif %}</span></div>
+</div>
+
+<div class="card">
+  <h2>Current app versions</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Computer</th><th>Version</th><th>Released</th><th>Downloads</th></tr></thead>
+    <tbody>
+    {% for key, info in PLATFORMS.items() %}{% set r = releases.get(key) %}
+      <tr><td>{{ info.label }}</td>
+        {% if r %}<td>{{ r.version }}</td><td>{{ r.created_at[:10] }}</td><td>{{ r.downloads }}</td>
+        {% else %}<td colspan="3" class="muted">No installer yet. <a href="{{ url_for('admin_releases') }}">Upload one</a></td>{% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+
+<div class="card">
+  <h2>Newest parents</h2>
+  {% if recent %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Name</th><th>Email</th><th>Child's age</th><th>Joined</th></tr></thead>
+    <tbody>{% for p in recent %}<tr><td>{{ p.name }}</td><td>{{ p.email }}</td><td>{{ p.child_age or "" }}</td><td>{{ p.created_at[:10] }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="muted">No parents have signed up yet. Share the website to get your first families.</p>{% endif %}
+</div>
+
+<div class="card">
+  <h2>Change your admin password</h2>
+  <form method="post" action="{{ url_for('change_password') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row-2">
+      <div class="field"><label for="current">Current password</label><input id="current" name="current" type="password" autocomplete="current-password" required></div>
+      <div class="field"><label for="new">New password</label><input id="new" name="new" type="password" autocomplete="new-password" minlength="8" required></div>
+    </div>
+    <button class="btn btn-small">Change password</button>
+  </form>
+</div>
+{% endblock %}

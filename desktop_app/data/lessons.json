@@ -1,0 +1,855 @@
+{
+ "version": 1,
+ "lessons": [
+  {
+   "id": "lesson1",
+   "position": 1,
+   "emoji": "👋",
+   "name": "WHAT IS PYTHON?",
+   "title": "👋 WHAT IS PYTHON?",
+   "subtitle": "Learn about Python with Tom & Friends! 🌟",
+   "video": {
+    "bundled": "vid/video1.mp4"
+   },
+   "default_code": "print(\"Python is a language! 🐍\")",
+   "examples": [
+    {
+     "label": "1️⃣ Friendly Language 🗣️",
+     "explain": "Python is a fun computer language that helps us talk to computers easily! 💻✨",
+     "output": "Python is a language! 🐍",
+     "code": "print(\"Python is a language! 🐍\")"
+    },
+    {
+     "label": "2️⃣ Super Smart Brain 🧠",
+     "explain": "It helps build super smart programs and games for kids! 🎮🚀",
+     "output": "Python is super smart! 🌟",
+     "code": "print(\"Python is super smart! 🌟\")"
+    },
+    {
+     "label": "3️⃣ Funny Name 📺",
+     "explain": "Python is actually named after a hilarious TV show, not a jungle snake! 😂🎪",
+     "output": "Named after Monty Python! 🎬",
+     "code": "print(\"Named after Monty Python! 🎬\")"
+    },
+    {
+     "label": "4️⃣ Easy Peasy 🎈",
+     "explain": "Writing code in Python is as easy as writing simple English sentences! ✍️🎉",
+     "output": "Easy to read and write! 👍",
+     "code": "print(\"Easy to read and write! 👍\")"
+    },
+    {
+     "label": "5️⃣ Space Rockets 🚀",
+     "explain": "Real space scientists use Python to launch rockets into outer space! 🌌🛰️",
+     "output": "Used by NASA and robots! 🤖",
+     "code": "print(\"Used by NASA and robots! 🤖\")"
+    },
+    {
+     "label": "6️⃣ Official Coder 👑",
+     "explain": "Running this code officially turns you into an awesome programmer! 🏆✨",
+     "output": "You are a Python programmer! 🎉",
+     "code": "print(\"You are a Python programmer! 🎉\")"
+    }
+   ]
+  },
+  {
+   "id": "lesson2",
+   "position": 2,
+   "emoji": "🖨️",
+   "name": "PRINT HELLO",
+   "title": "🖨️ PRINT HELLO",
+   "subtitle": "Learn how to print messages! 💌",
+   "video": {
+    "bundled": "vid/video2.mp4"
+   },
+   "default_code": "print(\"Hello World! 🌍\")",
+   "examples": [
+    {
+     "label": "1️⃣ Hello World 🌍",
+     "explain": "This is the very first magic spell every coder types on day one! ✨💻",
+     "output": "Hello World! 🌍",
+     "code": "print(\"Hello World! 🌍\")"
+    },
+    {
+     "label": "2️⃣ Say Hi to Tom 👦",
+     "explain": "Use quotation marks inside print to say hello to your friend Tom! 👋",
+     "output": "Hello Tom! 👦",
+     "code": "print(\"Hello Tom! 👦\")"
+    },
+    {
+     "label": "3️⃣ Say Hi to Penny 👧",
+     "explain": "Send a cheerful greeting straight to Penny using code! 🌟",
+     "output": "Hello Penny! 👧",
+     "code": "print(\"Hello Penny! 👧\")"
+    },
+    {
+     "label": "4️⃣ Hug Teddy 🧸",
+     "explain": "Say hi to Teddy the fluffy bear cub! 🍯🤗",
+     "output": "Hello Teddy! 🧸",
+     "code": "print(\"Hello Teddy! 🧸\")"
+    },
+    {
+     "label": "5️⃣ Magic Numbers 🔢",
+     "explain": "You can print fun lists of numbers inside your quotes too! 🎈",
+     "output": "1 2 3 4 5 🔢",
+     "code": "print(\"1 2 3 4 5 🔢\")"
+    },
+    {
+     "label": "6️⃣ Colorful Fruits 🍎",
+     "explain": "Python can print wonderful emojis right onto your screen! 🍌🍇",
+     "output": "🍎 🍌 🍇 ✨",
+     "code": "print(\"🍎 🍌 🍇 ✨\")"
+    }
+   ]
+  },
+  {
+   "id": "lesson3",
+   "position": 3,
+   "emoji": "💬",
+   "name": "COMMENTS",
+   "title": "💬 COMMENTS",
+   "subtitle": "Learn COMMENTS with Tom, Penny & Teddy! 🕵️‍♂️",
+   "video": {
+    "bundled": "vid/comment.mp4"
+   },
+   "default_code": "# Secret note for coders\nprint(\"Comments are hidden! 👻\")",
+   "examples": [
+    {
+     "label": "1️⃣ Secret Note 🤫",
+     "explain": "Python ignores lines starting with # so you can leave secret notes! 🕵️‍♂️✨",
+     "output": "Comments are hidden! 👻",
+     "code": "# Secret note for coders\nprint(\"Comments are hidden! 👻\")"
+    },
+    {
+     "label": "2️⃣ Math Note 📝",
+     "explain": "Use comments to explain what your magic math machine is calculating! ➕🎯",
+     "output": "10 🎯",
+     "code": "# Adding our lucky numbers below\nprint(5 + 5)"
+    },
+    {
+     "label": "3️⃣ Side Comment 🐱",
+     "explain": "You can even put a fun comment right next to your code line! 🐾",
+     "output": "Cat 🐾",
+     "code": "print(\"Cat 🐾\") # prints our cute animal friend"
+    },
+    {
+     "label": "4️⃣ Magic Shield 🛡️",
+     "explain": "Put a # in front of code to hide it like magic without deleting it! ✨",
+     "output": "Visible! 🌟",
+     "code": "# print(\"You cannot see me! 👻\")\nprint(\"Visible! 🌟\")"
+    },
+    {
+     "label": "5️⃣ Step-by-Step 🗺️",
+     "explain": "Break down your adventure into easy steps using comment maps! 🚀",
+     "output": "Step 1 🚀\nStep 2 🌟",
+     "code": "# First stop on our journey\nprint(\"Step 1 🚀\")\n# Second stop on our journey\nprint(\"Step 2 🌟\")"
+    },
+    {
+     "label": "6️⃣ Creator Badge 👑",
+     "explain": "Leave your awesome coder signature at the top of your program! 🏆",
+     "output": "Program written by Master Coder! 👑",
+     "code": "# Author: Super Ryaan 👑\nprint(\"Program written by Master Coder! 👑\")"
+    }
+   ]
+  },
+  {
+   "id": "lesson5",
+   "position": 4,
+   "emoji": "🎨",
+   "name": "VARIABLES",
+   "title": "🎨 VARIABLES",
+   "subtitle": "Learn VARIABLES with Treasure Chests! 💎",
+   "video": {
+    "bundled": "vid/video5.mp4"
+   },
+   "default_code": "score = 100\nprint(score)",
+   "examples": [
+    {
+     "label": "1️⃣ Store Number 📦",
+     "explain": "Think of a variable like a magical treasure chest holding the number 100! When you print it, it shows the number stored in it as output. The treasure box 💎 !",
+     "output": "100",
+     "code": "score = 100\nprint(score)"
+    },
+    {
+     "label": "2️⃣ Store Text 🏷️",
+     "explain": "Put a friendly name like Teddy inside text quotes! When you print(hero), it will print Teddy in the output 🧸",
+     "output": "Teddy",
+     "code": "hero = \"Teddy\"\nprint(hero)"
+    },
+    {
+     "label": "3️⃣ Update Value 🔄",
+     "explain": "Treasure boxes can change! First you put 10 coins in your box, but when you find more, you update it to 20. The old number disappears and 20 takes its place! 🪙",
+     "output": "20",
+     "code": "coins = 10\ncoins = 20\nprint(coins)"
+    },
+    {
+     "label": "4️⃣ Add Boxes ➕",
+     "explain": "Imagine two small boxes: box a holding 5 and box b holding 10. When you write print(a + b), Python acts like a smart robot, opens both boxes, adds them up, and gives you 15! 🤖",
+     "output": "15",
+     "code": "a = 5\nb = 10\nprint(a + b)"
+    },
+    {
+     "label": "5️⃣ Double Assign 👯",
+     "explain": "Why fill boxes one by one? This line fills up two chests at the exact same split second: box x gets 1 and box y gets 2. Printing them side-by-side shows 1 2! 📦📦",
+     "output": "1 2",
+     "code": "x, y = 1, 2\nprint(x, y)"
+    },
+    {
+     "label": "6️⃣ Box + Words 📝",
+     "explain": "You don't have to choose between words and numbers—you can mix them! If your speed box holds 50, Python reads both parts and prints out a fun sentence like Speed is: 50! 🏎️",
+     "output": "Speed is: 50",
+     "code": "speed = 50\nprint(\"Speed is:\", speed)"
+    }
+   ]
+  },
+  {
+   "id": "lesson4",
+   "position": 5,
+   "emoji": "🔢",
+   "name": "DATA TYPES",
+   "title": "🔢 DATA TYPES",
+   "subtitle": "Learn DATA TYPES with Tom, Penny & Teddy! 🧪",
+   "video": {
+    "bundled": "vid/video4.mp4"
+   },
+   "default_code": "my_integer = 10\nprint(my_integer)",
+   "examples": [
+    {
+     "label": "1️⃣ Integer Number 🔢",
+     "explain": "An integer is a whole counting number like 10 with no fractions! 👍",
+     "output": "10",
+     "code": "my_integer = 10\nprint(my_integer)"
+    },
+    {
+     "label": "2️⃣ Decimal Float 🍰",
+     "explain": "A float is a number with a delicious decimal point slice like 3.14! 🥧",
+     "output": "3.14",
+     "code": "my_float = 3.14\nprint(my_float)"
+    },
+    {
+     "label": "3️⃣ Text String 📜",
+     "explain": "A string is regular alphabet text wrapped nicely in quotation marks! 💬",
+     "output": "Hello Tom",
+     "code": "my_text = \"Hello Tom\"\nprint(my_text)"
+    },
+    {
+     "label": "4️⃣ True Switch ✅",
+     "explain": "A boolean switch can be turned ON to True like a happy light! 💡",
+     "output": "True",
+     "code": "is_happy = True\nprint(is_happy)"
+    },
+    {
+     "label": "5️⃣ False Switch ❌",
+     "explain": "A boolean switch can also be turned OFF to False! 🌙",
+     "output": "False",
+     "code": "is_cold = False\nprint(is_cold)"
+    },
+    {
+     "label": "6️⃣ Check Type 🔍",
+     "explain": "Use the type() command to ask Python what kind of data is inside! 🔎",
+     "output": "<class 'int'>",
+     "code": "x = 5\nprint(type(x))"
+    }
+   ]
+  },
+  {
+   "id": "lesson_math_operators",
+   "position": 6,
+   "emoji": "➕",
+   "name": "MATH OPERATORS",
+   "title": "➕ ARITHMATIC OPERATORS",
+   "subtitle": "Learn ARITHMATIC OPERATORS with Fun Equations! 🧮",
+   "video": {
+    "bundled": "vid/math-operators.mp4"
+   },
+   "default_code": "print(10 + 5)",
+   "examples": [
+    {
+     "label": "1️⃣ Addition (+) ➕",
+     "explain": "Adds two numbers together to make a bigger total number value! 📈",
+     "output": "15",
+     "code": "print(10 + 5)"
+    },
+    {
+     "label": "2️⃣ Subtraction (-) ➖",
+     "explain": "Takes away the right number from the left to leave a smaller amount! 📉",
+     "output": "12",
+     "code": "print(20 - 8)"
+    },
+    {
+     "label": "3️⃣ Multiplication (*) ✖️",
+     "explain": "Multiplies two numbers together to grow your final amount super fast! 🚀",
+     "output": "20",
+     "code": "print(4 * 5)"
+    },
+    {
+     "label": "4️⃣ Division (/) ➗",
+     "explain": "Divides a number evenly and gives you a decimal point answer! 🍰",
+     "output": "5.0",
+     "code": "print(20 / 4)"
+    },
+    {
+     "label": "5️⃣ Exponent (**) ⭐",
+     "explain": "Multiplies a base number by itself using special superpower instructions! ⚡",
+     "output": "8",
+     "code": "print(2 ** 3)"
+    },
+    {
+     "label": "6️⃣ Modulus (%) 🎯",
+     "explain": "Calculates and displays only the leftover remainder from your division! 🎪",
+     "output": "2",
+     "code": "print(17 % 5)"
+    }
+   ]
+  },
+  {
+   "id": "lesson_string",
+   "position": 7,
+   "emoji": "🔤",
+   "name": "STRINGS",
+   "title": "🔤 STRINGS",
+   "subtitle": "Learn STRINGS with Tom, Penny & Teddy! 🧵",
+   "video": {
+    "bundled": "vid/string1.mp4"
+   },
+   "default_code": "name = \"Penny\"\nprint(name)",
+   "examples": [
+    {
+     "label": "1️⃣ Create String 📝",
+     "explain": "Stores text characters inside a handy name variable! 🏷️",
+     "output": "Penny",
+     "code": "name = \"Penny\"\nprint(name)"
+    },
+    {
+     "label": "2️⃣ Join Strings (+) 🔗",
+     "explain": "Glues two separate text snippets together into a single phrase! ✨",
+     "output": "Super Hero",
+     "code": "print(\"Super \" + \"Hero\")"
+    },
+    {
+     "label": "3️⃣ Repeat String (*) 🔁",
+     "explain": "Multiplies text output so it repeats multiple times like an echo! 📢",
+     "output": "Ha Ha Ha ",
+     "code": "print(\"Ha \" * 3)"
+    },
+    {
+     "label": "4️⃣ Lowercase 📉",
+     "explain": "Converts all uppercase letters down into cozy lowercase letters! 🔠",
+     "output": "python",
+     "code": "word = \"PYTHON\"\nprint(word.lower())"
+    },
+    {
+     "label": "5️⃣ Uppercase 📈",
+     "explain": "Converts your letters into big shouty uppercase letters! 🔤",
+     "output": "PYTHON",
+     "code": "word = \"python\"\nprint(word.upper())"
+    },
+    {
+     "label": "6️⃣ String Length 📏",
+     "explain": "Counts every single letter and space inside your text string! 📐",
+     "output": "10",
+     "code": "text = \"Hello Kids\"\nprint(len(text))"
+    }
+   ]
+  },
+  {
+   "id": "lesson6",
+   "position": 8,
+   "emoji": "↩️",
+   "name": "USER INPUT",
+   "title": "↩️ USER INPUT",
+   "subtitle": "Learn USER INPUT and Interactive Prompts! 🎤",
+   "video": {
+    "bundled": "vid/video6.mp4"
+   },
+   "default_code": "name = input(\"Enter your name: \")\nprint(f\"Hello {name}\")",
+   "examples": [
+    {
+     "label": "1️⃣ Ask Name 🙋",
+     "explain": "Asks user for their name using input() and greets them back! 👋",
+     "output": "Enter your name: Tom\nHello Tom",
+     "code": "name = input(\"Enter your name: \")\nprint(f\"Hello {name}\")"
+    },
+    {
+     "label": "2️⃣ Age Display 🎂",
+     "explain": "Asks for your age number and responds with a birthday cheer! 🎈",
+     "output": "Enter your age: 10\nYou are 10 years old!",
+     "code": "age = input(\"Enter your age: \")\nprint(f\"You are {age} years old!\")"
+    },
+    {
+     "label": "3️⃣ Favorite Color 🎨",
+     "explain": "Asks what color you love most and prints it out! 🌈",
+     "output": "Enter your favorite color: Blue\nFavorite color is Blue",
+     "code": "color = input(\"Enter your favorite color: \")\nprint(f\"Favorite color is {color}\")"
+    },
+    {
+     "label": "4️⃣ Favorite Food 🍕",
+     "explain": "Asks what tasty snack you like best for lunch! 😋",
+     "output": "What is your favorite food?: Pizza\nYum! I love Pizza",
+     "code": "food = input(\"What is your favorite food?: \")\nprint(f\"Yum! I love {food}\")"
+    },
+    {
+     "label": "5️⃣ Convert & Add 🔢",
+     "explain": "Takes number input text, turns it to an int, and adds bonus points! ⭐",
+     "output": "Enter your score: 50\n60",
+     "code": "score = int(input(\"Enter your score: \"))\nprint(score + 10)"
+    },
+    {
+     "label": "6️⃣ Superhero Name 🦸",
+     "explain": "Asks for your secret superhero alias name! 🌟",
+     "output": "What is your superhero name?: Super Coder\nYour hero name is Super Coder",
+     "code": "hero = input(\"What is your superhero name?: \")\nprint(f\"Your hero name is {hero}\")"
+    }
+   ]
+  },
+  {
+   "id": "lesson7",
+   "position": 9,
+   "emoji": "⚖️",
+   "name": "CONDITIONAL OPERATORS",
+   "title": "⚖️ CONDITIONAL OPERATORS",
+   "subtitle": "Learn CONDITIONAL OPERATORS & Comparisons! ⚖️",
+   "video": {
+    "bundled": "vid/video7.mp4"
+   },
+   "default_code": "print(10 == 10)",
+   "examples": [
+    {
+     "label": "1️⃣ Equal To (==) 🤝",
+     "explain": "The (==) operator is used to check if two things are exactly equal in value or form the same text string. When we write print(10 == 10), Python checks if 10 equals 10, and since we know they match, it gives us True like a nodding robot! ✅",
+     "output": "True",
+     "code": "print(10 == 10)"
+    },
+    {
+     "label": "2️⃣ Not Equal (!=) ⚡",
+     "explain": "The (!=) operator is used to check if two things are not equal to each other. When we write print(5 != 3), Python asks if 5 and 3 are different, and since they are not equal, it outputs True! 🔍",
+     "output": "True",
+     "code": "print(5 != 3)"
+    },
+    {
+     "label": "3️⃣ Greater Than (>) 📈",
+     "explain": "The (>) operator is used to check if the number on the left is strictly greater or bigger than the number on the right. Since 15 is larger than 10, Python outputs True! 🚀",
+     "output": "True",
+     "code": "print(15 > 10)"
+    },
+    {
+     "label": "4️⃣ Less Than (<) 📉",
+     "explain": "The (<) operator is used to check if the number on the left is smaller than the number on the right. Since 3 is indeed smaller than 8, Python confirms with True! 🌟",
+     "output": "True",
+     "code": "print(3 < 8)"
+    },
+    {
+     "label": "5️⃣ Greater or Equal (>=) 🛡️",
+     "explain": "The (>=) operator is used to check if a value is greater than or equal to the target number. Since 10 is equal to 10 at least one condition is true between > and =, Python happily prints True! 🎯",
+     "output": "True",
+     "code": "print(10 >= 10)"
+    },
+    {
+     "label": "6️⃣ Kid Age Check 🧒",
+     "explain": "We store a kid's age as 7 inside a variable box. Then we use the less than (<) operator to check if the age is under 12. Since 7 is smaller, Python prints True! 🎈",
+     "output": "True",
+     "code": "age = 7\nprint(age < 12)"
+    }
+   ]
+  },
+  {
+   "id": "lesson8",
+   "position": 10,
+   "emoji": "👨‍💻❓",
+   "name": "IF ELSE",
+   "title": "👨‍💻❓ IF ELSE",
+   "subtitle": "Learn IF ELSE decision making! 🤖",
+   "video": {
+    "bundled": "vid/video8.mp4"
+   },
+   "default_code": "age = 10\nif age >= 8:\n    print(\"You can play!\")\nelse:\n    print(\"Too young!\")",
+   "examples": [
+    {
+     "label": "1️⃣ Basic If-Else 🚦",
+     "explain": "Let's learn how decision making works! The if condition asks Python a question using a colon (:) to open the doorway. The 4-space tab indentation makes sure the print action belongs inside the if choice. If it is false, Python slides down to the else condition backup plan! Here, the condition, if 10 is greater than 8 is true, so it should allow to play 🎮",
+     "output": "You can play!",
+     "code": "age = 10\nif age >= 8:\n    print(\"You can play!\")\nelse:\n    print(\"Too young!\")"
+    },
+    {
+     "label": "2️⃣ Traffic Light 🚥",
+     "explain": "This uses an if condition to check if the light equals red, ending with a colon (:) to open the code block gateway. The 4-space tab indentation keeps the print command safely tucked inside the rule. If the light is anything else, the else condition runs instead! 🚗",
+     "output": "STOP!",
+     "code": "light = \"red\"\nif light == \"red\":\n    print(\"STOP!\")\nelse:\n   print(\"GO!\")"
+    },
+    {
+     "label": "3️⃣ Rainy Day ☔",
+     "explain": "The if condition checks if our weather switch is True, followed by a colon (:) to open the instruction path. The 4-space tab indentation tells Python that the print action belongs to the rainy choice. If it's not raining, the else condition takes over! 🌧️",
+     "output": "Take umbrella!",
+     "code": "is_raining = True\nif is_raining:\n    print(\"Take umbrella!\")\nelse:\n    print(\"Wear hat!\")"
+    },
+    {
+     "label": "4️⃣ Elif Chain 📊",
+     "explain": "This uses multiple choices in order! Each line has an if or elif condition ending with a colon (:) and a 4-space tab indentation to group its code. Python checks them one by one until it finds a match! In this example, B is the perfect match 📝 !",
+     "output": "B",
+     "code": "marks = 75\nif marks >= 90:    \n    print(\"A\")\nelif marks >= 70:\n    print(\"B\")\nelse:\n    print(\"C\")"
+    },
+    {
+     "label": "5️⃣ Even or Odd 🎯",
+     "explain": "The if condition checks a math equation ending with a colon (:), using a 4-space tab indentation for the print block. Because 7 is odd, as 7 divided by 2 gives a remainder 1 which is not equal to 0, hence 7 is not even, the condition is false and Python runs the else condition backup and should print Odd! 🔢",
+     "output": "Odd",
+     "code": "num = 7\nif num % 2 == 0:\n    print(\"Even\")\nelse:\n    print(\"Odd\")"
+    },
+    {
+     "label": "6️⃣ Password Check 🔐",
+     "explain": "The if condition checks if the secret password matches, ending with a colon (:) and using a 4-space tab indentation to neatly tuck away the success message! 🚪",
+     "output": "Access Granted",
+     "code": "passw = \"1234\"\nif passw == \"1234\":\n    print(\"Access Granted\")"
+    }
+   ]
+  },
+  {
+   "id": "lesson9",
+   "position": 11,
+   "emoji": "🔄",
+   "name": "FOR LOOP",
+   "title": "🔁 FOR LOOP",
+   "subtitle": "Learn FOR LOOPS and Repetition! 🔄",
+   "video": {
+    "bundled": "vid/video9.mp4"
+   },
+   "default_code": "for i in range(3):\n    print(\"Hello!\")",
+   "examples": [
+    {
+     "label": "1️⃣ Repeat 3 Times 🔁",
+     "explain": "Let's learn how for loops work step-by-step: The 'for' command tells Python to repeat an action. The letter 'i' acts like a tiny helper counter box that keeps track of how many times we loop or repeat. The word 'range(3)' creates a counting list of 3 numbers starting from 0, and the number 3 inside the parentheses tells Python to stop after repeating exactly 3 times! That is why it displays 'Hello!' three times in a row! 🔄",
+     "output": "Hello!\nHello!\nHello!",
+     "code": "for i in range(3):\n    print(\"Hello!\")"
+    },
+    {
+     "label": "2️⃣ Count 0 to 4 🔢",
+     "explain": "The 'for' command loops through numbers. The letter 'i' holds each number as we count. The 'range(5)' creates numbers starting from 0, and the number 5 inside tells Python to count up to 5 items total, which gives us numbers from 0 up to 4! 📊",
+     "output": "0\n1\n2\n3\n4",
+     "code": "for i in range(5):\n    print(i)"
+    },
+    {
+     "label": "3️⃣ Loop String 🔤",
+     "explain": "The 'for' loop goes through words letter by letter. The variable 'char' catches each individual letter one at a time from the text word 'CAT', printing every letter on its own line! 🧵",
+     "output": "C\nA\nT",
+     "code": "for char in \"CAT\":\n    print(char)"
+    },
+    {
+     "label": "4️⃣ Loop List 🍎",
+     "explain": "The 'for' loop can look through lists of items. The list variable 'item' grabs each yummy snack emoji from the list container one by one until everything has been printed! 🍌",
+     "output": "🍎\n🍌",
+     "code": "for item in [\"🍎\", \"🍌\"]:\n    print(item)"
+    },
+    {
+     "label": "5️⃣ Countdown 🚀",
+     "explain": "The 'for' loop can also count backwards! The range(3, 0, -1) starts at 3 and steps down until it hits 0 for an awesome rocket ship launch countdown! 🌌",
+     "output": "3\n2\n1\nBlast off!",
+     "code": "for i in range(3, 0, -1):\n    print(i)\nprint(\"Blast off!\")"
+    },
+    {
+     "label": "6️⃣ Star Pattern ⭐",
+     "explain": "The 'for' loop uses our counting helper 'i' to change things on every loop. By multiplying the star emoji by (i + 1), it prints a growing pyramid of shining stars, with the first loop printing 1 star '(⭐ * (0 + 1))' or '(⭐ * 1)', the second loop printing 2 stars '(⭐ * (1 + 1))'or '(⭐ * 2)'and the third loop printing 3 stars '(⭐ * (2 + 1))' or '(⭐ * 3)'! Hence our star tree ! ✨",
+     "output": "⭐\n⭐⭐\n⭐⭐⭐",
+     "code": "for i in range(3):\n    print(\"⭐\" * (i + 1))"
+    }
+   ]
+  },
+  {
+   "id": "lesson_function",
+   "position": 12,
+   "emoji": "⚡",
+   "name": "FUNCTIONS",
+   "title": "⚡ FUNCTIONS",
+   "subtitle": "Learn FUNCTIONS & Magic Spells! 🪄",
+   "video": {
+    "bundled": "vid/function1.mp4"
+   },
+   "default_code": "def say_hi():\n    print(\"Hi from function!\")\nsay_hi()",
+   "examples": [
+    {
+     "label": "1️⃣ Simple Function 🪄",
+     "explain": "This defines a reusable block of code like a custom magic spell! We start with the word 'def' (which means define), followed by the function name 'say_hi', empty parentheses '()', and a colon ':' to open the doorway. We write a function name so Python knows what to call when we want to run our code. Then, we have something important called INDENTATION in Python, which is four spaces from the left to define a block of code that belongs to a function or a condition. In this case, the indented code in the second line runs whenever we call the function's name: say_hi()! ✨",
+     "output": "Hi from function!",
+     "code": "def say_hi():\n    print(\"Hi,I am from function 😊 ⭐!\")\nsay_hi()"
+    },
+    {
+     "label": "2️⃣ Function Parameter 📥",
+     "explain": "This passes a custom name parameter into your greeting spell! We use the function name 'greet', and by putting 'name' inside the parentheses '(name)', our spell is ready to receive a secret ingredient word. When we call greet('Ryaan'), Python hands the name into the function name and prints Hello Ryaan! 💌",
+     "output": "Hello Ryaan",
+     "code": "def greet(name):\n    print(\"Hello \" + name)\ngreet(\"Ryaan\")"
+    },
+    {
+     "label": "3️⃣ Add Function ➕",
+     "explain": "A function that takes two numbers and adds them together! We use the function name 'add', and the parentheses hold two parameters '(a, b)'. When we call add(10, 20), Python acts like a smart robot, uses the function name to run the code, adds the numbers up, and prints the total output of 30! 🧮",
+     "output": "30",
+     "code": "def add(a, b):\n    print(a + b)\nadd(10, 20)"
+    },
+    {
+     "label": "4️⃣ Return Value 🎁",
+     "explain": "This function uses the name 'double' and performs math inside, using the 'return' word to pack up an answer and hand it back to you! When we give it 5, double(5) multiplies it by 2 and returns 10 into our box variable 'res', which we then print! 📦",
+     "output": "10",
+     "code": "def double(x):\n    return x * 2\nres = double(5)\nprint(res)"
+    },
+    {
+     "label": "5️⃣ Default Value 🧀",
+     "explain": "This uses the function name 'make_pizza' with a default topping parameter if none is specified! If you call make_pizza() without any words inside the brackets, it uses our backup plan and automatically chooses cheese for you, printing Pizza with Cheese! 🍕",
+     "output": "Pizza with Cheese",
+     "code": "def make_pizza(topping=\"Cheese\"):\n    print(\"Pizza with \" + topping)\nmake_pizza()"
+    },
+    {
+     "label": "6️⃣ Magic Spell ✨",
+     "explain": "Performs a fun wizard spell whenever you call its name! We define the spell using the function name 'magic' like this: 'def magic():' with a colon, and calling magic() casts it to output ✨ Abracadabra! ✨! 🧙‍♂️",
+     "output": "✨ Abracadabra! ✨",
+     "code": "def magic():\n    print(\"✨ Abracadabra! ✨\")\nmagic()"
+    }
+   ]
+  },
+  {
+   "id": "lesson10",
+   "position": 13,
+   "emoji": "⏳",
+   "name": "WHILE LOOP",
+   "title": "⏳ WHILE LOOP",
+   "subtitle": "Learn WHILE LOOPS and Running Clocks! ⏰",
+   "video": {
+    "bundled": "vid/video10.mp4"
+   },
+   "default_code": "c = 1\nwhile c <= 3:\n    print(c)\n    c += 1",
+   "examples": [
+    {
+     "label": "1️⃣ Count 1 to 3 🔢",
+     "explain": "A while loop acts like a repeating game rule or running clock. It says: 'Keep doing this action while my question is true!' The colon symbol (:) acts like a doorway gateway introducing the indented instructions below. In this code, we start with c = 1. The while loop checks if c <= 3. Since 1 is smaller than 3, it enters the loop, prints the number 1, and then 'c += 1' adds 1 to make c become 2. It repeats this until c reaches 4, where the question becomes false and it stops! ⏱️",
+     "output": "1\n2\n3",
+     "code": "c = 1\nwhile c <= 3:\n    print(c)\n    c += 1"
+    },
+    {
+     "label": "2️⃣ Countdown 🚀",
+     "explain": "This countdown uses a while loop with a timer variable starting at 3. The while condition checks 'while timer > 0:' using a colon (:) to open the loop doorway. Inside, it prints the current timer number and then 'timer -= 1' subtracts 1 on every loop. When the timer hits 0, the question becomes false, the loop stops, and it prints 'Go!' for liftoff! 🌌",
+     "output": "3\n2\n1\nGo!",
+     "code": "timer = 3\nwhile timer > 0:\n    print(timer)\n    timer -= 1\nprint(\"Go!\")"
+    },
+    {
+     "label": "3️⃣ Break Loop 🛑",
+     "explain": "This uses a 'while True' infinite loop combined with a break command! The while condition is always True, meaning it would run forever. However, inside the loop, an 'if i == 2:' check uses the 'break' keyword like a magic emergency exit button to stop the running loop early when i reaches 2! ⚡",
+     "output": "1\n2",
+     "code": "i = 1\nwhile True:\n    print(i)\n    if i == 2:\n        break\n    i += 1"
+    },
+    {
+     "label": "4️⃣ Health Points ❤️",
+     "explain": "This simulates a video game combat loop where character health starts at 30. The while condition checks 'while hp > 0:' with a colon (:) gateway. On each loop, it prints the remaining health points. Inside the print statement, 'print(f\"Fighting! HP: {hp}\")' uses an 'f' in front of the quotes (called an f-string) to act like a fancy message creator. The curly brackets '{hp}' act like a magical window that grabs the changing number from our 'hp' variable box on every loop (showing 30, then 20, then 10), and 'hp -= 10' subtracts 10 health until the character runs out of HP and the game loop ends! 🎮",
+     "output": "Fighting! HP: 30\nFighting! HP: 20\nFighting! HP: 10",
+     "code": "hp = 30\nwhile hp > 0:\n    print(f\"Fighting! HP: {hp}\")\n    hp -= 10"
+    },
+    {
+     "label": "5️⃣ Collect Coins 🪙",
+     "explain": "This loop collects digital treasure coins until you reach your goal! We start with coins = 0. The while condition checks 'while coins < 3:' using a colon (:). Inside the loop, 'coins += 1' adds a coin and prints 'Collected coin!' until we collect 3 total coins and the loop finishes! 💰",
+     "output": "Collected coin!\nCollected coin!\nCollected coin!",
+     "code": "coins = 0\nwhile coins < 3:\n    coins += 1\n    print(\"Collected coin!\")"
+    },
+    {
+     "label": "6️⃣ Grow String 📈",
+     "explain": "This loop adds an extra character onto your string text on every single loop! We start with string s = 'a'. The while condition 'while len(s) <= 3:' checks the length of the string. Inside, it prints s and then 's += \"a\"' adds another 'a' letter until the text grows to length 3 and stops! 🧵",
+     "output": "a\naa\naaa",
+     "code": "s = \"a\"\nwhile len(s) <= 3:\n    print(s)\n    s += \"a\""
+    }
+   ]
+  },
+  {
+   "id": "lesson11",
+   "position": 14,
+   "emoji": "📖",
+   "name": "DICTIONARY",
+   "title": "📖 DICTIONARY",
+   "subtitle": "Learn DICTIONARIES and Label Tags! 🏷️",
+   "video": {
+    "bundled": "vid/video11.mp4"
+   },
+   "default_code": "hero = {\"name\": \"Tom\", \"age\": 10}\nprint(hero)",
+   "examples": [
+    {
+     "label": "1️⃣ Create Dict 📖",
+     "explain": "Stores key-value pairs like a real word dictionary or profile card! 📇",
+     "output": "{'name': 'Tom', 'age': 10}",
+     "code": "hero = {\"name\": \"Tom\", \"age\": 10}\nprint(hero)"
+    },
+    {
+     "label": "2️⃣ Get Value 🔍",
+     "explain": "Looks up and accesses a specific value using its key name tag! 🏷️",
+     "output": "Tom",
+     "code": "hero = {\"name\": \"Tom\"}\nprint(hero[\"name\"])"
+    },
+    {
+     "label": "3️⃣ Change Value ✏️",
+     "explain": "Updates the score value inside an existing dictionary key! 📊",
+     "output": "{'score': 100}",
+     "code": "user = {\"score\": 50}\nuser[\"score\"] = 100\nprint(user)"
+    },
+    {
+     "label": "4️⃣ Add New Key ➕",
+     "explain": "Adds a brand new key-value property pair to your dictionary! 🎒",
+     "output": "{'type': 'tom', 'color': 'Brown'}",
+     "code": "pet = {\"type\": \"tom\"}\npet[\"color\"] = \"Brown\"\nprint(pet)"
+    },
+    {
+     "label": "5️⃣ Check Key ✅",
+     "explain": "Checks if a specific label key exists inside your dictionary! 🔎",
+     "output": "True",
+     "code": "d = {\"x\": 10}\nprint(\"x\" in d)"
+    },
+    {
+     "label": "6️⃣ Dict Size 📏",
+     "explain": "Counts how many key-value item pairs live inside your dictionary! 📐",
+     "output": "2",
+     "code": "inventory = {\"apples\": 5, \"coins\": 10}\nprint(len(inventory))"
+    }
+   ]
+  },
+  {
+   "id": "lesson12",
+   "position": 15,
+   "emoji": "📋",
+   "name": "LISTS",
+   "title": "📋 LISTS",
+   "subtitle": "Learn LISTS and Toy Collections! 🧸",
+   "video": {
+    "bundled": "vid/video12.mp4"
+   },
+   "default_code": "toys = [\"Car\", \"Robot\", \"Ball\"]\nprint(toys)",
+   "examples": [
+    {
+     "label": "1️⃣ Create List 📋",
+     "explain": "Creates an orderly list collection of your favorite toys! 🚗🤖",
+     "output": "['Car', 'Robot', 'Ball']",
+     "code": "toys = [\"Car\", \"Robot\", \"Ball\"]\nprint(toys)"
+    },
+    {
+     "label": "2️⃣ First Item 🥇",
+     "explain": "Index position 0 grabs the very first item in your list! 👈",
+     "output": "Car",
+     "code": "toys = [\"Car\", \"Robot\"]\nprint(toys[0])"
+    },
+    {
+     "label": "3️⃣ Add Item (append) ➕",
+     "explain": "Appends a brand new toy item to the very end of your list! 🎁",
+     "output": "['Car', 'Doll']",
+     "code": "toys = [\"Car\"]\ntoys.append(\"Doll\")\nprint(toys)"
+    },
+    {
+     "label": "4️⃣ Remove Item ❌",
+     "explain": "Removes a specified item name right out of your list! 🗑️",
+     "output": "['Robot']",
+     "code": "toys = [\"Car\", \"Robot\"]\ntoys.remove(\"Car\")\nprint(toys)"
+    },
+    {
+     "label": "5️⃣ Sort List 🔠",
+     "explain": "Sorts items in your list into neat alphabetical or numerical order! 📊",
+     "output": "[1, 2, 3]",
+     "code": "nums = [3, 1, 2]\nnums.sort()\nprint(nums)"
+    },
+    {
+     "label": "6️⃣ Join Lists 🔗",
+     "explain": "Combines two separate lists together into one big collection! 🤝",
+     "output": "[1, 2, 3, 4]",
+     "code": "a = [1, 2]\nb = [3, 4]\nprint(a + b)"
+    }
+   ]
+  },
+  {
+   "id": "lesson_error_handling",
+   "position": 16,
+   "emoji": "🛡️",
+   "name": "ERROR HANDLING",
+   "title": "🛡️ ERROR HANDLING",
+   "subtitle": "Learn Error Handling with Try & Except! 🛡️",
+   "video": {
+    "bundled": "vid/error-handling.mp4"
+   },
+   "default_code": "try:\n    print(10 / 0)\nexcept:\n    print(\"Cannot divide by zero!\")",
+   "examples": [
+    {
+     "label": "1️⃣ Zero Division ➗",
+     "explain": "Think of a 'try' block like a safety test pilot! Python tries to run risky code inside the try block (like dividing 10 by 0, which computers hate). If a crash happens, the 'except' block acts like an emergency safety net catching the error so your program doesn't break, printing 'Cannot divide by zero!' 🛑",
+     "output": "Cannot divide by zero!",
+     "code": "try:\n    print(10 / 0)\nexcept:\n    print(\"Cannot divide by zero!\")"
+    },
+    {
+     "label": "2️⃣ Value Error ⚠️",
+     "explain": "The 'try' block tests changing text into a number using int('hello'). Since you cannot turn letters into a number, Python crashes, but the 'except' safety net catches the mistake instantly and safely prints 'Not a valid number!' instead of freezing up! 🛟",
+     "output": "Not a valid number!",
+     "code": "try:\n    num = int(\"hello\")\nexcept:\n    print(\"Not a valid number!\")"
+    },
+    {
+     "label": "3️⃣ Try-Except-Else 🎉",
+     "explain": "This uses 'try' to test adding 5 + 5 safely. Because there are zero errors, the 'except' safety net stays asleep, and an optional 'else' block runs smoothly to celebrate and print 'Success!' ⭐",
+     "output": "10\nSuccess!",
+     "code": "try:\n    print(5 + 5)\nexcept:\n    print(\"Error!\")\nelse:\n    print(\"Success!\")"
+    },
+    {
+     "label": "4️⃣ Name Error 👻",
+     "explain": "The 'try' block tries to print an unknown variable 'x' that doesn't exist yet. By using a specific 'except NameError:', Python looks specifically for missing variable name mistakes and catches them to print 'Variable not found!' 🔍",
+     "output": "Variable not found!",
+     "code": "try:\n    print(x)\nexcept NameError:\n    print(\"Variable not found!\")"
+    },
+    {
+     "label": "5️⃣ Index Error 📏",
+     "explain": "The 'try' block tries to look for item number 5 inside a tiny list that only has two items. A specific 'except IndexError:' safety net catches this out-of-bounds list mistake before your program crashes, printing 'Index out of range!' 🛑",
+     "output": "Index out of range!",
+     "code": "try:\n    lst = [1, 2]\n    print(lst[5])\nexcept IndexError:\n    print(\"Index out of range!\")"
+    },
+    {
+     "label": "6️⃣ Finally Block 🏁",
+     "explain": "This uses a 'try' block to print 'Hi', combined with a 'finally' block. The 'finally' section is like a guaranteed cleanup crew—it doesn't matter if an error happens or not, the code inside 'finally' executes its instructions always! In short its: \n a) try → Tryto do something\n.b) except → Handle an error if one happens.\n c) finally → Clean up at the end, whether there was an error or not.🚀",
+     "output": "Hi\nAlways runs!",
+     "code": "try:\n    print(\"Hi\")\nfinally:\n    print(\"Always runs!\")"
+    }
+   ]
+  },
+  {
+   "id": "lesson_opencv",
+   "position": 17,
+   "emoji": "📷",
+   "name": "OPENCV",
+   "title": "📷 OPENCV COMPUTER VISION",
+   "subtitle": "Learn Computer Vision and Robot Eyes! 🤖",
+   "video": {
+    "bundled": "vid/opencv.mp4"
+   },
+   "default_code": "import cv2\nprint(cv2.__version__)",
+   "examples": [
+    {
+     "label": "1️⃣ Check Version 🔍",
+     "explain": "Here is what the secret tools mean: The 'cv2' dot acts like a magical gateway connecting Python to the OpenCV computer vision toolkit! The command 'cv2.__version__' asks the vision toolkit to tell us its current version number so we know everything is installed correctly. 📊",
+     "output": "4.x.x (Version string)",
+     "code": "import cv2\nprint(cv2.__version__)"
+    },
+    {
+     "label": "2️⃣ Vision System 🌟",
+     "explain": "The 'cv2' dot lets us call commands from our computer vision toolbox. This example confirms that your robot vision system is fully awake, active, and ready to process images! 🤖",
+     "output": "Vision System 100% Ready! 🎉",
+     "code": "import cv2\nprint(\"Vision System 100% Ready! 🎉\")"
+    },
+    {
+     "label": "3️⃣ Load & Show Image 🐶",
+     "explain": "Let's learn how computer eyes work step-by-step:\n- 'cv2.imread()' is the load command that reads your picture file ('tom.png') into a digital grid of pixels.\n- 'cv2.namedWindow()' creates a pop-up frame.\n- 'cv2.moveWindow()' moves the pop-up window right to the center of your screen over your code.\n- 'cv2.imshow()' displays the image inside the window.\n- 'cv2.waitKey(0)' pauses everything so the window stays frozen on screen until you press any key.\n- 'cv2.destroyAllWindows()' acts like a clean-up crew that closes all pop-up windows safely! 📷",
+     "output": "tom Window Opened!",
+     "code": "import cv2, os\npath = 'tom.png' if os.path.exists('tom.png') else os.path.join(os.getcwd(), 'tom.png')\nimg = cv2.imread(path)\nif img is not None:\n    cv2.namedWindow('tom Picture', cv2.WINDOW_NORMAL)\n    cv2.resizeWindow('tom Picture', 340, 340)\n    cv2.moveWindow('tom Picture', 450, 220)\n    cv2.imshow('tom Picture', img)\n    cv2.waitKey(1)\n    print('tom Window Opened!')\nelse:\n    print('Image loaded or ready!')"
+    },
+    {
+     "label": "4️⃣ Resize Image 📐",
+     "explain": "This example uses the resize function ('cv2.resize()') to change the dimensions of our loaded image, making the picture smaller or bigger like a miniature toy! Then it uses 'cv2.moveWindow()' to place the centered pop-up window right over your code before waiting for a key press and closing with 'cv2.destroyAllWindows()'. 🐕",
+     "output": "tom Resized Window Opened!",
+     "code": "import cv2, os\npath = 'tom.png' if os.path.exists('tom.png') else os.path.join(os.getcwd(), 'tom.png')\nimg = cv2.imread(path)\nif img is not None:\n    small_img = cv2.resize(img, (200, 200))\n    cv2.namedWindow('mini Tom', cv2.WINDOW_NORMAL)\n    cv2.resizeWindow('mini Tom', 220, 220)\n    cv2.moveWindow('mini Tom', 450, 220)\n    cv2.imshow('mini Tom', small_img)\n    cv2.waitKey(1)\n    print('tom Resized Window Opened!')\nelse:\n    print('Resize operation ready!')"
+    },
+    {
+     "label": "5️⃣ Flip Image 🔄",
+     "explain": "This example uses the flip function ('cv2.flip()') with a value of 1 to turn the loaded image horizontally like looking into a magical mirror! It then positions the window in the center using 'cv2.moveWindow()', shows it with 'cv2.imshow()', pauses with 'cv2.waitKey(0)', and closes cleanly with 'cv2.destroyAllWindows()'. ✨",
+     "output": "Flipped Tom Window Opened!",
+     "code": "import cv2, os\npath = 'tom.png' if os.path.exists('tom.png') else os.path.join(os.getcwd(), 'tom.png')\nimg = cv2.imread(path)\nif img is not None:\n    flipped_img = cv2.flip(img, 1)\n    cv2.namedWindow('Flipped Tom', cv2.WINDOW_NORMAL)\n    cv2.resizeWindow('Flipped Tom', 340, 340)\n    cv2.moveWindow('Flipped Tom', 450, 220)\n    cv2.imshow('Flipped Tom', flipped_img)\n    cv2.waitKey(1)\n    print('Flipped Tom Window Opened!')\nelse:\n    print('Flip operation ready!')"
+    },
+    {
+     "label": "6️⃣ Black and White Image 🖤",
+     "explain": "This example turns our color photo into vintage grayscale using 'cv2.cvtColor()' combined with 'cv2.COLOR_BGR2GRAY' (which strips out the color channels to leave shades of gray). It then uses 'cv2.namedWindow()', 'cv2.moveWindow()', 'cv2.imshow()', 'cv2.waitKey(0)', and 'cv2.destroyAllWindows()' to show the centered black-and-white pop-up window! 📺",
+     "output": "Black & White Window Opened!",
+     "code": "import cv2, os\npath = 'tom.png' if os.path.exists('tom.png') else os.path.join(os.getcwd(), 'tom.png')\nimg = cv2.imread(path)\nif img is not None:\n    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n    cv2.namedWindow('Black and White Tom', cv2.WINDOW_NORMAL)\n    cv2.resizeWindow('Black and White Tom', 340, 340)\n    cv2.moveWindow('Black and White Tom', 450, 220)\n    cv2.imshow('Black and White Tom', gray_img)\n    cv2.waitKey(1)\n    print('Black & White Window Opened!')\nelse:\n    print('Grayscale mode ready!')"
+    }
+   ]
+  }
+ ]
+}

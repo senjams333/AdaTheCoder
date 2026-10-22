@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+website/instance/
+website/uploads/*
+!website/uploads/.gitkeep
+desktop_app/build/
+desktop_app/dist/
+.DS_Store
+.venv/
+website.log

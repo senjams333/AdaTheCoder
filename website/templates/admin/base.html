@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{% block admin_title %}Admin{% endblock %} | Ada The Coder admin{% endblock %}
+{% block body %}
+<div class="admin">
+  <aside class="admin-side">
+    <a class="brand" href="{{ url_for('admin_dashboard') }}"><img src="{{ url_for('static', filename='img/ada-face.png') }}" alt="">Ada admin</a>
+    {% set ep = request.endpoint %}
+    <nav aria-label="Admin">
+      <a href="{{ url_for('admin_dashboard') }}" {% if ep == 'admin_dashboard' %}aria-current="page"{% endif %}>Overview</a>
+      <a href="{{ url_for('admin_content') }}" {% if ep == 'admin_content' %}aria-current="page"{% endif %}>Website text</a>
+      <a href="{{ url_for('admin_courses') }}" {% if ep in ('admin_courses', 'admin_course', 'admin_course_edit', 'admin_lessons', 'admin_lesson_edit') %}aria-current="page"{% endif %}>Themes &amp; lessons</a>
+      <a href="{{ url_for('admin_releases') }}" {% if ep == 'admin_releases' %}aria-current="page"{% endif %}>App versions</a>
+      <a href="{{ url_for('admin_parents') }}" {% if ep == 'admin_parents' %}aria-current="page"{% endif %}>Parents</a>
+      <a href="{{ url_for('index') }}" target="_blank">View website</a>
+    </nav>
+    <div class="who">
+      Logged in as {{ current_user.email }}<br>
+      <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="link-btn">Log out</button></form>
+    </div>
+  </aside>
+  <main class="admin-main" id="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<ul class="flashes" role="status">{% for cat, msg in messages %}<li class="flash flash-{{ cat }}">{{ msg }}</li>{% endfor %}</ul>{% endif %}
+    {% endwith %}
+    {% block admin_content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "admin/base.html" %}
+{% block admin_title %}App versions{% endblock %}
+{% block admin_content %}
+<h1>App versions</h1>
+<p class="muted">Upload a new installer here. When it's the current download, installed apps show "A new version is ready" next time they open, and parents download it from their account page.</p>
+
+<form method="post" enctype="multipart/form-data" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <h2>Upload a new version</h2>
+  <div class="row-2">
+    <div class="field">
+      <label for="platform">Computer</label>
+      <select id="platform" name="platform" required>
+        <option value="windows">Windows (.exe, .msi or .zip)</option>
+        <option value="mac">Mac (.dmg, .pkg or .zip)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="version">Version number</label>
+      <input id="version" name="version" type="text" placeholder="1.1.0" required pattern="\d+\.\d+\.\d+">
+      <span class="help">Must match APP_VERSION in the app's app_config.py, so the app knows it's up to date.</span>
+    </div>
+  </div>
+  <div class="field"><label for="file">Installer file</label><input id="file" name="file" type="file" required></div>
+  <div class="field"><label for="notes">What's new</label><textarea id="notes" name="notes" rows="3" placeholder="New turtle lessons and bigger text buttons."></textarea><span class="help">Parents see this on the download page and kids see it in the app.</span></div>
+  <div class="row-2">
+    <div class="field">
+      <label for="min_supported">Oldest version still allowed <span class="muted">(optional)</span></label>
+      <input id="min_supported" name="min_supported" type="text" placeholder="1.0.0" pattern="\d+\.\d+\.\d+">
+      <span class="help">Apps older than this show the update message more strongly. Leave empty for a normal update.</span>
+    </div>
+    <div class="field" style="align-self:center">
+      <label class="check"><input type="checkbox" name="make_latest" value="1" checked><span>Make this the current download</span></label>
+    </div>
+  </div>
+  <button class="btn">Upload version</button>
+</form>
+
+<div class="card table-wrap">
+  <h2>All versions</h2>
+  {% if releases %}
+  <table>
+    <thead><tr><th>Computer</th><th>Version</th><th>Uploaded</th><th>Size</th><th>Downloads</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for r in releases %}
+    <tr>
+      <td>{{ PLATFORMS[r.platform].label }}</td>
+      <td>{{ r.version }}{% if r.min_supported %}<br><span class="muted">needs {{ r.min_supported }}+</span>{% endif %}</td>
+      <td>{{ r.created_at[:10] }}</td>
+      <td>{{ (r.size / 1048576)|round(1) }} MB</td>
+      <td>{{ r.downloads }}</td>
+      <td>{% if r.is_latest %}<span class="pill pill-sun">Current download</span>{% else %}<span class="pill pill-grey">Older</span>{% endif %}</td>
+      <td><div class="actions">
+        {% if not r.is_latest %}
+        <form method="post" action="{{ url_for('admin_release_latest', release_id=r.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-small btn-ghost">Make current</button></form>
+        <form method="post" action="{{ url_for('admin_release_delete', release_id=r.id) }}" onsubmit="return confirm('Delete version {{ r.version }}?');"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-small btn-danger">Delete</button></form>
+        {% endif %}
+      </div></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No versions uploaded yet. Build the app with the scripts in the desktop_app folder, then upload the installers above.</p>
+  {% endif %}
+</div>
+{% endblock %}

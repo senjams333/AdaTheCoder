@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Ada The Coder: Python for kids aged 6 to 11{% endblock %}</title>
+  <meta name="description" content="Ada The Coder teaches Python to children aged 6 to 11 with short, playful lessons on Windows and Mac.">
+  <link rel="icon" href="{{ url_for('static', filename='img/ada-face.png') }}" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fredoka:wght@500;600&family=Nunito:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% block body %}
+<a class="skip" href="#main">Skip to content</a>
+{% if site.site_banner %}<div class="banner">{{ site.site_banner }}</div>{% endif %}
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='img/ada-face.png') }}" alt="">Ada The Coder</a>
+    <nav class="nav" aria-label="Main">
+      <a href="{{ url_for('index') }}#lessons">Lessons</a>
+      <a href="{{ url_for('index') }}#parents">For parents</a>
+      {% if current_user %}
+        {% if current_user.role == 'admin' %}<a href="{{ url_for('admin_dashboard') }}">Admin</a>{% endif %}
+        <a href="{{ url_for('account') }}">My account</a>
+        <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="link-btn">Log out</button></form>
+      {% else %}
+        <a href="{{ url_for('login') }}">Log in</a>
+        <a class="btn btn-small" href="{{ url_for('register') }}">Sign up free</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}<ul class="flashes wrap" role="status">{% for cat, msg in messages %}<li class="flash flash-{{ cat }}">{{ msg }}</li>{% endfor %}</ul>{% endif %}
+{% endwith %}
+<main id="main">{% block content %}{% endblock %}</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© Ada The Coder. Made for curious kids and the grown-ups who help them.</span>
+    <span><a href="{{ url_for('privacy') }}">Privacy</a> &nbsp; <a href="{{ url_for('admin_login') }}">Admin</a> &nbsp; <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></span>
+  </div>
+</footer>
+{% endblock %}
+</body>
+</html>

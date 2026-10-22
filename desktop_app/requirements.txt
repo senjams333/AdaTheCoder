@@ -1,0 +1,4 @@
+PyQt5>=5.15,<5.16
+PyQtWebEngine>=5.15,<5.16
+opencv-python>=4.8
+numpy>=1.24

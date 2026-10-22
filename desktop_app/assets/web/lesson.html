@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ada The Coder lesson</title>
+<link rel="stylesheet" href="lesson.css">
+<!-- Present inside the app; harmless when the page is opened in a normal browser. -->
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="moon"></div>
+    <span class="star s1">⭐</span><span class="star s2">✨</span><span class="star s3">⭐</span><span class="star s4">✨</span><span class="star s5">⭐</span>
+    <div class="shooting-star" id="shootingStar"></div>
+  </div>
+
+  <header class="lesson-head">
+    <span class="lesson-badge" id="lessonBadge">Lesson 1</span>
+    <h1 id="lessonTitle">PYTHON ADVENTURE 🐍✨</h1>
+    <p class="subtitle" id="pageSubtitle">Learn Python with your coding friends! 🚀</p>
+  </header>
+
+  <main class="workspace">
+    <section class="panel examples" aria-labelledby="examplesTitle">
+      <h2 class="panel-title" id="examplesTitle">✨ Try an example</h2>
+      <div class="example-list" id="exampleList"></div>
+
+      <div class="tutorial-overlay" id="tutorialOverlay" role="status">
+        <div class="guide">
+          <span class="sparkle sp1">⭐</span><span class="sparkle sp2">✨</span>
+          <span class="sparkle sp3">🌟</span><span class="sparkle sp4">⭐</span>
+          <img id="guideImg" src="../images/ada.png" alt="">
+        </div>
+        <p class="bubble">Click an example to start! 🚀</p>
+      </div>
+    </section>
+
+    <section class="panel editor" aria-label="Code editor">
+      <div class="editor-bar">
+        <span class="file-tab">🐍 my_code.py</span>
+        <span class="bar-gap"></span>
+        <button class="tool-btn" id="resetBtn" type="button" title="Put the starting code back">↺ Reset</button>
+        <button class="tool-btn stop" id="stopBtn" type="button" hidden>⏹ Stop</button>
+        <button class="run-btn" id="runBtn" type="button" title="Run your code (Ctrl + Enter)">▶ RUN</button>
+      </div>
+
+      <div class="code-wrap" id="codeWrap">
+        <pre class="gutter" id="gutter" aria-hidden="true">1</pre>
+        <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Your Python code"># Write code below 💻
+print("Hello Kids! 👋")</textarea>
+      </div>
+      <p class="hint-line">Tip: press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to run · <kbd>Tab</kbd> adds 4 spaces</p>
+
+      <div class="output-head">
+        <span>🖥️ Output</span>
+        <button class="link-btn" id="clearBtn" type="button">Clear</button>
+      </div>
+      <div class="output" id="output" aria-live="polite"></div>
+
+      <div class="error-card" id="errorCard" hidden>
+        <img id="errorImg" src="../images/tom.png" alt="">
+        <div>
+          <p class="error-title" id="errorTitle">Oopsie! 🙈</p>
+          <p class="error-hint" id="errorHint"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="celebrate" id="celebrate" role="status">
+    <div class="celebrate-card">
+      <img id="successImg" src="../images/teddy.png" alt="">
+      <p class="celebrate-text">🎉 Fantastic job! 🌟</p>
+    </div>
+  </div>
+
+  <script src="lesson.js"></script>
+</body>
+</html>
