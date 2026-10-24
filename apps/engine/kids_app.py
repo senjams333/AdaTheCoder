@@ -2288,42 +2288,74 @@ class MainWindow(QMainWindow):
             widget.set_locked(self.locks.is_locked(idx + 1))
 
     def show_locked_dialog(self, idx):
-        """"Lesson N is locked" with one button, Upgrade. The window's ✕ closes it."""
+        """"Lesson N is locked": a glowing sky-blue card with round corners, big kid letters, Upgrade and a ✕."""
         topic = TOPICS[idx]
-        box = QDialog(self)
+        box = QDialog(self, Qt.Dialog | Qt.FramelessWindowHint)
         box.setWindowTitle("Locked lesson 🔒")
-        box.setStyleSheet("""
-            QDialog { background: #ffffff; }
-            QLabel { color: #0f172a; background: transparent; }
-            QPushButton { font-family: 'Comic Sans MS'; font-size: 17px; font-weight: bold; background: #ffd166; color: #0f172a;
-                          border: 3px solid #f59e0b; border-radius: 20px; padding: 8px 24px; }
-            QPushButton:hover { background: #38bdf8; color: white; border-color: #0284c7; }
+        box.setAttribute(Qt.WA_TranslucentBackground)
+        outer = QVBoxLayout(box)
+        outer.setContentsMargins(36, 36, 36, 36)          # room for the glow
+        card = QFrame()
+        card.setObjectName("SkyCard")
+        card.setStyleSheet("""
+            QFrame#SkyCard {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f0fbff, stop:0.45 #bae6fd, stop:1 #7dd3fc);
+                border: 4px solid #ffffff;
+                border-radius: 36px;
+            }
+            QLabel { color: #0f172a; background: transparent; border: none; }
+            QPushButton#up { font-family: 'Comic Sans MS'; font-size: 22px; font-weight: bold; background: #ffd166; color: #0f172a;
+                             border: 4px solid #f59e0b; border-radius: 28px; padding: 12px 34px; }
+            QPushButton#up:hover { background: #ffe08a; }
+            QPushButton#x { font-family: 'Comic Sans MS'; font-size: 22px; font-weight: bold; background: #ffffff; color: #0284c7;
+                            border: 3px solid #38bdf8; border-radius: 24px; }
+            QPushButton#x:hover { background: #38bdf8; color: white; }
         """)
-        layout = QVBoxLayout(box)
-        layout.setContentsMargins(22, 18, 22, 18)
+        glow = QGraphicsDropShadowEffect(box)
+        glow.setBlurRadius(60)
+        glow.setColor(QColor(56, 189, 248, 230))
+        glow.setOffset(0, 0)
+        card.setGraphicsEffect(glow)
+        outer.addWidget(card)
+
+        lay = QVBoxLayout(card)
+        lay.setContentsMargins(30, 18, 18, 26)
+        lay.setSpacing(10)
+        top = QHBoxLayout()
+        top.addStretch()
+        x_btn = QPushButton("✕")
+        x_btn.setObjectName("x")
+        x_btn.setFixedSize(48, 48)
+        x_btn.setCursor(Qt.PointingHandCursor)
+        x_btn.setToolTip("Close")
+        x_btn.clicked.connect(box.reject)
+        top.addWidget(x_btn)
+        lay.addLayout(top)
+
         row = QHBoxLayout()
-        row.setSpacing(16)
-        pix = make_round_pixmap(resource_path(LOGO), 96)
+        row.setSpacing(22)
+        pix = make_round_pixmap(resource_path(LOGO), 120)
         if pix:
             icon = QLabel()
             icon.setPixmap(pix)
             row.addWidget(icon, alignment=Qt.AlignTop)
         text = QLabel(
-            "<div style='font-family: Comic Sans MS; font-size: 15px; color: #0f172a;'>"
-            "<h2 style='color:#0284c7;'>🔒 %s %s</h2>"
-            "<p>Lesson %d is locked.</p>"
-            "<p>Lesson 1 is free to try. Ask a grown-up to unlock the rest ⭐</p>"
+            "<div style='font-family: Comic Sans MS; color: #0f172a;'>"
+            "<div style='color:#0369a1; font-size: 30px; font-weight: bold;'>🔒 %s %s</div>"
+            "<p style='font-size: 22px;'>Lesson %d is locked.</p>"
+            "<p style='font-size: 22px;'>Lesson 1 is free to try. Ask a grown-up to unlock the rest ⭐</p>"
             "</div>" % (topic["emoji"], html.escape(topic["name"]), idx + 1)
         )
         text.setTextFormat(Qt.RichText)
         text.setWordWrap(True)
-        text.setMinimumWidth(360)
+        text.setMinimumWidth(460)
         row.addWidget(text, stretch=1)
-        layout.addLayout(row)
+        lay.addLayout(row)
         up_btn = QPushButton("⭐ Upgrade")
+        up_btn.setObjectName("up")
         up_btn.setCursor(Qt.PointingHandCursor)
         up_btn.clicked.connect(box.accept)
-        layout.addWidget(up_btn, alignment=Qt.AlignRight)
+        lay.addWidget(up_btn, alignment=Qt.AlignRight)
         if box.exec_() == QDialog.Accepted:
             self.open_upgrade()
 
