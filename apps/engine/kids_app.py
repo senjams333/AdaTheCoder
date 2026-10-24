@@ -1211,6 +1211,16 @@ class ApiCall(QObject):
         threading.Thread(target=work, daemon=True).start()
 
 
+class KidWindow(QDialog):
+    """A window that stays open until the child presses its close button (Esc doesn't close it)."""
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            event.ignore()
+            return
+        super().keyPressEvent(event)
+
+
 class IntroOverlay(QFrame):
     """Plays the app's intro video (app.json → intro_video) over the window when the app opens."""
 
@@ -2480,12 +2490,12 @@ class MainWindow(QMainWindow):
         """A big, friendly window for children: large text, and a character waving hello.
 
         rows: (label, value) pairs shown in a table. notes: extra lines under it (HTML, already escaped).
-        buttons: (text, style, action) where style is "ok" or "soft" and action runs after the window closes
-        (None just closes). With no buttons, the window's own ✕ closes it.
+        buttons: (text, style, action): extra buttons at the bottom; pressing one runs its action and keeps
+        the window open. The window stays until the big red ✕ Close (or the title bar's ✕) is pressed.
         """
         info = "".join("<tr><td style='padding:5px 14px 5px 0; color:#0369a1;'><b>%s</b></td><td style='padding:5px 0;'>%s</td></tr>"
                        % (k, v) for k, v in rows)
-        box = QDialog(self)
+        box = KidWindow(self)
         box.setWindowTitle(title)
         box.setMinimumSize(960, 640)
         box.setStyleSheet("""
@@ -2496,10 +2506,25 @@ class MainWindow(QMainWindow):
             QPushButton#ok:hover { background: #38bdf8; color: white; border-color: #0284c7; }
             QPushButton#soft { background: #e0f2fe; color: #0f172a; border: 3px solid #38bdf8; }
             QPushButton#soft:hover { background: #38bdf8; color: white; }
+            QPushButton#close { background: #ef4444; color: white; border: 4px solid #b91c1c; border-radius: 30px;
+                                font-size: 24px; padding: 10px 26px; }
+            QPushButton#close:hover { background: #dc2626; }
+            QPushButton#close:pressed { background: #b91c1c; }
         """)
         outer = QVBoxLayout(box)
-        outer.setContentsMargins(30, 24, 30, 24)
-        outer.setSpacing(18)
+        outer.setContentsMargins(30, 18, 24, 24)
+        outer.setSpacing(12)
+
+        top = QHBoxLayout()
+        top.addStretch()
+        close_btn = QPushButton("✕  Close")
+        close_btn.setObjectName("close")
+        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.setMinimumHeight(60)
+        close_btn.setToolTip("Close this window")
+        close_btn.clicked.connect(box.accept)
+        top.addWidget(close_btn)
+        outer.addLayout(top)
         row = QHBoxLayout()
         row.setSpacing(28)
 
@@ -2527,7 +2552,6 @@ class MainWindow(QMainWindow):
         row.addWidget(text, stretch=1)
         outer.addLayout(row, stretch=1)
 
-        chosen = {"action": None}
         if buttons:
             bar = QHBoxLayout()
             bar.addStretch()
@@ -2535,7 +2559,7 @@ class MainWindow(QMainWindow):
                 btn = QPushButton(label)
                 btn.setObjectName("ok" if style == "ok" else "soft")
                 btn.setCursor(Qt.PointingHandCursor)
-                btn.clicked.connect(lambda _=False, act=action: (chosen.update(action=act), box.accept()))
+                btn.clicked.connect(lambda _=False, act=action: act())
                 bar.addWidget(btn)
             outer.addLayout(bar)
 
@@ -2557,8 +2581,6 @@ class MainWindow(QMainWindow):
             pic_label.setText("⭐")
             pic_label.setStyleSheet("font-size: 160px;")
         box.exec_()
-        if chosen["action"]:
-            chosen["action"]()
 
     def show_profile_dialog(self):
         u = dict(DUMMY_USER)
@@ -2573,7 +2595,6 @@ class MainWindow(QMainWindow):
         buttons = []
         if CONFIG.get("password_url"):
             buttons.append(("🔑 Change password", "soft", self.open_password_page))
-        buttons.append(("OK 👍", "ok", None))
         self._kid_window("Profile 👤", CONFIG.get("profile_picture") or LOGO, "👋 Hi, I'm Byte!", "👤 My Profile 🌟",
                          rows, notes, buttons)
 
@@ -2613,7 +2634,7 @@ class MainWindow(QMainWindow):
         first = (CONFIG["characters"] or [{}])[0]
         picture = CONFIG.get("license_picture") or first.get("image") or LOGO
         name = (CONFIG.get("license_character") or first.get("name", "").split(" ", 1)[-1] or "a friend").title()
-        # No buttons: the window's own ✕ closes it
+        # No buttons: the big red ✕ Close closes it
         self._kid_window("License 📜", picture, "👋 Hi, I'm %s!" % name, "📜 " + html.escape(CONFIG["name"]),
                          rows, notes, [], row_bg="#fef9c3")
 
