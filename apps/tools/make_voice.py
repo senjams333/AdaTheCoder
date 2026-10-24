@@ -1,4 +1,4 @@
-"""Record the teacher's voice for an app: a soft, warm, natural voice instead of the computer's robot voice.
+"""Record the app's voice: a cute boy's voice (or any natural voice) instead of the computer's robot voice.
 
     pip install edge-tts
     python apps/tools/make_voice.py python_adventure
@@ -9,9 +9,10 @@ It makes one small .mp3 per sentence the app says ("Fantastic job!...", "Click t
 "oops" messages) in apps/<app>/voice/. They go into the .exe when you build, and play without internet.
 Needs internet once, while recording (it uses Microsoft's neural voices through edge-tts).
 
-The voice, speed and pitch come from app.json → "voice" (or --voice/--rate/--pitch). Good young, gentle
-teacher voices: en-US-JennyNeural, en-US-AnaNeural (a child), en-GB-SoniaNeural, en-IN-NeerjaNeural,
-en-AU-NatashaNeural. A sentence can be said more kindly than it's written: app.json → "voice" → "say".
+The voice, speed and pitch come from app.json → "voice" (or --voice/--rate/--pitch). The default is a
+cute boy: en-US-AnaNeural (Microsoft's English child voice) a little lower. Another boy sound: a young
+man's voice made higher, e.g. --voice en-US-AndrewNeural --pitch +25Hz. A young lady teacher instead:
+--voice en-US-JennyNeural --pitch +14Hz (or en-IN-NeerjaNeural). A sentence can be said more kindly than it's written: app.json → "voice" → "say".
 """
 import argparse
 import asyncio
@@ -75,7 +76,7 @@ def main():
     p.add_argument("app", nargs="?")
     p.add_argument("--voice")
     p.add_argument("--rate", help='e.g. "-8%%" (slower) or "+5%%"')
-    p.add_argument("--pitch", help='e.g. "+14Hz" (higher, younger)')
+    p.add_argument("--pitch", help='e.g. "-8Hz" (lower) or "+14Hz" (higher)')
     p.add_argument("--list", action="store_true", help="list the English voices")
     args = p.parse_args()
     if args.list:
@@ -86,11 +87,11 @@ def main():
     app_dir = os.path.join(APPS, args.app)
     cfg = load_config(app_dir)
     v = cfg.get("voice", {})
-    voice = args.voice or v.get("name") or "en-US-JennyNeural"
+    voice = args.voice or v.get("name") or "en-US-AnaNeural"
     items = phrases(cfg)
     print(f"Recording {len(items)} sentences with {voice} into {os.path.relpath(os.path.join(app_dir, 'voice'))}/")
     asyncio.run(record(items, os.path.join(app_dir, "voice"), voice,
-                       args.rate or v.get("rate") or "-8%", args.pitch or v.get("pitch") or "+14Hz", v.get("say") or {}))
+                       args.rate or v.get("rate") or "-4%", args.pitch or v.get("pitch") or "-8Hz", v.get("say") or {}))
     print("Done. Open the app and press Run on an example to hear it.")
 
 

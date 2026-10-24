@@ -414,14 +414,15 @@ function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-// The teacher's voice: a soft, warm, natural recording made with make_voice.py (played by the app),
-// or else the computer's most natural female voice, a little slower and gentler.
+// The voice: a cute boy's voice recorded with make_voice.py (played by the app),
+// or else the computer's own voice made young and bright.
 let TEACHER_VOICE = null;
 function pickTeacherVoice() {
     if (!('speechSynthesis' in window)) return null;
     const voices = window.speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('en'));
-    const best = ['jenny', 'aria', 'ana ', 'neerja', 'libby', 'sonia', 'natasha', 'clara', 'natural',
-                  'samantha', 'karen', 'moira', 'tessa', 'google uk english female', 'google us english', 'zira', 'female'];
+    // natural male voices first: raised in pitch they sound like a young boy
+    const best = ['andrew', 'guy', 'christopher', 'eric', 'brian', 'ryan', 'prabhat', 'natural',
+                  'daniel', 'alex', 'google uk english male', 'david', 'mark', 'male', 'google us english'];
     for (const name of best) {
         const v = voices.find(x => x.name.toLowerCase().includes(name));
         if (v) return v;
@@ -447,8 +448,8 @@ function speakFallback(say) {
     const u = new SpeechSynthesisUtterance(say);
     TEACHER_VOICE = TEACHER_VOICE || pickTeacherVoice();
     if (TEACHER_VOICE) u.voice = TEACHER_VOICE;
-    u.pitch = 1.25;      // a young lady: bright and sweet, not squeaky
-    u.rate = 0.9;        // calm and clear
+    u.pitch = 1.6;       // a cute young boy: high and bright
+    u.rate = 0.95;       // clear, a little lively
     u.volume = 0.9;      // soft
     window.speechSynthesis.speak(u);
 }
