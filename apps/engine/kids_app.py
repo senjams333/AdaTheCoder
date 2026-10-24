@@ -423,6 +423,12 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 html, body { background: transparent !important; }
 .sun, .moon, .star { display: none !important; }
 body.dark-mode h1 { text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
+/* The white boxes: rounder and see-through, so the sky shows behind them (light theme) */
+body:not(.dark-mode) .example-panel { background: rgba(255, 255, 255, 0.32); border-radius: 36px; border-color: rgba(255, 255, 255, 0.6); }
+body:not(.dark-mode) .topic-btn { background: rgba(255, 255, 255, 0.72); border-radius: 22px; }
+body:not(.dark-mode) .topic-btn:hover { background: #38bdf8; }
+body:not(.dark-mode) .example-box { background: rgba(255, 255, 255, 0.72); border-radius: 22px; }
+body:not(.dark-mode) .output { background: rgba(255, 255, 255, 0.93); border-radius: 26px; }
 </style>
 """
 
