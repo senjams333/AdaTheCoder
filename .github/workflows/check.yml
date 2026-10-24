@@ -105,7 +105,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q libegl1 libgl1 libxkbcommon-x11-0 libxcb-cursor0 libnss3 libxcomposite1 \
-            libxdamage1 libxrandr2 libxtst6 libxkbfile1 libasound2t64 libpulse0 fonts-noto-color-emoji \
+            libxdamage1 libxrandr2 libxtst6 libxkbfile1 libasound2t64 libpulse0 libpulse-mainloop-glib0 fonts-noto-color-emoji \
             gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav
           pip install -r apps/requirements.txt
       - name: Open each app and go through it (screenshots)
