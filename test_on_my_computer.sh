@@ -76,18 +76,25 @@ else
   wait_for "$WEB" "The website" web.log
 fi
 
-# ---- 3. the desktop app (in a private Python environment, .venv)
+# ---- 3. put the kids app on the website (theme "python_adventure": price, lessons, licences)
+APP="${APP:-python_adventure}"
+python3 apps/tools/export_theme.py "$APP" > /dev/null
+(cd api && npm run -s theme -- import "../apps/$APP/theme_pack") || echo "(could not load the theme pack, see above)"
+
+# ---- 4. the kids app (in a private Python environment, .venv)
 [ -x .venv/bin/python ] || python3 -m venv .venv
 VPY="$HERE/.venv/bin/python"
 "$VPY" -m pip install -q --upgrade pip
-"$VPY" -m pip install -q -r desktop_app/requirements.txt
+"$VPY" -m pip install -q -r apps/requirements.txt
+"$VPY" apps/make_key.py "$APP" > "$HERE/licence-key-for-testing.txt"
 
 (xdg-open "$WEB/admin/login" >/dev/null 2>&1 || echo "Open $WEB/admin/login in your browser.") &
 echo
 echo "Website:  $WEB          Admin: $WEB/admin/login (first visit: create the admin account)"
 echo "API:      $API/api"
-cd desktop_app
-"$VPY" run.py --server "$API" --check || true
+echo "App:      apps/$APP — lesson 1 free, 2-17 locked."
+echo "          Unlock: licence key $(cat "$HERE/licence-key-for-testing.txt")  ·  grown-ups' PIN 2468"
+echo "          or a parent with a licence for the theme $APP (Admin → Parents)"
 echo
 echo "Starting the app. Closing it stops the website and the API too."
-"$VPY" run.py --server "$API"
+"$VPY" apps/run.py "$APP" --server "$API"

@@ -41,10 +41,13 @@ Logs: `api.log` and `web.log`.
    that it's a normal log-in.
 2. **Themes & lessons → Add a theme** (for example *Learn Coding in Space*, with your own 3 character
    pictures, paid, 3 free lessons). Open a theme to edit its topics, lessons and videos.
-3. In the app: avatar menu → **🔄 Check for new lessons** (it also checks every 3 minutes).
-4. **Try free** in the app: the free lessons open; the others show 🔒 and **Upgrade** opens the website.
-5. A bought theme: sign up as a parent, give the parent a licence in **Admin → Parents**, then log in to
-   the app with the parent's email: the theme unlocks.
+3. The script opens the kids app (`apps/python_adventure`) connected to your local website. Lesson 1 is
+   free and lessons 2–17 show 🔒. Unlock them with the licence key the script prints (also saved in
+   `licence-key-for-testing.txt`), the grown-ups' screen (avatar menu → 🔐, PIN 2468), or a parent account.
+4. Parent account: sign up on the website, then in **Admin → Parents** give that parent a licence for
+   **Python Adventure For Kids** (the script loaded it as a theme). Log in to the app with the parent's
+   email and every lesson opens.
+5. Another app: `APP=fairy_python bash test_on_my_computer.sh`.
 
 Windows: `test_on_my_computer.bat` (needs Node 20, Python 3.10–3.12 and MySQL 8 installed).
 
@@ -122,6 +125,14 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
 - **Desktop app**: set `DEFAULT_SERVER_URL` in `desktop_app/ada_coder/config.py` to the API's address
   (`https://api.adathecoder.com`), raise `APP_VERSION`, build (see `desktop_app/README.md`), and upload
   the installers in **Admin → App versions**.
+- **Kids app** (`apps/`, from `3-General.py`): in `apps/python_adventure/app.json` set
+  `"server": {"url": "https://api.adathecoder.com", "theme_id": "python_adventure"}` and
+  `"upgrade_url"` to your pricing page; change `"admin_pin"`. Put the theme on the website:
+  `python apps/tools/export_theme.py python_adventure --price '$4.99'` then, on the server,
+  `cd api && npm run theme -- import ../apps/python_adventure/theme_pack`. Make licence keys with
+  `python apps/make_key.py python_adventure --count 50` (keep `licence_secret.txt` safe), put the lesson
+  videos in `apps/python_adventure/vid/`, and build on Windows: `python apps/build.py python_adventure`.
+  Upload the installer in **Admin → App versions**. See `apps/README.md`.
 - Then open `/admin/login` straight away and create the admin account: the first person to open it
   becomes the admin.
 

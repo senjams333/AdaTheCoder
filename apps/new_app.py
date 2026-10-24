@@ -49,7 +49,7 @@ def duplicate(src_id, new_id, name, characters=None, prefix=None, with_videos=Fa
         raise SystemExit(f"{dst} is there already")
 
     def skip(folder, names):
-        out = {"licence_secret.txt", "__pycache__"}
+        out = {"licence_secret.txt", "__pycache__", "theme_pack"}
         if not with_videos and os.path.basename(folder) == "vid":
             out |= {n for n in names if n.lower().endswith(".mp4")}
         return out & set(names)

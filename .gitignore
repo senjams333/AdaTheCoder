@@ -16,3 +16,5 @@ apps/*/licence_secret.txt
 apps/*/vid/*.mp4
 apps/build/
 apps/dist/
+
+licence-key-for-testing.txt

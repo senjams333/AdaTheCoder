@@ -8,7 +8,7 @@ if not exist api\.env copy api\.env.example api\.env >nul
 if not exist web\.env.local copy web\.env.example web\.env.local >nul
 if not exist api\node_modules (cd api && call npm install --no-audit --no-fund && cd ..)
 if not exist web\node_modules (cd web && call npm install --no-audit --no-fund && cd ..)
-python -m pip install -q -r desktop_app\requirements.txt || goto :error
+python -m pip install -q -r apps\requirements.txt || goto :error
 
 start "Ada The Coder API (close to stop)" /D "%~dp0api" cmd /k npm run start:dev
 start "Ada The Coder website (close to stop)" /D "%~dp0web" cmd /k npm run dev
@@ -16,9 +16,14 @@ echo Waiting for the API and the website to start...
 timeout /t 25 /nobreak >nul
 start "" http://127.0.0.1:5000/admin/login
 
-cd desktop_app
-python run.py --server http://127.0.0.1:3000 --check
-python run.py --server http://127.0.0.1:3000
+python apps\tools\export_theme.py python_adventure >nul
+cd api && call npm run -s theme -- import ../apps/python_adventure/theme_pack & cd ..
+python apps\make_key.py python_adventure > licence-key-for-testing.txt
+echo.
+echo App: lesson 1 free, 2-17 locked. Licence key for testing:
+type licence-key-for-testing.txt
+echo Grown-ups' PIN: 2468. Or give a parent a licence for "python_adventure" in Admin - Parents.
+python apps\run.py python_adventure --server http://127.0.0.1:3000
 goto :eof
 
 :error
