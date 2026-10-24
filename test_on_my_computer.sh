@@ -93,7 +93,7 @@ echo
 echo "Website:  $WEB          Admin: $WEB/admin/login (first visit: create the admin account)"
 echo "API:      $API/api"
 echo "App:      apps/$APP — lesson 1 free, 2-17 locked."
-echo "          Unlock: licence key $(cat "$HERE/licence-key-for-testing.txt")  ·  grown-ups' PIN 2468"
+echo "          Unlock: licence key $(cat "$HERE/licence-key-for-testing.txt")"
 echo "          or a parent with a licence for the theme $APP (Admin → Parents)"
 echo
 echo "Starting the app. Closing it stops the website and the API too."

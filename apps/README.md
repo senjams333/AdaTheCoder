@@ -36,18 +36,16 @@ Lesson 1 is always free. In `app.json`:
 ```json
 "locks": {
   "locked_lessons": "2-17",        // or "2-5, 9", or [2, 3, 10], or [] for none
-  "admin_pin": "2468",             // change it
   "licence_prefix": "PAFK",
   "upgrade_url": "https://www.adathecoder.com/#pricing"
 }
 ```
 
 Locked lessons show **🔒** in the list. Clicking one shows *"Lesson N is locked"* with **Enter licence
-key** and **Upgrade**. They can be unlocked in three ways:
+key** and **Upgrade**. The app has no lock screen for children; lessons are unlocked in two ways:
 
 | How | Who | What it opens |
 | --- | --- | --- |
-| Avatar menu → **🔐 Lock / unlock lessons (grown-ups)**, then the admin PIN | You or a parent | Tick or untick each of lessons 2 to 17. Also *Lock all*, *Unlock all* and *As the app came*. It's remembered on that computer |
 | Avatar menu → **🔑 Enter licence key** | A family that bought it | Every lesson on that computer, for good |
 | Logging in with a website account that has a licence for this app | A parent (when `server.url` is set) | Every lesson while they're logged in |
 
@@ -72,7 +70,7 @@ python apps/new_app.py python_adventure space_python --name "Space Python Advent
 This copies the folder, gives the copy its own ID, name, licence key prefix and secret, and uses
 pictures from `apps/characters/`. Then:
 
-1. Edit `apps/space_python/app.json` (texts, colours, `locked_lessons`, PIN) and replace `intro.mp4`.
+1. Edit `apps/space_python/app.json` (texts, colours, `locked_lessons`) and replace `intro.mp4`.
 2. Edit `apps/space_python/lessons.py` (the lessons) and put the videos in `apps/space_python/vid/`.
 3. `python apps/run.py space_python` to try it.
 4. `python apps/make_key.py space_python --count 20` for its keys.
@@ -98,5 +96,5 @@ Build on Windows for Windows, and on a Mac for Mac. Everything in the app's fold
 
 `python -m unittest discover apps/tests` covers locks, keys, app folders and duplicating. On GitHub the
 **Check** workflow also opens every app with no screen, goes through it (intro, login, 🔒 on lessons
-2–17, locked message, PIN screen, licence key, restart) and saves screenshots to the
+2–17, locked message, licence key, restart) and saves screenshots to the
 `ci-app-previews` branch.

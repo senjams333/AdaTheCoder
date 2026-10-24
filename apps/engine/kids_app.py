@@ -1261,74 +1261,6 @@ class IntroOverlay(QFrame):
         self.on_finished()
 
 
-class LessonLocksDialog(QDialog):
-    """Grown-ups only (admin PIN): lock or unlock each of lessons 2..N."""
-
-    def __init__(self, parent, locks):
-        super().__init__(parent)
-        self.locks = locks
-        self.setWindowTitle("Lock / unlock lessons 🔐")
-        self.setMinimumWidth(560)
-        self.setStyleSheet("""
-            QDialog { background: #ffffff; }
-            QLabel { color: #0f172a; }
-            QCheckBox { color: #0f172a; font-size: 14px; padding: 5px; }
-            QCheckBox::indicator { width: 22px; height: 22px; }
-            QPushButton { background: #e0f2fe; color: #0f172a; border: 2px solid #38bdf8; border-radius: 14px; padding: 8px 14px; font-weight: bold; }
-            QPushButton:hover { background: #38bdf8; color: white; }
-        """)
-        layout = QVBoxLayout(self)
-        title = QLabel("🔐 Which lessons are locked?")
-        title.setFont(QFont("Comic Sans MS", 16, QFont.Bold))
-        layout.addWidget(title)
-        note = QLabel("Ticked = locked 🔒. Lesson 1 is always free. Saved on this computer.")
-        note.setWordWrap(True)
-        layout.addWidget(note)
-        if locks.has_full_access:
-            how = "a licence key (%s)" % locks.licence_key if locks.licence_key else "the parent's account"
-            full = QLabel("✅ Everything is open right now because of %s; these ticks apply without it." % how)
-            full.setWordWrap(True)
-            full.setStyleSheet("color: #166534; background: #dcfce7; border-radius: 10px; padding: 8px;")
-            layout.addWidget(full)
-
-        grid = QGridLayout()
-        self.boxes = {}
-        rows = (len(TOPICS) - 1 + 1) // 2
-        for i, topic in enumerate(TOPICS[1:], start=2):
-            box = QCheckBox("%d. %s %s" % (i, topic["emoji"], topic["name"]))
-            box.setChecked(locks.is_locked_by_setting(i))
-            self.boxes[i] = box
-            grid.addWidget(box, (i - 2) % rows, (i - 2) // rows)
-        layout.addLayout(grid)
-
-        row = QHBoxLayout()
-        for text, fn in (("🔒 Lock all", lambda: self._tick_all(True)),
-                         ("🔓 Unlock all", lambda: self._tick_all(False)),
-                         ("↺ As the app came", self._defaults)):
-            b = QPushButton(text)
-            b.setCursor(Qt.PointingHandCursor)
-            b.clicked.connect(fn)
-            row.addWidget(b)
-        layout.addLayout(row)
-
-        buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
-        buttons.accepted.connect(self._save)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
-
-    def _tick_all(self, locked):
-        for box in self.boxes.values():
-            box.setChecked(locked)
-
-    def _defaults(self):
-        for n, box in self.boxes.items():
-            box.setChecked(n in self.locks.default_locked)
-
-    def _save(self):
-        self.locks.set_many([n for n, box in self.boxes.items() if box.isChecked()])
-        self.accept()
-
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -1426,14 +1358,11 @@ class MainWindow(QMainWindow):
         self.license_action.triggered.connect(self.show_license_dialog)
         self.key_action = QAction("🔑 Enter licence key", self)
         self.key_action.triggered.connect(self.ask_licence_key)
-        self.locks_action = QAction("🔐 Lock / unlock lessons (grown-ups)", self)
-        self.locks_action.triggered.connect(self.show_locks_dialog)
 
         self.account_menu.addAction(self.profile_action)
         self.account_menu.addSeparator()
         self.account_menu.addAction(self.license_action)
         self.account_menu.addAction(self.key_action)
-        self.account_menu.addAction(self.locks_action)
         self.avatar_btn.setMenu(self.account_menu)
 
         top_bar.addWidget(logo)
@@ -2375,23 +2304,6 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Unlocked! 🎉", "Every lesson is open now. Have fun coding! 🚀")
         else:
             QMessageBox.warning(self, "Licence key 🔑", "That key doesn't work for this app. Check it and try again.")
-
-    def _ask_pin(self):
-        pin, ok = QInputDialog.getText(self, "Grown-ups only 🔐", "Admin PIN:", QLineEdit.Password)
-        if not ok:
-            return False
-        if self.locks.check_pin(pin):
-            return True
-        QMessageBox.warning(self, "Grown-ups only 🔐", "That PIN is not right.")
-        return False
-
-    def show_locks_dialog(self):
-        if not self._ask_pin():
-            return
-        if LessonLocksDialog(self, self.locks).exec_():
-            self.refresh_locks()
-            if self.locks.is_locked(self.current_lesson_index + 1) and self.center_stack.currentIndex() == 1:
-                self.show_home()
 
     def load_lesson(self, lesson_id):
         self.load_lesson_by_index(lesson_id)

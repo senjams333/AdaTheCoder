@@ -116,7 +116,7 @@ def main():
     rel = os.path.relpath(dst, os.getcwd())
     print(f"Made {rel} ✨  (licence keys start with {cfg['locks']['licence_prefix']}-)")
     print("Next:")
-    print(f"  1. Edit {os.path.join(rel, 'app.json')}: texts, colours, \"locked_lessons\", admin PIN")
+    print(f"  1. Edit {os.path.join(rel, 'app.json')}: texts, colours, \"locked_lessons\"")
     print(f"  2. Edit {os.path.join(rel, 'lessons.py')}: the lessons (and put the videos in {os.path.join(rel, 'vid')})")
     print(f"  3. Try it:       python apps/run.py {cfg['id']}")
     print(f"  4. Licence keys: python apps/make_key.py {cfg['id']} --count 10")

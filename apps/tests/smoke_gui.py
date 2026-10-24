@@ -3,8 +3,8 @@
     QT_QPA_PLATFORM=offscreen python apps/tests/smoke_gui.py python_adventure OUT_FOLDER
 
 Checks: the intro plays and can be skipped, the log-in works, lesson 1 is open and 2-17 show 🔒, a locked
-lesson shows the "locked" message instead of opening, the grown-ups' lock screen needs the PIN and
-unlocks single lessons, a licence key unlocks everything, and all of it is still so after a restart.
+lesson shows the "locked" message instead of opening, the menu has no lock screen for children,
+a licence key unlocks everything, and it is still so after a restart.
 Used by the Check workflow on GitHub.
 """
 import os
@@ -106,23 +106,8 @@ step("lesson 1 opens", w.center_stack.currentIndex() == 1 and w.current_lesson_i
 shot(w, "04-lesson-1")
 w.show_home()
 
-shown.clear()
-answers.append(("0000", True))
-w.show_locks_dialog()
-step("the lock screen needs the right PIN", "Grown-ups only 🔐" in shown)
-
-dlg = ns["LessonLocksDialog"](w, w.locks)
-dlg.resize(620, 520)
-dlg.show()
-QTest.qWait(300)
-dlg.grab().save(os.path.join(out, app_id, "05-grown-ups-lock-screen.png"))
-for i in (2, 3, 4, 5):
-    dlg.boxes[i].setChecked(False)
-dlg._save()
-w.refresh_locks()
-step("the grown-up unlocks lessons 2-5", [t.locked for t in w.topic_widgets[:6]] == [False] * 6
-     and all(t.locked for t in w.topic_widgets[6:]))
-shot(w, "06-lessons-2-to-5-unlocked")
+step("the menu has no lock / unlock screen", not hasattr(w, "locks_action")
+     and all("Lock / unlock" not in a.text() for a in w.account_menu.actions()))
 
 secret = w.locks.secret
 if secret:
@@ -139,8 +124,7 @@ if secret:
     step("the licence key is remembered after a restart", not w2.locks.is_locked(n))
     w2.locks.remove_key()
     w2.refresh_locks()
-    step("without the key, the grown-up's choice is still remembered",
-         not w2.locks.is_locked(3) and w2.locks.is_locked(n))
+    step("without the key, lessons 2-17 are locked again", w2.locks.locked_numbers() == list(range(2, n + 1)))
     w2.close()
 else:
     print("(no licence_secret.txt here: licence key steps skipped)")

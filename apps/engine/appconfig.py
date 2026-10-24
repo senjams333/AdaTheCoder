@@ -45,8 +45,6 @@ DEFAULTS = {
         # Lesson numbers as in the list on the right (1 = the first). Lesson 1 is always free.
         # "2-17" locks lessons 2 to 17; a list like [2, 3, 10] or "2-5, 9" works too; [] locks nothing.
         "locked_lessons": "2-17",
-        # Grown-ups' PIN for avatar menu → "Lock / unlock lessons" (change it!)
-        "admin_pin": "2468",
         # Licence keys look like PAFK-7Q2M-K9TD-XXXX; make them with: python apps/make_key.py <app>.
         # They are checked with the secret in the app folder's licence_secret.txt, which is kept off GitHub
         # (.gitignore) and goes into the .exe when you build. No secret: licence keys are turned off.

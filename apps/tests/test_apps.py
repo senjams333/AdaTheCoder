@@ -130,11 +130,6 @@ class Locks(unittest.TestCase):
         lk.set_account_licences([])
         self.assertEqual(len(lk.locked_numbers()), 16)
 
-    def test_admin_pin(self):
-        lk = self.locks()
-        self.assertTrue(lk.check_pin("2468"))
-        self.assertFalse(lk.check_pin("0000"))
-
     def test_locked_lessons_setting_from_app_json(self):
         cfg = config_with_secret()
         cfg["locks"]["locked_lessons"] = "10-17"

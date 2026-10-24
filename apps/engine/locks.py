@@ -3,8 +3,8 @@
 Lesson 1 is always free. Lessons 2..N are locked or not:
 
   1. app.json → "locks" → "locked_lessons" says which are locked when the app is new ("2-17").
-  2. A grown-up can lock or unlock single lessons in the app (avatar menu → 🔐, needs the admin PIN).
-     That is saved on this computer and wins over app.json.
+  2. (Tools only, no screen in the app) set_locked / set_many lock or unlock single lessons on this
+     computer; that wins over app.json.
   3. A licence key (PAFK-XXXX-XXXX-XXXX, made with apps/make_key.py) unlocks every lesson on this
      computer, for good.
   4. A parent account from the website with a licence for this app's theme (server.theme_id) unlocks
@@ -61,7 +61,6 @@ class LessonLocks:
         self.app_id = config["id"]
         self.secret = str(locks.get("licence_secret") or "")
         self.prefix = str(locks.get("licence_prefix") or "KEY")
-        self.pin = str(locks.get("admin_pin") or "")
         self.theme_id = str((config.get("server") or {}).get("theme_id") or "")
         self.count = lesson_count
         self.default_locked = parse_lesson_numbers(locks.get("locked_lessons", "2-%d" % lesson_count), lesson_count)
@@ -126,9 +125,6 @@ class LessonLocks:
 
     def locked_numbers(self):
         return [n for n in range(2, self.count + 1) if self.is_locked(n)]
-
-    def check_pin(self, pin):
-        return bool(self.pin) and hmac.compare_digest(str(pin).strip(), self.pin)
 
     # ---------- changes ----------
     def set_locked(self, number, locked):

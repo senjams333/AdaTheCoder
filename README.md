@@ -7,7 +7,7 @@ Python lessons for children aged 6 to 11. Three parts:
 | `api/` | The backend: **NestJS + MySQL** (database `admin_db`). Parent accounts, the first admin, website text, themes with their lessons, characters and videos, app versions, parents and licences. Sends the **Brevo** emails when someone registers (a welcome to the parent, a notice to the admin). See `api/README.md`. |
 | `web/` | The website and the admin: **Next.js + Redux Toolkit** (RTK Query). Home page, sign up, log in, the parent's account page (downloads, themes, licences), privacy, and the whole admin. Everything comes from the API. See `web/README.md`. |
 | `themes/` | **Theme packs**: a folder per theme (theme.json, character pictures, example code as .py files, videos). `npm run theme -- import ../themes/space` in `api/` loads one; installed apps show it by themselves. See `themes/README.md`. |
-| `apps/` | **The kids apps made from `3-General.py`**: one engine, one folder per app (Python Adventure, Fairy Python, ...). Lesson 1 free, lessons 2–17 🔒 (licence key, parent account, or the grown-ups' PIN screen). `python apps/new_app.py` makes the next app. See `apps/README.md`. |
+| `apps/` | **The kids apps made from `3-General.py`**: one engine, one folder per app (Python Adventure, Fairy Python, ...). Lesson 1 free, lessons 2–17 🔒 (licence key or parent account). `python apps/new_app.py` makes the next app. See `apps/README.md`. |
 | `desktop_app/` | The earlier Windows and Mac app (PyQt5). It downloads the themes and lessons from the API, logs parents in, and unlocks bought themes. See `desktop_app/README.md`. |
 
 ```
@@ -43,7 +43,7 @@ Logs: `api.log` and `web.log`.
    pictures, paid, 3 free lessons). Open a theme to edit its topics, lessons and videos.
 3. The script opens the kids app (`apps/python_adventure`) connected to your local website. Lesson 1 is
    free and lessons 2–17 show 🔒. Unlock them with the licence key the script prints (also saved in
-   `licence-key-for-testing.txt`), the grown-ups' screen (avatar menu → 🔐, PIN 2468), or a parent account.
+   `licence-key-for-testing.txt`) or a parent account.
 4. Parent account: sign up on the website, then in **Admin → Parents** give that parent a licence for
    **Python Adventure For Kids** (the script loaded it as a theme). Log in to the app with the parent's
    email and every lesson opens.
@@ -127,7 +127,7 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
   the installers in **Admin → App versions**.
 - **Kids app** (`apps/`, from `3-General.py`): in `apps/python_adventure/app.json` set
   `"server": {"url": "https://api.adathecoder.com", "theme_id": "python_adventure"}` and
-  `"upgrade_url"` to your pricing page; change `"admin_pin"`. Put the theme on the website:
+  `"upgrade_url"` to your pricing page. Put the theme on the website:
   `python apps/tools/export_theme.py python_adventure --price '$4.99'` then, on the server,
   `cd api && npm run theme -- import ../apps/python_adventure/theme_pack`. Make licence keys with
   `python apps/make_key.py python_adventure --count 50` (keep `licence_secret.txt` safe), put the lesson

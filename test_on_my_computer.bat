@@ -22,7 +22,7 @@ python apps\make_key.py python_adventure > licence-key-for-testing.txt
 echo.
 echo App: lesson 1 free, 2-17 locked. Licence key for testing:
 type licence-key-for-testing.txt
-echo Grown-ups' PIN: 2468. Or give a parent a licence for "python_adventure" in Admin - Parents.
+echo Or give a parent a licence for "python_adventure" in Admin - Parents.
 python apps\run.py python_adventure --server http://127.0.0.1:3000
 goto :eof
 
