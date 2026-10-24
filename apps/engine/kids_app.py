@@ -30,6 +30,7 @@ os.chdir(get_base_dir())
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import html
 import math
+import random
 import urllib.parse
 import urllib.request
 import urllib.error
@@ -56,7 +57,8 @@ APP_ID = CONFIG["id"]
 LOGO = CONFIG["logo"]
 
 from PyQt5.QtCore import QProcess, Qt, QUrl, QPropertyAnimation, QEasingCurve, QPoint, QObject, pyqtSlot, pyqtSignal, QTimer, QEvent
-from PyQt5.QtGui import QFont, QPixmap, QColor, QIcon, QPainter, QPainterPath, QTransform
+from PyQt5.QtGui import (QFont, QPixmap, QColor, QIcon, QPainter, QPainterPath, QTransform,
+                         QLinearGradient, QRadialGradient, QBrush, QPen)
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, QScrollArea, QFrame, QGraphicsDropShadowEffect, QStackedWidget, QLineEdit, QMessageBox, QSlider, QProgressBar, QToolButton, QMenu, QAction,
@@ -416,86 +418,16 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 .confetti { position:fixed; width:12px; height:12px; top:-20px; z-index:999999; animation: confettiFall linear forwards; }
 @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
 
-/* Day (light mode): blue sky, the sun, drifting clouds and a green meadow with flowers.
-   Night (dark mode): a night sky full of twinkling stars and the moon. */
-/* (html stays transparent so the body's sky fills the window and sits behind the clouds and stars) */
-body { background: linear-gradient(180deg, #5ec4ff 0%, #a5dcff 45%, #dff4ff 78%, #e9fbe3 100%) fixed; }
-body.dark-mode { background: radial-gradient(ellipse at 50% 0%, #2c3285 0%, #161c52 45%, #070b24 100%) fixed; }
-.sun { box-shadow: 0 0 40px 12px rgba(255, 213, 79, 0.75), 0 0 90px 30px rgba(255, 170, 0, 0.35); }
-
-.cloud { position: fixed; z-index: -1; pointer-events: none; background: #ffffff; border-radius: 999px; opacity: 0.95;
-         box-shadow: 0 8px 18px rgba(30, 90, 140, 0.12); animation: cloudDrift linear infinite; }
-.cloud::before, .cloud::after { content: ""; position: absolute; background: #ffffff; border-radius: 50%; }
-.cloud::before { width: 55%; height: 170%; left: 12%; bottom: 20%; }
-.cloud::after { width: 40%; height: 135%; right: 12%; bottom: 25%; }
-@keyframes cloudDrift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
-
-.meadow { position: fixed; left: 0; right: 0; bottom: 0; height: 17vh; z-index: -1; pointer-events: none;
-          background:
-            radial-gradient(ellipse 60% 100% at 15% 100%, #4ade80 0 60%, transparent 61%),
-            radial-gradient(ellipse 70% 120% at 70% 100%, #22c55e 0 58%, transparent 59%),
-            linear-gradient(180deg, #86efac 0%, #4ade80 40%, #16a34a 100%);
-          background-position: 0 0, 0 0, 0 4vh; background-repeat: no-repeat;
-          border-top-left-radius: 50% 18%; border-top-right-radius: 50% 18%; }
-.flower { position: fixed; z-index: -1; pointer-events: none; transform-origin: 50% 100%; animation: sway 3.2s ease-in-out infinite; }
-@keyframes sway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
-
-.night-star { position: fixed; border-radius: 50%; background: #ffffff; z-index: -1; pointer-events: none;
-              box-shadow: 0 0 6px rgba(255, 255, 255, 0.9), 0 0 12px rgba(147, 197, 253, 0.6);
-              animation: twinkleDot 3s ease-in-out infinite; }
-@keyframes twinkleDot { 0%, 100% { opacity: 0.2; transform: scale(0.6); } 50% { opacity: 1; transform: scale(1.2); } }
-
-body:not(.dark-mode) .night-star { display: none; }
-body.dark-mode .cloud, body.dark-mode .meadow, body.dark-mode .flower { display: none; }
+/* The window behind this page paints the sky (day: sun, clouds, meadow; night: moon, stars),
+   so the page is see-through and doesn't draw its own sun, moon or stars. */
+html, body { background: transparent !important; }
+.sun, .moon, .star { display: none !important; }
 body.dark-mode h1 { text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
-@media (prefers-reduced-motion: reduce) { .night-star, .star, .cloud, .flower { animation: none; } }
 </style>
 """
 
 COMMON_JS = """
 <script>
-// The day sky (clouds, meadow, flowers) and the night sky (twinkling stars); the dark-mode switch picks one
-function makeSkies() {
-    if (document.querySelector('.night-star')) return;
-    const clouds = [[8, 150, 46, 38], [22, 110, 36, 52], [14, 190, 54, 64], [30, 130, 40, 46], [5, 95, 30, 58]];
-    clouds.forEach(([top, w, h, secs], i) => {
-        const c = document.createElement('div');
-        c.className = 'cloud';
-        c.style.top = top + '%';
-        c.style.width = w + 'px';
-        c.style.height = h + 'px';
-        c.style.animationDuration = secs + 's';
-        c.style.animationDelay = (-secs * i / clouds.length) + 's';
-        document.body.appendChild(c);
-    });
-    const meadow = document.createElement('div');
-    meadow.className = 'meadow';
-    document.body.appendChild(meadow);
-    const flowers = ['🌼', '🌸', '🌷', '🌻', '🌼', '🌺', '🌸', '🌷'];
-    for (let i = 0; i < 22; i++) {
-        const f = document.createElement('div');
-        f.className = 'flower';
-        f.textContent = flowers[i % flowers.length];
-        f.style.left = (2 + i * 4.5 + Math.random() * 2) + '%';
-        f.style.bottom = (1 + Math.random() * 9) + 'vh';
-        f.style.fontSize = (18 + Math.random() * 16) + 'px';
-        f.style.animationDelay = (-Math.random() * 3) + 's';
-        document.body.appendChild(f);
-    }
-    for (let i = 0; i < 90; i++) {
-        const s = document.createElement('div');
-        s.className = 'night-star';
-        const size = 1 + Math.random() * 2.6;
-        s.style.width = s.style.height = size + 'px';
-        s.style.left = (Math.random() * 100) + '%';
-        s.style.top = (Math.random() * 100) + '%';
-        s.style.animationDuration = (2 + Math.random() * 3.5) + 's';
-        s.style.animationDelay = (-Math.random() * 5) + 's';
-        document.body.appendChild(s);
-    }
-}
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', makeSkies); else makeSkies();
-
 let CURRENT_EXAMPLES = {};
 let activeExampleKey = null;
 
@@ -1089,6 +1021,145 @@ except Exception as e:
         self.code_file = self.runner_file = None
 
 
+class SceneWidget(QWidget):
+    """The whole window's background, painted and gently moving.
+
+    Day (light theme): blue sky, a glowing sun, drifting clouds, a green meadow with swaying flowers.
+    Night (dark theme): a deep night sky, a glowing moon and twinkling stars.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.dark = False
+        self.t = 0.0
+        rnd = random.Random(7)
+        self.stars = [(rnd.random(), rnd.random() * 0.92, 0.8 + rnd.random() * 2.2, rnd.random() * 6.3, 0.8 + rnd.random() * 1.8)
+                      for _ in range(150)]
+        self.clouds = [(0.06, 170, 52, 14), (0.20, 120, 40, 10), (0.12, 210, 62, 8), (0.30, 140, 44, 12), (0.04, 100, 34, 9)]
+        self.cloud_start = [rnd.random() for _ in self.clouds]
+        colours = ["#f472b6", "#facc15", "#ffffff", "#c084fc", "#fb7185", "#fde047", "#f9a8d4", "#a78bfa"]
+        self.flowers = [((i + 0.5) / 26 + (rnd.random() - 0.5) * 0.02, rnd.random(), colours[i % len(colours)],
+                         7 + rnd.random() * 5, rnd.random() * 6.3) for i in range(26)]
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self._tick)
+        self.timer.start(50)
+
+    def set_dark(self, dark):
+        self.dark = dark
+        self.update()
+
+    def _tick(self):
+        self.t += 0.05
+        self.update()
+
+    def paintEvent(self, event):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        w, h = self.width(), self.height()
+        if self.dark:
+            self._night(p, w, h)
+        else:
+            self._day(p, w, h)
+        p.end()
+
+    def _glow(self, p, x, y, r, inner, outer):
+        g = QRadialGradient(x, y, r)
+        g.setColorAt(0, inner)
+        g.setColorAt(1, outer)
+        p.setPen(Qt.NoPen)
+        p.setBrush(QBrush(g))
+        p.drawEllipse(int(x - r), int(y - r), int(2 * r), int(2 * r))
+
+    def _day(self, p, w, h):
+        sky = QLinearGradient(0, 0, 0, h)
+        sky.setColorAt(0, QColor("#5ec4ff"))
+        sky.setColorAt(0.45, QColor("#a5dcff"))
+        sky.setColorAt(0.8, QColor("#dff4ff"))
+        sky.setColorAt(1, QColor("#e9fbe3"))
+        p.fillRect(0, 0, w, h, sky)
+        # the sun, top left, glowing
+        sx, sy = 230, 80
+        pulse = 1 + 0.04 * math.sin(self.t * 1.5)
+        self._glow(p, sx, sy, 120 * pulse, QColor(255, 213, 79, 170), QColor(255, 170, 0, 0))
+        self._glow(p, sx, sy, 52, QColor("#fff700"), QColor("#ff9d00"))
+        # clouds drifting to the right
+        p.setPen(Qt.NoPen)
+        for (top, cw, ch, speed), start in zip(self.clouds, self.cloud_start):
+            span = w + 2 * cw
+            x = (start * span + self.t * speed * 6) % span - cw
+            y = top * h + 40
+            p.setBrush(QColor(255, 255, 255, 240))
+            p.drawRoundedRect(int(x), int(y), int(cw), int(ch), ch / 2, ch / 2)
+            p.drawEllipse(int(x + cw * 0.15), int(y - ch * 0.55), int(cw * 0.45), int(ch * 1.3))
+            p.drawEllipse(int(x + cw * 0.48), int(y - ch * 0.35), int(cw * 0.36), int(ch * 1.05))
+        # the meadow: two rolling green hills
+        top = h * 0.84
+        back = QPainterPath()
+        back.moveTo(0, h)
+        back.lineTo(0, top + 10)
+        back.cubicTo(w * 0.25, top - 40, w * 0.45, top + 30, w * 0.7, top - 10)
+        back.cubicTo(w * 0.85, top - 30, w * 0.95, top, w, top - 5)
+        back.lineTo(w, h)
+        p.setBrush(QColor("#4ade80"))
+        p.drawPath(back)
+        front = QPainterPath()
+        front.moveTo(0, h)
+        front.lineTo(0, top + 40)
+        front.cubicTo(w * 0.3, top + 10, w * 0.6, top + 55, w, top + 25)
+        front.lineTo(w, h)
+        grass = QLinearGradient(0, top, 0, h)
+        grass.setColorAt(0, QColor("#86efac"))
+        grass.setColorAt(1, QColor("#16a34a"))
+        p.setBrush(QBrush(grass))
+        p.drawPath(front)
+        # flowers swaying in the grass
+        for fx, fy, colour, size, phase in self.flowers:
+            x = fx * w
+            y = top + 50 + fy * (h - top - 60)
+            p.save()
+            p.translate(x, y)
+            p.rotate(7 * math.sin(self.t * 2 + phase))
+            p.setPen(QPen(QColor("#15803d"), 2))
+            p.drawLine(0, 0, 0, int(-size * 2.2))
+            p.translate(0, -size * 2.2)
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor(colour))
+            for k in range(5):
+                a = k * 72 + 18
+                p.drawEllipse(int(math.cos(math.radians(a)) * size * 0.7 - size * 0.45),
+                              int(math.sin(math.radians(a)) * size * 0.7 - size * 0.45), int(size * 0.9), int(size * 0.9))
+            p.setBrush(QColor("#f59e0b"))
+            p.drawEllipse(int(-size * 0.35), int(-size * 0.35), int(size * 0.7), int(size * 0.7))
+            p.restore()
+
+    def _night(self, p, w, h):
+        sky = QRadialGradient(w / 2, 0, max(w, h))
+        sky.setColorAt(0, QColor("#2c3285"))
+        sky.setColorAt(0.45, QColor("#161c52"))
+        sky.setColorAt(1, QColor("#070b24"))
+        p.fillRect(0, 0, w, h, sky)
+        # twinkling stars
+        p.setPen(Qt.NoPen)
+        for sx, sy, size, phase, speed in self.stars:
+            a = 0.25 + 0.75 * (0.5 + 0.5 * math.sin(self.t * speed * 2 + phase))
+            x, y = sx * w, sy * h
+            self._glow(p, x, y, size * 3.5, QColor(170, 205, 255, int(90 * a)), QColor(170, 205, 255, 0))
+            p.setBrush(QColor(255, 255, 255, int(255 * a)))
+            p.drawEllipse(int(x - size / 2), int(y - size / 2), max(int(size), 1), max(int(size), 1))
+        # the moon, top left, glowing
+        mx, my = 230, 80
+        pulse = 1 + 0.05 * math.sin(self.t * 1.2)
+        self._glow(p, mx, my, 140 * pulse, QColor(253, 230, 138, 120), QColor(253, 230, 138, 0))
+        moon = QRadialGradient(mx - 15, my - 15, 70)
+        moon.setColorAt(0, QColor("#ffffff"))
+        moon.setColorAt(1, QColor("#fde68a"))
+        p.setBrush(QBrush(moon))
+        p.drawEllipse(int(mx - 50), int(my - 50), 100, 100)
+        p.setBrush(QColor(234, 200, 120, 110))
+        for cx, cy, cr in ((-14, -6, 11), (12, 14, 8), (8, -20, 6)):
+            p.drawEllipse(int(mx + cx - cr), int(my + cy - cr), 2 * cr, 2 * cr)
+
+
 class CharacterWidget(QWidget):
     def __init__(self, name, image_file, emoji=""):
         super().__init__()
@@ -1352,7 +1423,7 @@ class MainWindow(QMainWindow):
         self.api.done.connect(self._api_answer)
         self._api_kind = None
 
-        self.central_widget = QWidget()
+        self.central_widget = SceneWidget()
         self.setCentralWidget(self.central_widget)
         self.central_widget.setObjectName("CentralWidget")
 
@@ -2871,16 +2942,16 @@ class MainWindow(QMainWindow):
 
     def update_app_style(self):
         if self.is_dark_mode:
-            self.central_widget.setStyleSheet("QWidget#CentralWidget { background: %s; }" % CONFIG["colors"]["background_dark"])
-            self.hero_panel.setStyleSheet("QFrame { background-color: rgba(15, 23, 42, 0.75); border-radius: 40px; }")
+            self.central_widget.set_dark(True)
+            self.hero_panel.setStyleSheet("QFrame { background-color: rgba(15, 23, 42, 0.30); border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: white;")
             self.hero_sub.setStyleSheet("color: #d1fae5;")
             self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #0369a1; }"
                                              % CONFIG["colors"]["sidebar_dark"])
             self.sidebar_title.setStyleSheet("color: #e0f2fe; background: transparent;")
         else:
-            self.central_widget.setStyleSheet("QWidget#CentralWidget { background: %s; }" % CONFIG["colors"]["background"])
-            self.hero_panel.setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 0.45); border-radius: 40px; }")
+            self.central_widget.set_dark(False)
+            self.hero_panel.setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 0.16); border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: #0f172a;")
             self.hero_sub.setStyleSheet("color: #065f46;")
             self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #ffffff; }"
