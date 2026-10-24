@@ -423,20 +423,14 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 html, body { background: transparent !important; }
 .sun, .moon, .star { display: none !important; }
 body.dark-mode h1 { text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
-/* See-through lesson page: only the lessons panel and the code editor have a background, at 50%,
-   so the sky (sun, clouds, meadow or moon and stars) shows through everywhere */
-.example-panel { background: rgba(255, 255, 255, 0.5) !important; border-radius: 36px; border-color: rgba(255, 255, 255, 0.6) !important;
-                 box-shadow: none !important; backdrop-filter: none !important; }
-body.dark-mode .example-panel { background: rgba(15, 23, 42, 0.5) !important; border-color: rgba(124, 255, 178, 0.3) !important; }
-.editor-section { background: rgba(15, 23, 42, 0.5) !important; box-shadow: none !important; }
-textarea { background: rgba(15, 23, 42, 0.5) !important; }
+/* See-through lesson page: the lessons panel has no background, so the sky shows behind the lesson
+   buttons; the code editor and the output box keep their own look */
+.example-panel { background: transparent !important; border-color: transparent !important; box-shadow: none !important;
+                 backdrop-filter: none !important; }
 .topic-btn { border-radius: 22px; }
 body:not(.dark-mode) .topic-btn { background: rgba(255, 255, 255, 0.72); }
 body:not(.dark-mode) .topic-btn:hover { background: #38bdf8; }
 body:not(.dark-mode) .example-box { background: rgba(255, 255, 255, 0.72); border-radius: 22px; }
-.output { border-radius: 26px; }
-body:not(.dark-mode) .output { background: rgba(255, 255, 255, 0.6) !important; }
-body.dark-mode .output { background: rgba(15, 23, 42, 0.5) !important; }
 </style>
 """
 
