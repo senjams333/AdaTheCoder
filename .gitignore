@@ -10,3 +10,9 @@ desktop_app/dist/
 .DS_Store
 .venv/
 *.log
+
+# Kids apps: each app's licence secret (makes the licence keys) and its lesson videos stay off GitHub
+apps/*/licence_secret.txt
+apps/*/vid/*.mp4
+apps/build/
+apps/dist/

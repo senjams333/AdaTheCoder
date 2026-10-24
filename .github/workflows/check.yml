@@ -86,6 +86,51 @@ jobs:
       - name: Theme pack examples print what the lessons say
         run: python themes/check_examples.py themes
 
+  apps:
+    name: Kids apps (engine, lesson locks, duplicating)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tests (locks, licence keys, app folders, duplicating)
+        run: python -m unittest discover apps/tests -v
+      - name: Every app is ready to build
+        run: |
+          for a in apps/*/app.json; do python apps/build.py "$(basename "$(dirname "$a")")" --check; done
+      - name: Install PyQt5
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q libegl1 libgl1 libxkbcommon-x11-0 libxcb-cursor0 libnss3 libxcomposite1 \
+            libxdamage1 libxrandr2 libxtst6 libxkbfile1 libasound2t64 libpulse0 fonts-noto-color-emoji \
+            gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav
+          pip install -r apps/requirements.txt
+      - name: Open each app and go through it (screenshots)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QTWEBENGINE_DISABLE_SANDBOX: "1"
+          QTWEBENGINE_CHROMIUM_FLAGS: "--no-sandbox --disable-gpu"
+        run: |
+          for a in apps/*/app.json; do
+            a="$(basename "$(dirname "$a")")"
+            python apps/make_key.py "$a" > /dev/null
+            timeout 300 python apps/tests/smoke_gui.py "$a" "$RUNNER_TEMP/app-shots" 2>&1 | tee -a smoke.txt
+          done
+          echo "::notice title=Apps::$(grep -c '^PASS' smoke.txt) steps passed"
+      - name: Save the screenshots (ci-app-previews branch)
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          [ -d "$RUNNER_TEMP/app-shots" ] || exit 0
+          cd "$RUNNER_TEMP/app-shots"
+          git init -q && git checkout -q -b ci-app-previews
+          git config user.name "github-actions" && git config user.email "github-actions@users.noreply.github.com"
+          echo "Screenshots of the kids apps from commit $GITHUB_SHA" > README.md
+          git add -A && git commit -q -m "App screenshots for $GITHUB_SHA"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-app-previews
+
   e2e:
     name: End-to-end (MySQL + API + website in a browser)
     runs-on: ubuntu-latest

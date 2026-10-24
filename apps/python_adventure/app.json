@@ -1,0 +1,44 @@
+{
+  "id": "python_adventure",
+  "name": "Python Adventure For Kids",
+  "version": "1.0.0",
+
+  "window_title": "Python Adventure For Kids 🐍✨",
+  "hero_title": "Python Adventure For Kids! 🐍",
+  "hero_subtitle": "Fun coding lessons for little learners 🚀✨",
+  "page_title": "PYTHON ADVENTURE 🐍✨",
+  "page_subtitle": "Learn Python with Tom, Penny & Teddy! 🚀",
+  "sidebar_title": "📚 Beginner Python Course 🌟",
+  "login_subtitle": "Login to unlock your Python Adventure 🚀",
+
+  "logo": "ada.png",
+  "characters": [
+    {"name": "🧒🏻 TOM", "image": "tom1.png", "emoji": "👦"},
+    {"name": "🐍 PENNY", "image": "penny.png", "emoji": "🐍"},
+    {"name": "🧸 TEDDY", "image": "teddy.png", "emoji": "🧸"}
+  ],
+  "success_picture": "teddy.png",
+  "oops_picture": "tom.png",
+  "intro_video": "intro.mp4",
+  "characters_note": "Content is AI generated from Google AI. All characters (Tom, Penny, Teddy) are fictional.",
+  "video_note": "This is an AI generated content from Google AI",
+
+  "colors": {
+    "background": "#eaf8ff",
+    "background_dark": "#0f172a",
+    "sidebar": "#a7f3d0",
+    "sidebar_dark": "#134e4a"
+  },
+
+  "locks": {
+    "locked_lessons": "2-17",
+    "admin_pin": "2468",
+    "licence_prefix": "PAFK",
+        "upgrade_url": "https://www.adathecoder.com/#pricing"
+  },
+
+  "server": {
+    "url": "",
+    "theme_id": "python_adventure"
+  }
+}

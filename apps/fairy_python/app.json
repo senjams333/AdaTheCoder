@@ -1,0 +1,51 @@
+{
+  "id": "fairy_python",
+  "name": "Fairy Python Adventure",
+  "version": "1.0.0",
+  "window_title": "Fairy Python Adventure ✨",
+  "hero_title": "Fairy Python Adventure! ✨",
+  "hero_subtitle": "Fun coding lessons for little learners 🚀✨",
+  "page_title": "FAIRY PYTHON ADVENTURE ✨",
+  "page_subtitle": "Learn Python with Ada, Fairy Rose & Unicorn! 🚀",
+  "sidebar_title": "📚 Beginner Python Course 🌟",
+  "login_subtitle": "Login to unlock your Fairy Python Adventure 🚀",
+  "logo": "ada.png",
+  "characters": [
+    {
+      "name": "👧 ADA",
+      "image": "ada_girl.png",
+      "emoji": "👧"
+    },
+    {
+      "name": "🧚 FAIRY ROSE",
+      "image": "pink_fairy.png",
+      "emoji": "🧚"
+    },
+    {
+      "name": "🦄 UNICORN",
+      "image": "unicorn.png",
+      "emoji": "🦄"
+    }
+  ],
+  "success_picture": "unicorn.png",
+  "oops_picture": "ada_girl.png",
+  "intro_video": "intro.mp4",
+  "characters_note": "Content is AI generated from Google AI. All characters (Ada, Fairy Rose, Unicorn) are fictional.",
+  "video_note": "This is an AI generated content from Google AI",
+  "colors": {
+    "background": "#eaf8ff",
+    "background_dark": "#0f172a",
+    "sidebar": "#a7f3d0",
+    "sidebar_dark": "#134e4a"
+  },
+  "locks": {
+    "locked_lessons": "2-17",
+    "admin_pin": "2468",
+    "licence_prefix": "FAIR",
+    "upgrade_url": "https://www.adathecoder.com/#pricing"
+  },
+  "server": {
+    "url": "",
+    "theme_id": "fairy_python"
+  }
+}
