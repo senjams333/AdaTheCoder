@@ -249,16 +249,16 @@ body.dark-mode .topic-btn:hover { background:#38bdf8; color:#0f172a; }
 
 .example-box { 
     display:none; 
-    margin-top:10px; 
-    padding:18px; 
-    border-radius:18px; 
+    margin-top:8px; 
+    padding:12px 14px; 
+    border-radius:16px; 
     background: rgba(255, 255, 255, 0.98); 
-    font-size:32px; 
+    font-size:21px; 
     font-weight: 700;
     font-style: normal;
     color:#0f172a; 
-    line-height: 1.5; 
-    border: 3.5px solid #38bdf8; 
+    line-height: 1.45; 
+    border: 3px solid #38bdf8; 
     animation: expandDown 0.3s ease-out forwards; 
 }
 body.dark-mode .example-box { background: #1e293b; color: #f8fafc; border-color: #38bdf8; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
@@ -267,18 +267,18 @@ body.dark-mode .example-box { background: #1e293b; color: #f8fafc; border-color:
     100% { opacity: 1; transform: translateY(0); }
 }
 
-.example-box b { color: #0284c7; font-size: 26px; display: inline-block; margin-top: 4px; font-weight: 800; font-style: normal; }
+.example-box b { color: #0284c7; font-size: 19px; display: inline-block; margin-top: 4px; font-weight: 800; font-style: normal; }
 body.dark-mode .example-box b { color: #38bdf8; }
 .example-box span.explanation-text { font-style: normal; font-weight: 700; }
 .example-box pre { 
     display:block; 
     background:#0f172a; 
     color:#7CFFB2; 
-    padding:14px 18px; 
-    border-radius:14px; 
+    padding:10px 14px; 
+    border-radius:12px; 
     font-family:monospace; 
-    margin-top:10px; 
-    font-size:26px; 
+    margin-top:8px; 
+    font-size:18px; 
     font-weight:bold; 
     font-style: normal;
     white-space: pre-wrap; 
