@@ -2767,24 +2767,37 @@ class MainWindow(QMainWindow):
         info = "".join("<tr><td style='padding:5px 14px 5px 0; color:#0369a1;'><b>%s</b></td><td style='padding:5px 0;'>%s</td></tr>"
                        % (k, v) for k, v in rows)
         box = KidWindow(self)
+        box.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        box.setAttribute(Qt.WA_TranslucentBackground)
         box.setWindowTitle(title)
-        box.setMinimumSize(960, 640)
-        box.setStyleSheet("""
-            QDialog { background: #f0f9ff; }
-            QLabel { color: #0f172a; background: transparent; }
-            QPushButton { font-family: 'Comic Sans MS'; font-size: 20px; font-weight: bold; border-radius: 24px; padding: 12px 30px; }
+        box.setMinimumSize(880, 610)                 # the card is about 810 x 540, plus room for the glow
+        frame = QVBoxLayout(box)
+        frame.setContentsMargins(34, 34, 34, 34)
+        card = QFrame()
+        card.setObjectName("KidCard")
+        frame.addWidget(card)
+        # a warm sunset glow around a round-cornered card
+        glow = QGraphicsDropShadowEffect(box)
+        glow.setBlurRadius(60)
+        glow.setColor(QColor(251, 128, 114, 235))
+        glow.setOffset(0, 0)
+        card.setGraphicsEffect(glow)
+        card.setStyleSheet("""
+            QFrame#KidCard { background: #f0f9ff; border: 4px solid #ffffff; border-radius: 34px; }
+            QLabel { color: #0f172a; background: transparent; border: none; }
+            QPushButton { font-family: 'Comic Sans MS'; font-size: 18px; font-weight: bold; border-radius: 24px; padding: 12px 30px; }
             QPushButton#ok { background: #ffd166; color: #0f172a; border: 3px solid #f59e0b; }
             QPushButton#ok:hover { background: #38bdf8; color: white; border-color: #0284c7; }
             QPushButton#soft { background: #e0f2fe; color: #0f172a; border: 3px solid #38bdf8; }
             QPushButton#soft:hover { background: #38bdf8; color: white; }
-            QPushButton#close { background: #ef4444; color: white; border: 4px solid #b91c1c; border-radius: 30px;
-                                font-size: 24px; padding: 10px 26px; }
+            QPushButton#close { background: #ef4444; color: white; border: 4px solid #b91c1c; border-radius: 26px;
+                                font-size: 21px; padding: 8px 22px; }
             QPushButton#close:hover { background: #dc2626; }
             QPushButton#close:pressed { background: #b91c1c; }
         """)
-        outer = QVBoxLayout(box)
-        outer.setContentsMargins(30, 18, 24, 24)
-        outer.setSpacing(12)
+        outer = QVBoxLayout(card)
+        outer.setContentsMargins(26, 16, 20, 20)
+        outer.setSpacing(10)
 
         top = QHBoxLayout()
         top.addStretch()
@@ -2802,11 +2815,11 @@ class MainWindow(QMainWindow):
         side = QVBoxLayout()
         side.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
         bubble = QLabel(hello)
-        bubble.setFont(QFont("Comic Sans MS", 20, QFont.Bold))
+        bubble.setFont(QFont("Comic Sans MS", 17, QFont.Bold))
         bubble.setAlignment(Qt.AlignCenter)
         bubble.setStyleSheet("background: white; border: 3px solid #38bdf8; border-radius: 22px; padding: 10px 18px;")
         pic_label = QLabel()
-        pic_label.setFixedSize(300, 320)
+        pic_label.setFixedSize(250, 270)
         pic_label.setAlignment(Qt.AlignCenter)
         side.addWidget(bubble, alignment=Qt.AlignHCenter)
         side.addWidget(pic_label, alignment=Qt.AlignHCenter)
@@ -2816,8 +2829,8 @@ class MainWindow(QMainWindow):
         text.setTextFormat(Qt.RichText)
         text.setWordWrap(True)
         text.setText(
-            "<div style='font-family: Comic Sans MS; font-size: 21px; color: #0f172a;'>"
-            "<div style='color:#0284c7; font-size: 34px; font-weight: bold; margin-bottom: 10px;'>%s</div>"
+            "<div style='font-family: Comic Sans MS; font-size: 18px; color: #0f172a;'>"
+            "<div style='color:#0284c7; font-size: 29px; font-weight: bold; margin-bottom: 8px;'>%s</div>"
             "<table style='background:%s;'>%s</table>%s</div>" % (heading, row_bg, info, notes)
         )
         row.addWidget(text, stretch=1)
@@ -2837,7 +2850,7 @@ class MainWindow(QMainWindow):
         # the character waves: the picture rocks gently from side to side
         pix = QPixmap(resource_path(picture)) if picture else QPixmap()
         if not pix.isNull():
-            pix = pix.scaled(270, 270, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pix = pix.scaled(225, 225, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             step = {"t": 0.0}
 
             def wave():
@@ -2862,7 +2875,7 @@ class MainWindow(QMainWindow):
                 ("⚧ Gender", u.get("gender")), ("📍 Address", u.get("address")), ("🔐 Auth Provider", u.get("auth_provider")),
                 ("⚡ Active", active), ("🗓️ Created At", u.get("created_at"))]
         rows = [(k, html.escape(str(v or "N/A"))) for k, v in rows]
-        notes = "" if self._use_server() else "<p style='font-size:16px; color:#065f46;'>✨ Demo data — no internet or server needed! 🚀</p>"
+        notes = "" if self._use_server() else "<p style='font-size:14px; color:#065f46;'>✨ Demo data — no internet or server needed! 🚀</p>"
         buttons = []
         if CONFIG.get("password_url"):
             buttons.append(("🔑 Change password", "soft", self.open_password_page))
@@ -2898,8 +2911,8 @@ class MainWindow(QMainWindow):
                 ("📧 Email", html.escape(str(self.user_info.get("email") or DUMMY_USER["email"]))),
                 ("🎯 Plan", html.escape(lic["plan"])), ("⚡ Status", status),
                 ("🔢 Version", html.escape(str(CONFIG["version"])))]
-        notes = ("<p style='font-size:17px;'><b>📜 License:</b> Personal &amp; educational use only.</p>"
-                 "<br><p style='font-size:17px;'>This software is provided \"as is\", without warranty of any kind.</p>")
+        notes = ("<p style='font-size:15px;'><b>📜 License:</b> Personal &amp; educational use only.</p>"
+                 "<br><p style='font-size:15px;'>This software is provided \"as is\", without warranty of any kind.</p>")
         first = (CONFIG["characters"] or [{}])[0]
         picture = CONFIG.get("license_picture") or first.get("image") or LOGO
         name = (CONFIG.get("license_character") or first.get("name", "").split(" ", 1)[-1] or "a friend").title()
