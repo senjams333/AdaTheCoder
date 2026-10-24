@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 const email = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toLowerCase() : value);
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
@@ -38,11 +38,30 @@ export class ForgotPasswordDto {
   email!: string;
 }
 
-/** POST /api/auth/reset-password: the new password, with the token from the emailed link */
+const code = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.replace(/\s/g, '') : value);
+
+/** POST /api/auth/verify-email: the link's token and the 6-digit code from the sign-up email */
+export class VerifyEmailDto {
+  @IsString()
+  @IsNotEmpty({ message: 'This link is not complete. Open the link from the email again.' })
+  token!: string;
+
+  @Transform(code)
+  @IsString({ message: 'Type the 6-digit code from the email.' })
+  @Matches(/^\d{6}$/, { message: 'Type the 6-digit code from the email.' })
+  code!: string;
+}
+
+/** POST /api/auth/reset-password: the new password, with the token from the emailed link and its code */
 export class ResetPasswordDto {
   @IsString()
   @IsNotEmpty({ message: 'This link is not complete. Open the link from the email again.' })
   token!: string;
+
+  @Transform(code)
+  @IsString({ message: 'Type the 6-digit code from the email.' })
+  @Matches(/^\d{6}$/, { message: 'Type the 6-digit code from the email.' })
+  code!: string;
 
   @IsString()
   @MinLength(8, { message: 'Choose a new password with at least 8 characters.' })

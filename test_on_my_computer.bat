@@ -10,7 +10,7 @@ if not exist api\node_modules (cd api && call npm install --no-audit --no-fund &
 if not exist web\node_modules (cd web && call npm install --no-audit --no-fund && cd ..)
 python -m pip install -q -r apps\requirements.txt || goto :error
 
-start "Ada The Coder API (close to stop)" /D "%~dp0api" cmd /k npm run start:dev
+start "Ada The Coder API (close to stop)" /D "%~dp0api" cmd /k "set DEV_SHOW_CODES=true&& npm run start:dev"
 start "Ada The Coder website (close to stop)" /D "%~dp0web" cmd /k npm run dev
 echo Waiting for the API and the website to start...
 timeout /t 25 /nobreak >nul

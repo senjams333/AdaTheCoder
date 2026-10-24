@@ -10,6 +10,7 @@ import { errorList } from '@/lib/errors';
 /** Opened from the emailed link (?token=...): choose the new password. */
 function ResetForm() {
   const token = useSearchParams().get('token') || '';
+  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
@@ -18,13 +19,17 @@ function ResetForm() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (!/^\d{6}$/.test(code.replace(/\s/g, ''))) {
+      setErrors(['Type the 6-digit code from the email.']);
+      return;
+    }
     if (password !== password2) {
       setErrors(["The two passwords don't match."]);
       return;
     }
     setErrors([]);
     try {
-      const res = await reset({ token, password, password2 }).unwrap();
+      const res = await reset({ token, code: code.replace(/\s/g, ''), password, password2 }).unwrap();
       setDoneFor(res.email);
     } catch (err) {
       setErrors(errorList(err));
@@ -53,9 +58,15 @@ function ResetForm() {
           ) : (
             <>
               <h1>Choose a new password</h1>
-              <p className="sub">At least 8 characters. It will work on the website and in the app.</p>
+              <p className="sub">Type the 6-digit code from the email, then your new password (at least 8 characters).
+                It will work on the website and in the app.</p>
               <FormErrors errors={errors} />
               <form onSubmit={submit}>
+                <div className="field">
+                  <label htmlFor="code">Code from the email</label>
+                  <input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={7} placeholder="123456" required
+                    style={{ fontSize: 28, letterSpacing: 8, textAlign: 'center' }} value={code} onChange={(e) => setCode(e.target.value)} />
+                </div>
                 <div className="field">
                   <label htmlFor="password">New password</label>
                   <input id="password" type="password" autoComplete="new-password" required minLength={8} maxLength={72}

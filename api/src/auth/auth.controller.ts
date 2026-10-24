@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Ip, Post, UseGuards } from '@nestjs/common';
 import { publicUser, User } from '../entities/user.entity';
 import { AuthService } from './auth.service';
-import { ChangePasswordDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, SetupAdminDto } from './dto/login.dto';
+import { ChangePasswordDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, SetupAdminDto, VerifyEmailDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AuthGuard, CurrentUser } from './guards';
 
@@ -9,10 +9,17 @@ import { AuthGuard, CurrentUser } from './guards';
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
-  /** Creates a parent account, then emails a welcome to the parent and a notice to the admin. */
+  /** Sign-up step 1: emails the parent a link and a 6-digit code. The account isn't made yet. */
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.auth.register(dto);
+  register(@Body() dto: RegisterDto, @Ip() ip: string) {
+    return this.auth.startSignup(dto, ip);
+  }
+
+  /** Sign-up step 2 (the page the emailed link opens): the code makes the account, logs the parent in,
+   *  and emails a welcome to the parent and a notice to the admin. */
+  @Post('verify-email')
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.auth.finishSignup(dto);
   }
 
   /** Parents and admins. The answer's user.role says which. */

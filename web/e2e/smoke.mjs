@@ -115,6 +115,15 @@ await step('a parent signs up and lands on the account page', async () => {
   await page.fill('#password2', 'goodpass1');
   await page.locator('input[type=checkbox]').check();
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  // the API emails a link and a code (the CI runs with DEV_SHOW_CODES=true, so the page shows them too)
+  await page.getByText('Check your email').waitFor({ timeout: 20000 });
+  const code = (await page.locator('p', { hasText: 'Test mode' }).locator('b').innerText()).trim();
+  await page.getByRole('link', { name: 'Open the code page', exact: true }).click();
+  await page.fill('#code', '000000' === code ? '111111' : '000000');
+  await page.getByRole('button', { name: 'Finish my account', exact: true }).click();
+  await page.getByText("code isn't right").waitFor({ timeout: 15000 });
+  await page.fill('#code', code);
+  await page.getByRole('button', { name: 'Finish my account', exact: true }).click();
   await page.getByText('Welcome, Priya!').waitFor({ timeout: 20000 });
   await page.getByText('Jungle Coders').first().waitFor();
   await page.getByText('Your account is ready').waitFor();

@@ -35,7 +35,7 @@ function ForgotForm() {
           {sentTo ? (
             <>
               <p className="sub">
-                If <b>{sentTo}</b> has an account, we&apos;ve emailed it a link to choose a new password. The link works for
+                If <b>{sentTo}</b> has an account, we&apos;ve emailed it a link and a 6-digit code. Open the link, type the code, and choose a new password. The link works for
                 1 hour. Check your spam folder if it isn&apos;t there in a few minutes.
               </p>
               <p className="sub">The new password works on the website and in the app.</p>

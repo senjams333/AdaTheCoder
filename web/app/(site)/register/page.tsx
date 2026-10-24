@@ -1,24 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
 import { useGetSiteQuery, useRegisterMutation } from '@/lib/api';
-import { loggedIn } from '@/lib/authSlice';
 import { errorList } from '@/lib/errors';
-import { flash } from '@/lib/flashSlice';
-import { useAppDispatch } from '@/lib/hooks';
 
 const EMPTY = { name: '', email: '', city: '', country: '', password: '', password2: '', childName: '', childAge: '', consent: false };
 
 export default function RegisterPage() {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState<string[]>([]);
+  const [sent, setSent] = useState<{ email: string; dev?: { token: string; code: string } } | null>(null);
   const [register, { isLoading }] = useRegisterMutation();
   const { data: site } = useGetSiteQuery();
-  const dispatch = useAppDispatch();
-  const router = useRouter();
   const set = (k: keyof typeof EMPTY) => (e: { target: { value: string; checked?: boolean; type?: string } }) =>
     setForm({ ...form, [k]: e.target.type === 'checkbox' ? Boolean(e.target.checked) : e.target.value });
 
@@ -41,10 +36,9 @@ export default function RegisterPage() {
       };
       if (form.childName.trim()) body.childName = form.childName.trim();
       if (form.childAge) body.childAge = Number(form.childAge);
+      // step 1: the API emails a link and a 6-digit code; the account is made on the page the link opens
       const res = await register(body).unwrap();
-      dispatch(loggedIn({ token: res.token, user: res.user }));
-      dispatch(flash('success', 'Your account is ready. Download the app below.'));
-      router.push('/account');
+      setSent({ email: res.email, dev: res.dev });
     } catch (err) {
       setErrors(errorList(err));
     }
@@ -92,8 +86,26 @@ export default function RegisterPage() {
           </div>
         </div>
         <div className="auth-card">
+          {sent ? (
+            <>
+              <h1>Check your email 📬</h1>
+              <p className="sub">
+                We sent an email to <b>{sent.email}</b>. Open it, press <b>Finish my account</b>, and type the 6-digit code
+                from the email. Your account is made when you type the code.
+              </p>
+              <p className="sub">The code works for 30 minutes. Check your spam folder if it isn&apos;t there in a few minutes.</p>
+              {sent.dev && (
+                <p className="sub" style={{ border: '2px dashed #f59e0b', borderRadius: 12, padding: 10 }}>
+                  Test mode (DEV_SHOW_CODES=true): your code is <b>{sent.dev.code}</b>.{' '}
+                  <Link href={`/verify-email?token=${encodeURIComponent(sent.dev.token)}`}>Open the code page</Link>
+                </p>
+              )}
+              <button className="btn btn-ghost" type="button" onClick={() => setSent(null)}>Change my details</button>
+            </>
+          ) : (
+          <>
           <h1>Create a parent account</h1>
-          <p className="sub">You&apos;ll be able to download the app as soon as you&apos;re done.</p>
+          <p className="sub">We&apos;ll email you a code to finish your account. Then you can download the app.</p>
           <FormErrors errors={errors} />
           <form onSubmit={submit} noValidate>
             <div className="field">
@@ -145,8 +157,10 @@ export default function RegisterPage() {
                 <span>I&apos;m the parent or legal guardian, and I&apos;ve read the <Link href="/privacy" target="_blank">privacy page</Link>.</span>
               </label>
             </div>
-            <button className="btn" type="submit" disabled={isLoading}>{isLoading ? 'Creating your account…' : 'Create account'}</button>
+            <button className="btn" type="submit" disabled={isLoading}>{isLoading ? 'Sending your code…' : 'Create account'}</button>
           </form>
+          </>
+          )}
           <p className="switch">Already have an account? <Link href="/login">Log in</Link></p>
         </div>
       </section>

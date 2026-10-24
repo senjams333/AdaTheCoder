@@ -99,16 +99,44 @@ export function adminNewAccountEmail(user: NewAccount, siteUrl: string): Email {
   return { subject: `New parent account: ${user.name} (${user.email})`, html, text };
 }
 
+const codeBox = (code: string) =>
+  `<div style="margin:0 0 18px;text-align:center;"><span style="display:inline-block;background:#F4F1FF;border:2px dashed #7B4DFF;border-radius:16px;padding:12px 26px;font-size:32px;font-weight:bold;letter-spacing:10px;color:#2B2257;font-family:Consolas,monospace;">${esc(code)}</span></div>`;
+
+/** Sent when a parent signs up on the website: the link opens the website, where they type the code. */
+export function signupCodeEmail(user: { name: string; email: string }, link: string, code: string, siteUrl: string): Email {
+  const first = (user.name || '').split(' ')[0] || 'there';
+  const html = layout(
+    'Your Ada The Coder code',
+    `<h1 style="margin:0 0 12px;font-size:24px;color:#2B2257;">Hi ${esc(first)}, one last step! 🎉</h1>
+<p style="margin:0 0 14px;">To finish making your Ada The Coder account for <b>${esc(user.email)}</b>, press the button and type this code:</p>
+${codeBox(code)}
+<p style="margin:0 0 18px;text-align:center;">${button(link, 'Finish my account')}</p>
+<p style="margin:0 0 14px;font-size:14px;">The code works for 30 minutes. Your account is made when you type it.</p>
+<p style="margin:0;color:#6B6890;font-size:14px;">Didn't sign up? Ignore this email: nothing is made without the code.</p>`,
+    siteUrl,
+  );
+  const text = `Hi ${first},
+
+To finish making your Ada The Coder account for ${user.email}, open this link and type the code:
+
+Code: ${code}
+${link}
+
+The code works for 30 minutes. Didn't sign up? Ignore this email.`;
+  return { subject: `Your Ada The Coder code: ${code}`, html, text };
+}
+
 /** Sent when someone asks for a new password on the website (or from the app's Profile → Change password). */
-export function passwordResetEmail(user: { name: string; email: string }, link: string, siteUrl: string): Email {
+export function passwordResetEmail(user: { name: string; email: string }, link: string, code: string, siteUrl: string): Email {
   const first = (user.name || '').split(' ')[0] || 'there';
   const forgot = `${siteUrl.replace(/\/$/, '')}/forgot-password`;
   const html = layout(
     'Choose a new password',
     `<h1 style="margin:0 0 12px;font-size:24px;color:#2B2257;">Hi ${esc(first)}, here's your link 🔑</h1>
 <p style="margin:0 0 14px;">Someone asked to change the password of the Ada The Coder account <b>${esc(user.email)}</b>.
-Press the button to choose a new one. It works for the website and the app.</p>
-<p style="margin:0 0 18px;">${button(link, 'Choose a new password')}</p>
+Press the button, type this code, and choose a new one. It works for the website and the app.</p>
+${codeBox(code)}
+<p style="margin:0 0 18px;text-align:center;">${button(link, 'Choose a new password')}</p>
 <p style="margin:0 0 14px;font-size:14px;">The link works for 1 hour, and only once. If it has expired, ask for a new one at
 <a href="${esc(forgot)}" style="color:#7B4DFF;">${esc(forgot.replace(/^https?:\/\//, ''))}</a>.</p>
 <p style="margin:0;color:#6B6890;font-size:14px;">Didn't ask for this? Ignore this email: your password stays the same.</p>`,
@@ -117,11 +145,13 @@ Press the button to choose a new one. It works for the website and the app.</p>
   const text = `Hi ${first},
 
 Someone asked to change the password of the Ada The Coder account ${user.email}.
-Choose a new password here (it works for the website and the app):
+Open this link, type the code, and choose a new password (it works for the website and the app):
+
+Code: ${code}
 ${link}
 
 The link works for 1 hour, and only once. A new one: ${forgot}
 
 Didn't ask for this? Ignore this email: your password stays the same.`;
-  return { subject: 'Choose a new password for Ada The Coder 🔑', html, text };
+  return { subject: `Your Ada The Coder password code: ${code}`, html, text };
 }

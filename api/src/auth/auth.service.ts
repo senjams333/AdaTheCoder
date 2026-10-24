@@ -4,16 +4,22 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
-import { createHash } from 'crypto';
+import { createHash, randomBytes, randomInt } from 'crypto';
 import { Repository } from 'typeorm';
+import { PendingSignup } from '../entities/pending-signup.entity';
 import { publicUser, User } from '../entities/user.entity';
 import { MailService } from '../mail/mail.service';
-import { ChangePasswordDto, LoginDto, ResetPasswordDto, SetupAdminDto } from './dto/login.dto';
+import { ChangePasswordDto, LoginDto, ResetPasswordDto, SetupAdminDto, VerifyEmailDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
 const MAX_FAILS = 8;
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_RESET_EMAILS = 5;
+const MAX_CODE_TRIES = 5;
+const SIGNUP_MINUTES = 30;
+export const SIGNUP_EXPIRED = 'This sign-up link has expired or was already used. Sign up again to get a new email.';
+export const WRONG_CODE = "That code isn't right. Check the 6-digit code in the email and try again.";
+const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 export const RESET_EXPIRED = 'This link has expired or was already used. Ask for a new one on the "Forgot your password?" page.';
 export const WRONG_LOGIN = "That email and password don't match. Check them and try again.";
 export const TAKEN = 'An account with this email already exists. Log in instead.';
@@ -27,6 +33,7 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(PendingSignup) private readonly pending: Repository<PendingSignup>,
     private readonly jwt: JwtService,
     private readonly mail: MailService,
   ) {}
@@ -39,17 +46,25 @@ export class AuthService {
     return bcrypt.hash(password, 12);
   }
 
+  /** Makes the account straight away (the older desktop app's sign-up, /api/v3/register). */
   async register(dto: RegisterDto) {
     if (dto.password2 !== undefined && dto.password2 !== dto.password) {
       throw new BadRequestException(["The two passwords don't match."]);
     }
     if (await this.findByEmail(dto.email)) throw new ConflictException(TAKEN);
+    return this.createParent({
+      name: dto.name, email: dto.email, passwordHash: await this.hash(dto.password), city: dto.city,
+      country: dto.country, childName: dto.childName || null, childAge: dto.childAge ?? null,
+    });
+  }
+
+  private async createParent(d: {
+    name: string; email: string; passwordHash: string; city: string; country: string; childName: string | null; childAge: number | null;
+  }) {
     let user: User;
     try {
       user = await this.users.save(this.users.create({
-        name: dto.name, email: dto.email, passwordHash: await this.hash(dto.password), role: 'parent',
-        city: dto.city, country: dto.country, childName: dto.childName || null, childAge: dto.childAge ?? null,
-        plan: 'free', isActive: true, lastLogin: new Date(),
+        ...d, role: 'parent', plan: 'free', isActive: true, lastLogin: new Date(),
       }));
     } catch (err) {
       // two sign-ups with the same email at the same moment: the database's unique index wins
@@ -58,6 +73,53 @@ export class AuthService {
     }
     const emails = await this.mail.sendAccountCreated(user);
     return { ok: true, user: publicUser(user), token: this.token(user), emails };
+  }
+
+  /** Website sign-up, step 1: emails a link and a 6-digit code. Nothing is made until the code is typed. */
+  async startSignup(dto: RegisterDto, address = 'unknown') {
+    if (dto.password2 !== undefined && dto.password2 !== dto.password) {
+      throw new BadRequestException(["The two passwords don't match."]);
+    }
+    const keys = [`signup:${dto.email}`, `signup-ip:${address}`];
+    if (keys.some((k) => this.tooMany(k, MAX_RESET_EMAILS))) {
+      throw new HttpException('Too many tries. Wait 15 minutes, then try again.', HttpStatus.TOO_MANY_REQUESTS);
+    }
+    keys.forEach((k) => this.fail(k));
+    if (await this.findByEmail(dto.email)) throw new ConflictException(TAKEN);
+    const link = randomBytes(24).toString('base64url');
+    const code = String(randomInt(0, 1000000)).padStart(6, '0');
+    await this.pending.delete({ email: dto.email });
+    await this.pending.save(this.pending.create({
+      email: dto.email, linkHash: sha(link), codeHash: sha(`${code}:${link}`), attempts: 0,
+      expiresAt: new Date(Date.now() + SIGNUP_MINUTES * 60 * 1000),
+      data: JSON.stringify({
+        name: dto.name, passwordHash: await this.hash(dto.password), city: dto.city, country: dto.country,
+        childName: dto.childName || null, childAge: dto.childAge ?? null,
+      }),
+    }));
+    const emailed = await this.mail.sendSignupCode({ name: dto.name, email: dto.email }, link, code);
+    // DEV_SHOW_CODES=true (tests, or trying it without email): the answer also carries the link's token and code
+    const dev = process.env.DEV_SHOW_CODES === 'true' ? { dev: { token: link, code } } : {};
+    return { ok: true, pending: true, email: dto.email, emailed, ...dev };
+  }
+
+  /** Website sign-up, step 2: the link's token and the code from the email make the account. */
+  async finishSignup(dto: VerifyEmailDto) {
+    const p = await this.pending.findOne({ where: { linkHash: sha(dto.token) } });
+    if (!p || new Date(p.expiresAt).getTime() < Date.now()) throw new BadRequestException([SIGNUP_EXPIRED]);
+    if (sha(`${dto.code}:${dto.token}`) !== p.codeHash) {
+      p.attempts += 1;
+      if (p.attempts >= MAX_CODE_TRIES) {
+        await this.pending.remove(p);
+        throw new BadRequestException(['Too many wrong codes. Sign up again to get a new email.']);
+      }
+      await this.pending.save(p);
+      throw new BadRequestException([WRONG_CODE]);
+    }
+    const d = JSON.parse(p.data);
+    await this.pending.remove(p);
+    if (await this.findByEmail(p.email)) throw new ConflictException(TAKEN);
+    return this.createParent({ ...d, email: p.email });
   }
 
   /** Checks an email and password. Throws with a friendly message when they don't match. */
@@ -120,15 +182,17 @@ export class AuthService {
     keys.forEach((k) => this.fail(k));
     const user = await this.findByEmail(email);
     if (user && user.isActive) {
-      const token = this.jwt.sign({ sub: user.id, purpose: 'reset', ph: this.hashMark(user) }, { expiresIn: '1h' });
-      await this.mail.sendPasswordReset(user, token);
+      const code = String(randomInt(0, 1000000)).padStart(6, '0');
+      const token = this.jwt.sign({ sub: user.id, purpose: 'reset', ph: this.hashMark(user), ch: sha(`${code}:${user.id}:${this.hashMark(user)}`) },
+        { expiresIn: '1h' });
+      await this.mail.sendPasswordReset(user, token, code);
     }
     return { ok: true };
   }
 
   /** Sets the new password from the emailed link. The link stops working once the password changes. */
   async resetPassword(dto: ResetPasswordDto) {
-    let payload: { sub?: number; purpose?: string; ph?: string };
+    let payload: { sub?: number; purpose?: string; ph?: string; ch?: string };
     try {
       payload = this.jwt.verify(dto.token);
     } catch {
@@ -137,6 +201,12 @@ export class AuthService {
     if (payload.purpose !== 'reset' || !payload.sub) throw new BadRequestException([RESET_EXPIRED]);
     const user = await this.users.findOne({ where: { id: payload.sub } });
     if (!user || !user.isActive || payload.ph !== this.hashMark(user)) throw new BadRequestException([RESET_EXPIRED]);
+    const tries = `reset-code:${dto.token.slice(-24)}`;
+    if (this.tooMany(tries, MAX_CODE_TRIES)) throw new BadRequestException(['Too many wrong codes. Ask for a new email.']);
+    if (sha(`${dto.code}:${user.id}:${this.hashMark(user)}`) !== (payload as { ch?: string }).ch) {
+      this.fail(tries);
+      throw new BadRequestException([WRONG_CODE]);
+    }
     if (dto.password2 !== undefined && dto.password2 !== dto.password) {
       throw new BadRequestException(["The two passwords don't match."]);
     }

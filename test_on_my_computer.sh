@@ -64,7 +64,8 @@ if curl -s "$API/api/health" | grep -q '"ok":true'; then
   echo "The API is already running."
 else
   echo "Starting the API at $API/api  (log: api.log)"
-  (cd api && npm run start:dev > "$HERE/api.log" 2>&1) & PIDS+=($!)
+  # DEV_SHOW_CODES: the sign-up page also shows the emailed code, for testing on this computer
+  (cd api && DEV_SHOW_CODES=true npm run start:dev > "$HERE/api.log" 2>&1) & PIDS+=($!)
   wait_for "$API/api/health" "The API" api.log
 fi
 

@@ -166,6 +166,7 @@ jobs:
       SITE_URL: http://127.0.0.1:5000
       API_PUBLIC_URL: http://127.0.0.1:3000
       NEXT_PUBLIC_API_URL: http://127.0.0.1:3000/api
+      DEV_SHOW_CODES: "true"
     defaults:
       run:
         shell: bash
