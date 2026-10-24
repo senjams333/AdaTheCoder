@@ -2066,8 +2066,7 @@ class MainWindow(QMainWindow):
             if answer and answer.get("ok") and self.locks.set_account_licences(answer.get("licences") or []):
                 self._stop_purchase_watch()
                 self.refresh_locks()
-                QMessageBox.information(self, "Unlocked! 🎉",
-                                        "Thank you! Every lesson is open now. Have fun coding! 🚀")
+                self.sunset_message("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀")
         elif kind == "register":
             if error == "offline":
                 self._stop_loading()
@@ -2346,6 +2345,52 @@ class MainWindow(QMainWindow):
         if box.exec_() == QDialog.Accepted:
             self.open_upgrade()
 
+    def sunset_message(self, title, heading, text):
+        """A happy message on a sunset-sky card: big letters, a big Close button, no ✕ (stays until Close)."""
+        box = KidWindow(self)
+        box.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        box.setWindowTitle(title)
+        box.setAttribute(Qt.WA_TranslucentBackground)
+        outer = QVBoxLayout(box)
+        outer.setContentsMargins(36, 36, 36, 36)
+        card = QFrame()
+        card.setObjectName("SunsetCard")
+        card.setStyleSheet("""
+            QFrame#SunsetCard {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #fff1c1, stop:0.35 #fdba74, stop:0.7 #f9a8d4, stop:1 #c4b5fd);
+                border: 4px solid #ffffff;
+                border-radius: 36px;
+            }
+            QLabel { color: #3b0764; background: transparent; border: none; }
+            QPushButton { font-family: 'Comic Sans MS'; font-size: 24px; font-weight: bold; color: #ffffff;
+                          background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #fb7185, stop:1 #a855f7);
+                          border: 4px solid #ffffff; border-radius: 30px; padding: 12px 40px; }
+            QPushButton:hover { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #f43f5e, stop:1 #9333ea); }
+        """)
+        glow = QGraphicsDropShadowEffect(box)
+        glow.setBlurRadius(60)
+        glow.setColor(QColor(251, 146, 60, 230))
+        glow.setOffset(0, 0)
+        card.setGraphicsEffect(glow)
+        outer.addWidget(card)
+        lay = QVBoxLayout(card)
+        lay.setContentsMargins(40, 30, 40, 30)
+        lay.setSpacing(16)
+        label = QLabel("<div style='font-family: Comic Sans MS;'>"
+                       "<div style='font-size: 36px; font-weight: bold; color: #7c2d12;'>%s</div>"
+                       "<p style='font-size: 24px;'>%s</p></div>" % (html.escape(heading), html.escape(text)))
+        label.setTextFormat(Qt.RichText)
+        label.setWordWrap(True)
+        label.setMinimumWidth(520)
+        label.setAlignment(Qt.AlignCenter)
+        lay.addWidget(label)
+        close_btn = QPushButton("Close")
+        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.clicked.connect(box.accept)
+        lay.addWidget(close_btn, alignment=Qt.AlignCenter)
+        box.exec_()
+
     def open_upgrade(self):
         """Opens the website: the parent logs in, buys the app, and the lessons open here by themselves."""
         url = CONFIG["locks"].get("upgrade_url")
@@ -2386,7 +2431,7 @@ class MainWindow(QMainWindow):
             return
         if self.locks.enter_key(key):
             self.refresh_locks()
-            QMessageBox.information(self, "Unlocked! 🎉", "Every lesson is open now. Have fun coding! 🚀")
+            self.sunset_message("Unlocked! 🎉", "🎉 Unlocked!", "Every lesson is open now. Have fun coding! 🚀")
         else:
             QMessageBox.warning(self, "Licence key 🔑", "That key doesn't work for this app. Check it and try again.")
 
