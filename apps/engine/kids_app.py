@@ -415,11 +415,41 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 
 .confetti { position:fixed; width:12px; height:12px; top:-20px; z-index:999999; animation: confettiFall linear forwards; }
 @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+
+/* The lesson page sits in a night sky full of twinkling stars (in light and dark mode) */
+html, body { background: radial-gradient(ellipse at 50% 0%, #2c3285 0%, #161c52 45%, #070b24 100%) fixed; }
+.night-star { position: fixed; border-radius: 50%; background: #ffffff; z-index: -1; pointer-events: none;
+              box-shadow: 0 0 6px rgba(255, 255, 255, 0.9), 0 0 12px rgba(147, 197, 253, 0.6);
+              animation: twinkleDot 3s ease-in-out infinite; }
+@keyframes twinkleDot { 0%, 100% { opacity: 0.2; transform: scale(0.6); } 50% { opacity: 1; transform: scale(1.2); } }
+.sun { opacity: 0 !important; }
+.moon { opacity: 1 !important; }
+.star { opacity: 1 !important; display: block !important; animation: twinkle 2s infinite; }
+h1 { color: #ffffff !important; text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
+.subtitle { color: #c7d2fe !important; }
+@media (prefers-reduced-motion: reduce) { .night-star, .star { animation: none; opacity: 0.8 !important; } }
 </style>
 """
 
 COMMON_JS = """
 <script>
+// Sprinkle twinkling stars over the night sky
+function makeNightSky() {
+    if (document.querySelector('.night-star')) return;
+    for (let i = 0; i < 90; i++) {
+        const s = document.createElement('div');
+        s.className = 'night-star';
+        const size = 1 + Math.random() * 2.6;
+        s.style.width = s.style.height = size + 'px';
+        s.style.left = (Math.random() * 100) + '%';
+        s.style.top = (Math.random() * 100) + '%';
+        s.style.animationDuration = (2 + Math.random() * 3.5) + 's';
+        s.style.animationDelay = (-Math.random() * 5) + 's';
+        document.body.appendChild(s);
+    }
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', makeNightSky); else makeNightSky();
+
 let CURRENT_EXAMPLES = {};
 let activeExampleKey = null;
 
