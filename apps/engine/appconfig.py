@@ -53,8 +53,9 @@ DEFAULTS = {
         # They are checked with the secret in the app folder's licence_secret.txt, which is kept off GitHub
         # (.gitignore) and goes into the .exe when you build. No secret: licence keys are turned off.
         "licence_prefix": "PAFK",
-        # Where "Upgrade" sends parents
-        "upgrade_url": "https://www.adathecoder.com/#pricing",
+        # Where "Upgrade" sends parents: the website's account page for this app (log in, then buy).
+        # While it's open, the app checks the parent's account and unlocks every lesson once it's bought.
+        "upgrade_url": "https://www.adathecoder.com/account",
     },
     # "New here? Create an account" on the login card opens this page of the website
     "register_url": "https://www.adathecoder.com/register",
@@ -95,6 +96,11 @@ def load_config(app_dir):
     if site:
         cfg["register_url"] = site.rstrip("/") + "/register"
         cfg["password_url"] = site.rstrip("/") + "/forgot-password"
+        cfg["locks"]["upgrade_url"] = site.rstrip("/") + "/account"
+    tid = cfg["server"].get("theme_id") or cfg["id"]
+    up = cfg["locks"].get("upgrade_url") or ""
+    if up.rstrip("/").endswith("/account"):
+        cfg["locks"]["upgrade_url"] = up.rstrip("/") + "?theme=" + tid + "#theme-" + tid
     env_url = os.environ.get("KIDS_APP_SERVER")
     if env_url is not None:
         cfg["server"]["url"] = env_url

@@ -37,7 +37,7 @@ Lesson 1 is always free. In `app.json`:
 "locks": {
   "locked_lessons": "2-17",        // or "2-5, 9", or [2, 3, 10], or [] for none
   "licence_prefix": "PAFK",
-  "upgrade_url": "https://www.adathecoder.com/#pricing"
+  "upgrade_url": "https://www.adathecoder.com/account"   // + ?theme=<theme_id>, added by the app
 }
 ```
 

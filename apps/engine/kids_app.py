@@ -1740,6 +1740,8 @@ class MainWindow(QMainWindow):
         self._finish_logout()
 
     def _finish_logout(self):
+        self._stop_purchase_watch()
+        self._session_login = None
         self.user_info = {}
         self._logged_in = False
         self.locks.set_account_licences([])
@@ -2050,6 +2052,7 @@ class MainWindow(QMainWindow):
         self._start_loading("⏳ Logging in...")
         if self._use_server():
             self._pending_email = email
+            self._pending_password = password
             self._api_kind = "login"
             self.api.start("/v3/login", {"email": email, "password": password})
             return
@@ -2079,8 +2082,18 @@ class MainWindow(QMainWindow):
                                   email=answer.get("email") or email, role="Parent account",
                                   auth_provider="Ada The Coder website")
             self.locks.set_account_licences(answer.get("licences") or [])
+            # kept in memory only (never saved), to check for a new purchase while the app is open
+            self._session_login = {"email": answer.get("email") or email, "password": getattr(self, "_pending_password", "")}
+            self._pending_password = ""
             self.refresh_locks()
             self._finish_login_success()
+        elif kind == "recheck":
+            # after "Upgrade": has the parent bought the app on the website yet?
+            if answer and answer.get("ok") and self.locks.set_account_licences(answer.get("licences") or []):
+                self._stop_purchase_watch()
+                self.refresh_locks()
+                QMessageBox.information(self, "Unlocked! 🎉",
+                                        "Thank you! Every lesson is open now. Have fun coding! 🚀")
         elif kind == "register":
             if error == "offline":
                 self._stop_loading()
@@ -2360,9 +2373,36 @@ class MainWindow(QMainWindow):
             self.open_upgrade()
 
     def open_upgrade(self):
+        """Opens the website: the parent logs in, buys the app, and the lessons open here by themselves."""
         url = CONFIG["locks"].get("upgrade_url")
-        if url:
-            webbrowser.open(url)
+        if not url:
+            return
+        webbrowser.open(url)
+        self._start_purchase_watch()
+
+    def _start_purchase_watch(self):
+        """Checks the parent's account every 20 seconds for 20 minutes; the purchase unlocks every lesson."""
+        if not self._use_server() or not getattr(self, "_session_login", None) or not self._session_login.get("password"):
+            return
+        if not hasattr(self, "purchase_timer"):
+            self.purchase_timer = QTimer(self)
+            self.purchase_timer.setInterval(20000)
+            self.purchase_timer.timeout.connect(self._recheck_purchase)
+        self._purchase_checks_left = 60
+        self.purchase_timer.start()
+
+    def _stop_purchase_watch(self):
+        if hasattr(self, "purchase_timer"):
+            self.purchase_timer.stop()
+
+    def _recheck_purchase(self):
+        self._purchase_checks_left -= 1
+        if self._purchase_checks_left <= 0 or self.locks.has_full_access:
+            self._stop_purchase_watch()
+            return
+        if self._api_kind is None:          # don't talk over another call
+            self._api_kind = "recheck"
+            self.api.start("/v3/login", dict(self._session_login))
 
     def ask_licence_key(self):
         prefix = self.locks.prefix
