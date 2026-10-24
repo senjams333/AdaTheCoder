@@ -2652,7 +2652,7 @@ class MainWindow(QMainWindow):
                 ("🎯 Plan", html.escape(lic["plan"])), ("⚡ Status", status),
                 ("🔢 Version", html.escape(str(CONFIG["version"])))]
         notes = ("<p style='font-size:17px;'><b>📜 License:</b> Personal &amp; educational use only.</p>"
-                 "<p style='font-size:17px;'>This software is provided \"as is\", without warranty of any kind.</p>")
+                 "<br><p style='font-size:17px;'>This software is provided \"as is\", without warranty of any kind.</p>")
         first = (CONFIG["characters"] or [{}])[0]
         picture = CONFIG.get("license_picture") or first.get("image") or LOGO
         name = (CONFIG.get("license_character") or first.get("name", "").split(" ", 1)[-1] or "a friend").title()
