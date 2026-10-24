@@ -1356,13 +1356,10 @@ class MainWindow(QMainWindow):
         self.profile_action.triggered.connect(self.show_profile_dialog)
         self.license_action = QAction("📜 License", self)
         self.license_action.triggered.connect(self.show_license_dialog)
-        self.key_action = QAction("🔑 Enter licence key", self)
-        self.key_action.triggered.connect(self.ask_licence_key)
 
         self.account_menu.addAction(self.profile_action)
         self.account_menu.addSeparator()
         self.account_menu.addAction(self.license_action)
-        self.account_menu.addAction(self.key_action)
         self.avatar_btn.setMenu(self.account_menu)
 
         top_bar.addWidget(logo)
@@ -2260,8 +2257,6 @@ class MainWindow(QMainWindow):
     def refresh_locks(self):
         for idx, widget in enumerate(self.topic_widgets):
             widget.set_locked(self.locks.is_locked(idx + 1))
-        if hasattr(self, "key_action"):
-            self.key_action.setVisible(bool(self.locks.secret) and not self.locks.licence_key)
 
     def show_locked_dialog(self, idx):
         topic = TOPICS[idx]

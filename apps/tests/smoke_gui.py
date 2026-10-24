@@ -106,7 +106,7 @@ step("lesson 1 opens", w.center_stack.currentIndex() == 1 and w.current_lesson_i
 shot(w, "04-lesson-1")
 w.show_home()
 
-step("the menu has no lock / unlock screen", not hasattr(w, "locks_action")
+step("the menu has no lock / unlock screen and no licence key item", not hasattr(w, "locks_action") and not hasattr(w, "key_action")
      and all("Lock / unlock" not in a.text() for a in w.account_menu.actions()))
 
 secret = w.locks.secret

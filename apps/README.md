@@ -46,7 +46,7 @@ key** and **Upgrade**. The app has no lock screen for children; lessons are unlo
 
 | How | Who | What it opens |
 | --- | --- | --- |
-| Avatar menu → **🔑 Enter licence key** | A family that bought it | Every lesson on that computer, for good |
+| **🔑 Enter licence key** on a locked lesson, or in 📜 License | A family that bought it | Every lesson on that computer, for good |
 | Logging in with a website account that has a licence for this app | A parent (when `server.url` is set) | Every lesson while they're logged in |
 
 **Licence keys.** `python apps/make_key.py python_adventure --count 20` prints 20 keys
