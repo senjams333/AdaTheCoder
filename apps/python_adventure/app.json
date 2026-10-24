@@ -37,6 +37,7 @@
   },
 
   "register_url": "https://www.adathecoder.com/register",
+  "password_url": "https://www.adathecoder.com/forgot-password",
 
   "server": {
     "url": "",

@@ -54,6 +54,8 @@ DEFAULTS = {
     },
     # "New here? Create an account" on the login card opens this page of the website
     "register_url": "https://www.adathecoder.com/register",
+    # Profile → "Change password" opens this page: the parent types their email and gets a reset link
+    "password_url": "https://www.adathecoder.com/forgot-password",
     "server": {
         # The Ada The Coder API (e.g. https://api.adathecoder.com). Empty: demo log-in, any email works.
         "url": "",
@@ -88,6 +90,7 @@ def load_config(app_dir):
     site = os.environ.get("KIDS_APP_SITE")
     if site:
         cfg["register_url"] = site.rstrip("/") + "/register"
+        cfg["password_url"] = site.rstrip("/") + "/forgot-password"
     env_url = os.environ.get("KIDS_APP_SERVER")
     if env_url is not None:
         cfg["server"]["url"] = env_url

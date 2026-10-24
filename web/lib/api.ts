@@ -27,6 +27,12 @@ export const api = createApi({
     register: b.mutation<AuthAnswer, Record<string, unknown>>({
       query: (body) => ({ url: 'auth/register', method: 'POST', body }),
     }),
+    forgotPassword: b.mutation<{ ok: boolean }, { email: string }>({
+      query: (body) => ({ url: 'auth/forgot-password', method: 'POST', body }),
+    }),
+    resetPassword: b.mutation<{ ok: boolean; email: string }, { token: string; password: string; password2: string }>({
+      query: (body) => ({ url: 'auth/reset-password', method: 'POST', body }),
+    }),
     me: b.query<{ ok: boolean; user: User }, void>({ query: () => 'auth/me' }),
     setupStatus: b.query<{ needed: boolean }, void>({ query: () => 'auth/setup' }),
     setupAdmin: b.mutation<AuthAnswer, { name: string; email: string; password: string; password2: string }>({
@@ -126,7 +132,7 @@ export const api = createApi({
 });
 
 export const {
-  useGetSiteQuery, useLoginMutation, useRegisterMutation, useMeQuery, useSetupStatusQuery, useSetupAdminMutation,
+  useGetSiteQuery, useLoginMutation, useRegisterMutation, useForgotPasswordMutation, useResetPasswordMutation, useMeQuery, useSetupStatusQuery, useSetupAdminMutation,
   useGetAccountQuery, useUpdateAccountMutation, useChangePasswordMutation, useDeleteAccountMutation, useDownloadLinkMutation,
   useDashboardQuery, useAdminSettingsQuery, useSaveSettingsMutation,
   useThemesQuery, useThemeQuery, useCreateThemeMutation, useUpdateThemeMutation, useDeleteThemeMutation, useCopyLessonsMutation,

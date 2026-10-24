@@ -98,3 +98,30 @@ export function adminNewAccountEmail(user: NewAccount, siteUrl: string): Email {
   const text = `New parent account\n\n${rows.map(([k, v]) => `${k}: ${v}`).join('\n')}\n\nAdmin: ${siteUrl.replace(/\/$/, '')}/admin/parents`;
   return { subject: `New parent account: ${user.name} (${user.email})`, html, text };
 }
+
+/** Sent when someone asks for a new password on the website (or from the app's Profile → Change password). */
+export function passwordResetEmail(user: { name: string; email: string }, link: string, siteUrl: string): Email {
+  const first = (user.name || '').split(' ')[0] || 'there';
+  const forgot = `${siteUrl.replace(/\/$/, '')}/forgot-password`;
+  const html = layout(
+    'Choose a new password',
+    `<h1 style="margin:0 0 12px;font-size:24px;color:#2B2257;">Hi ${esc(first)}, here's your link 🔑</h1>
+<p style="margin:0 0 14px;">Someone asked to change the password of the Ada The Coder account <b>${esc(user.email)}</b>.
+Press the button to choose a new one. It works for the website and the app.</p>
+<p style="margin:0 0 18px;">${button(link, 'Choose a new password')}</p>
+<p style="margin:0 0 14px;font-size:14px;">The link works for 1 hour, and only once. If it has expired, ask for a new one at
+<a href="${esc(forgot)}" style="color:#7B4DFF;">${esc(forgot.replace(/^https?:\/\//, ''))}</a>.</p>
+<p style="margin:0;color:#6B6890;font-size:14px;">Didn't ask for this? Ignore this email: your password stays the same.</p>`,
+    siteUrl,
+  );
+  const text = `Hi ${first},
+
+Someone asked to change the password of the Ada The Coder account ${user.email}.
+Choose a new password here (it works for the website and the app):
+${link}
+
+The link works for 1 hour, and only once. A new one: ${forgot}
+
+Didn't ask for this? Ignore this email: your password stays the same.`;
+  return { subject: 'Choose a new password for Ada The Coder 🔑', html, text };
+}

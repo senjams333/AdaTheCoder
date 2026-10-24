@@ -29,6 +29,7 @@ os.chdir(get_base_dir())
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import html
+import urllib.parse
 import urllib.request
 import urllib.error
 import webbrowser
@@ -2515,8 +2516,19 @@ class MainWindow(QMainWindow):
         if default_pix:
             box.setIconPixmap(default_pix)
         box.setStyleSheet("QMessageBox { background: #ffffff; }")
-        box.setStandardButtons(QMessageBox.Ok)
+        pw_btn = box.addButton("🔑 Change password", QMessageBox.ActionRole) if CONFIG.get("password_url") else None
+        box.addButton(QMessageBox.Ok)
         box.exec_()
+        if pw_btn is not None and box.clickedButton() is pw_btn:
+            self.open_password_page()
+
+    def open_password_page(self):
+        """Passwords are changed on the website: it emails a reset link, and the new password works here too."""
+        url = CONFIG["password_url"]
+        email = (self.user_info or {}).get("email") or ""
+        if email and "@" in email and email != DUMMY_USER["email"]:
+            url += ("&" if "?" in url else "?") + "email=" + urllib.parse.quote(email)
+        webbrowser.open(url)
 
     def show_license_dialog(self):
         lic = DUMMY_LICENSE

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Ip, Post, UseGuards } from '@nestjs/common';
 import { publicUser, User } from '../entities/user.entity';
 import { AuthService } from './auth.service';
-import { ChangePasswordDto, LoginDto, SetupAdminDto } from './dto/login.dto';
+import { ChangePasswordDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, SetupAdminDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AuthGuard, CurrentUser } from './guards';
 
@@ -37,6 +37,21 @@ export class AuthController {
   @Post('setup')
   setup(@Body() dto: SetupAdminDto) {
     return this.auth.setupAdmin(dto);
+  }
+
+  /** "Forgot your password?": emails a link to choose a new one. The same answer whether or not the
+   *  email has an account, so nobody can use it to find out who has one. */
+  @Post('forgot-password')
+  @HttpCode(200)
+  forgotPassword(@Body() dto: ForgotPasswordDto, @Ip() ip: string) {
+    return this.auth.forgotPassword(dto.email, ip);
+  }
+
+  /** The new password, from the page the emailed link opens. Works for the website and the app. */
+  @Post('reset-password')
+  @HttpCode(200)
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.auth.resetPassword(dto);
   }
 
   /** For other services that only know the email (the logged-in website uses /account/password). */

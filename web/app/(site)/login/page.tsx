@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
-import { useGetSiteQuery, useLoginMutation } from '@/lib/api';
+import { useLoginMutation } from '@/lib/api';
 import { loggedIn } from '@/lib/authSlice';
 import { errorList } from '@/lib/errors';
 import { useAppDispatch } from '@/lib/hooks';
@@ -15,11 +15,9 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
   const [login, { isLoading }] = useLoginMutation();
-  const { data: site } = useGetSiteQuery();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const next = useSearchParams().get('next');
-  const contact = site?.settings.contact_email || 'ada@adathecoder.com';
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -52,7 +50,7 @@ function LoginForm() {
             <button className="btn" type="submit" disabled={isLoading}>{isLoading ? 'Logging in…' : 'Log in'}</button>
           </form>
           <p className="switch">New here? <Link href="/register">Create a parent account</Link></p>
-          <p className="switch muted">Forgot your password? Email <a href={`mailto:${contact}`}>{contact}</a> and we&apos;ll help.</p>
+          <p className="switch muted"><Link href="/forgot-password">Forgot your password?</Link></p>
         </div>
       </section>
     </div>

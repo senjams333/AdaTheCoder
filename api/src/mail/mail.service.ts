@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminNewAccountEmail, Email, NewAccount, welcomeEmail } from './templates';
+import { adminNewAccountEmail, Email, NewAccount, passwordResetEmail, welcomeEmail } from './templates';
 
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
@@ -24,6 +24,12 @@ export class MailService {
       adminTo ? this.send(adminTo, 'Ada The Coder admin', adminNewAccountEmail(user, this.siteUrl)) : Promise.resolve(false),
     ]);
     return { user: toUser, admin: toAdmin };
+  }
+
+  /** The "choose a new password" email. Never throws. */
+  sendPasswordReset(user: { name: string; email: string }, token: string): Promise<boolean> {
+    const link = `${this.siteUrl.replace(/\/$/, '')}/reset-password?token=${encodeURIComponent(token)}`;
+    return this.send(user.email, user.name, passwordResetEmail(user, link, this.siteUrl));
   }
 
   async send(toEmail: string, toName: string, email: Email): Promise<boolean> {

@@ -31,6 +31,29 @@ export class ChangePasswordDto {
   newPassword!: string;
 }
 
+/** POST /api/auth/forgot-password: emails a link to choose a new password */
+export class ForgotPasswordDto {
+  @Transform(email)
+  @IsEmail({}, { message: 'Enter a valid email address.' })
+  email!: string;
+}
+
+/** POST /api/auth/reset-password: the new password, with the token from the emailed link */
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty({ message: 'This link is not complete. Open the link from the email again.' })
+  token!: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Choose a new password with at least 8 characters.' })
+  @MaxLength(72, { message: 'Choose a new password of at most 72 characters.' })
+  password!: string;
+
+  @IsOptional()
+  @IsString()
+  password2?: string;
+}
+
 /** POST /api/auth/setup: the first admin account of a new website */
 export class SetupAdminDto {
   @Transform(trim)

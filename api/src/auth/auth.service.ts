@@ -4,14 +4,17 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import { createHash } from 'crypto';
 import { Repository } from 'typeorm';
 import { publicUser, User } from '../entities/user.entity';
 import { MailService } from '../mail/mail.service';
-import { ChangePasswordDto, LoginDto, SetupAdminDto } from './dto/login.dto';
+import { ChangePasswordDto, LoginDto, ResetPasswordDto, SetupAdminDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
 const MAX_FAILS = 8;
 const WINDOW_MS = 15 * 60 * 1000;
+const MAX_RESET_EMAILS = 5;
+export const RESET_EXPIRED = 'This link has expired or was already used. Ask for a new one on the "Forgot your password?" page.';
 export const WRONG_LOGIN = "That email and password don't match. Check them and try again.";
 export const TAKEN = 'An account with this email already exists. Log in instead.';
 
@@ -108,6 +111,46 @@ export class AuthService {
     return this.changePassword(user, dto.currentPassword, dto.newPassword);
   }
 
+  /** Emails a link to choose a new password (valid for 1 hour, once). Answers the same for unknown emails. */
+  async forgotPassword(email: string, address = 'unknown') {
+    const keys = [`reset:${email}`, `reset-ip:${address}`];
+    if (keys.some((k) => this.tooMany(k, MAX_RESET_EMAILS))) {
+      throw new HttpException('Too many tries. Wait 15 minutes, then try again.', HttpStatus.TOO_MANY_REQUESTS);
+    }
+    keys.forEach((k) => this.fail(k));
+    const user = await this.findByEmail(email);
+    if (user && user.isActive) {
+      const token = this.jwt.sign({ sub: user.id, purpose: 'reset', ph: this.hashMark(user) }, { expiresIn: '1h' });
+      await this.mail.sendPasswordReset(user, token);
+    }
+    return { ok: true };
+  }
+
+  /** Sets the new password from the emailed link. The link stops working once the password changes. */
+  async resetPassword(dto: ResetPasswordDto) {
+    let payload: { sub?: number; purpose?: string; ph?: string };
+    try {
+      payload = this.jwt.verify(dto.token);
+    } catch {
+      throw new BadRequestException([RESET_EXPIRED]);
+    }
+    if (payload.purpose !== 'reset' || !payload.sub) throw new BadRequestException([RESET_EXPIRED]);
+    const user = await this.users.findOne({ where: { id: payload.sub } });
+    if (!user || !user.isActive || payload.ph !== this.hashMark(user)) throw new BadRequestException([RESET_EXPIRED]);
+    if (dto.password2 !== undefined && dto.password2 !== dto.password) {
+      throw new BadRequestException(["The two passwords don't match."]);
+    }
+    user.passwordHash = await this.hash(dto.password);
+    await this.users.save(user);
+    this.fails.delete(`email:${user.email}`);
+    return { ok: true, email: user.email };
+  }
+
+  /** A short fingerprint of the current password hash: a reset link is only good until the password changes. */
+  private hashMark(user: User): string {
+    return createHash('sha256').update(user.passwordHash).digest('hex').slice(0, 16);
+  }
+
   async deleteAccount(user: User, password: string) {
     if (user.role === 'admin') throw new ForbiddenException("Admin accounts can't be deleted here.");
     if (!(await bcrypt.compare(password || '', user.passwordHash))) {
@@ -130,11 +173,11 @@ export class AuthService {
     return this.jwt.sign({ sub: user.id, email: user.email, role: user.role });
   }
 
-  private tooMany(key: string): boolean {
+  private tooMany(key: string, max = MAX_FAILS): boolean {
     const now = Date.now();
     const recent = (this.fails.get(key) || []).filter((t) => now - t < WINDOW_MS);
     this.fails.set(key, recent);
-    return recent.length >= MAX_FAILS;
+    return recent.length >= max;
   }
 
   private fail(key: string) {

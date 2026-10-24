@@ -60,6 +60,13 @@ Then the login and *Create an account* use the website's accounts (`/api/v3/logi
 Give a parent a licence for the theme `python_adventure` in **Admin → Parents** (create a paid theme with
 that ID first). No internet: the child still gets in, with the free lessons only.
 
+## Accounts and passwords
+
+On the login card, **New here? Create an account** opens the website's registration page (`register_url`).
+**Profile → 🔑 Change password** opens the website's *Forgot your password?* page (`password_url`): the
+parent types their email, gets a link by email, and chooses a new password on the website. The same
+password then works on the website and in the app.
+
 ## Make the next app
 
 ```bash

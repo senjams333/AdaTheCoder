@@ -15,6 +15,7 @@ describe('Ada The Coder API', () => {
   let app: INestApplication;
   let http: ReturnType<INestApplication['getHttpServer']>;
   const sent: string[] = [];
+  const resetLinks: { email: string; token: string }[] = [];
   let admin = '';
   let parent = '';
 
@@ -25,7 +26,10 @@ describe('Ada The Coder API', () => {
     process.env.UPLOAD_DIR = mkdtempSync(join(tmpdir(), 'ada-uploads-'));
     const mod = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(MailService)
-      .useValue({ async sendAccountCreated(u: { email: string }) { sent.push(u.email, 'admin'); return { user: true, admin: true }; } })
+      .useValue({
+        async sendAccountCreated(u: { email: string }) { sent.push(u.email, 'admin'); return { user: true, admin: true }; },
+        async sendPasswordReset(u: { email: string }, token: string) { resetLinks.push({ email: u.email, token }); return true; },
+      })
       .compile();
     app = mod.createNestApplication();
     app.setGlobalPrefix('api');
@@ -140,6 +144,34 @@ describe('Ada The Coder API', () => {
     }).expect(201);
     expect(r.body).toEqual({ ok: true, name: 'Lina', email: 'lina@example.com', licences: [] });
     expect((await request(http).post('/api/v3/register').send({ email: 'x' }).expect(400)).body.ok).toBe(false);
+  });
+
+  it('forgot password: emailed link sets a new password for the website and the app, once', async () => {
+    // unknown email: the same answer, nothing sent
+    await request(http).post('/api/auth/forgot-password').send({ email: 'nobody@example.com' }).expect(200, { ok: true });
+    expect(resetLinks).toHaveLength(0);
+    await request(http).post('/api/auth/forgot-password').send({ email: 'not-an-email' }).expect(400);
+    await request(http).post('/api/auth/forgot-password').send({ email: 'Lina@Example.com' }).expect(200, { ok: true });
+    expect(resetLinks.map((l) => l.email)).toEqual(['lina@example.com']);
+    const { token } = resetLinks[0];
+    // the link's token is not a log-in
+    await request(http).get('/api/account').set('Authorization', `Bearer ${token}`).expect(401);
+    // a log-in token is not a reset link
+    const login = await request(http).post('/api/auth/login').send({ email: 'lina@example.com', password: 'goodpass1' }).expect(200);
+    await request(http).post('/api/auth/reset-password').send({ token: login.body.token, password: 'brandnew99' }).expect(400);
+    const short = await request(http).post('/api/auth/reset-password').send({ token, password: 'short' }).expect(400);
+    expect(short.body.message.join(' ')).toContain('8 characters');
+    await request(http).post('/api/auth/reset-password').send({ token, password: 'brandnew99', password2: 'different1' }).expect(400);
+    await request(http).post('/api/auth/reset-password').send({ token, password: 'brandnew99', password2: 'brandnew99' })
+      .expect(200, { ok: true, email: 'lina@example.com' });
+    // the new password works on the website and in the app; the old one doesn't
+    await request(http).post('/api/auth/login').send({ email: 'lina@example.com', password: 'goodpass1' }).expect(401);
+    await request(http).post('/api/auth/login').send({ email: 'lina@example.com', password: 'brandnew99' }).expect(200);
+    expect((await request(http).post('/api/v3/login').send({ email: 'lina@example.com', password: 'brandnew99' }).expect(200)).body.ok).toBe(true);
+    // the link works only once
+    const again = await request(http).post('/api/auth/reset-password').send({ token, password: 'another123' }).expect(400);
+    expect(again.body.message.join(' ')).toContain('expired or was already used');
+    await request(http).post('/api/auth/reset-password').send({ token: 'garbage', password: 'another123' }).expect(400);
   });
 
   it('parent: details, password, delete', async () => {

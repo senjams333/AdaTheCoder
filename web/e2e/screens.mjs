@@ -31,6 +31,8 @@ async function shoot(name, path, who, { width = 1366, height = 900, full = true 
 
 await shoot('01-home', '/', null);
 await shoot('02-register', '/register', null);
+await shoot('02b-forgot-password', '/forgot-password', null);
+await shoot('02c-reset-password', '/reset-password?token=example', null);
 await shoot('03-login', '/login', null);
 await shoot('04-account', '/account', parent, { full: false });
 await shoot('05-admin-overview', '/admin', admin);

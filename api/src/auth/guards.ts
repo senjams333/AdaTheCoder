@@ -13,12 +13,14 @@ export class AuthGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest();
     const [kind, token] = String(req.headers.authorization || '').split(' ');
     if (kind !== 'Bearer' || !token) throw new UnauthorizedException('Please log in first.');
-    let payload: { sub: number };
+    let payload: { sub: number; purpose?: string };
     try {
       payload = this.jwt.verify(token);
     } catch {
       throw new UnauthorizedException('Your log-in has expired. Please log in again.');
     }
+    // password-reset links carry a token too: it only resets a password, it never logs anyone in
+    if (payload.purpose) throw new UnauthorizedException('Please log in first.');
     const user = await this.users.findOne({ where: { id: payload.sub } });
     if (!user || !user.isActive) throw new UnauthorizedException('This account is turned off or no longer exists.');
     req.user = user;

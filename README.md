@@ -104,6 +104,7 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
 | Address | For |
 | --- | --- |
 | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | Parents and admins (the answer's `user.role` says which) |
+| `POST /auth/forgot-password`, `POST /auth/reset-password` | "Forgot your password?": emails a link (Brevo, 1 hour, once) to the website's `/reset-password` page; the new password works on the website and in the app |
 | `GET /auth/setup`, `POST /auth/setup` | The first admin of a new website (works only while there is none) |
 | `GET /site` | Everything the public pages show |
 | `GET/PATCH /account`, `POST /account/password`, `POST /account/delete`, `POST /account/download/:platform` | The logged-in parent (Bearer) |
