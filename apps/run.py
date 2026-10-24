@@ -24,6 +24,7 @@ def main():
     p = argparse.ArgumentParser(description="Open a kids app")
     p.add_argument("app", nargs="?", help="the app's folder name in apps/")
     p.add_argument("--server", help="the API's address (overrides app.json → server.url for this run)")
+    p.add_argument("--site", help="the website's address, for 'Create an account' (e.g. http://127.0.0.1:5000)")
     args = p.parse_args()
     apps = app_folders()
     name = args.app or (apps[0] if len(apps) == 1 else None)
@@ -31,6 +32,8 @@ def main():
         print("Which app? python apps/run.py <app>   Apps here:", ", ".join(apps) or "(none)")
         sys.exit(1)
     os.environ["KIDS_APP_DIR"] = os.path.join(HERE, name)
+    if args.site:
+        os.environ["KIDS_APP_SITE"] = args.site
     if args.server is not None:
         os.environ["KIDS_APP_SERVER"] = args.server
     sys.argv = [ENGINE]

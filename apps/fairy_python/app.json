@@ -43,6 +43,8 @@
     "licence_prefix": "FAIR",
     "upgrade_url": "https://www.adathecoder.com/#pricing"
   },
+  "register_url": "https://www.adathecoder.com/register",
+
   "server": {
     "url": "",
     "theme_id": "fairy_python"

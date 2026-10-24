@@ -1932,7 +1932,8 @@ class MainWindow(QMainWindow):
             }
             QPushButton:hover { color: #0f766e; }
         """)
-        self.toggle_mode_btn.clicked.connect(self.toggle_login_mode)
+        self.toggle_mode_btn.setToolTip(CONFIG["register_url"])
+        self.toggle_mode_btn.clicked.connect(self.open_register_page)
 
         card_layout.addWidget(img_label, alignment=Qt.AlignCenter)
         card_layout.addWidget(self.login_title)
@@ -1958,6 +1959,13 @@ class MainWindow(QMainWindow):
         self.login_overlay.raise_()
         self.login_overlay.show()
         QTimer.singleShot(100, self.email_input.setFocus)
+
+    def open_register_page(self):
+        """New accounts are made on the website's registration page."""
+        if CONFIG.get("register_url"):
+            webbrowser.open(CONFIG["register_url"])
+            self.login_status.setStyleSheet("font-size: 14px; font-weight: bold; color: #2563eb;")
+            self.login_status.setText("🌐 The sign-up page opened in your browser. Come back and log in! ✨")
 
     def toggle_login_mode(self):
         if self.login_mode == "login":

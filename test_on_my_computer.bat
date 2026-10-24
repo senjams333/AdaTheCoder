@@ -23,7 +23,7 @@ echo.
 echo App: lesson 1 free, 2-17 locked. Licence key for testing:
 type licence-key-for-testing.txt
 echo Or give a parent a licence for "python_adventure" in Admin - Parents.
-python apps\run.py python_adventure --server http://127.0.0.1:3000
+python apps\run.py python_adventure --server http://127.0.0.1:3000 --site http://127.0.0.1:5000
 goto :eof
 
 :error

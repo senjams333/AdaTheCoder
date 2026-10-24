@@ -52,6 +52,8 @@ DEFAULTS = {
         # Where "Upgrade" sends parents
         "upgrade_url": "https://www.adathecoder.com/#pricing",
     },
+    # "New here? Create an account" on the login card opens this page of the website
+    "register_url": "https://www.adathecoder.com/register",
     "server": {
         # The Ada The Coder API (e.g. https://api.adathecoder.com). Empty: demo log-in, any email works.
         "url": "",
@@ -83,6 +85,9 @@ def load_config(app_dir):
         with open(secret_file, encoding="utf-8") as f:
             cfg["locks"]["licence_secret"] = f.read().strip()
     cfg["locks"].setdefault("licence_secret", "")
+    site = os.environ.get("KIDS_APP_SITE")
+    if site:
+        cfg["register_url"] = site.rstrip("/") + "/register"
     env_url = os.environ.get("KIDS_APP_SERVER")
     if env_url is not None:
         cfg["server"]["url"] = env_url

@@ -97,4 +97,4 @@ echo "          Unlock: licence key $(cat "$HERE/licence-key-for-testing.txt")"
 echo "          or a parent with a licence for the theme $APP (Admin → Parents)"
 echo
 echo "Starting the app. Closing it stops the website and the API too."
-"$VPY" apps/run.py "$APP" --server "$API"
+"$VPY" apps/run.py "$APP" --server "$API" --site "$WEB"
