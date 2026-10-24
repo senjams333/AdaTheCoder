@@ -37,8 +37,8 @@
   "colors": {
     "background": "#eaf8ff",
     "background_dark": "#0f172a",
-    "sidebar": "#a7f3d0",
-    "sidebar_dark": "#134e4a"
+    "sidebar": "qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #e0f6ff, stop:0.5 #bae6fd, stop:1 #7dd3fc)",
+    "sidebar_dark": "qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0c4a6e, stop:1 #075985)"
   },
   "locks": {
     "locked_lessons": "2-17",

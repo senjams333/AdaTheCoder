@@ -1102,46 +1102,26 @@ class TopicItem(QWidget):
         self.update_style(self.is_active)
 
     def update_style(self, is_active):
+        """Sky-blue, round and friendly: white bubbles, the open lesson bright blue with a sunny border."""
         self.is_active = is_active
+        base = "font-family: 'Comic Sans MS'; font-size: 15px; border-radius: 22px; padding: 12px 16px; text-align: left;"
         if self.locked and not is_active:
             self.topic_btn.setStyleSheet("""
-                QPushButton { 
-                    background-color: rgba(255, 255, 255, 0.35); 
-                    color: #64748b; 
-                    border: 2px dashed rgba(100, 116, 139, 0.45); 
-                    border-radius: 20px; 
-                    padding: 14px 16px; 
-                    text-align: left; 
-                    font-weight: normal;
-                }
-                QPushButton:hover { background-color: rgba(255, 255, 255, 0.6); color: #475569; }
-            """)
+                QPushButton { %s background-color: rgba(255, 255, 255, 0.45); color: #5b7a99;
+                              border: 2px dashed #7dd3fc; font-weight: normal; }
+                QPushButton:hover { background-color: rgba(255, 255, 255, 0.7); color: #0369a1; }
+            """ % base)
             return
         if is_active:
             self.topic_btn.setStyleSheet("""
-                QPushButton { 
-                    background-color: #38bdf8; 
-                    color: #ffffff; 
-                    border: 3px solid #facc15; 
-                    border-radius: 20px; 
-                    padding: 14px 16px; 
-                    text-align: left; 
-                    font-weight: bold;
-                }
-            """)
+                QPushButton { %s background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #38bdf8, stop:1 #0ea5e9);
+                              color: #ffffff; border: 3px solid #facc15; font-weight: bold; }
+            """ % base)
         else:
             self.topic_btn.setStyleSheet("""
-                QPushButton { 
-                    background-color: rgba(255, 255, 255, 0.7); 
-                    color: #0f172a; 
-                    border: none; 
-                    border-radius: 20px; 
-                    padding: 14px 16px; 
-                    text-align: left; 
-                    font-weight: normal;
-                }
-                QPushButton:hover { background-color: #ffffff; color: #2563eb; }
-            """)
+                QPushButton { %s background-color: #ffffff; color: #0c4a6e; border: 2px solid #bae6fd; font-weight: bold; }
+                QPushButton:hover { background-color: #e0f2fe; border-color: #38bdf8; color: #0369a1; }
+            """ % base)
 
 
 DUMMY_CREDENTIALS = {
@@ -1640,7 +1620,8 @@ class MainWindow(QMainWindow):
         sidebar_layout.setContentsMargins(14, 15, 14, 15)
 
         self.sidebar_title = QLabel(CONFIG["sidebar_title"])
-        self.sidebar_title.setFont(QFont("Arial", 15, QFont.Normal))
+        self.sidebar_title.setFont(QFont("Comic Sans MS", 16, QFont.Bold))
+        self.sidebar_panel.setObjectName("SidePanel")
         self.sidebar_title.setAlignment(Qt.AlignCenter)
         sidebar_layout.addWidget(self.sidebar_title)
 
@@ -2773,15 +2754,17 @@ class MainWindow(QMainWindow):
             self.hero_panel.setStyleSheet("QFrame { background-color: rgba(15, 23, 42, 0.75); border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: white;")
             self.hero_sub.setStyleSheet("color: #d1fae5;")
-            self.sidebar_panel.setStyleSheet("QFrame { background: %s; border-radius: 40px; }" % CONFIG["colors"]["sidebar_dark"])
-            self.sidebar_title.setStyleSheet("color: #d1fae5;")
+            self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #0369a1; }"
+                                             % CONFIG["colors"]["sidebar_dark"])
+            self.sidebar_title.setStyleSheet("color: #e0f2fe; background: transparent;")
         else:
             self.central_widget.setStyleSheet("QWidget#CentralWidget { background: %s; }" % CONFIG["colors"]["background"])
             self.hero_panel.setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 0.45); border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: #0f172a;")
             self.hero_sub.setStyleSheet("color: #065f46;")
-            self.sidebar_panel.setStyleSheet("QFrame { background: %s; border-radius: 40px; }" % CONFIG["colors"]["sidebar"])
-            self.sidebar_title.setStyleSheet("color: #064e3b;")
+            self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #ffffff; }"
+                                             % CONFIG["colors"]["sidebar"])
+            self.sidebar_title.setStyleSheet("color: #0c4a6e; background: transparent;")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
