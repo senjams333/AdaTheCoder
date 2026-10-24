@@ -1212,7 +1212,16 @@ class ApiCall(QObject):
 
 
 class KidWindow(QDialog):
-    """A window that stays open until the child presses its close button (Esc doesn't close it)."""
+    """A window that stays open until the child presses its big red Close button.
+
+    It has no small ✕ in the title bar, and Esc or Alt+F4 don't close it.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent, Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+
+    def closeEvent(self, event):
+        event.ignore()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
@@ -2491,7 +2500,7 @@ class MainWindow(QMainWindow):
 
         rows: (label, value) pairs shown in a table. notes: extra lines under it (HTML, already escaped).
         buttons: (text, style, action): extra buttons at the bottom; pressing one runs its action and keeps
-        the window open. The window stays until the big red ✕ Close (or the title bar's ✕) is pressed.
+        the window open. The window stays until the big red ✕ Close is pressed (no title-bar ✕).
         """
         info = "".join("<tr><td style='padding:5px 14px 5px 0; color:#0369a1;'><b>%s</b></td><td style='padding:5px 0;'>%s</td></tr>"
                        % (k, v) for k, v in rows)
