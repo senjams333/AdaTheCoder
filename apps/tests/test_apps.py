@@ -50,11 +50,6 @@ class AppFolders(unittest.TestCase):
         self.assertTrue(lessons["lesson1"]["video_path"].endswith(os.path.join("vid", "video1.mp4")))
         self.assertEqual(len(lessons["lesson2"]["examples"]), 6)
 
-    def test_voice_file_names_ignore_emoji(self):
-        from appconfig import voice_key
-        self.assertEqual(voice_key("Fantastic job! Code ran correctly!"), "fantastic_job_code_ran_correctly")
-        self.assertEqual(voice_key("You missed to type input 🙈"), voice_key("You missed to type input"))
-
     def test_lesson_numbers(self):
         self.assertEqual(parse_lesson_numbers("2-17", 17), set(range(2, 18)))
         self.assertEqual(parse_lesson_numbers("1-3, 9", 17), {2, 3, 9})   # 1 is always free
@@ -173,11 +168,6 @@ class ExplainMistakes(unittest.TestCase):
         }
         for code, expected in cases.items():
             self.assertIn(expected, self.run_code(code)[0], code)
-
-    def test_every_short_message_has_a_voice_name(self):
-        from appconfig import voice_key
-        from explain import SHORT
-        self.assertEqual(len({voice_key(v) for v in SHORT.values()}), len(SHORT))
 
     def test_the_input_program_runner_explains_too(self):
         import subprocess

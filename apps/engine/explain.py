@@ -2,8 +2,7 @@
 
     text, short = explain(error, code)
 
-text is shown in the output box; short is the one-line message Tom says (also the name of its voice
-recording, so the shorts are a fixed list: SHORT). No PyQt here: the tests use it, and the program runner
+text is shown in the output box; short is the one-line message Tom shows (a fixed list: SHORT). No PyQt here: the tests use it, and the program runner
 for input() lessons copies this file's code in.
 """
 import builtins

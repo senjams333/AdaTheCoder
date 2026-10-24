@@ -34,7 +34,7 @@ import urllib.parse
 import urllib.request
 import urllib.error
 import webbrowser
-from appconfig import load_config, load_lessons, data_dir, voice_key
+from appconfig import load_config, load_lessons, data_dir
 import explain as explain_mod
 from explain import explain
 
@@ -428,45 +428,8 @@ function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-// The voice: a cute boy's voice recorded with make_voice.py (played by the app),
-// or else the computer's own voice made young and bright.
-let TEACHER_VOICE = null;
-function pickTeacherVoice() {
-    if (!('speechSynthesis' in window)) return null;
-    const voices = window.speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('en'));
-    // natural male voices first: raised in pitch they sound like a young boy
-    const best = ['andrew', 'guy', 'christopher', 'eric', 'brian', 'ryan', 'prabhat', 'natural',
-                  'daniel', 'alex', 'google uk english male', 'david', 'mark', 'male', 'google us english'];
-    for (const name of best) {
-        const v = voices.find(x => x.name.toLowerCase().includes(name));
-        if (v) return v;
-    }
-    return voices[0] || null;
-}
-if ('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = () => { TEACHER_VOICE = pickTeacherVoice(); };
-}
-function cleanForSpeech(text) {
-    // no emoji: a voice reads them out ("smiling face with...")
-    return Array.from(String(text || '')).filter(ch => ch.codePointAt(0) < 0x2190).join('').split(' ').filter(Boolean).join(' ');
-}
-function speakWithKidVoice(text) {
-    const say = cleanForSpeech(text);
-    if (!say) return;
-    if (window.pyqtBridge && window.pyqtBridge.speak) { window.pyqtBridge.speak(say); return; }
-    speakFallback(say);
-}
-function speakFallback(say) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(say);
-    TEACHER_VOICE = TEACHER_VOICE || pickTeacherVoice();
-    if (TEACHER_VOICE) u.voice = TEACHER_VOICE;
-    u.pitch = 1.6;       // a cute young boy: high and bright
-    u.rate = 0.95;       // clear, a little lively
-    u.volume = 0.9;      // soft
-    window.speechSynthesis.speak(u);
-}
+// No voice: the app doesn't speak (the chimes and sounds stay).
+function speakWithKidVoice(text) {}
 
 function selectExample(key) {
     document.querySelectorAll(".example-box").forEach(box => { box.style.display = "none"; });
@@ -873,11 +836,6 @@ class CodeBridge(QObject):
         a = self.terminal_output.replace("\\","\\\\").replace("`","\\`").replace("\r","")
         p = self.last_prompt.replace("\\","\\\\").replace("`","\\`").replace("\r","").replace("\n","")
         self.web_view.page().runJavaScript(f"showInputLessonOutput(`{a}`, {'true' if self.waiting else 'false'}, `{p}`);")
-
-    @pyqtSlot(str)
-    def speak(self, text):
-        """The lesson page wants the teacher to say something."""
-        self.parent_window.speak(text)
 
     @pyqtSlot()
     def notifyEmptyInput(self):
@@ -2728,20 +2686,6 @@ class MainWindow(QMainWindow):
             buttons.append(("🔑 Change password", "soft", self.open_password_page))
         self._kid_window("Profile 👤", CONFIG.get("profile_picture") or LOGO, "👋 Hi, I'm Byte!", "👤 My Profile 🌟",
                          rows, notes, buttons)
-
-    def speak(self, text):
-        """Plays the teacher's recorded voice (voice/<phrase>.mp3, made with apps/tools/make_voice.py).
-        A phrase without a recording is spoken by the computer's own voice instead."""
-        clip = resource_path(os.path.join("voice", voice_key(text) + ".mp3"))
-        if os.path.exists(clip):
-            if not hasattr(self, "voice_player"):
-                self.voice_player = QMediaPlayer(self)
-                self.voice_player.setVolume(85)
-            self.voice_player.stop()
-            self.voice_player.setMedia(QMediaContent(QUrl.fromLocalFile(clip)))
-            self.voice_player.play()
-        else:
-            self.lesson_viewer.page().runJavaScript("speakFallback(%s);" % json.dumps(text))
 
     def open_password_page(self):
         """Passwords are changed on the website: it emails a reset link, and the new password works here too."""
