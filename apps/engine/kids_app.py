@@ -66,7 +66,9 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtMultimediaWidgets import QVideoWidget, QGraphicsVideoItem
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
+from PyQt5.QtCore import QSizeF
 
 
 class ClickableSlider(QSlider):
@@ -1030,6 +1032,33 @@ except Exception as e:
         self.code_file = self.runner_file = None
 
 
+class VideoView(QGraphicsView):
+    """Shows the lesson video by painting its frames (QGraphicsVideoItem).
+
+    A plain QVideoWidget draws the video in a separate native layer: with the glow effect and the see-through
+    window on top, Linux (Ubuntu) then shows a black box and plays only the sound. Painting the frames
+    works the same on Windows, Mac and Linux.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.setScene(QGraphicsScene(self))
+        self.item = QGraphicsVideoItem()
+        self.item.setAspectRatioMode(Qt.IgnoreAspectRatio)
+        self.scene().addItem(self.item)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setBackgroundBrush(QColor("black"))
+        self.setStyleSheet("QGraphicsView { background: black; border-radius: 35px; border: 6px solid #ffea79; }")
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        r = self.viewport().rect()
+        self.item.setPos(0, 0)
+        self.item.setSize(QSizeF(r.width(), r.height()))
+        self.scene().setSceneRect(0, 0, r.width(), r.height())
+
+
 class SceneWidget(QWidget):
     """The whole window's background, painted and gently moving.
 
@@ -1533,15 +1562,7 @@ class MainWindow(QMainWindow):
         video_container_layout.setContentsMargins(0, 0, 0, 0)
         video_container_layout.setSpacing(0)
 
-        self.video_widget = QVideoWidget()
-        self.video_widget.setAspectRatioMode(Qt.IgnoreAspectRatio)
-        self.video_widget.setStyleSheet("""
-            QVideoWidget {
-                background: black; 
-                border-radius: 35px; 
-                border: 6px solid #ffea79;
-            }
-        """)
+        self.video_widget = VideoView()
         
         self.video_shadow = QGraphicsDropShadowEffect(self)
         self.video_shadow.setBlurRadius(30)
@@ -1562,7 +1583,7 @@ class MainWindow(QMainWindow):
         self.ai_watermark.move(25, 10)
 
         self.media_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-        self.media_player.setVideoOutput(self.video_widget)
+        self.media_player.setVideoOutput(self.video_widget.item)
         self.media_player.setVolume(100)
         self.media_player.stateChanged.connect(self.handle_media_state)
 
@@ -2924,6 +2945,9 @@ class MainWindow(QMainWindow):
             self.sidebar_title.setStyleSheet("color: #0c4a6e; background: transparent;")
 
 if __name__ == "__main__":
+    # Ubuntu's Wayland desktop: Qt 5 shows videos and the see-through sky more reliably through X11 (XWayland)
+    if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY") and not os.environ.get("QT_QPA_PLATFORM"):
+        os.environ["QT_QPA_PLATFORM"] = "xcb"
     app = QApplication(sys.argv)
     app.setApplicationName(CONFIG["name"])
     
