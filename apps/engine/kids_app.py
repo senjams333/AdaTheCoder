@@ -35,6 +35,20 @@ import urllib.request
 import urllib.error
 import webbrowser
 from appconfig import load_config, load_lessons, data_dir, voice_key
+import explain as explain_mod
+from explain import explain
+
+
+def explain_source():
+    """explain.py's code, for the separate runner of input() programs (also bundled next to the app)."""
+    for path in (os.path.join(os.path.dirname(os.path.abspath(explain_mod.__file__)), "explain.py"),
+                 os.path.join(get_base_dir(), "explain.py")):
+        try:
+            with open(path, encoding="utf-8") as f:
+                return f.read()
+        except OSError:
+            pass
+    return ""
 from locks import LessonLocks
 
 CONFIG = load_config(get_base_dir())
@@ -896,24 +910,11 @@ class CodeBridge(QObject):
                 finally:
                     sys.stdin = old
             self._normal(buf.getvalue() or "✅ Code Ran Successfully! 🎉")
-        except SyntaxError:
-            msg = "Code missing ) or string error"
-            self._normal(f"❌ {msg}", True, msg)
-        except NameError:
-            msg = "Mistake in function name or variable 💡"
-            self._normal(f"❌ {msg}", True, msg)
-        except ModuleNotFoundError:
-            msg = "OpenCV / Module not installed in system 💡"
-            self._normal(f"❌ {msg}", True, msg)
         except Exception as e:
-            err_str = str(e)
-            if "was never closed" in err_str or "unexpected EOF" in err_str or "unterminated" in err_str:
-                msg = "Code missing ) or string error"
-            elif "not defined" in err_str:
-                msg = "Mistake in function name or variable 💡"
-            else:
-                msg = f"{type(e).__name__}: {e} 💡"
-            self._normal("❌ " + msg, True, msg)
+            # say what went wrong, on which line, why, and how to fix it
+            text, msg = explain(e, code_str)
+            printed = buf.getvalue()
+            self._normal((printed.rstrip("\n") + "\n\n" if printed.strip() else "") + text, True, msg)
 
     def _run_input(self, code):
         import tempfile
@@ -960,16 +961,14 @@ builtins.input = inp
 try:
     runpy.run_path(sys.argv[1], run_name='__main__')
 except Exception as e:
-    tb = traceback.format_exc()
-    if "SyntaxError" in tb or "IndentationError" in tb or "EOF" in tb or "unterminated" in tb:
-        print("\\nCode missing ) or string error")
-    elif "NameError" in tb:
-        print("\\nMistake in function name or variable 💡")
-    elif "ModuleNotFoundError" in tb or "No module named" in tb:
-        print("\\nOpenCV / Module not installed in system 💡")
-    else:
-        print("\\nError: " + str(e))
+    try:
+        with open(sys.argv[1], encoding='utf-8') as f:
+            src = f.read()
+        print("\\n" + explain(e, src, sys.argv[1])[0])
+    except Exception:
+        print("\\n❌ Error: " + str(e))
 """
+        runner_content = explain_source() + "\n\n" + runner_content
         Path(runner_name).write_text(runner_content, encoding="utf-8")
         self.code_file = code_name
         self.runner_file = runner_name
@@ -1004,7 +1003,7 @@ except Exception as e:
                     self.pending += parts[1]
             else:
                 self.terminal_output += chunk
-                if "Code missing" in chunk or "Mistake in function" in chunk or "Error:" in chunk or "Module not installed" in chunk:
+                if "❌" in chunk or "Code missing" in chunk or "Mistake in function" in chunk or "Error:" in chunk or "Module not installed" in chunk:
                     self.waiting = False
         self._interactive()
 

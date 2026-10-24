@@ -143,6 +143,61 @@ class Locks(unittest.TestCase):
         self.assertEqual(self.locks(cfg).locked_numbers(), [])
 
 
+class ExplainMistakes(unittest.TestCase):
+    def run_code(self, code):
+        from explain import explain
+        try:
+            exec(compile(code, "<string>", "exec"), {})
+        except Exception as e:  # noqa: BLE001
+            return explain(e, code)
+        self.fail("no error")
+
+    def test_says_what_where_why_and_how(self):
+        text, short = self.run_code('print("Hi"')
+        self.assertIn("❌ A bracket is not closed", text)
+        self.assertIn("📍 Line 1:", text)
+        self.assertIn("💡 Why:", text)
+        self.assertIn("🔧 Try:", text)
+        self.assertTrue(short.startswith("A bracket is not closed"))
+
+    def test_common_mistakes(self):
+        cases = {
+            'prnt("Hi")': "Did you mean print?",
+            'print("Hi)': "A quote is missing",
+            'if 5 > 3\n    print(1)': "A colon is missing",
+            'if 5 > 3:\nprint(1)': "Some spaces are missing",
+            'age = 8\nprint("Age: " + age)': "str()",
+            'print(1/0)': "divide by zero",
+            'x = [1]\nprint(x[3])': "📍 Line 2",
+            'import not_a_real_module_xyz': "pip install not_a_real_module_xyz",
+        }
+        for code, expected in cases.items():
+            self.assertIn(expected, self.run_code(code)[0], code)
+
+    def test_every_short_message_has_a_voice_name(self):
+        from appconfig import voice_key
+        from explain import SHORT
+        self.assertEqual(len({voice_key(v) for v in SHORT.values()}), len(SHORT))
+
+    def test_the_input_program_runner_explains_too(self):
+        import subprocess
+        src = open(os.path.join(APPS, "engine", "explain.py"), encoding="utf-8").read()
+        runner = src + """
+import sys, runpy
+try:
+    runpy.run_path(sys.argv[1], run_name='__main__')
+except Exception as e:
+    print(explain(e, open(sys.argv[1], encoding='utf-8').read(), sys.argv[1])[0])
+"""
+        with tempfile.TemporaryDirectory() as d:
+            code, run = os.path.join(d, "code.py"), os.path.join(d, "run.py")
+            open(code, "w", encoding="utf-8").write('name = "Tom"\nprint("Hi " + nme)\n')
+            open(run, "w", encoding="utf-8").write(runner)
+            out = subprocess.run([sys.executable, run, code], capture_output=True, text=True, encoding="utf-8").stdout
+        self.assertIn("📍 Line 2:", out)
+        self.assertIn("Did you mean name?", out)
+
+
 class Duplicate(unittest.TestCase):
     NEW = "zz_test_copy"
 

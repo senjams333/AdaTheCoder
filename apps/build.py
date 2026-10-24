@@ -83,7 +83,9 @@ def main():
         "--name", cfg["name"],
         "--windowed", "--noconfirm",
         "--paths", ENGINE_DIR,
-        "--hidden-import", "appconfig", "--hidden-import", "locks",
+        "--hidden-import", "appconfig", "--hidden-import", "locks", "--hidden-import", "explain",
+        # the runner of input() programs copies explain.py's code
+        "--add-data", f"{os.path.join(ENGINE_DIR, 'explain.py')}{os.pathsep}.",
         # the children's code can use these (lesson 17 is OpenCV)
         "--hidden-import", "cv2", "--hidden-import", "numpy",
         "--distpath", os.path.join(HERE, "dist"),

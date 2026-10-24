@@ -24,8 +24,18 @@ APPS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(APPS, "engine"))
 from appconfig import load_config, voice_key  # noqa: E402
 
-# How the teacher says the app's short messages: same meaning, warmer words
+# How the app's short messages are said: same meaning, warmer words
 KIND_WORDS = {
+    "A bracket is not closed": "Oops! A bracket is not closed. Let's look at it together.",
+    "A quote is missing": "Oh! A quote is missing. Let's find it together.",
+    "A colon is missing": "Almost! A colon is missing at the end of the line.",
+    "Some spaces are missing": "Oops! This line needs some spaces at the start.",
+    "There are too many spaces": "Oops! This line has too many spaces at the start.",
+    "Use == to compare": "To compare, we use two equals signs.",
+    "Mistake in function name or variable": "Hmm, a name is spelled a little differently. Let's check it together.",
+    "Words and numbers are mixed": "Oh! Words and numbers got mixed up.",
+    "You can't divide by zero": "Oops! We can't divide by zero.",
+    "Oops! Something went wrong": "Oops! Something went wrong. Let's read the hint together.",
     "Click the examples here to start !": "Hi there! Click an example to start. You can do it!",
     "Fantastic job! Code ran correctly!": "Fantastic job! Your code ran perfectly. I'm so proud of you!",
     "You missed to type input": "Oops! You forgot to type something. Try again, you're doing great.",
@@ -45,6 +55,8 @@ def phrases(cfg):
     src = open(os.path.join(APPS, "engine", "kids_app.py"), encoding="utf-8").read()
     found = re.findall(r'speakWithKidVoice\("([^"]+)"\)', src)
     found += re.findall(r'^\s*msg = "([^"{}]+)"', src, re.M)       # the "oops" messages (not f-strings)
+    from explain import SHORT                                       # the short messages Tom says
+    found += list(SHORT.values())
     found += list(cfg.get("voice", {}).get("extra_phrases", []))
     out = {}
     for f in found:
