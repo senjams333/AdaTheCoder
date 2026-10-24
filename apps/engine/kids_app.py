@@ -1534,12 +1534,6 @@ class MainWindow(QMainWindow):
         self.hero_title.setFont(QFont("Comic Sans MS", 46, QFont.Bold))
         self.hero_title.setAlignment(Qt.AlignCenter)
         self.hero_title.setWordWrap(True)
-        # a soft pink-and-yellow (peachy) glow around the title
-        title_glow = QGraphicsDropShadowEffect(self)
-        title_glow.setBlurRadius(55)
-        title_glow.setColor(QColor(255, 160, 150, 255))
-        title_glow.setOffset(0, 0)
-        self.hero_title.setGraphicsEffect(title_glow)
 
         self.hero_sub = QLabel(CONFIG["hero_subtitle"])
         self.hero_sub.setFont(QFont("Comic Sans MS", 22, QFont.Bold))
