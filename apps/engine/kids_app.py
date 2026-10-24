@@ -2288,28 +2288,43 @@ class MainWindow(QMainWindow):
             widget.set_locked(self.locks.is_locked(idx + 1))
 
     def show_locked_dialog(self, idx):
+        """"Lesson N is locked" with one button, Upgrade. The window's ✕ closes it."""
         topic = TOPICS[idx]
-        box = QMessageBox(self)
+        box = QDialog(self)
         box.setWindowTitle("Locked lesson 🔒")
-        box.setTextFormat(Qt.RichText)
-        box.setText(
+        box.setStyleSheet("""
+            QDialog { background: #ffffff; }
+            QLabel { color: #0f172a; background: transparent; }
+            QPushButton { font-family: 'Comic Sans MS'; font-size: 17px; font-weight: bold; background: #ffd166; color: #0f172a;
+                          border: 3px solid #f59e0b; border-radius: 20px; padding: 8px 24px; }
+            QPushButton:hover { background: #38bdf8; color: white; border-color: #0284c7; }
+        """)
+        layout = QVBoxLayout(box)
+        layout.setContentsMargins(22, 18, 22, 18)
+        row = QHBoxLayout()
+        row.setSpacing(16)
+        pix = make_round_pixmap(resource_path(LOGO), 96)
+        if pix:
+            icon = QLabel()
+            icon.setPixmap(pix)
+            row.addWidget(icon, alignment=Qt.AlignTop)
+        text = QLabel(
             "<div style='font-family: Comic Sans MS; font-size: 15px; color: #0f172a;'>"
             "<h2 style='color:#0284c7;'>🔒 %s %s</h2>"
             "<p>Lesson %d is locked.</p>"
             "<p>Lesson 1 is free to try. Ask a grown-up to unlock the rest ⭐</p>"
             "</div>" % (topic["emoji"], html.escape(topic["name"]), idx + 1)
         )
-        pix = make_round_pixmap(resource_path(LOGO), 96)
-        if pix:
-            box.setIconPixmap(pix)
-        box.setStyleSheet("QMessageBox { background: #ffffff; }")
-        key_btn = box.addButton("🔑 Enter licence key", QMessageBox.AcceptRole) if self.locks.secret else None
-        up_btn = box.addButton("⭐ Upgrade", QMessageBox.ActionRole)
-        box.addButton("Not now", QMessageBox.RejectRole)
-        box.exec_()
-        if key_btn is not None and box.clickedButton() is key_btn:
-            self.ask_licence_key()
-        elif box.clickedButton() is up_btn:
+        text.setTextFormat(Qt.RichText)
+        text.setWordWrap(True)
+        text.setMinimumWidth(360)
+        row.addWidget(text, stretch=1)
+        layout.addLayout(row)
+        up_btn = QPushButton("⭐ Upgrade")
+        up_btn.setCursor(Qt.PointingHandCursor)
+        up_btn.clicked.connect(box.accept)
+        layout.addWidget(up_btn, alignment=Qt.AlignRight)
+        if box.exec_() == QDialog.Accepted:
             self.open_upgrade()
 
     def open_upgrade(self):

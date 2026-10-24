@@ -26,7 +26,7 @@ os.environ.setdefault("KIDS_APP_SERVER", "")          # demo log-in
 ns = runpy.run_path(os.path.join(APPS, "engine", "kids_app.py"), run_name="kids_app")
 
 from PyQt5.QtTest import QTest  # noqa: E402
-from PyQt5.QtWidgets import QApplication, QInputDialog, QMessageBox  # noqa: E402
+from PyQt5.QtWidgets import QApplication, QDialog, QInputDialog, QMessageBox  # noqa: E402
 
 from locks import make_key  # noqa: E402
 
@@ -48,6 +48,7 @@ def shot(window, name):
 
 
 QMessageBox.exec_ = lambda self: shown.append(self.windowTitle()) or 0
+QDialog.exec_ = lambda self: shown.append(self.windowTitle()) or 0
 QMessageBox.information = staticmethod(lambda parent, title, text, *a, **k: shown.append(title) or 0)
 QMessageBox.warning = staticmethod(lambda parent, title, text, *a, **k: shown.append(title) or 0)
 QInputDialog.getText = staticmethod(lambda *a, **k: answers.pop(0) if answers else ("", False))
