@@ -26,8 +26,8 @@ pip install -r apps/requirements.txt
 python apps/run.py python_adventure
 ```
 
-The login comes first; after logging in, the intro video plays in the same player as the lessons' videos
-(Stop video skips it), then the home screen. Without a server in `app.json` the login is the
+The login comes first, then the home screen. Clicking a lesson plays that lesson's video (from `vid/`) and
+then opens the coding page with the examples; "Stop video" skips straight to the coding page. Without a server in `app.json` the login is the
 demo one from `3-General.py` (any email works, no internet needed).
 
 ## Locked lessons (2 to 17)

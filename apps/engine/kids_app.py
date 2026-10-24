@@ -1795,33 +1795,6 @@ class MainWindow(QMainWindow):
 
         self.apply_responsive_layout()
 
-        self._playing_intro = False
-
-    def play_intro_video(self):
-        """After logging in: the app's intro video (app.json → intro_video) in the same player as the lessons'
-        videos. When it ends, or "Stop video" is pressed, the home screen comes."""
-        intro = resource_path(CONFIG["intro_video"]) if CONFIG.get("intro_video") else ""
-        if not intro or not os.path.exists(intro) or not self._logged_in:
-            return
-        self._playing_intro = True
-        self.play_vid_btn.setVisible(True)
-        self.seek_slider.blockSignals(True)
-        self.seek_slider.setRange(0, 0)
-        self.seek_slider.setValue(0)
-        self.seek_slider.blockSignals(False)
-        self.time_label.setText("00:00")
-        self.duration_label.setText("00:00")
-        self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(intro)))
-        self.center_stack.setCurrentIndex(1)
-        self.lesson_stack.setCurrentIndex(0)
-        self.media_player.setPosition(0)
-        self.media_player.play()
-        self.video_timer.start()
-        self.update_app_style()
-
-    def _end_intro(self):
-        self._playing_intro = False
-        self.show_home()
 
     def on_web_page_loaded(self, success):
         self.web_page_ready = True
@@ -2233,7 +2206,6 @@ class MainWindow(QMainWindow):
         self.logout_btn.raise_()
 
         QTimer.singleShot(1200, self.login_overlay.hide)
-        QTimer.singleShot(1300, self.play_intro_video)
 
     def start_register(self):
         full_name = self.name_input.text().strip()
@@ -2583,7 +2555,6 @@ class MainWindow(QMainWindow):
 
     def load_lesson_active(self):
         close_opencv_windows()
-        self._playing_intro = False
         self.update_sidebar_highlight()
         topic = TOPICS[self.current_lesson_index]
         lesson_id = topic["id"]
@@ -2619,9 +2590,6 @@ class MainWindow(QMainWindow):
         self.push_active_lesson_to_ui()
 
     def handle_media_state(self, state):
-        if state == QMediaPlayer.StoppedState and self._playing_intro:
-            self._end_intro()
-            return
         if state == QMediaPlayer.StoppedState and self.lesson_stack.currentIndex() == 0:
             self.lesson_stack.setCurrentIndex(1)
             self.push_active_lesson_to_ui()
@@ -2896,10 +2864,6 @@ class MainWindow(QMainWindow):
                          rows, notes, [], row_bg="#fef9c3")
 
     def handle_bottom_button_click(self):
-        if self._playing_intro:
-            self._playing_intro = False
-            self.show_home()
-            return
         if self.lesson_stack.currentIndex() == 0:
             self.media_player.stop()
             self.lesson_stack.setCurrentIndex(1)
@@ -2937,7 +2901,6 @@ class MainWindow(QMainWindow):
 
     def show_home(self):
         close_opencv_windows()
-        self._playing_intro = False
         self.media_player.stop()
         self.center_stack.setCurrentIndex(0)
         self.update_app_style()

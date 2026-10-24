@@ -76,19 +76,7 @@ for _ in range(40):
     if not w.login_overlay.isVisible():
         break
 step("demo log-in opens the app", not w.login_overlay.isVisible() and w.sidebar_panel.isVisible())
-has_intro = bool(CONFIG.get("intro_video")) and os.path.exists(os.path.join(os.environ["KIDS_APP_DIR"], CONFIG["intro_video"]))
-if has_intro:
-    QTest.qWait(500)
-    if w._playing_intro:
-        step("after log-in the intro video plays in the lesson video player",
-             w.center_stack.currentIndex() == 1 and w.lesson_stack.currentIndex() == 0)
-        shot(w, "02b-intro-video")
-        w.play_vid_btn.click()
-        QTest.qWait(300)
-        step("Stop video ends the intro and shows the home screen", not w._playing_intro and w.center_stack.currentIndex() == 0)
-    else:
-        # this computer can't play videos (no media backend): the intro must step aside by itself
-        step("intro steps aside when videos can't play", w.center_stack.currentIndex() == 0)
+step("after log-in the home screen shows (no video before it)", w.center_stack.currentIndex() == 0)
 n = len(TOPICS)
 step("lesson 1 is open", not w.topic_widgets[0].locked)
 step(f"lessons 2-{n} show a lock", all(t.locked for t in w.topic_widgets[1:]))
