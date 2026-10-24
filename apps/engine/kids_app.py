@@ -2951,7 +2951,7 @@ class MainWindow(QMainWindow):
     def update_app_style(self):
         if self.is_dark_mode:
             self.central_widget.set_dark(True)
-            self.hero_panel.setStyleSheet("QFrame { background-color: rgba(15, 23, 42, 0.30); border-radius: 40px; }")
+            self.hero_panel.setStyleSheet("QFrame { background: transparent; border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: white;")
             self.hero_sub.setStyleSheet("color: #d1fae5;")
             self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #0369a1; }"
@@ -2959,7 +2959,7 @@ class MainWindow(QMainWindow):
             self.sidebar_title.setStyleSheet("color: #e0f2fe; background: transparent;")
         else:
             self.central_widget.set_dark(False)
-            self.hero_panel.setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 0.16); border-radius: 40px; }")
+            self.hero_panel.setStyleSheet("QFrame { background: transparent; border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: #0f172a;")
             self.hero_sub.setStyleSheet("color: #065f46;")
             self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #ffffff; }"
