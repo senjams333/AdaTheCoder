@@ -416,26 +416,72 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 .confetti { position:fixed; width:12px; height:12px; top:-20px; z-index:999999; animation: confettiFall linear forwards; }
 @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
 
-/* The lesson page sits in a night sky full of twinkling stars (in light and dark mode) */
-html, body { background: radial-gradient(ellipse at 50% 0%, #2c3285 0%, #161c52 45%, #070b24 100%) fixed; }
+/* Day (light mode): blue sky, the sun, drifting clouds and a green meadow with flowers.
+   Night (dark mode): a night sky full of twinkling stars and the moon. */
+/* (html stays transparent so the body's sky fills the window and sits behind the clouds and stars) */
+body { background: linear-gradient(180deg, #5ec4ff 0%, #a5dcff 45%, #dff4ff 78%, #e9fbe3 100%) fixed; }
+body.dark-mode { background: radial-gradient(ellipse at 50% 0%, #2c3285 0%, #161c52 45%, #070b24 100%) fixed; }
+.sun { box-shadow: 0 0 40px 12px rgba(255, 213, 79, 0.75), 0 0 90px 30px rgba(255, 170, 0, 0.35); }
+
+.cloud { position: fixed; z-index: -1; pointer-events: none; background: #ffffff; border-radius: 999px; opacity: 0.95;
+         box-shadow: 0 8px 18px rgba(30, 90, 140, 0.12); animation: cloudDrift linear infinite; }
+.cloud::before, .cloud::after { content: ""; position: absolute; background: #ffffff; border-radius: 50%; }
+.cloud::before { width: 55%; height: 170%; left: 12%; bottom: 20%; }
+.cloud::after { width: 40%; height: 135%; right: 12%; bottom: 25%; }
+@keyframes cloudDrift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
+
+.meadow { position: fixed; left: 0; right: 0; bottom: 0; height: 17vh; z-index: -1; pointer-events: none;
+          background:
+            radial-gradient(ellipse 60% 100% at 15% 100%, #4ade80 0 60%, transparent 61%),
+            radial-gradient(ellipse 70% 120% at 70% 100%, #22c55e 0 58%, transparent 59%),
+            linear-gradient(180deg, #86efac 0%, #4ade80 40%, #16a34a 100%);
+          background-position: 0 0, 0 0, 0 4vh; background-repeat: no-repeat;
+          border-top-left-radius: 50% 18%; border-top-right-radius: 50% 18%; }
+.flower { position: fixed; z-index: -1; pointer-events: none; transform-origin: 50% 100%; animation: sway 3.2s ease-in-out infinite; }
+@keyframes sway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+
 .night-star { position: fixed; border-radius: 50%; background: #ffffff; z-index: -1; pointer-events: none;
               box-shadow: 0 0 6px rgba(255, 255, 255, 0.9), 0 0 12px rgba(147, 197, 253, 0.6);
               animation: twinkleDot 3s ease-in-out infinite; }
 @keyframes twinkleDot { 0%, 100% { opacity: 0.2; transform: scale(0.6); } 50% { opacity: 1; transform: scale(1.2); } }
-.sun { opacity: 0 !important; }
-.moon { opacity: 1 !important; }
-.star { opacity: 1 !important; display: block !important; animation: twinkle 2s infinite; }
-h1 { color: #ffffff !important; text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
-.subtitle { color: #c7d2fe !important; }
-@media (prefers-reduced-motion: reduce) { .night-star, .star { animation: none; opacity: 0.8 !important; } }
+
+body:not(.dark-mode) .night-star { display: none; }
+body.dark-mode .cloud, body.dark-mode .meadow, body.dark-mode .flower { display: none; }
+body.dark-mode h1 { text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
+@media (prefers-reduced-motion: reduce) { .night-star, .star, .cloud, .flower { animation: none; } }
 </style>
 """
 
 COMMON_JS = """
 <script>
-// Sprinkle twinkling stars over the night sky
-function makeNightSky() {
+// The day sky (clouds, meadow, flowers) and the night sky (twinkling stars); the dark-mode switch picks one
+function makeSkies() {
     if (document.querySelector('.night-star')) return;
+    const clouds = [[8, 150, 46, 38], [22, 110, 36, 52], [14, 190, 54, 64], [30, 130, 40, 46], [5, 95, 30, 58]];
+    clouds.forEach(([top, w, h, secs], i) => {
+        const c = document.createElement('div');
+        c.className = 'cloud';
+        c.style.top = top + '%';
+        c.style.width = w + 'px';
+        c.style.height = h + 'px';
+        c.style.animationDuration = secs + 's';
+        c.style.animationDelay = (-secs * i / clouds.length) + 's';
+        document.body.appendChild(c);
+    });
+    const meadow = document.createElement('div');
+    meadow.className = 'meadow';
+    document.body.appendChild(meadow);
+    const flowers = ['🌼', '🌸', '🌷', '🌻', '🌼', '🌺', '🌸', '🌷'];
+    for (let i = 0; i < 22; i++) {
+        const f = document.createElement('div');
+        f.className = 'flower';
+        f.textContent = flowers[i % flowers.length];
+        f.style.left = (2 + i * 4.5 + Math.random() * 2) + '%';
+        f.style.bottom = (1 + Math.random() * 9) + 'vh';
+        f.style.fontSize = (18 + Math.random() * 16) + 'px';
+        f.style.animationDelay = (-Math.random() * 3) + 's';
+        document.body.appendChild(f);
+    }
     for (let i = 0; i < 90; i++) {
         const s = document.createElement('div');
         s.className = 'night-star';
@@ -448,7 +494,7 @@ function makeNightSky() {
         document.body.appendChild(s);
     }
 }
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', makeNightSky); else makeNightSky();
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', makeSkies); else makeSkies();
 
 let CURRENT_EXAMPLES = {};
 let activeExampleKey = null;
