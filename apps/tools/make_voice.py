@@ -75,7 +75,7 @@ def main():
     p.add_argument("app", nargs="?")
     p.add_argument("--voice")
     p.add_argument("--rate", help='e.g. "-8%%" (slower) or "+5%%"')
-    p.add_argument("--pitch", help='e.g. "+4Hz" (a little higher)')
+    p.add_argument("--pitch", help='e.g. "+14Hz" (higher, younger)')
     p.add_argument("--list", action="store_true", help="list the English voices")
     args = p.parse_args()
     if args.list:
@@ -90,7 +90,7 @@ def main():
     items = phrases(cfg)
     print(f"Recording {len(items)} sentences with {voice} into {os.path.relpath(os.path.join(app_dir, 'voice'))}/")
     asyncio.run(record(items, os.path.join(app_dir, "voice"), voice,
-                       args.rate or v.get("rate") or "-8%", args.pitch or v.get("pitch") or "+4Hz", v.get("say") or {}))
+                       args.rate or v.get("rate") or "-8%", args.pitch or v.get("pitch") or "+14Hz", v.get("say") or {}))
     print("Done. Open the app and press Run on an example to hear it.")
 
 

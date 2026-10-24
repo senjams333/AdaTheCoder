@@ -447,7 +447,7 @@ function speakFallback(say) {
     const u = new SpeechSynthesisUtterance(say);
     TEACHER_VOICE = TEACHER_VOICE || pickTeacherVoice();
     if (TEACHER_VOICE) u.voice = TEACHER_VOICE;
-    u.pitch = 1.12;      // young and sweet, not squeaky
+    u.pitch = 1.25;      // a young lady: bright and sweet, not squeaky
     u.rate = 0.9;        // calm and clear
     u.volume = 0.9;      // soft
     window.speechSynthesis.speak(u);

@@ -33,7 +33,7 @@
   "intro_video": "intro.mp4",
   "characters_note": "Content is AI generated from Google AI. All characters (Ada, Fairy Rose, Unicorn) are fictional.",
   "video_note": "This is an AI generated content from Google AI",
-  "voice": {"name": "en-US-JennyNeural", "rate": "-8%", "pitch": "+4Hz", "extra_phrases": []},
+  "voice": {"name": "en-US-JennyNeural", "rate": "-8%", "pitch": "+14Hz", "extra_phrases": []},
 
   "colors": {
     "background": "#eaf8ff",

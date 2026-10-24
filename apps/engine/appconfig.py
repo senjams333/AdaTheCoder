@@ -40,7 +40,7 @@ DEFAULTS = {
     "characters_note": "All characters (Tom, Penny, Teddy) are fictional.",
     "video_note": "This is an AI generated content from Google AI",
     # The teacher's voice for apps/tools/make_voice.py (Microsoft neural voices, made once, played offline)
-    "voice": {"name": "en-US-JennyNeural", "rate": "-8%", "pitch": "+4Hz", "extra_phrases": []},
+    "voice": {"name": "en-US-JennyNeural", "rate": "-8%", "pitch": "+14Hz", "extra_phrases": []},
     "colors": {
         "background": "#eaf8ff",
         "background_dark": "#0f172a",
