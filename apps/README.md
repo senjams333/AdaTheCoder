@@ -67,6 +67,25 @@ On the login card, **New here? Create an account** opens the website's registrat
 parent types their email, gets a link by email, and chooses a new password on the website. The same
 password then works on the website and in the app.
 
+## The teacher's voice
+
+The app speaks a few short sentences ("Click an example to start", "Fantastic job!", the gentle "oops"
+messages). To make the voice soft, warm and natural like a young teacher, record them once with
+Microsoft's neural voices (needs internet only while recording):
+
+```bash
+pip install edge-tts
+python apps/tools/make_voice.py python_adventure                         # en-US-JennyNeural
+python apps/tools/make_voice.py python_adventure --voice en-IN-NeerjaNeural   # Indian English
+python apps/tools/make_voice.py --list                                   # every English voice
+```
+
+This makes `apps/python_adventure/voice/*.mp3`, which the app plays and the build puts in the `.exe`. The
+sentences are said more kindly than they're written (for example, "Oh! A bracket or a quote is missing.
+Let's look at it together."). Change the voice, speed (`rate`), pitch or the words in `app.json` →
+`"voice"` (`"say": {"Fantastic job! Code ran correctly!": "Yay! ..."}`). Without recordings, the app uses
+the computer's most natural female voice, slower and softer.
+
 ## Make the next app
 
 ```bash

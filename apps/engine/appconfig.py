@@ -39,6 +39,8 @@ DEFAULTS = {
     "intro_video": "intro.mp4",
     "characters_note": "All characters (Tom, Penny, Teddy) are fictional.",
     "video_note": "This is an AI generated content from Google AI",
+    # The teacher's voice for apps/tools/make_voice.py (Microsoft neural voices, made once, played offline)
+    "voice": {"name": "en-US-JennyNeural", "rate": "-8%", "pitch": "+4Hz", "extra_phrases": []},
     "colors": {
         "background": "#eaf8ff",
         "background_dark": "#0f172a",
@@ -146,6 +148,20 @@ def parse_lesson_numbers(spec, count):
     elif spec is True:
         numbers = set(range(2, count + 1))
     return {n for n in numbers if 2 <= n <= count}
+
+
+def voice_key(text):
+    """The file name of a recorded phrase: its letters and digits, e.g. "fantastic_job_code_ran_correctly"."""
+    words, word = [], ""
+    for ch in str(text).lower():
+        if ch.isascii() and ch.isalnum():
+            word += ch
+        elif word:
+            words.append(word)
+            word = ""
+    if word:
+        words.append(word)
+    return "_".join(words)[:80] or "silence"
 
 
 def data_dir(app_id):
