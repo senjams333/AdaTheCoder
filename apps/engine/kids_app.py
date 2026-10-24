@@ -2847,15 +2847,25 @@ class MainWindow(QMainWindow):
                 bar.addWidget(btn)
             outer.addLayout(bar)
 
-        # the character waves: the picture rocks gently from side to side
+        # the character moves slowly and gently
         pix = QPixmap(resource_path(picture)) if picture else QPixmap()
         if not pix.isNull():
             pix = pix.scaled(225, 225, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             step = {"t": 0.0}
 
             def wave():
-                step["t"] += 0.12
-                pic_label.setPixmap(pix.transformed(QTransform().rotate(9 * math.sin(step["t"])), Qt.SmoothTransformation))
+                # slow and gentle: a small sway and a soft float up and down (about 5 seconds a swing)
+                step["t"] += 0.05
+                turned = pix.transformed(QTransform().rotate(4 * math.sin(step["t"])), Qt.SmoothTransformation)
+                canvas = QPixmap(pic_label.size())
+                canvas.fill(Qt.transparent)
+                painter = QPainter(canvas)
+                painter.setRenderHint(QPainter.SmoothPixmapTransform)
+                dy = 7 * math.sin(step["t"] * 0.8)
+                painter.drawPixmap(int((canvas.width() - turned.width()) / 2),
+                                   int((canvas.height() - turned.height()) / 2 + dy), turned)
+                painter.end()
+                pic_label.setPixmap(canvas)
 
             wave()
             waver = QTimer(box)
