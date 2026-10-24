@@ -423,10 +423,11 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 html, body { background: transparent !important; }
 .sun, .moon, .star { display: none !important; }
 body.dark-mode h1 { text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
-/* See-through lesson page: the lessons panel has no background, so the sky shows behind the lesson
-   buttons; the code editor and the output box keep their own look */
-.example-panel { background: transparent !important; border-color: transparent !important; box-shadow: none !important;
-                 backdrop-filter: none !important; }
+/* See-through lesson page: the left (lessons) panel is 50% see-through, so the sky shows behind it;
+   the code editor and the output box keep their own look */
+.example-panel { background: rgba(255, 255, 255, 0.5) !important; border-color: rgba(255, 255, 255, 0.6) !important;
+                 box-shadow: none !important; backdrop-filter: none !important; }
+body.dark-mode .example-panel { background: rgba(15, 23, 42, 0.5) !important; border-color: rgba(124, 255, 178, 0.3) !important; }
 .topic-btn { border-radius: 22px; }
 body:not(.dark-mode) .topic-btn { background: rgba(255, 255, 255, 0.5); }
 body:not(.dark-mode) .topic-btn:hover { background: #38bdf8; }
