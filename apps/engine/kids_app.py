@@ -2476,30 +2476,17 @@ class MainWindow(QMainWindow):
             self.play_pause_btn.setText("▶ Play")
         self._tick_position()
 
-    def show_profile_dialog(self):
-        u = dict(DUMMY_USER)
-        u.update(self.user_info or {})
-        name = u.get("full_name") or "N/A"
-        email = u.get("email") or "N/A"
-        role = u.get("role") or "N/A"
-        user_id = u.get("id") or "N/A"
-        avatar = u.get("avatar_url") or "Default"
-        bio = u.get("bio") or "N/A"
-        gender = u.get("gender") or "N/A"
-        address = u.get("address") or "N/A"
-        provider = u.get("auth_provider") or "N/A"
-        active = "✅ Yes" if u.get("is_active") else "❌ No"
-        created = u.get("created_at") or "N/A"
+    def _kid_window(self, title, picture, hello, heading, rows, notes, buttons, row_bg="#ffffff"):
+        """A big, friendly window for children: large text, and a character waving hello.
 
-        rows = [("🆔 User ID", user_id), ("👤 Full Name", name), ("📧 Email", email), ("🎓 Role", role),
-                ("🖼️ Avatar", avatar), ("📝 Bio", bio), ("⚧ Gender", gender), ("📍 Address", address),
-                ("🔐 Auth Provider", provider), ("⚡ Active", active), ("🗓️ Created At", created)]
+        rows: (label, value) pairs shown in a table. notes: extra lines under it (HTML, already escaped).
+        buttons: (text, style, action) where style is "ok" or "soft" and action runs after the window closes
+        (None just closes). With no buttons, the window's own ✕ closes it.
+        """
         info = "".join("<tr><td style='padding:5px 14px 5px 0; color:#0369a1;'><b>%s</b></td><td style='padding:5px 0;'>%s</td></tr>"
-                       % (k, html.escape(str(v))) for k, v in rows)
-
-        # A big, friendly window: large text for children, and Byte waving hello
+                       % (k, v) for k, v in rows)
         box = QDialog(self)
-        box.setWindowTitle("Profile 👤")
+        box.setWindowTitle(title)
         box.setMinimumSize(960, 640)
         box.setStyleSheet("""
             QDialog { background: #f0f9ff; }
@@ -2507,8 +2494,8 @@ class MainWindow(QMainWindow):
             QPushButton { font-family: 'Comic Sans MS'; font-size: 20px; font-weight: bold; border-radius: 24px; padding: 12px 30px; }
             QPushButton#ok { background: #ffd166; color: #0f172a; border: 3px solid #f59e0b; }
             QPushButton#ok:hover { background: #38bdf8; color: white; border-color: #0284c7; }
-            QPushButton#pw { background: #e0f2fe; color: #0f172a; border: 3px solid #38bdf8; }
-            QPushButton#pw:hover { background: #38bdf8; color: white; }
+            QPushButton#soft { background: #e0f2fe; color: #0f172a; border: 3px solid #38bdf8; }
+            QPushButton#soft:hover { background: #38bdf8; color: white; }
         """)
         outer = QVBoxLayout(box)
         outer.setContentsMargins(30, 24, 30, 24)
@@ -2516,71 +2503,79 @@ class MainWindow(QMainWindow):
         row = QHBoxLayout()
         row.setSpacing(28)
 
-        byte_col = QVBoxLayout()
-        byte_col.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
-        hello = QLabel("👋 Hi, I'm Byte!")
-        hello.setFont(QFont("Comic Sans MS", 20, QFont.Bold))
-        hello.setAlignment(Qt.AlignCenter)
-        hello.setStyleSheet("background: white; border: 3px solid #38bdf8; border-radius: 22px; padding: 10px 18px;")
-        byte = QLabel()
-        byte.setFixedSize(300, 320)
-        byte.setAlignment(Qt.AlignCenter)
-        byte_col.addWidget(hello, alignment=Qt.AlignHCenter)
-        byte_col.addWidget(byte, alignment=Qt.AlignHCenter)
-        row.addLayout(byte_col)
+        side = QVBoxLayout()
+        side.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        bubble = QLabel(hello)
+        bubble.setFont(QFont("Comic Sans MS", 20, QFont.Bold))
+        bubble.setAlignment(Qt.AlignCenter)
+        bubble.setStyleSheet("background: white; border: 3px solid #38bdf8; border-radius: 22px; padding: 10px 18px;")
+        pic_label = QLabel()
+        pic_label.setFixedSize(300, 320)
+        pic_label.setAlignment(Qt.AlignCenter)
+        side.addWidget(bubble, alignment=Qt.AlignHCenter)
+        side.addWidget(pic_label, alignment=Qt.AlignHCenter)
+        row.addLayout(side)
 
         text = QLabel()
         text.setTextFormat(Qt.RichText)
         text.setWordWrap(True)
         text.setText(
             "<div style='font-family: Comic Sans MS; font-size: 21px; color: #0f172a;'>"
-            "<div style='color:#0284c7; font-size: 34px; font-weight: bold; margin-bottom: 10px;'>👤 My Profile 🌟</div>"
-            "<table style='background:#ffffff;'>%s</table>"
-            "<p style='font-size:16px; color:#065f46;'>✨ Demo data — no internet or server needed! 🚀</p>"
-            "</div>" % info if not self._use_server() else
-            "<div style='font-family: Comic Sans MS; font-size: 21px; color: #0f172a;'>"
-            "<div style='color:#0284c7; font-size: 34px; font-weight: bold; margin-bottom: 10px;'>👤 My Profile 🌟</div>"
-            "<table style='background:#ffffff;'>%s</table></div>" % info
+            "<div style='color:#0284c7; font-size: 34px; font-weight: bold; margin-bottom: 10px;'>%s</div>"
+            "<table style='background:%s;'>%s</table>%s</div>" % (heading, row_bg, info, notes)
         )
         row.addWidget(text, stretch=1)
         outer.addLayout(row, stretch=1)
 
-        buttons = QHBoxLayout()
-        buttons.addStretch()
-        pw_btn = None
-        if CONFIG.get("password_url"):
-            pw_btn = QPushButton("🔑 Change password")
-            pw_btn.setObjectName("pw")
-            pw_btn.setCursor(Qt.PointingHandCursor)
-            pw_btn.clicked.connect(lambda: (box.accept(), self.open_password_page()))
-            buttons.addWidget(pw_btn)
-        ok_btn = QPushButton("OK 👍")
-        ok_btn.setObjectName("ok")
-        ok_btn.setCursor(Qt.PointingHandCursor)
-        ok_btn.clicked.connect(box.accept)
-        buttons.addWidget(ok_btn)
-        outer.addLayout(buttons)
+        chosen = {"action": None}
+        if buttons:
+            bar = QHBoxLayout()
+            bar.addStretch()
+            for label, style, action in buttons:
+                btn = QPushButton(label)
+                btn.setObjectName("ok" if style == "ok" else "soft")
+                btn.setCursor(Qt.PointingHandCursor)
+                btn.clicked.connect(lambda _=False, act=action: (chosen.update(action=act), box.accept()))
+                bar.addWidget(btn)
+            outer.addLayout(bar)
 
-        # Byte waves: the picture rocks gently from side to side
-        byte_pix = QPixmap(resource_path(CONFIG.get("profile_picture") or LOGO))
-        if not byte_pix.isNull():
-            byte_pix = byte_pix.scaled(270, 270, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        # the character waves: the picture rocks gently from side to side
+        pix = QPixmap(resource_path(picture)) if picture else QPixmap()
+        if not pix.isNull():
+            pix = pix.scaled(270, 270, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             step = {"t": 0.0}
 
             def wave():
                 step["t"] += 0.12
-                angle = 9 * math.sin(step["t"])
-                turned = byte_pix.transformed(QTransform().rotate(angle), Qt.SmoothTransformation)
-                byte.setPixmap(turned)
+                pic_label.setPixmap(pix.transformed(QTransform().rotate(9 * math.sin(step["t"])), Qt.SmoothTransformation))
 
             wave()
             waver = QTimer(box)
             waver.timeout.connect(wave)
             waver.start(40)
         else:
-            byte.setText("🦉")
-            byte.setStyleSheet("font-size: 160px;")
+            pic_label.setText("⭐")
+            pic_label.setStyleSheet("font-size: 160px;")
         box.exec_()
+        if chosen["action"]:
+            chosen["action"]()
+
+    def show_profile_dialog(self):
+        u = dict(DUMMY_USER)
+        u.update(self.user_info or {})
+        active = "✅ Yes" if u.get("is_active") else "❌ No"
+        rows = [("🆔 User ID", u.get("id")), ("👤 Full Name", u.get("full_name")), ("📧 Email", u.get("email")),
+                ("🎓 Role", u.get("role")), ("🖼️ Avatar", u.get("avatar_url") or "Default"), ("📝 Bio", u.get("bio")),
+                ("⚧ Gender", u.get("gender")), ("📍 Address", u.get("address")), ("🔐 Auth Provider", u.get("auth_provider")),
+                ("⚡ Active", active), ("🗓️ Created At", u.get("created_at"))]
+        rows = [(k, html.escape(str(v or "N/A"))) for k, v in rows]
+        notes = "" if self._use_server() else "<p style='font-size:16px; color:#065f46;'>✨ Demo data — no internet or server needed! 🚀</p>"
+        buttons = []
+        if CONFIG.get("password_url"):
+            buttons.append(("🔑 Change password", "soft", self.open_password_page))
+        buttons.append(("OK 👍", "ok", None))
+        self._kid_window("Profile 👤", CONFIG.get("profile_picture") or LOGO, "👋 Hi, I'm Byte!", "👤 My Profile 🌟",
+                         rows, notes, buttons)
 
     def open_password_page(self):
         """Passwords are changed on the website: it emails a reset link, and the new password works here too."""
@@ -2606,42 +2601,21 @@ class MainWindow(QMainWindow):
         else:
             status = "Every lesson is open ✅"
             key = "none needed"
+        rows = [("🎫 License Key", html.escape(key)),
+                ("👤 Licensed To", html.escape(str(self.user_info.get("full_name") or lic["holder_name"]))),
+                ("📧 Email", html.escape(str(self.user_info.get("email") or DUMMY_USER["email"]))),
+                ("🎯 Plan", html.escape(lic["plan"])), ("⚡ Status", status),
+                ("🔢 Version", html.escape(str(CONFIG["version"])))]
+        notes = ("<p style='font-size:17px;'><b>📜 License:</b> Personal &amp; educational use only.</p>"
+                 "<p style='font-size:17px;'>%s</p>"
+                 "<p style='font-size:17px;'>This software is provided \"as is\", without warranty of any kind.</p>"
+                 % html.escape(CONFIG["characters_note"]))
+        first = (CONFIG["characters"] or [{}])[0]
+        picture = CONFIG.get("license_picture") or first.get("image") or LOGO
+        name = (CONFIG.get("license_character") or first.get("name", "").split(" ", 1)[-1] or "a friend").title()
         # No buttons: the window's own ✕ closes it
-        box = QDialog(self)
-        box.setWindowTitle("License 📜")
-        box.setStyleSheet("QDialog { background: #ffffff; }")
-        text = QLabel(box)
-        text.setTextFormat(Qt.RichText)
-        text.setWordWrap(True)
-        text.setMinimumWidth(440)
-        QVBoxLayout(box).addWidget(text)
-        text.setText(
-            "<div style='font-family: Comic Sans MS; font-size: 14px; color: #0f172a;'>"
-            "<h2 style='color:#0284c7;'>%s</h2>"
-            "<p style='background:#fef9c3; border-radius:8px; padding:10px;'>"
-            "<b>🎫 License Key:</b> %s<br>"
-            "<b>👤 Licensed To:</b> %s<br>"
-            "<b>📧 Email:</b> %s<br>"
-            "<b>🎯 Plan:</b> %s<br>"
-            "<b>⚡ Status:</b> %s<br>"
-            "<b>🔢 Version:</b> %s"
-            "</p>"
-            "<p><b>📜 License:</b> Personal &amp; educational use only.</p>"
-            "<p>%s</p>"
-            "<p>This software is provided \"as is\", without warranty of any kind.</p>"
-            "</div>"
-            % (
-                html.escape(CONFIG["name"]),
-                html.escape(key),
-                html.escape(str(self.user_info.get("full_name") or lic["holder_name"])),
-                html.escape(str(self.user_info.get("email") or DUMMY_USER["email"])),
-                lic["plan"],
-                status,
-                html.escape(str(CONFIG["version"])),
-                html.escape(CONFIG["characters_note"]),
-            )
-        )
-        box.exec_()
+        self._kid_window("License 📜", picture, "👋 Hi, I'm %s!" % name, "📜 " + html.escape(CONFIG["name"]),
+                         rows, notes, [], row_bg="#fef9c3")
 
     def handle_bottom_button_click(self):
         if self.lesson_stack.currentIndex() == 0:

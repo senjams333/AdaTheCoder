@@ -33,6 +33,8 @@ DEFAULTS = {
     "success_picture": "teddy.png",
     # Shown waving in the Profile window
     "profile_picture": "byte_owl.png",
+    # Shown waving in the License window ("" = the first character, e.g. Tom)
+    "license_picture": "",
     "oops_picture": "tom.png",
     "intro_video": "intro.mp4",
     "characters_note": "All characters (Tom, Penny, Teddy) are fictional.",
