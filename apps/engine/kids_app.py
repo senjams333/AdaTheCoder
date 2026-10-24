@@ -2526,7 +2526,7 @@ class MainWindow(QMainWindow):
         """)
         glow = QGraphicsDropShadowEffect(box)
         glow.setBlurRadius(60)
-        glow.setColor(QColor(251, 146, 60, 230))
+        glow.setColor(QColor(244, 114, 182, 240))      # pink glow
         glow.setOffset(0, 0)
         card.setGraphicsEffect(glow)
         outer.addWidget(card)
