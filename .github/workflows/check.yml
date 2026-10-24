@@ -109,6 +109,7 @@ jobs:
             gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav
           pip install -r apps/requirements.txt
       - name: Open each app and go through it (screenshots)
+        shell: bash
         env:
           QT_QPA_PLATFORM: offscreen
           QTWEBENGINE_DISABLE_SANDBOX: "1"
@@ -117,9 +118,18 @@ jobs:
           for a in apps/*/app.json; do
             a="$(basename "$(dirname "$a")")"
             python apps/make_key.py "$a" > /dev/null
-            timeout 300 python apps/tests/smoke_gui.py "$a" "$RUNNER_TEMP/app-shots" 2>&1 | tee -a smoke.txt
+            mkdir -p "$RUNNER_TEMP/app-shots"
+            status=0
+            timeout 300 python apps/tests/smoke_gui.py "$a" "$RUNNER_TEMP/app-shots" > "$RUNNER_TEMP/app-shots/$a.log" 2>&1 || status=$?
+            cat "$RUNNER_TEMP/app-shots/$a.log"
+            grep -E '^(PASS|FAIL)' "$RUNNER_TEMP/app-shots/$a.log" >> smoke.txt || true
+            if [ "$status" != 0 ]; then
+              tail -n 25 "$RUNNER_TEMP/app-shots/$a.log" | sed 's/^/::error title='"$a"'::/'
+              failed=1
+            fi
           done
-          echo "::notice title=Apps::$(grep -c '^PASS' smoke.txt) steps passed"
+          echo "::notice title=Apps::$(grep -c '^PASS' smoke.txt) steps passed, $(grep -c '^FAIL' smoke.txt) failed"
+          [ -z "$failed" ]
       - name: Save the screenshots (ci-app-previews branch)
         if: always() && github.event_name != 'pull_request'
         run: |
