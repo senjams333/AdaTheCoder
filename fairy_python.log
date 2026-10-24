@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/runner/work/AdaTheCoder/AdaTheCoder/apps/tests/smoke_gui.py", line 26, in <module>
+    ns = runpy.run_path(os.path.join(APPS, "engine", "kids_app.py"), run_name="kids_app")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/AdaTheCoder/AdaTheCoder/apps/engine/kids_app.py", line 50, in <module>
+    from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+ImportError: libpulse-mainloop-glib.so.0: cannot open shared object file: No such file or directory
