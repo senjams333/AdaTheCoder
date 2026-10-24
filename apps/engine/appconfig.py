@@ -31,6 +31,8 @@ DEFAULTS = {
         {"name": "🧸 TEDDY", "image": "teddy.png", "emoji": "🧸"},
     ],
     "success_picture": "teddy.png",
+    # Shown waving in the Profile window
+    "profile_picture": "byte_owl.png",
     "oops_picture": "tom.png",
     "intro_video": "intro.mp4",
     "characters_note": "All characters (Tom, Penny, Teddy) are fictional.",

@@ -29,6 +29,7 @@ os.chdir(get_base_dir())
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import html
+import math
 import urllib.parse
 import urllib.request
 import urllib.error
@@ -41,7 +42,7 @@ APP_ID = CONFIG["id"]
 LOGO = CONFIG["logo"]
 
 from PyQt5.QtCore import QProcess, Qt, QUrl, QPropertyAnimation, QEasingCurve, QPoint, QObject, pyqtSlot, pyqtSignal, QTimer, QEvent
-from PyQt5.QtGui import QFont, QPixmap, QColor, QIcon, QPainter, QPainterPath
+from PyQt5.QtGui import QFont, QPixmap, QColor, QIcon, QPainter, QPainterPath, QTransform
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, QScrollArea, QFrame, QGraphicsDropShadowEffect, QStackedWidget, QLineEdit, QMessageBox, QSlider, QProgressBar, QToolButton, QMenu, QAction,
@@ -2490,37 +2491,96 @@ class MainWindow(QMainWindow):
         active = "✅ Yes" if u.get("is_active") else "❌ No"
         created = u.get("created_at") or "N/A"
 
-        box = QMessageBox(self)
+        rows = [("🆔 User ID", user_id), ("👤 Full Name", name), ("📧 Email", email), ("🎓 Role", role),
+                ("🖼️ Avatar", avatar), ("📝 Bio", bio), ("⚧ Gender", gender), ("📍 Address", address),
+                ("🔐 Auth Provider", provider), ("⚡ Active", active), ("🗓️ Created At", created)]
+        info = "".join("<tr><td style='padding:5px 14px 5px 0; color:#0369a1;'><b>%s</b></td><td style='padding:5px 0;'>%s</td></tr>"
+                       % (k, html.escape(str(v))) for k, v in rows)
+
+        # A big, friendly window: large text for children, and Byte waving hello
+        box = QDialog(self)
         box.setWindowTitle("Profile 👤")
-        box.setTextFormat(Qt.RichText)
-        box.setText(
-            "<div style='font-family: Comic Sans MS; font-size: 14px; color: #0f172a;'>"
-            "<h2 style='color:#0284c7;'>👤 My Profile 🌟</h2>"
-            "<p style='background:#f0f9ff; border-radius:8px; padding:10px;'>"
-            "<b>🆔 User ID:</b> %s<br>"
-            "<b>👤 Full Name:</b> %s<br>"
-            "<b>📧 Email:</b> %s<br>"
-            "<b>🎓 Role:</b> %s<br>"
-            "<b>🖼️ Avatar:</b> %s<br>"
-            "<b>📝 Bio:</b> %s<br>"
-            "<b>⚧ Gender:</b> %s<br>"
-            "<b>📍 Address:</b> %s<br>"
-            "<b>🔐 Auth Provider:</b> %s<br>"
-            "<b>⚡ Active:</b> %s<br>"
-            "<b>🗓️ Created At:</b> %s"
-            "</p>"
-            "<p style='font-size:12px; color:#065f46;'>✨ Demo data — no internet or server needed! 🚀</p>"
-            "</div>" % (user_id, name, email, role, avatar, bio, gender, address, provider, active, created)
+        box.setMinimumSize(960, 640)
+        box.setStyleSheet("""
+            QDialog { background: #f0f9ff; }
+            QLabel { color: #0f172a; background: transparent; }
+            QPushButton { font-family: 'Comic Sans MS'; font-size: 20px; font-weight: bold; border-radius: 24px; padding: 12px 30px; }
+            QPushButton#ok { background: #ffd166; color: #0f172a; border: 3px solid #f59e0b; }
+            QPushButton#ok:hover { background: #38bdf8; color: white; border-color: #0284c7; }
+            QPushButton#pw { background: #e0f2fe; color: #0f172a; border: 3px solid #38bdf8; }
+            QPushButton#pw:hover { background: #38bdf8; color: white; }
+        """)
+        outer = QVBoxLayout(box)
+        outer.setContentsMargins(30, 24, 30, 24)
+        outer.setSpacing(18)
+        row = QHBoxLayout()
+        row.setSpacing(28)
+
+        byte_col = QVBoxLayout()
+        byte_col.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        hello = QLabel("👋 Hi, I'm Byte!")
+        hello.setFont(QFont("Comic Sans MS", 20, QFont.Bold))
+        hello.setAlignment(Qt.AlignCenter)
+        hello.setStyleSheet("background: white; border: 3px solid #38bdf8; border-radius: 22px; padding: 10px 18px;")
+        byte = QLabel()
+        byte.setFixedSize(300, 320)
+        byte.setAlignment(Qt.AlignCenter)
+        byte_col.addWidget(hello, alignment=Qt.AlignHCenter)
+        byte_col.addWidget(byte, alignment=Qt.AlignHCenter)
+        row.addLayout(byte_col)
+
+        text = QLabel()
+        text.setTextFormat(Qt.RichText)
+        text.setWordWrap(True)
+        text.setText(
+            "<div style='font-family: Comic Sans MS; font-size: 21px; color: #0f172a;'>"
+            "<div style='color:#0284c7; font-size: 34px; font-weight: bold; margin-bottom: 10px;'>👤 My Profile 🌟</div>"
+            "<table style='background:#ffffff;'>%s</table>"
+            "<p style='font-size:16px; color:#065f46;'>✨ Demo data — no internet or server needed! 🚀</p>"
+            "</div>" % info if not self._use_server() else
+            "<div style='font-family: Comic Sans MS; font-size: 21px; color: #0f172a;'>"
+            "<div style='color:#0284c7; font-size: 34px; font-weight: bold; margin-bottom: 10px;'>👤 My Profile 🌟</div>"
+            "<table style='background:#ffffff;'>%s</table></div>" % info
         )
-        default_pix = make_round_pixmap(resource_path(LOGO), 120)
-        if default_pix:
-            box.setIconPixmap(default_pix)
-        box.setStyleSheet("QMessageBox { background: #ffffff; }")
-        pw_btn = box.addButton("🔑 Change password", QMessageBox.ActionRole) if CONFIG.get("password_url") else None
-        box.addButton(QMessageBox.Ok)
+        row.addWidget(text, stretch=1)
+        outer.addLayout(row, stretch=1)
+
+        buttons = QHBoxLayout()
+        buttons.addStretch()
+        pw_btn = None
+        if CONFIG.get("password_url"):
+            pw_btn = QPushButton("🔑 Change password")
+            pw_btn.setObjectName("pw")
+            pw_btn.setCursor(Qt.PointingHandCursor)
+            pw_btn.clicked.connect(lambda: (box.accept(), self.open_password_page()))
+            buttons.addWidget(pw_btn)
+        ok_btn = QPushButton("OK 👍")
+        ok_btn.setObjectName("ok")
+        ok_btn.setCursor(Qt.PointingHandCursor)
+        ok_btn.clicked.connect(box.accept)
+        buttons.addWidget(ok_btn)
+        outer.addLayout(buttons)
+
+        # Byte waves: the picture rocks gently from side to side
+        byte_pix = QPixmap(resource_path(CONFIG.get("profile_picture") or LOGO))
+        if not byte_pix.isNull():
+            byte_pix = byte_pix.scaled(270, 270, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            step = {"t": 0.0}
+
+            def wave():
+                step["t"] += 0.12
+                angle = 9 * math.sin(step["t"])
+                turned = byte_pix.transformed(QTransform().rotate(angle), Qt.SmoothTransformation)
+                byte.setPixmap(turned)
+
+            wave()
+            waver = QTimer(box)
+            waver.timeout.connect(wave)
+            waver.start(40)
+        else:
+            byte.setText("🦉")
+            byte.setStyleSheet("font-size: 160px;")
         box.exec_()
-        if pw_btn is not None and box.clickedButton() is pw_btn:
-            self.open_password_page()
 
     def open_password_page(self):
         """Passwords are changed on the website: it emails a reset link, and the new password works here too."""

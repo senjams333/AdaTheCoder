@@ -21,7 +21,7 @@ def check(app_dir, cfg):
     """Say what's missing before building, so nobody ships an app with holes."""
     problems, notes = [], []
     lessons, topics = load_lessons(app_dir)
-    for pic in [cfg["logo"], cfg["success_picture"], cfg["oops_picture"]] + [c.get("image") for c in cfg["characters"]]:
+    for pic in [cfg["logo"], cfg["success_picture"], cfg["oops_picture"], cfg.get("profile_picture")] + [c.get("image") for c in cfg["characters"]]:
         if pic and not os.path.exists(os.path.join(app_dir, pic)):
             problems.append(f"picture missing: {pic}")
     if cfg.get("intro_video") and not os.path.exists(os.path.join(app_dir, cfg["intro_video"])):

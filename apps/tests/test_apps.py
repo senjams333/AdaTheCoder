@@ -36,7 +36,7 @@ class AppFolders(unittest.TestCase):
             self.assertEqual(cfg["id"], name, "the folder name and app.json id must match")
             lessons, topics = load_lessons(d)
             self.assertGreaterEqual(len(topics), 2)
-            for pic in [cfg["logo"], cfg["success_picture"], cfg["oops_picture"]] + [c["image"] for c in cfg["characters"]]:
+            for pic in [cfg["logo"], cfg["success_picture"], cfg["oops_picture"], cfg["profile_picture"]] + [c["image"] for c in cfg["characters"]]:
                 self.assertTrue(os.path.exists(os.path.join(d, pic)), f"{name}: {pic} missing")
             for lesson in lessons.values():
                 self.assertIn("title", lesson)

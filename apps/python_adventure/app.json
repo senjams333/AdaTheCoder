@@ -17,6 +17,7 @@
     {"name": "🐍 PENNY", "image": "penny.png", "emoji": "🐍"},
     {"name": "🧸 TEDDY", "image": "teddy.png", "emoji": "🧸"}
   ],
+  "profile_picture": "byte_owl.png",
   "success_picture": "teddy.png",
   "oops_picture": "tom.png",
   "intro_video": "intro.mp4",
