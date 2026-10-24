@@ -2526,10 +2526,16 @@ class MainWindow(QMainWindow):
         else:
             status = "Every lesson is open ✅"
             key = "none needed"
-        box = QMessageBox(self)
+        # No buttons: the window's own ✕ closes it
+        box = QDialog(self)
         box.setWindowTitle("License 📜")
-        box.setTextFormat(Qt.RichText)
-        box.setText(
+        box.setStyleSheet("QDialog { background: #ffffff; }")
+        text = QLabel(box)
+        text.setTextFormat(Qt.RichText)
+        text.setWordWrap(True)
+        text.setMinimumWidth(440)
+        QVBoxLayout(box).addWidget(text)
+        text.setText(
             "<div style='font-family: Comic Sans MS; font-size: 14px; color: #0f172a;'>"
             "<h2 style='color:#0284c7;'>%s</h2>"
             "<p style='background:#fef9c3; border-radius:8px; padding:10px;'>"
@@ -2555,17 +2561,7 @@ class MainWindow(QMainWindow):
                 html.escape(CONFIG["characters_note"]),
             )
         )
-        box.setStyleSheet("QMessageBox { background: #ffffff; }")
-        key_btn = up_btn = None
-        if not self.locks.has_full_access and locked:
-            key_btn = box.addButton("🔑 Enter licence key", QMessageBox.AcceptRole) if self.locks.secret else None
-            up_btn = box.addButton("⭐ Upgrade", QMessageBox.ActionRole)
-        box.addButton(QMessageBox.Ok)
         box.exec_()
-        if key_btn is not None and box.clickedButton() is key_btn:
-            self.ask_licence_key()
-        elif up_btn is not None and box.clickedButton() is up_btn:
-            self.open_upgrade()
 
     def handle_bottom_button_click(self):
         if self.lesson_stack.currentIndex() == 0:
