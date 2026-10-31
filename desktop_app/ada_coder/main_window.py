@@ -203,6 +203,7 @@ class MainWindow(QMainWindow):
         self.theme_cards = []
         self._fill_theme_cards()
         home_lay.addWidget(title)
+        title.hide()                  # no "Choose a theme" heading above the cards
         home_lay.addWidget(self.theme_scroll)
         return home
 
