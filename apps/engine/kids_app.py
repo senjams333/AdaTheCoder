@@ -2937,7 +2937,8 @@ class MainWindow(QMainWindow):
         buttons = []
         if CONFIG.get("password_url"):
             buttons.append(("🔑 Change password", "soft", self.open_password_page))
-        self._kid_window("Profile 👤", CONFIG.get("profile_picture") or LOGO, "👋 Hi, I'm Byte!", "👤 My Profile 🌟",
+        first_name = (str(u.get("full_name") or "").split() or ["friend"])[0]   # the student's first name
+        self._kid_window("Profile 👤", CONFIG.get("profile_picture") or LOGO, "👋 Hi, %s!" % first_name, "👤 My Profile 🌟",
                          rows, notes, buttons)
 
     def open_password_page(self):
