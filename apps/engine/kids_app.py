@@ -246,6 +246,15 @@ body.dark-mode .example-panel { background: rgba(15, 23, 42, 0.95); border-color
 body.dark-mode .example-title { color:#d1fae5; }
 
 .example-item { margin-bottom: 16px; }
+/* after the code runs well: the open example slides up and the next one glows, with an arrow */
+.example-box.slide-away { animation: slideAway 0.55s ease-in forwards; overflow: hidden; }
+@keyframes slideAway { from { max-height: 600px; opacity: 1; } to { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; transform: translateY(-14px); } }
+.topic-btn.next-glow { outline: 4px solid #facc15; outline-offset: 0; animation: nextGlow 1.1s ease-in-out infinite; }
+@keyframes nextGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.9), 0 0 14px 4px rgba(250, 204, 21, 0.55); }
+                      50% { box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.35), 0 0 30px 10px rgba(251, 191, 36, 0.8); } }
+.next-hint { display: block; margin: 0 0 8px 6px; font-size: 21px; font-weight: 800; color: #b45309; animation: nextHint 0.8s ease-in-out infinite alternate; }
+body.dark-mode .next-hint { color: #fde047; }
+@keyframes nextHint { from { transform: translateY(0); } to { transform: translateY(6px); } }
 .topic-btn { width:100%; padding:14px 18px; border:none; border-radius:18px; background: #ffffff; font-size:20px; font-weight:bold; cursor:pointer; transition:0.2s; color:#0f172a; text-align:left; box-shadow: 0 4px 12px rgba(0,0,0,0.08); white-space: normal; word-break: break-word; }
 body.dark-mode .topic-btn { background: #1e293b; color: #f8fafc; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); }
 .topic-btn:hover { background:#38bdf8; color:#ffffff; transform: translateY(-2px); }
@@ -450,8 +459,44 @@ function escapeHtml(text) {
 // No voice: the app doesn't speak (the chimes and sounds stay).
 function speakWithKidVoice(text) {}
 
+function clearNextHint() {
+    document.querySelectorAll(".next-hint").forEach(h => h.remove());
+    document.querySelectorAll(".topic-btn.next-glow").forEach(b => b.classList.remove("next-glow"));
+}
+
+// After the code ran well: slide the open example up out of sight and make the next example glow, with an arrow
+function nudgeNextExample() {
+    let keys = Object.keys(CURRENT_EXAMPLES);
+    let i = keys.indexOf(activeExampleKey);
+    if (i < 0 || i >= keys.length - 1) return;           // the last example: nothing comes next
+    clearNextHint();
+    let box = document.getElementById("box_" + keys[i]);
+    if (box && box.style.display !== "none") {
+        box.classList.add("slide-away");
+        box.addEventListener("animationend", function done() {
+            box.removeEventListener("animationend", done);
+            box.style.display = "none";
+            box.classList.remove("slide-away");
+        });
+    }
+    let next = document.getElementById("box_" + keys[i + 1]);
+    let btn = next ? next.parentNode.querySelector(".topic-btn") : null;
+    if (btn) {
+        btn.classList.add("next-glow");
+        let hint = document.createElement("span");
+        hint.className = "next-hint";
+        hint.textContent = "👇 Click next example !";
+        btn.parentNode.insertBefore(hint, btn);
+        setTimeout(() => {      // bring it into view inside the lesson panel only (not the whole page)
+            let panel = document.getElementById("exampleContainer");
+            if (panel) panel.scrollTo({ top: Math.max(0, btn.offsetTop - panel.clientHeight / 3), behavior: "smooth" });
+        }, 600);
+    }
+}
+
 function selectExample(key) {
-    document.querySelectorAll(".example-box").forEach(box => { box.style.display = "none"; });
+    clearNextHint();
+    document.querySelectorAll(".example-box").forEach(box => { box.style.display = "none"; box.classList.remove("slide-away"); });
     activeExampleKey = key;
     let data = CURRENT_EXAMPLES[key];
     if (data) {
@@ -614,6 +659,7 @@ function showGiantTeddy(muteSound = false) {
             overlay.classList.remove("show");
         }, 3000);
     }
+    setTimeout(nudgeNextExample, 1200);
 }
 
 function showGiantTom(msg) {
