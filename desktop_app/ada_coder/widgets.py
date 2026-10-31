@@ -221,7 +221,7 @@ class ThemeCard(QFrame):
     def set_state(self, current, owned, free_count, price):
         """current: the theme on screen. owned: free theme or bought. free_count: lessons free to try."""
         if owned:
-            self.badge.setText("✓ Unlocked" if free_count is not None else "Free")
+            self.badge.setText("✓ Purchased · all lessons open" if free_count is not None else "Free")
         else:
             self.badge.setText(f"{free_count} free lessons · {price}".strip(" ·"))
         if current:
