@@ -2455,7 +2455,7 @@ class MainWindow(QMainWindow):
         """)
         glow = QGraphicsDropShadowEffect(box)
         glow.setBlurRadius(60)
-        glow.setColor(QColor(56, 189, 248, 230))
+        glow.setColor(QColor(251, 191, 36, 235))   # warm, yellow sunset glow
         glow.setOffset(0, 0)
         card.setGraphicsEffect(glow)
         outer.addWidget(card)
