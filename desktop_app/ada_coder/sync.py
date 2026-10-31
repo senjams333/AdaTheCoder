@@ -190,6 +190,24 @@ def register(details):
         return None
 
 
+def forgot_password(email):
+    """Asks the website to email a password reset link (/api/auth/forgot-password).
+    Returns True when the website accepted it, False when it said no, or None when it can't be reached.
+    The website answers the same whether or not the email has an account, so nobody can probe for accounts."""
+    body = json.dumps({"email": email}).encode("utf-8")
+    req = urllib.request.Request(SERVER_URL.rstrip("/") + "/api/auth/forgot-password", data=body, method="POST",
+                                 headers={"User-Agent": USER_AGENT, "Content-Type": "application/json",
+                                          "Accept": "application/json"})
+    try:
+        with _open(req, TIMEOUT) as resp:
+            resp.read()
+            return True
+    except urllib.error.HTTPError as e:
+        return None if e.code == 404 else False
+    except NETWORK_ERRORS:
+        return None
+
+
 def check_for_update():
     if platform_key() == "other":
         return None

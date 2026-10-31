@@ -9,7 +9,8 @@ from urllib.parse import quote
 
 from PyQt5.QtCore import Qt, QTimer, QUrl
 from PyQt5.QtGui import QColor, QDesktopServices, QPainter, QPixmap, QTransform
-from PyQt5.QtWidgets import QDialog, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import (QApplication, QDialog, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QPushButton,
+                             QVBoxLayout)
 
 from .config import APP_NAME, APP_VERSION, CONTACT_EMAIL, SERVER_URL
 from .styles import font, ui_family
@@ -70,7 +71,8 @@ def kid_window(parent, title, picture, hello, heading, rows, notes="", buttons=(
     """A big, friendly window: a character waving hello next to a table of rows.
 
     rows: (label, value) pairs (plain text). notes: extra HTML under the table (already escaped).
-    buttons: (text, action) pairs shown at the bottom; they keep the window open.
+    buttons: (text, action) pairs shown at the bottom; they keep the window open. action(note) gets a label
+    above the buttons where it can show a short message (hidden until used).
     """
     family = ui_family()
     info = "".join("<tr><td style='padding:5px 14px 5px 0; color:#0369a1;'><b>%s</b></td><td style='padding:5px 0;'>%s</td></tr>"
@@ -138,13 +140,20 @@ def kid_window(parent, title, picture, hello, heading, rows, notes="", buttons=(
     outer.addLayout(row, 1)
 
     if buttons:
+        note = QLabel("")
+        note.setWordWrap(True)
+        note.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        note.setFont(font(13, True))
+        note.setStyleSheet("color: #0369a1;")
+        note.hide()
+        outer.addWidget(note)
         bar = QHBoxLayout()
         bar.addStretch()
         for label, action in buttons:
             btn = QPushButton(label)
             btn.setObjectName("soft")
             btn.setCursor(Qt.PointingHandCursor)
-            btn.clicked.connect(lambda _=False, act=action: act())
+            btn.clicked.connect(lambda _=False, act=action: act(note))
             bar.addWidget(btn)
         outer.addLayout(bar)
 
@@ -159,11 +168,22 @@ def show_profile(parent, user, done_count, lesson_count, course_name):
     rows = [("👤 Name", user.get("full_name") or "Coder"), ("📧 Email", email or "–"),
             ("⭐ Lessons finished", f"{done_count} of {lesson_count}"), ("🎨 Theme", course_name)]
 
-    def change_password():      # passwords are changed on the website, which emails a reset link
-        url = SERVER_URL.rstrip("/") + "/forgot-password"
-        if "@" in email:
-            url += "?email=" + quote(email)
-        QDesktopServices.openUrl(QUrl(url))
+    def change_password(note):
+        """Asks the website to email the grown-up a password reset link (with a 6-digit code).
+        The new password then works on the website and in the app. Offline: opens the website's page."""
+        from . import sync
+        note.setText("⏳ Asking the website…")
+        note.show()
+        QApplication.processEvents()
+        sent = sync.forgot_password(email)
+        if sent is None:
+            url = SERVER_URL.rstrip("/") + "/forgot-password" + ("?email=" + quote(email) if "@" in email else "")
+            QDesktopServices.openUrl(QUrl(url))
+            note.setText("🌐 Can't reach the website from the app, so its Forgot password page is open in your browser.")
+        elif sent:
+            note.setText(f"📧 We've emailed a password reset link to {email}. Ask a grown-up to open it and choose a new password.")
+        else:
+            note.setText("❌ The website couldn't send the email just now. Please try again in a minute.")
     buttons = [("🔑 Change password", change_password)] if email else []
     kid_window(parent, "Profile 👤", "byte.png", f"👋 Hi, {first}!", "👤 My Profile 🌟", rows, buttons=buttons)
 
