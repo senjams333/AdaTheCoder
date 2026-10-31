@@ -112,6 +112,7 @@ class MainWindow(QMainWindow):
         bar.addStretch()
         for w in (self.home_btn, self.course_btn, self.theme_btn, self.music_btn, self.avatar):
             bar.addWidget(w)
+        self.course_btn.hide()        # no Lessons button: the lesson list shows by itself while a lesson is open
         return bar
 
     def _build_menu(self):
