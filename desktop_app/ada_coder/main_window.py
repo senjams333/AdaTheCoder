@@ -183,6 +183,7 @@ class MainWindow(QMainWindow):
         self.hero_sub.hide()          # no "theme: tagline" line under the greeting
         lay.addWidget(cards, 1)
         lay.addWidget(self.start_btn, alignment=Qt.AlignCenter)
+        self.start_btn.hide()         # no Start button on the home screen: children open a theme card instead
 
         # every theme from the website, with Try free / Play
         home = QWidget()
