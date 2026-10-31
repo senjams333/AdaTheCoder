@@ -1599,13 +1599,6 @@ class MainWindow(QMainWindow):
         self.hero_layout.setAlignment(Qt.AlignCenter)
         self.hero_layout.setSpacing(45)
 
-        # "👋 Hi, Alex!": the student's name, shown above the title once they've logged in
-        self.hero_name = QLabel("")
-        self.hero_name.setFont(QFont("Comic Sans MS", 30, QFont.Bold))
-        self.hero_name.setAlignment(Qt.AlignCenter)
-        self.hero_name.setStyleSheet("color: #db2777;")
-        self.hero_name.hide()
-
         self.hero_title = QLabel(CONFIG["hero_title"])
         self.hero_title.setFont(QFont("Comic Sans MS", 46, QFont.Bold))
         self.hero_title.setAlignment(Qt.AlignCenter)
@@ -1628,7 +1621,6 @@ class MainWindow(QMainWindow):
             self.char_widgets.append(char_widget)
             self.char_layout.addWidget(char_widget)
 
-        self.hero_layout.addWidget(self.hero_name)
         self.hero_layout.addWidget(self.hero_title)
         self.hero_layout.addWidget(self.hero_sub)
         self.hero_layout.addWidget(self.char_container, alignment=Qt.AlignCenter)
@@ -1931,8 +1923,6 @@ class MainWindow(QMainWindow):
         self._session_login = None
         self.user_info = {}
         self._logged_in = False
-        self.hero_name.hide()
-        self.hero_name.setText("")
         self.locks.set_account_licences([])
         self.refresh_locks()
         round_pix = make_round_pixmap(resource_path(LOGO), 46)
@@ -2313,9 +2303,6 @@ class MainWindow(QMainWindow):
         display_name = (self.user_info.get("full_name") or self.user_info.get("email") or "Learner")
         self.login_status.setStyleSheet("font-size: 15px; font-weight: bold; color: #16a34a;")
         self.login_status.setText("✅ Welcome, %s! 🎉" % str(display_name))
-        first = str(self.user_info.get("full_name") or "").split()
-        self.hero_name.setText("👋 Hi, %s! 🌟" % (first[0] if first else "friend"))
-        self.hero_name.show()
 
         self.center_stack.setEnabled(True)
         self.home_btn.setEnabled(True)
@@ -2876,6 +2863,8 @@ class MainWindow(QMainWindow):
         bubble = QLabel(hello)
         bubble.setFont(QFont("Comic Sans MS", 17, QFont.Bold))
         bubble.setAlignment(Qt.AlignCenter)
+        bubble.setWordWrap(True)
+        bubble.setMaximumWidth(270)
         bubble.setStyleSheet("background: white; border: 3px solid #38bdf8; border-radius: 22px; padding: 10px 18px;")
         pic_label = QLabel()
         pic_label.setFixedSize(250, 270)
@@ -2986,7 +2975,7 @@ class MainWindow(QMainWindow):
         picture = CONFIG.get("license_picture") or first.get("image") or LOGO
         name = (CONFIG.get("license_character") or first.get("name", "").split(" ", 1)[-1] or "a friend").title()
         # No buttons: the big red ✕ Close closes it
-        self._kid_window("License 📜", picture, "👋 Hi, I'm %s!" % name, "📜 " + html.escape(CONFIG["name"]),
+        self._kid_window("License 📜", picture, "👋 Hi, here's your license details", "📜 " + html.escape(CONFIG["name"]),
                          rows, notes, [], row_bg="#fef9c3")
 
     def handle_bottom_button_click(self):
@@ -3036,7 +3025,6 @@ class MainWindow(QMainWindow):
             self.central_widget.set_dark(True)
             self.hero_panel.setStyleSheet("QFrame { background: transparent; border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: white;")
-            self.hero_name.setStyleSheet("color: #f9a8d4;")
             self.hero_sub.setStyleSheet("color: #d1fae5;")
             self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #0369a1; }"
                                              % CONFIG["colors"]["sidebar_dark"])
@@ -3045,7 +3033,6 @@ class MainWindow(QMainWindow):
             self.central_widget.set_dark(False)
             self.hero_panel.setStyleSheet("QFrame { background: transparent; border-radius: 40px; }")
             self.hero_title.setStyleSheet("color: #0f172a;")
-            self.hero_name.setStyleSheet("color: #db2777;")
             self.hero_sub.setStyleSheet("color: #065f46;")
             self.sidebar_panel.setStyleSheet("QFrame#SidePanel { background: %s; border-radius: 40px; border: 3px solid #ffffff; }"
                                              % CONFIG["colors"]["sidebar"])
