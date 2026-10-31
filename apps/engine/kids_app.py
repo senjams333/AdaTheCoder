@@ -240,7 +240,7 @@ body.dark-mode .subtitle { color: #d1fae5; }
 
 .coding-box { width:96%; height:calc(100vh - 120px); min-height: 420px; margin:8px auto 0 auto; display:flex; gap:22px; overflow-y:auto; overflow-x:hidden; z-index:2; position:relative; }
 
-.example-panel { width:40%; height:auto; min-height: 360px; margin-top:10px; border-radius:35px; padding:22px; overflow-y:auto; background: rgba(255, 255, 255, 0.55); backdrop-filter:blur(12px); border: 2px solid rgba(255, 255, 255, 0.7); box-shadow: 0 10px 25px rgba(0,0,0,0.08); position: relative; }
+.example-panel { width:35%; height:auto; min-height: 360px; margin-top:10px; border-radius:35px; padding:22px; overflow-y:auto; background: rgba(255, 255, 255, 0.55); backdrop-filter:blur(12px); border: 2px solid rgba(255, 255, 255, 0.7); box-shadow: 0 10px 25px rgba(0,0,0,0.08); position: relative; }
 body.dark-mode .example-panel { background: rgba(15, 23, 42, 0.95); border-color: rgba(124, 255, 178, 0.3); box-shadow: 0 12px 30px rgba(0,0,0,0.4), 0 0 20px rgba(124, 255, 178, 0.15); }
 .example-title { text-align:center; font-size:26px; color:#0f172a; font-weight:bold; margin-bottom: 16px; }
 body.dark-mode .example-title { color:#d1fae5; }
