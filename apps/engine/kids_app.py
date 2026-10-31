@@ -1064,17 +1064,19 @@ class SceneWidget(QWidget):
 
     Day (light theme): blue sky, a glowing sun, drifting clouds, a green meadow with swaying flowers.
     Night (dark theme): a deep night sky, a glowing moon and twinkling stars.
-    Both: once a minute a shooting star flies from the top right corner to the bottom left corner.
+    At night a shooting star (round head, long bright tail) flies from the top right corner to the bottom
+    left corner: 2 seconds after night mode turns on, then every 30 seconds.
     """
 
-    SHOOT_EVERY = 60.0    # seconds between shooting stars
-    SHOOT_FIRST = 5.0     # the first one comes 5 seconds after the app opens
+    SHOOT_EVERY = 30.0    # seconds between shooting stars
+    SHOOT_FIRST = 2.0     # the first one comes 2 seconds after night mode turns on
     SHOOT_TIME = 1.8      # how long it takes to cross the window
 
     def __init__(self):
         super().__init__()
         self.dark = False
         self.t = 0.0
+        self.night_since = 0.0
         rnd = random.Random(7)
         self.stars = [(rnd.random(), rnd.random() * 0.92, 0.8 + rnd.random() * 2.2, rnd.random() * 6.3, 0.8 + rnd.random() * 1.8)
                       for _ in range(150)]
@@ -1088,6 +1090,8 @@ class SceneWidget(QWidget):
         self.timer.start(50)
 
     def set_dark(self, dark):
+        if dark and not self.dark:
+            self.night_since = self.t
         self.dark = dark
         self.update()
 
@@ -1107,31 +1111,39 @@ class SceneWidget(QWidget):
         p.end()
 
     def _shooting_star(self, p, w, h):
-        if self.t < self.SHOOT_FIRST:
+        if not self.dark:
             return
-        k = ((self.t - self.SHOOT_FIRST) % self.SHOOT_EVERY) / self.SHOOT_TIME
+        e = self.t - self.night_since - self.SHOOT_FIRST
+        if e < 0:
+            return
+        k = (e % self.SHOOT_EVERY) / self.SHOOT_TIME
         if k > 1:
             return
-        x0, y0, x1, y1 = w + 40, -40, -40, h + 40
+        x0, y0, x1, y1 = w + 60, -60, -60, h + 60
         hx, hy = x0 + (x1 - x0) * k, y0 + (y1 - y0) * k
         length = math.hypot(x1 - x0, y1 - y0)
-        tail = 240 if self.dark else 200
-        tx, ty = hx + (x0 - x1) / length * tail, hy + (y0 - y1) / length * tail
-        fade = min(1.0, k / 0.12, (1 - k) / 0.15)
-        head = QColor(255, 255, 255, int(255 * fade))
-        glow = QColor(253, 230, 138, int(200 * fade)) if not self.dark else QColor(170, 205, 255, int(200 * fade))
+        ux, uy = (x0 - x1) / length, (y0 - y1) / length       # from the head back along the tail
+        tail, r = 460, 7
+        tx, ty = hx + ux * tail, hy + uy * tail
+        fade = min(1.0, k / 0.1, (1 - k) / 0.12)
+        # the tail: wide at the head, narrowing to a point, bright white fading to nothing
         g = QLinearGradient(hx, hy, tx, ty)
-        g.setColorAt(0, head)
-        g.setColorAt(0.25, glow)
-        g.setColorAt(1, QColor(255, 255, 255, 0))
-        pen = QPen(QBrush(g), 4)
-        pen.setCapStyle(Qt.RoundCap)
-        p.setPen(pen)
-        p.drawLine(int(hx), int(hy), int(tx), int(ty))
+        g.setColorAt(0, QColor(255, 255, 255, int(255 * fade)))
+        g.setColorAt(0.3, QColor(190, 220, 255, int(200 * fade)))
+        g.setColorAt(1, QColor(170, 205, 255, 0))
+        nx, ny = -uy, ux
+        path = QPainterPath()
+        path.moveTo(hx + nx * r, hy + ny * r)
+        path.lineTo(tx, ty)
+        path.lineTo(hx - nx * r, hy - ny * r)
+        path.closeSubpath()
         p.setPen(Qt.NoPen)
-        self._glow(p, hx, hy, 18, glow, QColor(glow.red(), glow.green(), glow.blue(), 0))
-        p.setBrush(head)
-        p.drawEllipse(int(hx - 4), int(hy - 4), 8, 8)
+        p.setBrush(QBrush(g))
+        p.drawPath(path)
+        # the round, glowing head
+        self._glow(p, hx, hy, 30, QColor(200, 225, 255, int(190 * fade)), QColor(170, 205, 255, 0))
+        p.setBrush(QColor(255, 255, 255, int(255 * fade)))
+        p.drawEllipse(int(hx - r), int(hy - r), 2 * r, 2 * r)
 
     def _glow(self, p, x, y, r, inner, outer):
         g = QRadialGradient(x, y, r)
