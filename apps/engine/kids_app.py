@@ -1070,7 +1070,7 @@ class SceneWidget(QWidget):
 
     SHOOT_EVERY = 30.0    # seconds between shooting stars
     SHOOT_FIRST = 2.0     # the first one comes 2 seconds after night mode turns on
-    SHOOT_TIME = 1.3      # how long it takes to cross the window (quick, like a real one)
+    SHOOT_TIME = 2.2      # how long it takes to cross the window
 
     def __init__(self):
         super().__init__()
@@ -1123,7 +1123,7 @@ class SceneWidget(QWidget):
         hx, hy = x0 + (x1 - x0) * k, y0 + (y1 - y0) * k
         length = math.hypot(x1 - x0, y1 - y0)
         ux, uy = (x0 - x1) / length, (y0 - y1) / length       # from the head back along the tail
-        tail, r = 380, 2.2
+        tail, r = 380, 2.6
         tx, ty = hx + ux * tail, hy + uy * tail
         fade = min(1.0, k / 0.1, (1 - k) / 0.15)
         nx, ny = -uy, ux
@@ -1143,9 +1143,10 @@ class SceneWidget(QWidget):
             p.setBrush(QBrush(g))
             p.drawPath(path)
         # the small round head with a gentle glow
-        self._glow(p, hx, hy, 12, QColor(220, 235, 255, int(200 * fade)), QColor(170, 205, 255, 0))
+        self._glow(p, hx, hy, 24, QColor(220, 235, 255, int(210 * fade)), QColor(170, 205, 255, 0))
+        self._glow(p, hx, hy, 9, QColor(255, 255, 255, int(255 * fade)), QColor(220, 235, 255, int(90 * fade)))
         p.setBrush(QColor(255, 255, 255, int(255 * fade)))
-        p.drawEllipse(QPointF(hx, hy), r, r)
+        p.drawEllipse(QPointF(hx, hy), 4, 4)
 
     def _glow(self, p, x, y, r, inner, outer):
         g = QRadialGradient(x, y, r)
