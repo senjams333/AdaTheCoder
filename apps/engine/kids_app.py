@@ -68,7 +68,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget, QGraphicsVideoItem
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
-from PyQt5.QtCore import QSizeF
+from PyQt5.QtCore import QSizeF, QPointF
 
 
 class ClickableSlider(QSlider):
@@ -1070,7 +1070,7 @@ class SceneWidget(QWidget):
 
     SHOOT_EVERY = 30.0    # seconds between shooting stars
     SHOOT_FIRST = 2.0     # the first one comes 2 seconds after night mode turns on
-    SHOOT_TIME = 1.8      # how long it takes to cross the window
+    SHOOT_TIME = 1.3      # how long it takes to cross the window (quick, like a real one)
 
     def __init__(self):
         super().__init__()
@@ -1123,27 +1123,29 @@ class SceneWidget(QWidget):
         hx, hy = x0 + (x1 - x0) * k, y0 + (y1 - y0) * k
         length = math.hypot(x1 - x0, y1 - y0)
         ux, uy = (x0 - x1) / length, (y0 - y1) / length       # from the head back along the tail
-        tail, r = 460, 7
+        tail, r = 380, 2.2
         tx, ty = hx + ux * tail, hy + uy * tail
-        fade = min(1.0, k / 0.1, (1 - k) / 0.12)
-        # the tail: wide at the head, narrowing to a point, bright white fading to nothing
-        g = QLinearGradient(hx, hy, tx, ty)
-        g.setColorAt(0, QColor(255, 255, 255, int(255 * fade)))
-        g.setColorAt(0.3, QColor(190, 220, 255, int(200 * fade)))
-        g.setColorAt(1, QColor(170, 205, 255, 0))
+        fade = min(1.0, k / 0.1, (1 - k) / 0.15)
         nx, ny = -uy, ux
-        path = QPainterPath()
-        path.moveTo(hx + nx * r, hy + ny * r)
-        path.lineTo(tx, ty)
-        path.lineTo(hx - nx * r, hy - ny * r)
-        path.closeSubpath()
         p.setPen(Qt.NoPen)
-        p.setBrush(QBrush(g))
-        p.drawPath(path)
-        # the round, glowing head
-        self._glow(p, hx, hy, 30, QColor(200, 225, 255, int(190 * fade)), QColor(170, 205, 255, 0))
+        # a soft, very thin halo along the tail, then the slim bright streak over it
+        for width, inner, outer in ((5.0, QColor(170, 205, 255, int(70 * fade)), QColor(170, 205, 255, 0)),
+                                    (r, QColor(255, 255, 255, int(255 * fade)), QColor(200, 225, 255, 0))):
+            g = QLinearGradient(hx, hy, tx, ty)
+            g.setColorAt(0, inner)
+            g.setColorAt(0.15, inner)
+            g.setColorAt(1, outer)
+            path = QPainterPath()
+            path.moveTo(hx + nx * width / 2, hy + ny * width / 2)
+            path.lineTo(tx, ty)
+            path.lineTo(hx - nx * width / 2, hy - ny * width / 2)
+            path.closeSubpath()
+            p.setBrush(QBrush(g))
+            p.drawPath(path)
+        # the small round head with a gentle glow
+        self._glow(p, hx, hy, 12, QColor(220, 235, 255, int(200 * fade)), QColor(170, 205, 255, 0))
         p.setBrush(QColor(255, 255, 255, int(255 * fade)))
-        p.drawEllipse(int(hx - r), int(hy - r), 2 * r, 2 * r)
+        p.drawEllipse(QPointF(hx, hy), r, r)
 
     def _glow(self, p, x, y, r, inner, outer):
         g = QRadialGradient(x, y, r)
