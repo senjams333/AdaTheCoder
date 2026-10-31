@@ -1774,7 +1774,7 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(body_layout)
 
         self.sidebar_collapsed = False
-        self.sidebar_toggle = QPushButton("❮❮", self.central_widget)
+        self.sidebar_toggle = QPushButton(">>", self.central_widget)
         self.sidebar_toggle.setToolTip("Hide lesson list")
         self.sidebar_toggle.setFixedSize(46, 92)
         self.sidebar_toggle.setFont(QFont("Comic Sans MS", 15, QFont.Bold))
@@ -2220,7 +2220,7 @@ class MainWindow(QMainWindow):
         self.sidebar_collapsed = False
         self.refresh_locks()
         self.sidebar_panel.show()
-        self.sidebar_toggle.setText("❮❮")
+        self.sidebar_toggle.setText(">>")
         self.sidebar_toggle.show()
         self._position_sidebar_toggle()
         self.logout_btn.show()
@@ -2272,14 +2272,14 @@ class MainWindow(QMainWindow):
     def collapse_sidebar(self):
         self.sidebar_collapsed = True
         self.sidebar_panel.hide()
-        self.sidebar_toggle.setText("❯❯")
+        self.sidebar_toggle.setText("<<")
         self.sidebar_toggle.setToolTip("Show lesson list")
         self._position_sidebar_toggle()
 
     def expand_sidebar(self):
         self.sidebar_collapsed = False
         self.sidebar_panel.show()
-        self.sidebar_toggle.setText("❮❮")
+        self.sidebar_toggle.setText(">>")
         self.sidebar_toggle.setToolTip("Hide lesson list")
         self.update_sidebar_highlight()
         self._position_sidebar_toggle()
