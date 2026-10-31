@@ -358,7 +358,8 @@ class MainWindow(QMainWindow):
     def _on_logged_in(self, user):
         self.user = dict(user)
         self._set_signed_in(True)
-        first = (self.user.get("full_name") or "").split(" ")[0]
+        # the child's name from the parent's profile on the website (or the name typed for Try for free)
+        first = (self.user.get("child_name") or self.user.get("full_name") or "").split(" ")[0]
         self.kid_name = first
         self._hero_text()
         self._licences_changed()

@@ -154,7 +154,7 @@ def kid_window(parent, title, picture, hello, heading, rows, notes="", buttons=(
 
 def show_profile(parent, user, done_count, lesson_count, course_name):
     """Profile: Byte the owl waves and says hi to the child by their first name."""
-    first = (str(user.get("full_name") or "").split() or ["friend"])[0]
+    first = (str(user.get("child_name") or user.get("full_name") or "").split() or ["friend"])[0]
     email = user.get("email") or ""
     rows = [("👤 Name", user.get("full_name") or "Coder"), ("📧 Email", email or "–"),
             ("⭐ Lessons finished", f"{done_count} of {lesson_count}"), ("🎨 Theme", course_name)]

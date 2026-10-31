@@ -284,7 +284,8 @@ class LoginOverlay(QFrame):
             return self._error(" ".join(answer.get("errors") or ["The account couldn't be created."]))
         self.settings["licences"] = list(answer.get("licences") or [])
         self._welcome({"full_name": answer.get("name") or self.name_input.text().strip(),
-                       "email": answer.get("email") or ""}, note="Your account is ready.")
+                       "email": answer.get("email") or "", "child_name": answer.get("child_name") or ""},
+                      note="Your account is ready.")
 
     def _check(self, answer):
         """answer: what the website said (see sync.login), or None when it couldn't be reached."""
@@ -296,13 +297,15 @@ class LoginOverlay(QFrame):
             # offline: let the child in, with the themes remembered from the last log-in
             if not same_person:
                 self.settings["licences"] = []
-            user = {"full_name": saved.get("full_name") if same_person else email.split("@")[0].title(), "email": email}
+            user = {"full_name": saved.get("full_name") if same_person else email.split("@")[0].title(), "email": email,
+                    "child_name": saved.get("child_name", "") if same_person else ""}
             return self._welcome(user, note="(offline: we'll check your themes next time) ")
         if not answer.get("ok"):
             self._busy(False, "")
             return self._error(answer.get("error") or "That email and password don't match.")
         self.settings["licences"] = list(answer.get("licences") or [])
-        self._welcome({"full_name": answer.get("name") or email.split("@")[0].title(), "email": answer.get("email") or email})
+        self._welcome({"full_name": answer.get("name") or email.split("@")[0].title(), "email": answer.get("email") or email,
+                       "child_name": answer.get("child_name") or ""})
 
     def _welcome(self, user, note=""):
         self.settings["remember_me"] = bool(self.remember.isChecked())

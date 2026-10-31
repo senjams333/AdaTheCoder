@@ -43,14 +43,16 @@ export class AppApiController {
     return res.json(since === revision ? { revision, unchanged: true } : { revision, unchanged: false, lessons });
   }
 
-  /** The app's log-in: { ok, name, email, licences: [theme ids] } or 401 { ok: false, error } */
+  /** The app's log-in: { ok, name, email, child_name, licences: [theme ids] } or 401 { ok: false, error }.
+   *  child_name is the child's name from the parent's profile: the app greets the child with it. */
   @Post('v3/login')
   @HttpCode(200)
   async login(@Body() body: Record<string, unknown>, @Ip() ip: string, @Res() res: Response) {
     try {
       const { user } = await this.auth.login(
         { email: String(body.email || '').trim().toLowerCase(), password: String(body.password || '') }, ip);
-      return res.json({ ok: true, name: user.name, email: user.email, licences: await this.catalog.licencedSlugs(user.id) });
+      return res.json({ ok: true, name: user.name, email: user.email, child_name: user.childName || '',
+        licences: await this.catalog.licencedSlugs(user.id) });
     } catch (err) {
       return res.status(401).json({ ok: false, error: this.text(err) });
     }
@@ -75,7 +77,7 @@ export class AppApiController {
     try {
       const { user } = await this.auth.register(dto);
       this.signups.set(key, [...recent, Date.now()]);
-      return res.status(201).json({ ok: true, name: user.name, email: user.email, licences: [] });
+      return res.status(201).json({ ok: true, name: user.name, email: user.email, child_name: user.childName || '', licences: [] });
     } catch (err) {
       const status = err instanceof HttpException ? err.getStatus() : 400;
       return res.status(status === 409 ? 409 : 400).json({ ok: false, errors: [this.text(err)] });
