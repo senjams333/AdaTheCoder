@@ -49,7 +49,8 @@ def load_courses():
             c["buy_url"] = f"{SERVER_URL.rstrip('/')}/account?theme={c['id']}"
         if c["lessons"]:
             courses.append(c)
-    return sorted(courses, key=lambda c: c.get("position", 0))
+    # free themes first (left on the home screen), then the paid ones in the admin's order
+    return sorted(courses, key=lambda c: (bool(c.get("premium")), c.get("position", 0)))
 
 
 def characters(course):

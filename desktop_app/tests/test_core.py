@@ -52,12 +52,12 @@ class LessonTests(unittest.TestCase):
 
     def test_bundled_courses(self):
         courses = lessons.load_courses()
-        self.assertEqual([c["id"] for c in courses], ["friends", "fairies", "coding_club", "python_adventure"])
+        self.assertEqual([c["id"] for c in courses], ["coding_club", "friends", "fairies", "python_adventure"])
         for c in courses:
             self.assertIn(c["pack"], THEMES)
             self.assertEqual(len(c["lessons"]), 17)
         self.assertEqual(lessons.find_course(courses, "fairies")["name"], "Fairies & Angels")
-        self.assertEqual(lessons.find_course(courses, "gone")["id"], "friends")
+        self.assertEqual(lessons.find_course(courses, "gone")["id"], "coding_club")   # the first: the free theme
 
     def test_downloaded_courses_win(self):
         lesson = {"id": "new1", "position": 1, "emoji": "🐢", "name": "TURTLE", "title": "🐢 TURTLE",
