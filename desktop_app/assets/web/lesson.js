@@ -246,7 +246,7 @@ function setDarkMode(on) { document.body.classList.toggle("dark-mode", !!on); }
 function toggleAudioEngine(on) {
   musicOn = !!on;
   clearInterval(musicTimer);
-  if (musicOn) { musicTick(); musicTimer = setInterval(musicTick, 5000); }
+  twinkleMusic(musicOn);       // gentle twinkling music-box music for kids (see below)
 }
 
 function setVoiceEnabled(on) { state.voice = !!on; if (!on && "speechSynthesis" in window) speechSynthesis.cancel(); }
@@ -324,3 +324,36 @@ function showError(err) {
 
 refreshGutter();
 clearOutput();
+
+/* soft twinkling music box: "Twinkle Twinkle Little Star" (a traditional tune) with little sparkles, looped */
+var TW_NOTES = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.0, C6: 1046.5, E6: 1318.5, G6: 1568.0 };
+var TW_SONG = "C5 C5 G5 G5 A5 A5 G5- F5 F5 E5 E5 D5 D5 C5- G5 G5 F5 F5 E5 E5 D5- G5 G5 F5 F5 E5 E5 D5- C5 C5 G5 G5 A5 A5 G5- F5 F5 E5 E5 D5 D5 C5-".split(" ");
+var twCtx = null, twTimer = null, twOn = false, twMaster = null;
+function twBell(freq, at, len, vol) {
+  var o = twCtx.createOscillator(), o2 = twCtx.createOscillator(), g = twCtx.createGain();
+  o.type = "sine"; o.frequency.value = freq; o2.type = "triangle"; o2.frequency.value = freq * 2;
+  var g2 = twCtx.createGain(); g2.gain.value = 0.25;
+  o.connect(g); o2.connect(g2); g2.connect(g); g.connect(twMaster);
+  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, at + len);
+  o.start(at); o2.start(at); o.stop(at + len + 0.05); o2.stop(at + len + 0.05);
+}
+function twPlayOnce() {
+  if (!twOn || !twCtx || !twMaster) return 0;
+  var beat = 0.42, t = twCtx.currentTime + 0.1;
+  TW_SONG.forEach(function (n) {
+    var long = n.slice(-1) === "-", f = TW_NOTES[n.replace("-", "")];
+    twBell(f, t, long ? 1.4 : 0.9, 0.05);
+    if (Math.random() < 0.3) twBell([TW_NOTES.C6, TW_NOTES.E6, TW_NOTES.G6][Math.floor(Math.random() * 3)], t + beat / 2, 0.6, 0.012);   // a sparkle
+    t += long ? beat * 2 : beat;
+  });
+  return (t - twCtx.currentTime) * 1000 + 1200;          // a short rest, then again
+}
+function twLoop() { if (!twOn) return; var ms = twPlayOnce(); twTimer = setTimeout(twLoop, ms); }
+function twinkleMusic(on) {
+  twOn = !!on; clearTimeout(twTimer);
+  if (twMaster) { twMaster.disconnect(); twMaster = null; }        // silences every note already on its way
+  if (!twOn) return;
+  try { if (!twCtx) twCtx = new (window.AudioContext || window.webkitAudioContext)(); twCtx.resume(); } catch (e) { twOn = false; return; }
+  twMaster = twCtx.createGain(); twMaster.gain.value = 1; twMaster.connect(twCtx.destination);
+  twLoop();
+}
