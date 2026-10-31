@@ -417,6 +417,8 @@ class MainWindow(QMainWindow):
         self.settings.set_last_lesson(self.course["id"], lesson["id"])
         self.bridge.stop()
         self.center.setCurrentIndex(LESSON)
+        self.sidebar.show()          # the lesson list appears once a lesson is open
+        self.course_btn.setText("📚  Lessons")
         self.refresh_sidebar()
         self.prev_btn.setEnabled(self.index > 0)
         self.next_btn.setEnabled(self.index < len(self.lessons) - 1)
@@ -498,6 +500,9 @@ class MainWindow(QMainWindow):
         self.bridge.stop()
         self.video.stop()
         self.center.setCurrentIndex(HOME)
+        self.sidebar.hide()          # the home screen shows only the themes; the lesson list comes with a lesson
+        self.course_btn.setText("📚  Show lessons")
+        self._fit_home()
         if getattr(self, "_reload_waiting", False):
             self.reload_courses()
         self.refresh_sidebar()
