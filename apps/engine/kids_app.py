@@ -686,8 +686,6 @@ function triggerShootingStar() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    triggerShootingStar();
-    setInterval(triggerShootingStar, 120000);
     let outputEl = document.getElementById("output");
     if (outputEl) {
         outputEl.innerText = "Your output will be displayed here 😊 .";
@@ -768,7 +766,6 @@ MASTER_HTML_TEMPLATE = """<!DOCTYPE html><html><head>""" + BASE_CSS + """</head>
     <div class="star star1">⭐</div><div class="star star2">⭐</div><div class="star star3">⭐</div>
     <div class="star star4">⭐</div><div class="star star5">⭐</div>
     
-    <div class="shooting-star" id="shootingStar"></div>
     
     <div class="giant-teddy-overlay" id="giantTeddyOverlay">
         <div class="giant-teddy-card">
