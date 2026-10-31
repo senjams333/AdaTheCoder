@@ -246,13 +246,6 @@ body.dark-mode .example-panel { background: rgba(15, 23, 42, 0.95); border-color
 body.dark-mode .example-title { color:#d1fae5; }
 
 .example-item { margin-bottom: 16px; }
-.next-arrow { position: sticky; bottom: 4px; margin: 6px 2px 0 auto; width: 50px; height: 50px; border-radius: 50%; display: none;
-  align-items: center; justify-content: center; border: 3px solid #fde047; background: radial-gradient(circle, #fef08a, #f59e0b);
-  color: #ffffff; font-size: 26px; cursor: pointer; z-index: 5; text-shadow: 0 1px 3px rgba(146, 64, 14, 0.8);
-  animation: arrowBob 1s ease-in-out infinite alternate, arrowGlow 1.4s ease-in-out infinite; }
-.next-arrow:hover { transform: scale(1.08); }
-@keyframes arrowBob { from { translate: 0 0; } to { translate: 0 7px; } }
-@keyframes arrowGlow { 0%, 100% { box-shadow: 0 0 10px 3px rgba(250, 204, 21, 0.7); } 50% { box-shadow: 0 0 26px 10px rgba(251, 191, 36, 0.95); } }
 /* after the code runs well: the open example slides up and the next one glows, with an arrow */
 .example-box.slide-away { animation: slideAway 0.55s ease-in forwards; overflow: hidden; }
 @keyframes slideAway { from { max-height: 600px; opacity: 1; } to { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; transform: translateY(-14px); } }
@@ -501,27 +494,6 @@ function nudgeNextExample() {
     }
 }
 
-// The glowing ▼ at the bottom of the lesson panel: shows while another example comes after the open one
-function updateNextArrow() {
-    let arrow = document.getElementById("nextArrow");
-    if (!arrow) return;
-    let keys = Object.keys(CURRENT_EXAMPLES);
-    let i = keys.indexOf(activeExampleKey);
-    arrow.style.display = (keys.length > 1 && i < keys.length - 1) ? "flex" : "none";
-}
-
-function goNextExample() {
-    let keys = Object.keys(CURRENT_EXAMPLES);
-    let i = keys.indexOf(activeExampleKey);
-    if (i >= 0 && i < keys.length - 1) {
-        let key = keys[i + 1];
-        selectExample(key);
-        let box = document.getElementById("box_" + key);
-        let panel = document.getElementById("exampleContainer");
-        if (box && panel) panel.scrollTo({ top: Math.max(0, box.parentNode.offsetTop - 20), behavior: "smooth" });
-    }
-}
-
 function selectExample(key) {
     clearNextHint();
     document.querySelectorAll(".example-box").forEach(box => { box.style.display = "none"; box.classList.remove("slide-away"); });
@@ -542,7 +514,6 @@ function selectExample(key) {
             outputEl.innerText = "Your output will be displayed here 😊 .";
         }
     }
-    updateNextArrow();
 }
 
 function updateLessonData(title, subtitle, examplesObj, defaultCode) {
@@ -579,7 +550,6 @@ function updateLessonData(title, subtitle, examplesObj, defaultCode) {
             </div>
             <h2>Click the examples here to start ! 🚀</h2>
         </div>
-        <button class="next-arrow" id="nextArrow" type="button" title="Next example" onclick="goNextExample()">▼</button>
     `;
 
     let editor = document.getElementById("code");
