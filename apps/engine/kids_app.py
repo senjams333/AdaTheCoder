@@ -1065,11 +1065,11 @@ class SceneWidget(QWidget):
     Day (light theme): blue sky, a glowing sun, drifting clouds, a green meadow with swaying flowers.
     Night (dark theme): a deep night sky, a glowing moon and twinkling stars.
     At night a shooting star (round head, long bright tail) flies from the top right corner to the bottom
-    left corner: 2 seconds after night mode turns on, then every 30 seconds.
+    left corner: 1 second after night mode turns on, then every 30 seconds.
     """
 
     SHOOT_EVERY = 30.0    # seconds between shooting stars
-    SHOOT_FIRST = 2.0     # the first one comes 2 seconds after night mode turns on
+    SHOOT_FIRST = 1.0     # the first one comes 1 second after night mode turns on
     SHOOT_TIME = 2.2      # how long it takes to cross the window
 
     def __init__(self):
