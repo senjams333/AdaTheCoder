@@ -654,7 +654,7 @@ class MainWindow(QMainWindow):
         scale = max(0.45, min(min(w / 1366.0, h / 820.0), 1.25))
         self.hero_title.setFont(font(max(int(38 * scale), 18), True))
         self.hero_sub.setFont(font(max(int(19 * scale), 11), True))
-        self.cards_layout.setSpacing(max(int(40 * scale), 8))
+        self.cards_layout.setSpacing(max(int(90 * scale), 16))      # room between the three characters
         side = self.sidebar.width() if self.sidebar.isVisible() else 0
         per_card = (w - side - 160) / 3.0
         card_scale = max(0.3, min(scale, per_card / 380.0, (h - 260) * 0.5 / 400.0))  # theme cards sit below
