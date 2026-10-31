@@ -559,9 +559,9 @@ class MainWindow(QMainWindow):
         first = getattr(self, "kid_name", "")
         if first:
             text = (f"<span style='color:{main}'>Hi </span><span style='color:{name_colour}'>{html.escape(first)}</span>"
-                    f"<span style='color:{main}'>! Ready to code? 🐍</span>")
+                    f"<span style='color:{main}'> ! Welcome to Ada The Coder</span>")
         else:
-            text = f"<span style='color:{main}'>Python Adventure For Kids! 🐍</span>"
+            text = f"<span style='color:{main}'>Welcome to Ada The Coder</span>"
         self.hero_title.setTextFormat(Qt.RichText)
         self.hero_title.setText(text)
 
