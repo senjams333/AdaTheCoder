@@ -216,6 +216,8 @@ class MainWindow(QMainWindow):
         row.addStretch()
         self.theme_scroll.setWidget(holder)
         self._refresh_theme_cards()
+        if hasattr(self, "sidebar"):          # not during start-up: the window sizes them once it's built
+            self._fit_home()
 
     def _refresh_theme_cards(self):
         for card in self.theme_cards:
@@ -654,6 +656,11 @@ class MainWindow(QMainWindow):
         card_scale = max(0.3, min(scale, per_card / 380.0, (h - 260) * 0.5 / 400.0))  # theme cards sit below
         for card in self.cards:
             card.set_scale(card_scale)
+        # three theme cards in a row; more themes scroll sideways
+        view = self.theme_scroll.viewport().width() if self.theme_scroll.isVisible() else (w - side - 40)
+        each = max(200, int((view - 4 - 2 * 14) / 3))
+        for card in self.theme_cards:
+            card.setFixedWidth(each)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
