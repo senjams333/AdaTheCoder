@@ -1064,7 +1064,12 @@ class SceneWidget(QWidget):
 
     Day (light theme): blue sky, a glowing sun, drifting clouds, a green meadow with swaying flowers.
     Night (dark theme): a deep night sky, a glowing moon and twinkling stars.
+    Both: once a minute a shooting star flies from the top right corner to the bottom left corner.
     """
+
+    SHOOT_EVERY = 60.0    # seconds between shooting stars
+    SHOOT_FIRST = 5.0     # the first one comes 5 seconds after the app opens
+    SHOOT_TIME = 1.8      # how long it takes to cross the window
 
     def __init__(self):
         super().__init__()
@@ -1098,7 +1103,35 @@ class SceneWidget(QWidget):
             self._night(p, w, h)
         else:
             self._day(p, w, h)
+        self._shooting_star(p, w, h)
         p.end()
+
+    def _shooting_star(self, p, w, h):
+        if self.t < self.SHOOT_FIRST:
+            return
+        k = ((self.t - self.SHOOT_FIRST) % self.SHOOT_EVERY) / self.SHOOT_TIME
+        if k > 1:
+            return
+        x0, y0, x1, y1 = w + 40, -40, -40, h + 40
+        hx, hy = x0 + (x1 - x0) * k, y0 + (y1 - y0) * k
+        length = math.hypot(x1 - x0, y1 - y0)
+        tail = 240 if self.dark else 200
+        tx, ty = hx + (x0 - x1) / length * tail, hy + (y0 - y1) / length * tail
+        fade = min(1.0, k / 0.12, (1 - k) / 0.15)
+        head = QColor(255, 255, 255, int(255 * fade))
+        glow = QColor(253, 230, 138, int(200 * fade)) if not self.dark else QColor(170, 205, 255, int(200 * fade))
+        g = QLinearGradient(hx, hy, tx, ty)
+        g.setColorAt(0, head)
+        g.setColorAt(0.25, glow)
+        g.setColorAt(1, QColor(255, 255, 255, 0))
+        pen = QPen(QBrush(g), 4)
+        pen.setCapStyle(Qt.RoundCap)
+        p.setPen(pen)
+        p.drawLine(int(hx), int(hy), int(tx), int(ty))
+        p.setPen(Qt.NoPen)
+        self._glow(p, hx, hy, 18, glow, QColor(glow.red(), glow.green(), glow.blue(), 0))
+        p.setBrush(head)
+        p.drawEllipse(int(hx - 4), int(hy - 4), 8, 8)
 
     def _glow(self, p, x, y, r, inner, outer):
         g = QRadialGradient(x, y, r)
