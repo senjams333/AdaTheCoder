@@ -1,144 +1,252 @@
-"""Profile, About and Upgrade pop-ups."""
-from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtWidgets import QDialog, QFrame, QGridLayout, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+"""Profile, License (About) and Upgrade pop-ups, made for children: big letters, round glowing cards.
+
+Profile and License stay open until the big red Close is pressed (no small ✕, Esc does nothing), and a
+character waves gently on them. The Upgrade card glows like a sunset and has only ✕ and Upgrade.
+"""
+import html
+import math
+from urllib.parse import quote
+
+from PyQt5.QtCore import Qt, QTimer, QUrl
+from PyQt5.QtGui import QColor, QDesktopServices, QPainter, QPixmap, QTransform
+from PyQt5.QtWidgets import QDialog, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
 from .config import APP_NAME, APP_VERSION, CONTACT_EMAIL, SERVER_URL
-from .styles import DIALOG_QSS, font
-from .widgets import round_pixmap
+from .styles import font, ui_family
+from .widgets import load_pixmap, round_pixmap
 
 
-def _info_box(rows):
-    box = QFrame()
-    box.setObjectName("InfoBox")
-    grid = QGridLayout(box)
-    grid.setContentsMargins(16, 12, 16, 12)
-    grid.setHorizontalSpacing(18)
-    grid.setVerticalSpacing(8)
-    for i, (label, value) in enumerate(rows):
-        a = QLabel(label)
-        a.setObjectName("Muted")
-        a.setFont(font(11, True))
-        b = QLabel(str(value))
-        b.setFont(font(12, True))
-        b.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        b.setWordWrap(True)
-        grid.addWidget(a, i, 0, Qt.AlignLeft | Qt.AlignTop)
-        grid.addWidget(b, i, 1)
-    return box
+class KidWindow(QDialog):
+    """A frameless window that stays open until the child presses its big red Close button."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent, Qt.Dialog | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            event.ignore()
+            return
+        super().keyPressEvent(event)
 
 
-def _dialog(parent, title, picture, heading, subheading):
-    dlg = QDialog(parent)
-    dlg.setWindowTitle(title)
-    dlg.setStyleSheet(DIALOG_QSS)
-    dlg.setMinimumWidth(420)
-    lay = QVBoxLayout(dlg)
-    lay.setContentsMargins(26, 22, 26, 20)
-    lay.setSpacing(12)
-    head = QHBoxLayout()
-    pic = QLabel()
-    pix = round_pixmap(picture, 76)
-    if pix:
-        pic.setPixmap(pix)
-    texts = QVBoxLayout()
-    h = QLabel(heading)
-    h.setFont(font(18, True))
-    s = QLabel(subheading)
-    s.setObjectName("Muted")
-    s.setFont(font(11))
-    s.setWordWrap(True)
-    texts.addWidget(h)
-    texts.addWidget(s)
-    head.addWidget(pic)
-    head.addSpacing(10)
-    head.addLayout(texts, 1)
-    lay.addLayout(head)
-    return dlg, lay
+def _glow(owner, colour):
+    glow = QGraphicsDropShadowEffect(owner)
+    glow.setBlurRadius(60)
+    glow.setColor(colour)
+    glow.setOffset(0, 0)
+    return glow
 
 
-def _buttons(dlg, lay, *extra):
+def _waving(label, picture, box):
+    """The character moves slowly and gently: a small sway and a soft float (about 5 seconds a swing)."""
+    pix = load_pixmap(picture) if picture else QPixmap()
+    if pix.isNull():
+        label.setText("⭐")
+        label.setStyleSheet("font-size: 150px;")
+        return
+    pix = pix.scaled(225, 225, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+    step = {"t": 0.0}
+
+    def wave():
+        step["t"] += 0.05
+        turned = pix.transformed(QTransform().rotate(4 * math.sin(step["t"])), Qt.SmoothTransformation)
+        canvas = QPixmap(label.size())
+        canvas.fill(Qt.transparent)
+        painter = QPainter(canvas)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform)
+        dy = 7 * math.sin(step["t"] * 0.8)
+        painter.drawPixmap(int((canvas.width() - turned.width()) / 2), int((canvas.height() - turned.height()) / 2 + dy), turned)
+        painter.end()
+        label.setPixmap(canvas)
+
+    wave()
+    timer = QTimer(box)
+    timer.timeout.connect(wave)
+    timer.start(40)
+
+
+def kid_window(parent, title, picture, hello, heading, rows, notes="", buttons=(), row_bg="#ffffff"):
+    """A big, friendly window: a character waving hello next to a table of rows.
+
+    rows: (label, value) pairs (plain text). notes: extra HTML under the table (already escaped).
+    buttons: (text, action) pairs shown at the bottom; they keep the window open.
+    """
+    family = ui_family()
+    info = "".join("<tr><td style='padding:5px 14px 5px 0; color:#0369a1;'><b>%s</b></td><td style='padding:5px 0;'>%s</td></tr>"
+                   % (html.escape(str(k)), html.escape(str(v))) for k, v in rows)
+    box = KidWindow(parent)
+    box.setWindowTitle(title)
+    box.setMinimumSize(880, 610)                  # the card is about 810 x 540, plus room for the glow
+    frame = QVBoxLayout(box)
+    frame.setContentsMargins(34, 34, 34, 34)
+    card = QFrame()
+    card.setObjectName("KidCard")
+    card.setGraphicsEffect(_glow(box, QColor(251, 128, 114, 235)))     # a warm sunset glow
+    card.setStyleSheet(f"""
+        QFrame#KidCard {{ background: #f0f9ff; border: 4px solid #ffffff; border-radius: 34px; }}
+        QLabel {{ color: #0f172a; background: transparent; border: none; }}
+        QPushButton {{ font-family: '{family}'; font-size: 18px; font-weight: bold; border-radius: 24px; padding: 12px 30px; }}
+        QPushButton#soft {{ background: #e0f2fe; color: #0f172a; border: 3px solid #38bdf8; }}
+        QPushButton#soft:hover {{ background: #38bdf8; color: white; }}
+        QPushButton#close {{ background: #ef4444; color: white; border: 4px solid #b91c1c; border-radius: 26px;
+                            font-size: 21px; padding: 8px 22px; }}
+        QPushButton#close:hover {{ background: #dc2626; }}
+        QPushButton#close:pressed {{ background: #b91c1c; }}
+    """)
+    frame.addWidget(card)
+    outer = QVBoxLayout(card)
+    outer.setContentsMargins(26, 16, 20, 20)
+    outer.setSpacing(10)
+
+    top = QHBoxLayout()
+    top.addStretch()
+    close_btn = QPushButton("✕  Close")
+    close_btn.setObjectName("close")
+    close_btn.setCursor(Qt.PointingHandCursor)
+    close_btn.setMinimumHeight(60)
+    close_btn.setToolTip("Close this window")
+    close_btn.clicked.connect(box.accept)
+    top.addWidget(close_btn)
+    outer.addLayout(top)
+
     row = QHBoxLayout()
-    for btn in extra:
-        row.addWidget(btn)
-    row.addStretch()
-    ok = QPushButton("OK")
-    ok.setCursor(Qt.PointingHandCursor)
-    ok.clicked.connect(dlg.accept)
-    row.addWidget(ok)
-    lay.addLayout(row)
+    row.setSpacing(28)
+    side = QVBoxLayout()
+    side.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+    bubble = QLabel(hello)
+    bubble.setFont(font(17, True))
+    bubble.setAlignment(Qt.AlignCenter)
+    bubble.setWordWrap(True)
+    bubble.setMaximumWidth(270)
+    bubble.setStyleSheet("background: white; border: 3px solid #38bdf8; border-radius: 22px; padding: 10px 18px;")
+    pic = QLabel()
+    pic.setFixedSize(250, 270)
+    pic.setAlignment(Qt.AlignCenter)
+    side.addWidget(bubble, alignment=Qt.AlignHCenter)
+    side.addWidget(pic, alignment=Qt.AlignHCenter)
+    row.addLayout(side)
+
+    text = QLabel()
+    text.setTextFormat(Qt.RichText)
+    text.setWordWrap(True)
+    text.setTextInteractionFlags(Qt.TextSelectableByMouse)
+    text.setText(f"<div style=\"font-family: '{family}'; font-size: 18px; color: #0f172a;\">"
+                 f"<div style='color:#0284c7; font-size: 29px; font-weight: bold; margin-bottom: 8px;'>{heading}</div>"
+                 f"<table style='background:{row_bg};'>{info}</table>{notes}</div>")
+    row.addWidget(text, 1)
+    outer.addLayout(row, 1)
+
+    if buttons:
+        bar = QHBoxLayout()
+        bar.addStretch()
+        for label, action in buttons:
+            btn = QPushButton(label)
+            btn.setObjectName("soft")
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.clicked.connect(lambda _=False, act=action: act())
+            bar.addWidget(btn)
+        outer.addLayout(bar)
+
+    _waving(pic, picture, box)
+    box.exec_()
 
 
 def show_profile(parent, user, done_count, lesson_count, course_name):
-    name = user.get("full_name") or "Coder"
-    dlg, lay = _dialog(parent, "My profile", "ada_logo.png", f"{name} 🌟", "Your Ada The Coder profile")
-    lay.addWidget(_info_box([
-        ("Email", user.get("email") or "–"),
-        ("Lessons finished", f"{done_count} of {lesson_count} ⭐"),
-        ("Course", course_name),
-    ]))
-    _buttons(dlg, lay)
-    dlg.exec_()
+    """Profile: Byte the owl waves and says hi to the child by their first name."""
+    first = (str(user.get("full_name") or "").split() or ["friend"])[0]
+    email = user.get("email") or ""
+    rows = [("👤 Name", user.get("full_name") or "Coder"), ("📧 Email", email or "–"),
+            ("⭐ Lessons finished", f"{done_count} of {lesson_count}"), ("🎨 Theme", course_name)]
+
+    def change_password():      # passwords are changed on the website, which emails a reset link
+        url = SERVER_URL.rstrip("/") + "/forgot-password"
+        if "@" in email:
+            url += "?email=" + quote(email)
+        QDesktopServices.openUrl(QUrl(url))
+    buttons = [("🔑 Change password", change_password)] if email else []
+    kid_window(parent, "Profile 👤", "byte.png", f"👋 Hi, {first}!", "👤 My Profile 🌟", rows, buttons=buttons)
 
 
-def show_about(parent):
-    dlg, lay = _dialog(parent, f"About {APP_NAME}", "ada_logo.png", f"{APP_NAME} 🐍",
-                       f"Version {APP_VERSION} · Python lessons for children aged 6 to 11")
-    lay.addWidget(_info_box([
-        ("Website", SERVER_URL.replace("https://", "")),
-        ("Help", CONTACT_EMAIL),
-        ("Licence", "Personal and educational use"),
-    ]))
-    note = QLabel("Lesson videos include content generated with Google AI. All characters are fictional.\n"
-                  "This software is provided \"as is\", without warranty of any kind.")
-    note.setObjectName("Muted")
-    note.setWordWrap(True)
-    note.setFont(font(10))
-    lay.addWidget(note)
-    site = QPushButton("Open website")
-    site.setObjectName("Plain")
-    site.setCursor(Qt.PointingHandCursor)
-    site.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(SERVER_URL)))
-    _buttons(dlg, lay, site)
-    dlg.exec_()
+def show_about(parent, picture="tom.png", licence_status=""):
+    """License (About): the theme's first character waves next to the licence details."""
+    rows = [("📜 App", APP_NAME), ("🔢 Version", APP_VERSION), ("🌐 Website", SERVER_URL.replace("https://", "")),
+            ("💌 Help", CONTACT_EMAIL)]
+    if licence_status:
+        rows.append(("⚡ Status", licence_status))
+    notes = ("<p style='font-size:15px;'><b>📜 License:</b> Personal &amp; educational use only.</p><br>"
+             "<p style='font-size:15px;'>This software is provided \"as is\", without warranty of any kind.</p>")
+    kid_window(parent, "License 📜", picture or "tom.png", "👋 Hi, here's your license details",
+               "📜 " + html.escape(APP_NAME), rows, notes, row_bg="#fef9c3")
 
 
 def show_upgrade(parent, course, free_count, lesson_count, picture="ada_logo.png"):
-    """Shown when a child opens a locked lesson. Returns "upgrade", "login" or None."""
-    dlg, lay = _dialog(parent, "Unlock more lessons", picture or "ada_logo.png",
-                       f"You finished the free lessons! 🌟",
-                       f"{course['name']}: {free_count} of {lesson_count} lessons are free to try")
-    text = QLabel(f"Ask a grown-up to unlock all {lesson_count} lessons of {course['name']}"
-                  f"{' for ' + course['price'] if course.get('price') else ''}. "
-                  "The Upgrade button opens our website, where they can get a licence.\n\n"
-                  "Already bought it? Log in again with the grown-up's account.")
-    text.setWordWrap(True)
-    text.setFont(font(12))
-    lay.addWidget(text)
-    choice = {}
-    upgrade = QPushButton("⭐  Upgrade")
-    upgrade.setObjectName("UpgradeButton")
-    upgrade.setCursor(Qt.PointingHandCursor)
-    upgrade.setFont(font(12, True))
-    login = QPushButton("🔑  Log in again")
-    login.setObjectName("Plain")
-    login.setCursor(Qt.PointingHandCursor)
+    """A locked lesson: a glowing sky card with a yellow sunset glow, big letters, ✕ and Upgrade.
+    Upgrade opens the website's account page at this theme. Returns "upgrade" or None."""
+    family = ui_family()
+    box = QDialog(parent, Qt.Dialog | Qt.FramelessWindowHint)
+    box.setWindowTitle("Locked lesson 🔒")
+    box.setAttribute(Qt.WA_TranslucentBackground)
+    outer = QVBoxLayout(box)
+    outer.setContentsMargins(36, 36, 36, 36)          # room for the glow
+    card = QFrame()
+    card.setObjectName("SkyCard")
+    card.setStyleSheet(f"""
+        QFrame#SkyCard {{
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f0fbff, stop:0.45 #bae6fd, stop:1 #7dd3fc);
+            border: 4px solid #ffffff; border-radius: 36px;
+        }}
+        QLabel {{ color: #0f172a; background: transparent; border: none; }}
+        QPushButton#up {{ font-family: '{family}'; font-size: 22px; font-weight: bold; background: #ffd166; color: #0f172a;
+                         border: 4px solid #f59e0b; border-radius: 28px; padding: 12px 34px; }}
+        QPushButton#up:hover {{ background: #ffe08a; }}
+        QPushButton#x {{ font-family: '{family}'; font-size: 22px; font-weight: bold; background: #ffffff; color: #0284c7;
+                        border: 3px solid #38bdf8; border-radius: 24px; }}
+        QPushButton#x:hover {{ background: #38bdf8; color: white; }}
+    """)
+    card.setGraphicsEffect(_glow(box, QColor(251, 191, 36, 235)))     # warm, yellow sunset glow
+    outer.addWidget(card)
 
-    def pick(what):
-        choice["what"] = what
-        if what == "upgrade" and course.get("buy_url"):
-            QDesktopServices.openUrl(QUrl(course["buy_url"]))
-        dlg.accept()
-    upgrade.clicked.connect(lambda: pick("upgrade"))
-    login.clicked.connect(lambda: pick("login"))
+    lay = QVBoxLayout(card)
+    lay.setContentsMargins(30, 18, 18, 26)
+    lay.setSpacing(10)
+    top = QHBoxLayout()
+    top.addStretch()
+    x_btn = QPushButton("✕")
+    x_btn.setObjectName("x")
+    x_btn.setFixedSize(48, 48)
+    x_btn.setCursor(Qt.PointingHandCursor)
+    x_btn.setToolTip("Close")
+    x_btn.clicked.connect(box.reject)
+    top.addWidget(x_btn)
+    lay.addLayout(top)
+
     row = QHBoxLayout()
-    row.addWidget(upgrade)
-    row.addWidget(login)
-    row.addStretch()
-    later = QPushButton("Later")
-    later.setCursor(Qt.PointingHandCursor)
-    later.clicked.connect(dlg.reject)
-    row.addWidget(later)
+    row.setSpacing(22)
+    pix = round_pixmap(picture or "ada_logo.png", 120) or round_pixmap("ada_logo.png", 120)
+    if pix:
+        icon = QLabel()
+        icon.setPixmap(pix)
+        row.addWidget(icon, alignment=Qt.AlignTop)
+    price = f" for {html.escape(course['price'])}" if course.get("price") else ""
+    free = (f"{free_count} of {lesson_count} lessons are free to try." if free_count
+            else "This theme needs a grown-up's licence.")
+    text = QLabel(f"<div style=\"font-family: '{family}'; color: #0f172a;\">"
+                  f"<div style='color:#0369a1; font-size: 30px; font-weight: bold;'>🔒 {html.escape(course['name'])}</div>"
+                  f"<p style='font-size: 22px;'>This lesson is locked. {free}</p>"
+                  f"<p style='font-size: 22px;'>Ask a grown-up to unlock every lesson{price} ⭐</p></div>")
+    text.setTextFormat(Qt.RichText)
+    text.setWordWrap(True)
+    text.setMinimumWidth(460)
+    row.addWidget(text, 1)
     lay.addLayout(row)
-    dlg.exec_()
-    return choice.get("what")
+    up_btn = QPushButton("⭐ Upgrade")
+    up_btn.setObjectName("up")
+    up_btn.setCursor(Qt.PointingHandCursor)
+    up_btn.clicked.connect(box.accept)
+    lay.addWidget(up_btn, alignment=Qt.AlignRight)
+    if box.exec_() == QDialog.Accepted:
+        if course.get("buy_url"):
+            QDesktopServices.openUrl(QUrl(course["buy_url"]))
+        return "upgrade"
+    return None

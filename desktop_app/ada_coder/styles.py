@@ -6,12 +6,16 @@ LIGHT = {
     "window2": "#fdf2ff",
     "panel": "rgba(255, 255, 255, 0.72)",
     "panel_solid": "#ffffff",
+    "pill": "rgba(255, 255, 255, 0.85)",
     "ink": "#1e1b4b",
     "ink_soft": "#4c4a7a",
     "line": "#e2dcf8",
-    "sidebar": "#ffffff",
-    "item": "#f4f1ff",
+    # the lesson list: a sky-blue panel (a Qt gradient)
+    "sidebar": "qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #e0f6ff, stop:0.5 #bae6fd, stop:1 #7dd3fc)",
+    "sidebar_line": "rgba(255, 255, 255, 0.9)",
+    "item": "rgba(255, 255, 255, 0.85)",
     "item_hover": "#ffffff",
+    "badge": "#f4f1ff",
     "accent": "#7b4dff",
     "accent_dark": "#5b2fe0",
     "sun": "#ffd23f",
@@ -26,12 +30,15 @@ DARK = dict(
     window2="#1b1446",
     panel="rgba(30, 23, 69, 0.85)",
     panel_solid="#1e1745",
+    pill="rgba(30, 23, 69, 0.8)",
     ink="#f5f3ff",
     ink_soft="#c4b5fd",
     line="#3b3280",
-    sidebar="#1e1745",
-    item="#2a2160",
+    sidebar="qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0c4a6e, stop:1 #075985)",
+    sidebar_line="rgba(125, 211, 252, 0.45)",
+    item="rgba(15, 23, 42, 0.55)",
     item_hover="#352a78",
+    badge="#2a2160",
 )
 
 _FAMILY = None
@@ -64,21 +71,19 @@ def palette(dark):
 def window_qss(dark):
     c = palette(dark)
     return f"""
-    QWidget#CentralWidget {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 {c['window']}, stop:1 {c['window2']});
-    }}
+    QWidget#CentralWidget {{ background: transparent; }}
     QLabel {{ color: {c['ink']}; background: transparent; }}
     QLabel#AppName {{ color: {c['ink']}; }}
     QLabel#Muted {{ color: {c['ink_soft']}; }}
 
     QPushButton#PillButton, QToolButton#PillButton {{
-        background: {c['panel_solid']}; color: {c['ink']};
+        background: {c['pill']}; color: {c['ink']};
         border: 2px solid {c['line']}; border-radius: 22px; padding: 8px 18px;
     }}
     QPushButton#PillButton:hover, QToolButton#PillButton:hover {{ border-color: {c['accent']}; }}
     QPushButton#PillButton:disabled {{ color: {c['ink_soft']}; }}
     QPushButton#RoundButton {{
-        background: {c['panel_solid']}; color: {c['ink']};
+        background: {c['pill']}; color: {c['ink']};
         border: 2px solid {c['line']}; border-radius: 22px;
     }}
     QPushButton#RoundButton:hover {{ border-color: {c['accent']}; }}
@@ -95,8 +100,8 @@ def window_qss(dark):
     QPushButton#AccentButton:hover {{ background: {c['accent_dark']}; }}
     QPushButton#AccentButton:disabled {{ background: {c['line']}; color: {c['ink_soft']}; }}
 
-    QFrame#HeroPanel {{ background: {c['panel']}; border-radius: 36px; }}
-    QFrame#Sidebar {{ background: {c['sidebar']}; border: 2px solid {c['line']}; border-radius: 30px; }}
+    QFrame#HeroPanel {{ background: transparent; border-radius: 36px; }}
+    QFrame#Sidebar {{ background: {c['sidebar']}; border: 3px solid {c['sidebar_line']}; border-radius: 30px; }}
     QScrollArea, QScrollArea > QWidget > QWidget {{ background: transparent; border: none; }}
     QScrollBar:vertical {{ background: transparent; width: 10px; margin: 4px 0; }}
     QScrollBar::handle:vertical {{ background: {c['line']}; border-radius: 5px; min-height: 30px; }}
@@ -115,7 +120,7 @@ def window_qss(dark):
     QFrame#ThemeCard:hover {{ border-color: {c['accent']}; }}
     QFrame#ThemeCard[current="true"] {{ border: 3px solid {c['sun']}; }}
     QFrame#ThemeCard QLabel {{ background: transparent; color: {c['ink']}; }}
-    QLabel#ThemeBadge {{ background: {c['item']}; color: {c['accent_dark']}; border-radius: 9px; padding: 2px 9px; }}
+    QLabel#ThemeBadge {{ background: {c['badge']}; color: {c['accent_dark']}; border-radius: 9px; padding: 2px 9px; }}
     QPushButton#ThemeButton {{ background: {c['accent']}; color: white; border: none; border-radius: 17px; padding: 6px 14px; }}
     QPushButton#ThemeButton:hover {{ background: {c['accent_dark']}; }}
     QFrame#ThemeCard[current="true"] QPushButton#ThemeButton {{ background: {c['mint']}; }}

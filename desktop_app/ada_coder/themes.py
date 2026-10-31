@@ -31,6 +31,14 @@ THEMES = {
         "success": "byte.png",
         "oops": "byte.png",
     },
+    "python_adventure": {
+        "name": "Python Adventure For Kids",
+        "tagline": "Learn Python with Tom, Penny & Teddy! 🚀",
+        "hero": [("Tom", "tom.png", "🧒"), ("Penny", "penny.png", "🐍"), ("Teddy", "teddy.png", "🧸")],
+        "guide": "girl_wave.png",
+        "success": "teddy.png",
+        "oops": "tom.png",
+    },
 }
 DEFAULT_THEME = "friends"
 

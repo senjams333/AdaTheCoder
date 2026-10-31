@@ -47,7 +47,8 @@ body {
 button { font-family: inherit; cursor: pointer; }
 kbd { font-family: var(--mono); font-size: .85em; background: rgba(123, 77, 255, .12); border-radius: 5px; padding: 0 5px; }
 
-/* ---------- sky: sun by day, moon and stars at night ---------- */
+/* ---------- sky: the app window paints the sky behind this page now (sun, clouds, meadow; moon, stars) ---------- */
+.sky { display: none !important; }
 .sky { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 .sun, .moon { position: absolute; top: 10px; left: 22px; width: 64px; height: 64px; border-radius: 50%; transition: opacity .5s; }
 .sun { background: radial-gradient(circle, #fff7b0, #ffb703); box-shadow: 0 0 40px #ffcf33, 0 0 90px rgba(255, 170, 0, .55); }
@@ -73,11 +74,32 @@ h1 { font-size: clamp(22px, 3vw, 38px); line-height: 1.15; margin-top: 6px; }
 .subtitle { color: var(--ink-soft); font-size: clamp(15px, 1.7vw, 21px); font-weight: bold; margin-top: 2px; }
 
 /* ---------- two panels ---------- */
-.workspace { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(280px, 38%) minmax(0, 1fr); gap: 18px; }
+.workspace { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(260px, 35%) minmax(0, 1fr); gap: 18px; }
 @media (max-width: 860px) { .workspace { grid-template-columns: minmax(0, 1fr); } body { overflow-y: auto; } }
 .panel { position: relative; min-height: 0; border-radius: 28px; padding: 18px; background: var(--panel);
   border: 2px solid var(--panel-line); box-shadow: 0 12px 30px rgba(30, 27, 75, .12); backdrop-filter: blur(10px); }
 .panel-title { font-size: 22px; margin-bottom: 12px; }
+/* the examples panel is see-through (50%) so the sky shows; the editor keeps its own look */
+.panel.examples { background: rgba(255, 255, 255, 0.5); border-color: rgba(255, 255, 255, 0.6); }
+body.dark-mode .panel.examples { background: rgba(15, 23, 42, 0.5); border-color: rgba(124, 255, 178, 0.3); }
+.example { background: rgba(255, 255, 255, 0.5); }
+body.dark-mode .example { background: rgba(30, 41, 59, 0.6); }
+.example.active { background: rgba(255, 255, 255, 0.85); }
+body.dark-mode .example.active { background: rgba(30, 41, 59, 0.9); }
+h1 { text-shadow: 0 2px 10px rgba(255, 255, 255, 0.6); }
+body.dark-mode h1 { text-shadow: 0 0 18px rgba(147, 197, 253, 0.8); }
+.subtitle { color: #065f46; }
+body.dark-mode .subtitle { color: #d1fae5; }
+
+/* after a good run: the open example slides up, the next one glows golden with "Click next example !" */
+.example.slide-away .example-body { animation: slideAway .55s ease-in forwards; overflow: hidden; }
+@keyframes slideAway { from { max-height: 600px; opacity: 1; } to { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; transform: translateY(-14px); } }
+.example.next-glow { border-color: #facc15; animation: nextGlow 1.1s ease-in-out infinite; }
+@keyframes nextGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, .9), 0 0 14px 4px rgba(250, 204, 21, .55); }
+                      50% { box-shadow: 0 0 0 6px rgba(250, 204, 21, .35), 0 0 30px 10px rgba(251, 191, 36, .8); } }
+.next-hint { margin: 2px 0 -4px 6px; font-size: 20px; font-weight: bold; color: #b45309; animation: nextHint .8s ease-in-out infinite alternate; }
+body.dark-mode .next-hint { color: #fde047; }
+@keyframes nextHint { from { transform: translateY(0); } to { transform: translateY(6px); } }
 
 /* ---------- examples ---------- */
 .examples { display: flex; flex-direction: column; }
@@ -95,8 +117,8 @@ body.dark-mode .example-btn:hover { color: var(--sun); }
 @keyframes drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .example-body h3 { font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--grape); margin: 6px 0 4px; }
 body.dark-mode .example-body h3 { color: var(--sky); }
-.explain { font-size: 18px; line-height: 1.55; white-space: pre-line; }
-.expected { font-family: var(--mono); font-size: 18px; background: var(--code-bg); color: var(--code-green); border-radius: 12px;
+.explain { font-size: 16px; line-height: 1.5; white-space: pre-line; }
+.expected { font-family: var(--mono); font-size: 16px; background: var(--code-bg); color: var(--code-green); border-radius: 12px;
   padding: 10px 14px; white-space: pre-wrap; word-break: break-word; }
 
 /* ---------- guide pop-up over the examples ---------- */

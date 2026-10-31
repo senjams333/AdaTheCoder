@@ -124,7 +124,38 @@ function renderExamples() {
   });
 }
 
+/* After code runs well: the open example slides up out of sight and the next one glows, with an arrow */
+function clearNextHint() {
+  document.querySelectorAll(".next-hint").forEach((h) => h.remove());
+  document.querySelectorAll(".example.next-glow").forEach((c) => c.classList.remove("next-glow"));
+}
+
+function nudgeNextExample() {
+  const i = state.active;
+  if (i < 0 || i >= state.examples.length - 1) return;      // no example open, or the last one: nothing comes next
+  clearNextHint();
+  const cards = document.querySelectorAll(".example");
+  const open = cards[i], next = cards[i + 1];
+  if (open && open.classList.contains("active")) {
+    open.classList.add("slide-away");
+    open.addEventListener("animationend", function done(e) {
+      if (e.target !== open.querySelector(".example-body")) return;
+      open.removeEventListener("animationend", done);
+      open.classList.remove("active", "slide-away");
+    });
+  }
+  if (next) {
+    next.classList.add("next-glow");
+    next.parentNode.insertBefore(el("div", "next-hint", "👇 Click next example !"), next);
+    setTimeout(() => {         // bring it into view inside the examples list only
+      const list = $("exampleList");
+      list.scrollTo({ top: Math.max(0, next.offsetTop - list.offsetTop - list.clientHeight / 3), behavior: "smooth" });
+    }, 600);
+  }
+}
+
 function selectExample(i) {
+  clearNextHint();
   state.active = i;
   document.querySelectorAll(".example").forEach((card, n) => card.classList.toggle("active", n === i));
   const ex = state.examples[i];
@@ -193,14 +224,6 @@ function confetti() {
   }
 }
 
-function triggerShootingStar() {
-  const star = $("shootingStar");
-  star.classList.remove("animate");
-  void star.offsetHeight;
-  star.classList.add("animate");
-}
-triggerShootingStar();
-setInterval(triggerShootingStar, 120000);
 
 /* ================================================================== Called from Python */
 
@@ -283,6 +306,7 @@ function showSuccess(quiet) {
   overlay.classList.add("show");
   confetti();
   setTimeout(() => overlay.classList.remove("show"), 2800);
+  setTimeout(nudgeNextExample, 1200);
 }
 
 /** Something went wrong. err = {title, hint, line} (line is optional). */

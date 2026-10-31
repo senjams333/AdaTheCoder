@@ -30,6 +30,16 @@
    "premium": false,
    "price": "",
    "free_lessons": null
+  },
+  {
+   "id": "python_adventure",
+   "name": "Python Adventure For Kids",
+   "tagline": "Fun coding lessons for little learners, with Tom, Penny & Teddy.",
+   "pack": "python_adventure",
+   "position": 4,
+   "premium": true,
+   "price": "$4.99",
+   "free_lessons": 1
   }
  ]
 }

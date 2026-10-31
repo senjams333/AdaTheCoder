@@ -14,6 +14,7 @@ from .config import APP_NAME
 from .dialogs import show_about, show_profile, show_upgrade
 from .login import LoginOverlay
 from .paths import asset, image
+from .scene import SceneWidget
 from .settings import Settings
 from .splash import IntroSplash
 from .styles import font, window_qss
@@ -40,7 +41,8 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(900, 600)
         self.setWindowIcon(QIcon(image("ada_logo.png")))
 
-        self.central = QWidget()
+        # the whole window is a moving sky: sunny meadow by day, moon, stars and a shooting star at night
+        self.central = SceneWidget()
         self.central.setObjectName("CentralWidget")
         self.setCentralWidget(self.central)
         root = QVBoxLayout(self.central)
@@ -123,7 +125,7 @@ class MainWindow(QMainWindow):
         menu.addAction("🔄  Check for new lessons", self.check_for_lessons)
         menu.addAction("🎬  Watch the intro again", self.replay_intro)
         menu.addSeparator()
-        menu.addAction("ℹ️  About & licence", lambda: show_about(self))
+        menu.addAction("📜  License", self.open_license)
         menu.addSeparator()
         self.logout_action = menu.addAction("🚪  Log out", self.logout)
         return menu
@@ -371,6 +373,17 @@ class MainWindow(QMainWindow):
         self.sidebar.hide()
         self.login.open()
 
+    def open_license(self):
+        """License: the current theme's first character waves next to the licence details."""
+        hero = course.characters(self.course)["hero"]
+        picture = hero[0][1] if hero and hero[0][1] else "tom.png"
+        free = course.free_count(self.course)
+        if course.owns(self.course, self.settings["licences"]):
+            status = f"{self.course['name']}: every lesson is open ✅"
+        else:
+            status = f"{self.course['name']}: {min(free or 0, len(self.lessons))} of {len(self.lessons)} lessons open 🔒"
+        show_about(self, picture, status)
+
     def open_profile(self):
         done = sum(1 for l in self.lessons if self.settings.is_completed(self.course["id"], l["id"]))
         show_profile(self, self.user or self.settings["user"] or {}, done, len(self.lessons), self.course["name"])
@@ -526,6 +539,7 @@ class MainWindow(QMainWindow):
     def apply_style(self):
         dark = bool(self.settings["dark_mode"])
         self.central.setStyleSheet(window_qss(dark))
+        self.central.set_dark(dark)
         self.theme_btn.setText("🌙" if dark else "☀️")
         self.music_btn.setText("🎵" if self.settings["music"] else "🔈")
         self._js("setDarkMode", dark)
@@ -573,8 +587,7 @@ class MainWindow(QMainWindow):
         free = course.free_count(self.course) or 0
         hero = course.characters(self.course)["hero"]
         picture = hero[-1][1] if hero and hero[-1][1] else "ada_logo.png"
-        if show_upgrade(self, self.course, free, len(self.lessons), picture) == "login":
-            self.logout()
+        show_upgrade(self, self.course, free, len(self.lessons), picture)
 
     def _licences_changed(self):
         for menu in getattr(self, "course_menus", []):

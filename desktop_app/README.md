@@ -46,6 +46,24 @@ vid/                    lesson videos (add your own, see vid/README.txt)
 tests/                  checks that run without a screen
 ```
 
+## The look (the same for every theme)
+
+Every theme has the same look, taken from the Python Adventure app; only the characters and the lessons change:
+
+- The whole window is a moving sky (`ada_coder/scene.py`): a sunny meadow with clouds and flowers by day,
+  a moon and twinkling stars at night, and a shooting star 1 second after night mode turns on, then every 30 seconds.
+- The lesson list is sky blue; on the lesson page the examples panel is see-through so the sky shows.
+- When code runs well, the open example slides up and the next one glows with "👇 Click next example !".
+- The start pop-up on the lesson page shows the theme's guide character.
+- **Profile** (Byte waves and says hi with the child's first name) and **License** (the theme's first
+  character waves) are big rounded windows with a sunset glow that close only with the big red Close.
+- A locked lesson shows a sky card with a yellow sunset glow, ✕ and **Upgrade**.
+- Videos are painted frame by frame, so the picture shows on Ubuntu too (and on Wayland the app uses X11).
+
+**Python Adventure For Kids** is one of the built-in themes (`python_adventure`: Tom, Penny and Teddy, with the
+waving girl as guide; lesson 1 free). Its ID is the same as the separate Python Adventure app's, so a
+licence for it on the website opens it in both.
+
 ## Themes, topics, lessons and videos
 
 Everything is managed in the website admin under **Themes & lessons**:

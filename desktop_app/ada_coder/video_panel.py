@@ -1,9 +1,10 @@
 """The lesson video player: video, play/pause, a seek bar and volume."""
-from PyQt5.QtCore import Qt, QTimer, QUrl, pyqtSignal
+from PyQt5.QtCore import QSizeF, Qt, QTimer, QUrl, pyqtSignal
 from PyQt5.QtGui import QColor
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
-from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
+from PyQt5.QtWidgets import (QGraphicsDropShadowEffect, QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel, QPushButton,
+                             QVBoxLayout, QWidget)
 
 from .styles import SLIDER_QSS, font
 from .widgets import ClickableSlider
@@ -12,6 +13,33 @@ from .widgets import ClickableSlider
 def _fmt(ms):
     s = max(int(ms / 1000), 0)
     return "%02d:%02d" % (s // 60, s % 60)
+
+
+class VideoView(QGraphicsView):
+    """Shows the video by painting its frames (QGraphicsVideoItem).
+
+    A plain QVideoWidget draws the video in a separate native layer: with the glow effect and the see-through
+    sky window around it, Linux (Ubuntu) then shows a black box and plays only the sound. Painting the frames
+    works the same on Windows, Mac and Linux.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.setScene(QGraphicsScene(self))
+        self.item = QGraphicsVideoItem()
+        self.item.setAspectRatioMode(Qt.KeepAspectRatio)
+        self.scene().addItem(self.item)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setBackgroundBrush(QColor("black"))
+        self.setStyleSheet("QGraphicsView { background: black; border: 5px solid #ffea79; border-radius: 30px; }")
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        r = self.viewport().rect()
+        self.item.setPos(0, 0)
+        self.item.setSize(QSizeF(r.width(), r.height()))
+        self.scene().setSceneRect(0, 0, r.width(), r.height())
 
 
 class VideoPanel(QWidget):
@@ -23,9 +51,7 @@ class VideoPanel(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(8)
 
-        self.video = QVideoWidget()
-        self.video.setAspectRatioMode(Qt.KeepAspectRatio)
-        self.video.setStyleSheet("background: black;")
+        self.video = VideoView()
         glow = QGraphicsDropShadowEffect(self)
         glow.setBlurRadius(30)
         glow.setColor(QColor(255, 210, 63, 200))
@@ -38,7 +64,7 @@ class VideoPanel(QWidget):
         self.note.move(16, 10)
 
         self.player = QMediaPlayer(self, QMediaPlayer.VideoSurface)
-        self.player.setVideoOutput(self.video)
+        self.player.setVideoOutput(self.video.item)
         self.player.setNotifyInterval(250)
         self.player.mediaStatusChanged.connect(self._status)
         self.player.error.connect(self._error)

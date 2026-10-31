@@ -40,6 +40,11 @@ def main():
         from ada_coder import sync
         sys.exit(sync.diagnose())
 
+    # Ubuntu's Wayland desktop: Qt 5 shows videos and the see-through sky more reliably through X11 (XWayland)
+    import os
+    if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY") and not os.environ.get("QT_QPA_PLATFORM"):
+        os.environ["QT_QPA_PLATFORM"] = "xcb"
+
     from PyQt5.QtCore import QCoreApplication, Qt
     from PyQt5.QtGui import QIcon
     from PyQt5.QtWidgets import QApplication

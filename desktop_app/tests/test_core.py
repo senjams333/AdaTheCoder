@@ -52,7 +52,7 @@ class LessonTests(unittest.TestCase):
 
     def test_bundled_courses(self):
         courses = lessons.load_courses()
-        self.assertEqual([c["id"] for c in courses], ["friends", "fairies", "coding_club"])
+        self.assertEqual([c["id"] for c in courses], ["friends", "fairies", "coding_club", "python_adventure"])
         for c in courses:
             self.assertIn(c["pack"], THEMES)
             self.assertEqual(len(c["lessons"]), 17)
@@ -74,7 +74,7 @@ class LessonTests(unittest.TestCase):
             self.assertEqual([l["id"] for l in courses[0]["lessons"]], ["new1"])
         finally:
             os.remove(cache)
-        self.assertEqual(len(lessons.load_courses()), 3)
+        self.assertEqual(len(lessons.load_courses()), 4)
 
     def test_free_lessons_and_licences(self):
         paid = {"id": "space", "premium": True, "free_lessons": 3, "lessons": []}
