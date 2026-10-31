@@ -36,7 +36,7 @@ DEFAULTS = {
     # Shown waving in the License window ("" = the first character, e.g. Tom)
     "license_picture": "",
     "oops_picture": "tom.png",
-    # Waving at the top of the lesson panel on the coding page ("" = no picture)
+    # In the "Click the examples here to start!" pop-up when the coding page opens ("" = the logo)
     "lesson_picture": "",
     "intro_video": "intro.mp4",
     "characters_note": "All characters (Tom, Penny, Teddy) are fictional.",
