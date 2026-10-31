@@ -359,7 +359,8 @@ class MainWindow(QMainWindow):
         self.user = dict(user)
         self._set_signed_in(True)
         first = (self.user.get("full_name") or "").split(" ")[0]
-        self.hero_title.setText(f"Hi {first}! Ready to code? 🐍" if first else "Python Adventure For Kids! 🐍")
+        self.kid_name = first
+        self._hero_text()
         self._licences_changed()
         self.show_home()
 
@@ -547,8 +548,23 @@ class MainWindow(QMainWindow):
                 pictures[k] = "../images/" + name
         self._js("setCharacters", pictures)
 
+    def _hero_text(self):
+        """The greeting in its own colour, with the student's name in another (pink) colour."""
+        import html
+        dark = bool(self.settings["dark_mode"])
+        main, name_colour = ("#c4b5fd", "#f9a8d4") if dark else ("#5b2fe0", "#e23d8b")
+        first = getattr(self, "kid_name", "")
+        if first:
+            text = (f"<span style='color:{main}'>Hi </span><span style='color:{name_colour}'>{html.escape(first)}</span>"
+                    f"<span style='color:{main}'>! Ready to code? 🐍</span>")
+        else:
+            text = f"<span style='color:{main}'>Python Adventure For Kids! 🐍</span>"
+        self.hero_title.setTextFormat(Qt.RichText)
+        self.hero_title.setText(text)
+
     def apply_style(self):
         dark = bool(self.settings["dark_mode"])
+        self._hero_text()
         self.central.setStyleSheet(window_qss(dark))
         self.central.set_dark(dark)
         self.theme_btn.setText("🌙" if dark else "☀️")
