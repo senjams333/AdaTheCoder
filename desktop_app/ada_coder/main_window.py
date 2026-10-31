@@ -108,6 +108,7 @@ class MainWindow(QMainWindow):
 
         bar.addWidget(logo)
         bar.addWidget(name)
+        name.hide()                   # only the logo at the top left, no app name beside it
         bar.addStretch()
         for w in (self.home_btn, self.course_btn, self.theme_btn, self.music_btn, self.avatar):
             bar.addWidget(w)
