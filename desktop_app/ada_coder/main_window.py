@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt, QTimer, QUrl
 from PyQt5.QtGui import QColor, QIcon, QKeySequence
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEngineView
-from PyQt5.QtWidgets import (QAction, QActionGroup, QFrame, QHBoxLayout, QLabel, QMainWindow, QMenu, QProgressBar,
+from PyQt5.QtWidgets import (QAction, QActionGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QMainWindow, QMenu, QProgressBar,
                              QScrollArea, QShortcut, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from . import lessons as course
@@ -194,7 +194,8 @@ class MainWindow(QMainWindow):
         title.setFont(font(15, True))
         self.theme_scroll = QScrollArea()
         self.theme_scroll.setWidgetResizable(True)
-        self.theme_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.theme_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.theme_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.theme_scroll.setFixedHeight(214)
         self.theme_cards = []
         self._fill_theme_cards()
@@ -203,17 +204,20 @@ class MainWindow(QMainWindow):
         return home
 
     def _fill_theme_cards(self):
+        # three themes in a row, one row on show; more themes scroll up and down
         holder = QWidget()
-        row = QHBoxLayout(holder)
-        row.setContentsMargins(2, 2, 2, 2)
-        row.setSpacing(14)
+        grid = QGridLayout(holder)
+        grid.setContentsMargins(2, 2, 2, 2)
+        grid.setHorizontalSpacing(14)
+        grid.setVerticalSpacing(14)
         self.theme_cards = []
-        for c in self.courses:
+        for i, c in enumerate(self.courses):
             card = ThemeCard(c, course.characters(c)["hero"])
             card.picked.connect(self.play_theme)
             self.theme_cards.append(card)
-            row.addWidget(card)
-        row.addStretch()
+            grid.addWidget(card, i // 3, i % 3)
+        for col in range(3):
+            grid.setColumnStretch(col, 1)
         self.theme_scroll.setWidget(holder)
         self._refresh_theme_cards()
         if hasattr(self, "sidebar"):          # not during start-up: the window sizes them once it's built
@@ -656,9 +660,9 @@ class MainWindow(QMainWindow):
         card_scale = max(0.3, min(scale, per_card / 380.0, (h - 260) * 0.5 / 400.0))  # theme cards sit below
         for card in self.cards:
             card.set_scale(card_scale)
-        # three theme cards in a row; more themes scroll sideways
+        # three theme cards in a row (the grid shares the width); more rows scroll up and down
         view = self.theme_scroll.viewport().width() if self.theme_scroll.isVisible() else (w - side - 40)
-        each = max(200, int((view - 4 - 2 * 14) / 3))
+        each = max(160, int((view - 4 - 2 * 14) / 3))
         for card in self.theme_cards:
             card.setFixedWidth(each)
 
