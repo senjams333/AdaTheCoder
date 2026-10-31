@@ -242,6 +242,10 @@ body.dark-mode .subtitle { color: #d1fae5; }
 
 .example-panel { width:40%; height:auto; min-height: 360px; margin-top:10px; border-radius:35px; padding:22px; overflow-y:auto; background: rgba(255, 255, 255, 0.55); backdrop-filter:blur(12px); border: 2px solid rgba(255, 255, 255, 0.7); box-shadow: 0 10px 25px rgba(0,0,0,0.08); position: relative; }
 body.dark-mode .example-panel { background: rgba(15, 23, 42, 0.95); border-color: rgba(124, 255, 178, 0.3); box-shadow: 0 12px 30px rgba(0,0,0,0.4), 0 0 20px rgba(124, 255, 178, 0.15); }
+.lesson-guide { text-align:center; margin: -6px 0 4px; }
+.lesson-guide img { height: 150px; max-width: 80%; object-fit: contain; transform-origin: 50% 100%;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.18)); animation: guideWave 5s ease-in-out infinite; }
+@keyframes guideWave { 0%, 100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(3deg) translateY(-5px); } }
 .example-title { text-align:center; font-size:26px; color:#0f172a; font-weight:bold; margin-bottom: 16px; }
 body.dark-mode .example-title { color:#d1fae5; }
 
@@ -479,7 +483,7 @@ function updateLessonData(title, subtitle, examplesObj, defaultCode) {
     activeExampleKey = keys.length > 0 ? keys[0] : null;
 
     let container = document.getElementById("exampleContainer");
-    let html = '<div class="example-title">' + escapeHtml(title) + '</div>';
+    let html = LESSON_GUIDE + '<div class="example-title">' + escapeHtml(title) + '</div>';
 
     for (let key in examplesObj) {
         let ex = examplesObj[key];
@@ -676,6 +680,8 @@ function toggleAudioEngine(enableAudio) {
     }
 }
 
+const LESSON_GUIDE = '';
+
 function triggerShootingStar() {
     let star = document.getElementById("shootingStar");
     if (star) {
@@ -788,7 +794,7 @@ MASTER_HTML_TEMPLATE = """<!DOCTYPE html><html><head>""" + BASE_CSS + """</head>
 
     <div class="coding-box">
         <div class="example-panel" id="exampleContainer">
-            <div class="example-title">✨ LESSON EXAMPLES 🎈</div>
+            __LESSON_GUIDE__<div class="example-title">✨ LESSON EXAMPLES 🎈</div>
             <div class="tutorial-overlay" id="tutorialOverlay">
                 <div class="tom-container">
                     <span class="sparkle-star s1">⭐</span>
@@ -808,11 +814,17 @@ MASTER_HTML_TEMPLATE = """<!DOCTYPE html><html><head>""" + BASE_CSS + """</head>
     </div>
     """ + COMMON_JS + """</body></html>"""
 
+# The picture waving at the top of the lesson panel on the coding page (app.json "lesson_picture"; "" = none)
+_LESSON_GUIDE_HTML = ('<div class="lesson-guide"><img src="%s" alt="" onerror="this.parentNode.remove()"></div>'
+                      % html.escape(CONFIG.get("lesson_picture") or "", quote=True)) if CONFIG.get("lesson_picture") else ""
+
 MASTER_HTML_TEMPLATE = (
     MASTER_HTML_TEMPLATE
     .replace('src="ada.png"', 'src="%s"' % html.escape(LOGO, quote=True))
     .replace('src="teddy.png"', 'src="%s"' % html.escape(CONFIG["success_picture"], quote=True))
     .replace('src="tom.png"', 'src="%s"' % html.escape(CONFIG["oops_picture"], quote=True))
+    .replace("__LESSON_GUIDE__", _LESSON_GUIDE_HTML)
+    .replace("const LESSON_GUIDE = '';", "const LESSON_GUIDE = %s;" % json.dumps(_LESSON_GUIDE_HTML))
     .replace("<h1>PYTHON ADVENTURE 🐍✨</h1>", "<h1>%s</h1>" % html.escape(CONFIG["page_title"]))
     .replace(">Learn Python with Tom, Penny & Teddy! 🚀<", ">%s<" % html.escape(CONFIG["page_subtitle"]))
 )
