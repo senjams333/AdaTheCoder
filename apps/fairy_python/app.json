@@ -6,7 +6,7 @@
   "hero_title": "Fairy Python Adventure! ✨",
   "hero_subtitle": "Fun coding lessons for little learners 🚀✨",
   "page_title": "FAIRY PYTHON ADVENTURE ✨",
-  "page_subtitle": "Learn Python with Ada, Fairy Rose & Unicorn! 🚀",
+  "page_subtitle": "Learn Python with Ada, Fairy & Unicorn! 🚀",
   "sidebar_title": "📚 Beginner Python Course 🌟",
   "login_subtitle": "Login to unlock your Fairy Python Adventure 🚀",
   "logo": "ada.png",
@@ -17,8 +17,8 @@
       "emoji": "👧"
     },
     {
-      "name": "🧚 FAIRY ROSE",
-      "image": "pink_fairy.png",
+      "name": "🧚 FAIRY",
+      "image": "fairy.png",
       "emoji": "🧚"
     },
     {
@@ -32,7 +32,7 @@
   "lesson_picture": "girl_wave.png",
   "oops_picture": "ada_girl.png",
   "intro_video": "intro.mp4",
-  "characters_note": "Content is AI generated from Google AI. All characters (Ada, Fairy Rose, Unicorn) are fictional.",
+  "characters_note": "Content is AI generated from Google AI. All characters (Ada, Fairy, Unicorn) are fictional.",
   "video_note": "This is an AI generated content from Google AI",
 
   "colors": {
