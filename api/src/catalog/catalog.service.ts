@@ -68,7 +68,7 @@ export class CatalogService {
     const out = [];
     for (const c of await this.allCourses(true)) {
       out.push({
-        id: c.slug, name: c.name, tagline: c.tagline, pack: c.pack, position: c.position, premium: c.premium,
+        id: c.slug, name: c.name, tagline: c.tagline, description: c.description || '', pack: c.pack, position: c.position, premium: c.premium,
         price: c.price, free_lessons: c.premium ? c.freeLessons : null,
         buy_url: c.premium ? `${siteUrl()}/account?theme=${encodeURIComponent(c.slug)}` : '',
         characters: this.characters(c),

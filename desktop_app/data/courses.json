@@ -9,7 +9,8 @@
    "position": 1,
    "premium": true,
    "price": "$3.69",
-   "free_lessons": 3
+   "free_lessons": 3,
+   "description": "Tom, Penny and Teddy explore Python together, solving playful puzzles and cheering every single program."
   },
   {
    "id": "fairies",
@@ -19,7 +20,8 @@
    "position": 2,
    "premium": true,
    "price": "$3.69",
-   "free_lessons": 3
+   "free_lessons": 3,
+   "description": "Twinkle, Fairy and Sparkle turn coding into magic with sparkling spells of loops and variables."
   },
   {
    "id": "coding_club",
@@ -29,7 +31,8 @@
    "position": 3,
    "premium": false,
    "price": "",
-   "free_lessons": null
+   "free_lessons": null,
+   "description": "Join Ada and Byte the owl for friendly Python lessons, from hello to fun games."
   },
   {
    "id": "python_adventure",
@@ -39,7 +42,8 @@
    "position": 4,
    "premium": true,
    "price": "$4.99",
-   "free_lessons": 1
+   "free_lessons": 1,
+   "description": "Learn Python step by step with Tom, Penny and Teddy, from printing to computer vision."
   }
  ]
 }

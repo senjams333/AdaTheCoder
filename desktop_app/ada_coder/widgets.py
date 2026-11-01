@@ -187,6 +187,7 @@ class ThemeCard(QFrame):
         self.setObjectName("ThemeCard")
         self.setCursor(Qt.PointingHandCursor)
         self.setFixedWidth(232)
+        self.setMinimumHeight(268)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(12, 10, 12, 12)
         lay.setSpacing(5)
@@ -195,9 +196,9 @@ class ThemeCard(QFrame):
         pics.setAlignment(Qt.AlignCenter)
         for name, picture, emoji in chars[:3]:
             lbl = QLabel()
-            lbl.setFixedSize(60, 60)
+            lbl.setFixedSize(86, 86)          # the characters a little bigger
             lbl.setAlignment(Qt.AlignCenter)
-            pix = scaled_pixmap(picture, 60, 60) if picture else None
+            pix = scaled_pixmap(picture, 86, 86) if picture else None
             if pix:
                 lbl.setPixmap(pix)
             else:
@@ -207,6 +208,11 @@ class ThemeCard(QFrame):
         self.name = QLabel(course["name"])
         self.name.setFont(font(12, True))
         self.name.setWordWrap(True)
+        # about 15 words on what the theme is
+        self.about = QLabel(course.get("description") or course.get("tagline") or "")
+        self.about.setObjectName("Muted")
+        self.about.setFont(font(10))
+        self.about.setWordWrap(True)
         self.badge = QLabel("")
         self.badge.setObjectName("ThemeBadge")
         self.badge.setFont(font(9, True))
@@ -215,6 +221,8 @@ class ThemeCard(QFrame):
         self.button.clicked.connect(lambda: self.picked.emit(self.course_id))
         lay.addLayout(pics)
         lay.addWidget(self.name)
+        lay.addWidget(self.about)
+        lay.addStretch()
         lay.addWidget(self.badge, alignment=Qt.AlignLeft)
         lay.addWidget(self.button)
 
@@ -223,7 +231,7 @@ class ThemeCard(QFrame):
         if owned:
             self.badge.setText("✓ Purchased · all lessons open" if free_count is not None else "Free")
         else:
-            self.badge.setText(f"{free_count} free lessons · {price}".strip(" ·"))
+            self.badge.setText(f"{price} · {free_count} free lessons".strip(" ·"))   # not bought yet: its price
         if current:
             self.button.setText("▶  Playing now")
         else:
