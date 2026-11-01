@@ -101,7 +101,7 @@ Before the app has been online it uses `data/courses.json`, with the lessons in 
 | Pack | Home screen | Celebrates | Explains mistakes |
 | --- | --- | --- | --- |
 | Friends Adventure | Tom, Penny, Teddy | Teddy | Tom |
-| Fairies & Angels | Twinkle, Fern, Sparkle | Sparkle | Fern |
+| Fairies & Angels | Twinkle, Fairy, Sparkle | Sparkle | Fairy |
 | Ada's Coding Club | Ada, Byte, Penny | Byte | Byte |
 
 Add a pack by putting pictures in `assets/images`, adding an entry to `ada_coder/themes.py`, and adding

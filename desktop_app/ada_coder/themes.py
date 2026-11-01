@@ -17,11 +17,11 @@ THEMES = {
     },
     "fairies": {
         "name": "Fairies & Angels",
-        "tagline": "Code some magic with Twinkle, Fern & Sparkle! ✨",
-        "hero": [("Twinkle", "twinkle.png", "🧚"), ("Fern", "fern.png", "🧚"), ("Sparkle", "sparkle.png", "🦄")],
+        "tagline": "Code some magic with Twinkle, Fairy & Sparkle! ✨",
+        "hero": [("Twinkle", "twinkle.png", "🧚"), ("Fairy", "fairy.png", "🧚"), ("Sparkle", "sparkle.png", "🦄")],
         "guide": "twinkle.png",
         "success": "sparkle.png",
-        "oops": "fern.png",
+        "oops": "fairy.png",
     },
     "coding_club": {
         "name": "Ada's Coding Club",
