@@ -9,13 +9,20 @@ from ada_coder.config import APP_NAME, APP_VERSION  # noqa: E402
 datas = [("assets", "assets"), ("data", "data")]
 if os.path.isdir("vid"):
     datas.append(("vid", "vid"))
+# the Python Adventure app's engine: a theme's Play button opens the theme in it (ada_coder/kids_launch.py)
+if os.path.isdir(os.path.join("..", "apps", "engine")):
+    datas.append((os.path.join("..", "apps", "engine"), "kids_engine"))
 
 a = Analysis(
     ["run.py"],
     pathex=["."],
     datas=datas,
     # cv2 and numpy are imported by the children's programs, not by the app, so list them here.
-    hiddenimports=["ada_coder.child", "cv2", "numpy"],
+    hiddenimports=["ada_coder.child", "cv2", "numpy",
+                   # used by the Python Adventure app's engine (kids_engine/), which runs from source
+                   "builtins", "contextlib", "copy", "difflib", "hashlib", "hmac", "html", "keyword", "math",
+                   "random", "secrets", "tempfile", "threading", "traceback", "urllib.request", "urllib.parse",
+                   "urllib.error", "webbrowser", "pathlib", "PyQt5.QtMultimediaWidgets"],
     excludes=["tkinter", "matplotlib", "PyQt5.QtQml", "PyQt5.QtQuick", "PyQt5.Qt3DCore"],
 )
 pyz = PYZ(a.pure)

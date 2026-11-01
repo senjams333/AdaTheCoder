@@ -15,11 +15,12 @@ import traceback
 import threading
 
 def get_base_dir():
-    """The app's folder: inside the .exe when built, else KIDS_APP_DIR (set by run.py), else here."""
-    if hasattr(sys, "_MEIPASS"):
-        return sys._MEIPASS
+    """The app's folder: KIDS_APP_DIR (set by run.py, or by Ada The Coder when it opens a theme), else inside the
+    .exe when built on its own, else here."""
     if os.environ.get("KIDS_APP_DIR"):
         return os.path.abspath(os.environ["KIDS_APP_DIR"])
+    if hasattr(sys, "_MEIPASS"):
+        return sys._MEIPASS
     return os.path.abspath(".")
 
 def resource_path(relative_path):
@@ -53,6 +54,12 @@ def explain_source():
 from locks import LessonLocks
 
 CONFIG = load_config(get_base_dir())
+# Opened from the Ada The Coder app: it passes who is logged in there ({"full_name", "email", "child_name"}),
+# so the child goes straight in, without this app's log-in card.
+try:
+    HOST_LOGIN = json.loads(os.environ.get("KIDS_APP_LOGIN") or "null") or None
+except ValueError:
+    HOST_LOGIN = None
 APP_ID = CONFIG["id"]
 LOGO = CONFIG["logo"]
 
@@ -1005,6 +1012,10 @@ except Exception as e:
         self.process.finished.connect(self._done)
         
         py_exec = sys.executable
+        if getattr(sys, 'frozen', False) and os.environ.get("KIDS_APP_HOST_RUNS_CODE"):
+            # opened from the packaged Ada The Coder app: it runs children's programs itself (no Python needed)
+            self.process.start(py_exec, ["--ada-run-script", runner_name, code_name])
+            return
         if getattr(sys, 'frozen', False):
             import shutil
             py_bin = shutil.which("python3") or shutil.which("python") or sys.executable
@@ -1916,6 +1927,9 @@ class MainWindow(QMainWindow):
 
     def logout(self):
         close_opencv_windows()
+        if HOST_LOGIN:                 # opened from Ada The Coder: Log out goes back to it
+            self.close()
+            return
         self._finish_logout()
 
     def _finish_logout(self):
@@ -2161,6 +2175,9 @@ class MainWindow(QMainWindow):
         self.login_overlay.raise_()
         self.login_overlay.show()
         QTimer.singleShot(100, self.email_input.setFocus)
+        if HOST_LOGIN:                 # opened from Ada The Coder, already logged in there: no log-in card
+            self.user_info = dict(DUMMY_USER, **HOST_LOGIN)
+            QTimer.singleShot(0, self._finish_login_success)
 
     def open_register_page(self):
         """New accounts are made on the website's registration page."""
@@ -2937,7 +2954,7 @@ class MainWindow(QMainWindow):
         buttons = []
         if CONFIG.get("password_url"):
             buttons.append(("🔑 Change password", "soft", self.open_password_page))
-        first_name = (str(u.get("full_name") or "").split() or ["friend"])[0]   # the student's first name
+        first_name = (str(u.get("child_name") or u.get("full_name") or "").split() or ["friend"])[0]   # the student's first name
         self._kid_window("Profile 👤", CONFIG.get("profile_picture") or LOGO, "👋 Hi, %s!" % first_name, "👤 My Profile 🌟",
                          rows, notes, buttons)
 

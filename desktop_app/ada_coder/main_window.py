@@ -607,11 +607,29 @@ class MainWindow(QMainWindow):
         self.refresh_sidebar()
 
     def play_theme(self, course_id):
-        """A theme card was clicked (Try free / Play): switch to it and start its lessons."""
+        """A theme card was clicked (Try free / Play / Playing now): switch to it and open it in the
+        Python Adventure app (its look, with this theme's characters and lessons). Without that app here,
+        the theme's lessons open in this window as before."""
+        from . import kids_launch
         self.choose_course(course_id)
-        if not self.sidebar.isVisible():
-            self.toggle_sidebar()
-        self.open_lesson(self.index)
+        if getattr(self, "kids_proc", None) and self.kids_proc.state() != 0:
+            return                                       # already open
+        user = dict(self.user or self.settings["user"] or {})
+        self.kids_proc = kids_launch.launch(self, self.course, self.settings["licences"], user, self._kids_closed)
+        if self.kids_proc is None:
+            if not self.sidebar.isVisible():
+                self.toggle_sidebar()
+            self.open_lesson(self.index)
+            return
+        self.showMinimized()                             # the theme opens in its own window
+
+    def _kids_closed(self):
+        """The theme's window was closed: come back to the home screen."""
+        self.kids_proc = None
+        self.showMaximized()
+        self.raise_()
+        self.activateWindow()
+        self.show_home()
 
     def ask_upgrade(self):
         """The Upgrade pop-up. Upgrade opens the website's account page on this theme."""

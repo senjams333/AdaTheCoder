@@ -64,6 +64,16 @@ Every theme has the same look, taken from the Python Adventure app; only the cha
 waving girl as guide; lesson 1 free). Its ID is the same as the separate Python Adventure app's, so a
 licence for it on the website opens it in both.
 
+## Play opens the theme in the Python Adventure app
+
+Pressing **Play**, **Try free** or **Playing now** on a theme card opens that theme in the Python Adventure app
+(`../apps/engine/kids_app.py`), already logged in with the same account: its sky, characters, video-then-code
+lessons, Profile, License and Upgrade, with this theme's characters and lessons (`ada_coder/kids_launch.py`
+writes the theme as a kids-app folder in the app's data folder). Lessons the family hasn't bought show 🔒 after
+the free ones. Ada The Coder waits minimised and comes back when that window is closed or the child logs out.
+The packaged app carries the engine as `kids_engine/` (see `AdaTheCoder.spec`). Without it, the theme's lessons
+open in this window as before.
+
 ## Themes, topics, lessons and videos
 
 Everything is managed in the website admin under **Themes & lessons**:

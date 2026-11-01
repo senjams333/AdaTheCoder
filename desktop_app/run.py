@@ -34,6 +34,24 @@ def main():
         from ada_coder import child
         sys.exit(child.main(sys.argv[2:]))
 
+    # A theme opened in the Python Adventure app (see ada_coder/kids_launch.py): "--kids-app <folder>"
+    if len(sys.argv) >= 3 and sys.argv[1] == "--kids-app":
+        import os
+        import runpy
+        from ada_coder.kids_launch import engine_path
+        os.environ["KIDS_APP_DIR"] = sys.argv[2]
+        engine = os.environ.get("KIDS_APP_ENGINE") or engine_path()
+        sys.argv = [engine]
+        runpy.run_path(engine, run_name="__main__")
+        return
+
+    # The packaged app also runs the Python Adventure app's programs: "--ada-run-script runner.py code.py"
+    if len(sys.argv) >= 4 and sys.argv[1] == "--ada-run-script":
+        import runpy
+        sys.argv = sys.argv[2:]
+        runpy.run_path(sys.argv[0], run_name="__main__")
+        return
+
     choose_server(sys.argv)
 
     if "--check" in sys.argv:

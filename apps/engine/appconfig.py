@@ -124,7 +124,10 @@ def load_lessons(app_dir):
             raise ValueError(f"{path}: TOPICS has '{t.get('id')}' but LESSONS_DATA has no lesson with that key")
     for lesson in lessons.values():
         video = lesson.get("video") or lesson.get("video_path") or ""
-        lesson["video_path"] = os.path.join(app_dir, *video.replace("\\", "/").split("/")) if video else ""
+        if video and os.path.isabs(video):          # a full path (themes opened from Ada The Coder)
+            lesson["video_path"] = video
+        else:
+            lesson["video_path"] = os.path.join(app_dir, *video.replace("\\", "/").split("/")) if video else ""
         lesson.setdefault("examples", {})
         lesson.setdefault("default_code", "")
     return lessons, topics
