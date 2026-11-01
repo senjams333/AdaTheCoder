@@ -1528,7 +1528,8 @@ class MainWindow(QMainWindow):
         self.home_btn.setFont(QFont("Comic Sans MS", 14, QFont.Bold))
         self.home_btn.setCursor(Qt.PointingHandCursor)
         self.home_btn.setStyleSheet("background: rgba(255,255,255,0.85); border-radius: 25px; padding: 14px 28px; color: #0f172a; border: none;")
-        self.home_btn.clicked.connect(self.show_home)
+        # opened from Ada The Coder: Home Screen goes back to Ada The Coder (closes this window)
+        self.home_btn.clicked.connect(self.close if HOST_LOGIN else self.show_home)
 
         self.theme_btn = QPushButton("☀️")
         self.theme_btn.setFont(QFont("Comic Sans MS", 14, QFont.Bold))
@@ -2172,12 +2173,14 @@ class MainWindow(QMainWindow):
         overlay_layout.addLayout(row, 0)
         overlay_layout.setAlignment(row, Qt.AlignCenter)
 
+        if HOST_LOGIN:                 # opened from Ada The Coder, already logged in there: no log-in card at all
+            self.user_info = dict(DUMMY_USER, **HOST_LOGIN)
+            self.login_overlay.hide()
+            QTimer.singleShot(0, self._finish_login_success)   # once the whole window is built
+            return
         self.login_overlay.raise_()
         self.login_overlay.show()
         QTimer.singleShot(100, self.email_input.setFocus)
-        if HOST_LOGIN:                 # opened from Ada The Coder, already logged in there: no log-in card
-            self.user_info = dict(DUMMY_USER, **HOST_LOGIN)
-            QTimer.singleShot(0, self._finish_login_success)
 
     def open_register_page(self):
         """New accounts are made on the website's registration page."""
