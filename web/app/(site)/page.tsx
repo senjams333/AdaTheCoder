@@ -217,15 +217,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="cta-section">
-        <div className="wrap">
-          <div className="cta-band">
-            <img src="/img/twinkle.webp" alt="" />
-            <h2>Ready for the first line of code?</h2>
-            <Link className="btn btn-sun" href={user ? '/account' : '/register'}>{user ? 'Go to downloads' : 'Try For Free!'}</Link>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
