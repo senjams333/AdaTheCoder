@@ -116,9 +116,8 @@ def window_qss(dark):
 
     QPushButton#LessonButton[locked="true"] {{ color: {c['ink_soft']}; }}
 
-    QFrame#ThemeCard {{ background: {c['panel_solid']}; border: 2px solid {c['line']}; border-radius: 22px; }}
-    QFrame#ThemeCard:hover {{ border-color: {c['accent']}; }}
-    QFrame#ThemeCard[current="true"] {{ border: 3px solid {c['sun']}; }}
+    QFrame#ThemeCard, QFrame#ThemeCard:hover, QFrame#ThemeCard[current="true"] {{
+        background: {c['panel_solid']}; border: 3px solid #ffffff; border-radius: 22px; }}
     QFrame#ThemeCard QLabel {{ background: transparent; color: {c['ink']}; }}
     QLabel#ThemeBadge {{ background: {c['badge']}; color: {c['accent_dark']}; border-radius: 9px; padding: 2px 9px; }}
     QPushButton#ThemeButton {{ background: {c['accent']}; color: white; border: none; border-radius: 17px; padding: 6px 14px; }}

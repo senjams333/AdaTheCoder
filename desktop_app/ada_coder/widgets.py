@@ -216,8 +216,8 @@ class ThemeCard(QFrame):
         self.badge = QLabel("")
         self.badge.setObjectName("ThemeBadge")
         self.badge.setFont(font(12, True))
-        self.button = pill("", "ThemeButton", size=11)
-        self.button.setMinimumHeight(34)
+        self.button = pill("", "ThemeButton", size=12)
+        self.button.setFixedSize(170, 44)       # shorter and a little taller
         self.button.clicked.connect(lambda: self.picked.emit(self.course_id))
         top = QHBoxLayout()                # Free / Purchased / the price, in the top right corner
         top.addStretch()
@@ -226,7 +226,7 @@ class ThemeCard(QFrame):
         lay.addLayout(pics)
         lay.addWidget(self.name)
         lay.addWidget(self.about)
-        lay.addWidget(self.button)
+        lay.addWidget(self.button, alignment=Qt.AlignHCenter)
 
     def set_state(self, current, owned, free_count, price):
         """current: the theme on screen. owned: free theme or bought. free_count: lessons free to try."""

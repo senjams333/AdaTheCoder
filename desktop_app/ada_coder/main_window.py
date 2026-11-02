@@ -23,7 +23,7 @@ from .widgets import CharacterCard, LessonButton, ThemeCard, pill, round_button,
 
 VIDEO, CODE = 0, 1          # pages of the lesson screen
 # The three friends on the home screen (the same for every theme; each theme's own characters are on its card)
-HOME_CHARACTERS = [("Tom", "tom.png", "🧒"), ("Ada", "girl_wave.png", "👧"), ("Fairy", "fairy.png", "🧚")]
+HOME_CHARACTERS = [("Tom", "tom.png", "🧒"), ("Ada", "girl_wave.png", "👧"), ("Unicorn", "unicorn.png", "🦄")]
 HOME, LESSON = 0, 1         # pages of the centre area
 
 
@@ -218,7 +218,10 @@ class MainWindow(QMainWindow):
         grid.setHorizontalSpacing(14)
         grid.setVerticalSpacing(14)
         self.theme_cards = []
-        for i, c in enumerate(self.courses):
+        # the theme being played first (top left), then the free themes, then the rest
+        playing = getattr(self, "course", None)
+        ordered = sorted(self.courses, key=lambda c: 0 if playing and c["id"] == playing["id"] else 1)
+        for i, c in enumerate(ordered):
             card = ThemeCard(c, course.characters(c)["hero"])
             card.picked.connect(self.play_theme)
             self.theme_cards.append(card)
@@ -604,7 +607,7 @@ class MainWindow(QMainWindow):
             self._fill_course_menu(menu)
         self._fill_lesson_list()
         self.apply_theme()
-        self._refresh_theme_cards()
+        self._fill_theme_cards()            # the playing theme moves to the top left
         self.center.setCurrentIndex(HOME)
         self.refresh_sidebar()
 
