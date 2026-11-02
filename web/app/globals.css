@@ -297,7 +297,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .section-author { background: var(--sun-soft); padding-block: 64px; }
 .author-letter {
   display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 28px; align-items: start;
-  max-width: 960px; margin: 0 auto; padding: 32px 36px 28px;
+  max-width: 1180px; margin: 0 auto; padding: 32px 36px 28px;
   background: #fff; border: 3px solid var(--sun); border-radius: 8px;
   box-shadow: 0 6px 0 rgba(242, 181, 0, .3);
 }
