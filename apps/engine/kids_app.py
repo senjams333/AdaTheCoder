@@ -2335,8 +2335,9 @@ class MainWindow(QMainWindow):
         self.sidebar_toggle.setText(">>")
         self.sidebar_toggle.show()
         self._position_sidebar_toggle()
-        self.logout_btn.show()
-        self.logout_btn.raise_()
+        if not HOST_LOGIN:             # opened from Ada The Coder: no Log out (Home Screen goes back there)
+            self.logout_btn.show()
+            self.logout_btn.raise_()
 
         QTimer.singleShot(1200, self.login_overlay.hide)
 
