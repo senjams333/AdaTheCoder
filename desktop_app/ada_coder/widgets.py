@@ -196,9 +196,9 @@ class ThemeCard(QFrame):
         pics.setAlignment(Qt.AlignCenter)
         for name, picture, emoji in chars[:3]:
             lbl = QLabel()
-            lbl.setFixedSize(104, 104)        # the characters bigger
+            lbl.setFixedSize(120, 120)        # the characters big
             lbl.setAlignment(Qt.AlignCenter)
-            pix = scaled_pixmap(picture, 104, 104) if picture else None
+            pix = scaled_pixmap(picture, 120, 120) if picture else None
             if pix:
                 lbl.setPixmap(pix)
             else:
@@ -211,7 +211,7 @@ class ThemeCard(QFrame):
         # about 15 words on what the theme is
         self.about = QLabel(course.get("description") or course.get("tagline") or "")
         self.about.setObjectName("Muted")
-        self.about.setFont(font(12))
+        self.about.setFont(font(13))
         self.about.setWordWrap(True)
         self.badge = QLabel("")
         self.badge.setObjectName("ThemeBadge")
@@ -226,7 +226,6 @@ class ThemeCard(QFrame):
         lay.addLayout(pics)
         lay.addWidget(self.name)
         lay.addWidget(self.about)
-        lay.addStretch()
         lay.addWidget(self.button)
 
     def set_state(self, current, owned, free_count, price):
