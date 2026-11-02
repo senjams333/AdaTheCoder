@@ -237,7 +237,8 @@ class ThemeCard(QFrame):
         if current:
             self.button.setText("▶  Playing now")
         else:
-            self.button.setText("▶  Play" if owned else "✨  Try free")
+            # Play only for a bought theme; free themes and ones not bought yet say Try free
+            self.button.setText("▶  Play" if owned and free_count is not None else "✨  Try free")
         self.setProperty("current", "true" if current else "false")
         self.style().unpolish(self)
         self.style().polish(self)
