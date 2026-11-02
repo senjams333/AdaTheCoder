@@ -111,17 +111,18 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
 | `GET/PATCH /account`, `POST /account/password`, `POST /account/delete`, `POST /account/download/:platform` | The logged-in parent (Bearer) |
 | `/admin/...` | Admin only (Bearer of an admin): dashboard, settings, themes, lessons, releases, parents |
 | `GET /v3/courses`, `POST /v3/login`, `POST /v3/register`, `GET /v1/app/latest`, `GET /v1/announcement` | The desktop app (same answers as before, so installed apps keep working). `/v3/login` also returns `app_token` |
-| `GET /v3/licences`, `POST /v3/pay-link` | The desktop app with its `app_token`: the family's licences again, and a 15-minute website link that pays for a theme |
+| `GET /v3/licences` | The desktop app with its `app_token`: the family's licences again (after paying on the website) |
 | `GET /pay/:theme`, `POST /pay/:theme/razorpay`, `POST /pay/:theme/paypal` | The website's `/pay` page (a parent's log-in or the app's pay link) |
 | `POST /pay/razorpay/verify`, `POST /pay/razorpay/webhook`, `POST /pay/paypal/capture` | Payment confirmations, checked with the Razorpay secrets or with PayPal itself; then the family gets a licence (`ADA-XXXX-XXXX-XXXX`) |
 | `/media/videos/...`, `/media/courses/...` | Uploaded lesson videos and theme pictures (outside `/api`) |
 
 ## Payments (Razorpay and PayPal)
 
-A child presses a locked lesson → the Upgrade card shows **💳 Razorpay** (India: UPI, cards, net banking, in rupees)
-and **🅿️ PayPal** (PayPal or any card). The app opens the website's `/pay` page, already logged in with the
-account used in the app, and starts that payment. Once it goes through, the family gets a licence and the app
-unlocks every lesson by itself (it checks every 15 seconds for 20 minutes, and at every website check).
+A child presses a locked lesson → the Upgrade card → **⭐ Upgrade** opens the website's `/pay` page for that theme.
+The parent logs in there and pays with **Razorpay** (India: UPI, cards, net banking, in rupees) or **PayPal**
+(PayPal or any card). Payment happens only on the website, never in the app. Once it goes through, the family gets
+a licence and the app unlocks every lesson by itself (it checks every 15 seconds for 20 minutes, and at every
+website check).
 Parents can also pay from their account page (Get Licence).
 
 1. Put the keys in `api/.env` (see `.env.example`): `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`,

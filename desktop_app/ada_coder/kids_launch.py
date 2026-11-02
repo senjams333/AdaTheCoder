@@ -110,7 +110,7 @@ def launch(parent, c, licences, user, on_closed=None):
     env = QProcessEnvironment.systemEnvironment()
     env.insert("KIDS_APP_DIR", folder)
     env.insert("KIDS_APP_ENGINE", engine)
-    # app_token + server: the theme's Upgrade card pays with Razorpay or PayPal on the website, already logged in
+    # server: the theme's Upgrade opens the website's pay page; app_token: then it sees the new licence by itself
     login = {k: user.get(k, "") for k in ("full_name", "email", "child_name", "app_token")}
     login["server"] = SERVER_URL
     env.insert("KIDS_APP_LOGIN", json.dumps(login))

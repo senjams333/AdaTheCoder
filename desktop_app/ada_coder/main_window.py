@@ -687,9 +687,9 @@ class MainWindow(QMainWindow):
         free = course.free_count(self.course) or 0
         hero = course.characters(self.course)["hero"]
         picture = hero[-1][1] if hero and hero[-1][1] else "ada_logo.png"
-        method = show_upgrade(self, self.course, free, len(self.lessons), picture)
-        if method in ("razorpay", "paypal"):
-            QDesktopServices.openUrl(QUrl(sync.pay_link(self.settings["app_token"], self.course["id"], method)))
+        if show_upgrade(self, self.course, free, len(self.lessons), picture) == "upgrade":
+            # the website's pay page: the parent logs in there and pays with Razorpay or PayPal
+            QDesktopServices.openUrl(QUrl(sync.pay_page(self.course["id"])))
             self._watch_payment()
 
     def _watch_payment(self):

@@ -217,7 +217,7 @@ def show_about(parent, picture="tom.png", licence_status="", theme_name="", user
 
 def show_upgrade(parent, course, free_count, lesson_count, picture="ada_logo.png"):
     """A locked lesson: a glowing sky card with a yellow sunset glow, big letters, ✕ and Upgrade.
-    Returns "razorpay" or "paypal" (the payment button pressed), or None."""
+    Returns "upgrade" (the caller opens the website, where the parent logs in and pays) or None."""
     family = ui_family()
     box = QDialog(parent, Qt.Dialog | Qt.FramelessWindowHint)
     box.setWindowTitle("Locked lesson 🔒")
@@ -275,18 +275,9 @@ def show_upgrade(parent, course, free_count, lesson_count, picture="ada_logo.png
     text.setMinimumWidth(460)
     row.addWidget(text, 1)
     lay.addLayout(row)
-    # pay on the website with Razorpay (India: UPI, cards) or PayPal; the caller opens the page
-    choice = {}
-    pay_row = QHBoxLayout()
-    pay_row.setSpacing(14)
-    pay_row.addStretch()
-    for method, label in (("razorpay", "💳 Razorpay\nUPI · cards (India)"), ("paypal", "🅿️ PayPal\nPayPal · cards")):
-        b = QPushButton(label)
-        b.setObjectName("up")
-        b.setCursor(Qt.PointingHandCursor)
-        b.clicked.connect(lambda _=False, m=method: (choice.update(method=m), box.accept()))
-        pay_row.addWidget(b)
-    lay.addLayout(pay_row)
-    if box.exec_() == QDialog.Accepted:
-        return choice.get("method")
-    return None
+    up_btn = QPushButton("⭐ Upgrade")
+    up_btn.setObjectName("up")
+    up_btn.setCursor(Qt.PointingHandCursor)
+    up_btn.clicked.connect(box.accept)
+    lay.addWidget(up_btn, alignment=Qt.AlignRight)
+    return "upgrade" if box.exec_() == QDialog.Accepted else None

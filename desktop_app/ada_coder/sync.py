@@ -204,21 +204,9 @@ def fetch_licences(app_token):
         return None
 
 
-def pay_link(app_token, theme_id, method=""):
-    """The website page that pays for a theme with Razorpay or PayPal, already logged in (a 15-minute link).
-    Without a log-in from this app it's the plain page, where the parent logs in first."""
-    site = SERVER_URL.rstrip("/")
-    plain = f"{site}/pay?theme={urllib.parse.quote(theme_id)}" + (f"&method={method}" if method else "")
-    if not app_token:
-        return plain
-    body = json.dumps({"theme": theme_id, "method": method}).encode("utf-8")
-    req = urllib.request.Request(site + "/api/v3/pay-link", data=body, method="POST", headers={
-        "User-Agent": USER_AGENT, "Content-Type": "application/json", "Authorization": "Bearer " + app_token})
-    try:
-        with _open(req, 10) as resp:
-            return json.loads(resp.read().decode("utf-8")).get("url") or plain
-    except NETWORK_ERRORS + (ValueError,):
-        return plain
+def pay_page(theme_id):
+    """The website page for buying a theme: the parent logs in there, then pays with Razorpay or PayPal."""
+    return f"{SERVER_URL.rstrip('/')}/pay?theme={urllib.parse.quote(theme_id)}"
 
 
 def forgot_password(email):

@@ -2581,22 +2581,6 @@ class MainWindow(QMainWindow):
         text.setMinimumWidth(460)
         row.addWidget(text, stretch=1)
         lay.addLayout(row)
-        if HOST_LOGIN and HOST_LOGIN.get("app_token"):
-            # opened from Ada The Coder after logging in: pay straight away with Razorpay or PayPal
-            choice = {}
-            pay_row = QHBoxLayout()
-            pay_row.setSpacing(14)
-            pay_row.addStretch()
-            for method, label in (("razorpay", "💳 Razorpay\nUPI · cards (India)"), ("paypal", "🅿️ PayPal\nPayPal · cards")):
-                b = QPushButton(label)
-                b.setObjectName("up")
-                b.setCursor(Qt.PointingHandCursor)
-                b.clicked.connect(lambda _=False, m=method: (choice.update(method=m), box.accept()))
-                pay_row.addWidget(b)
-            lay.addLayout(pay_row)
-            if box.exec_() == QDialog.Accepted:
-                self.open_upgrade(choice.get("method", ""))
-            return
         up_btn = QPushButton("⭐ Upgrade")
         up_btn.setObjectName("up")
         up_btn.setCursor(Qt.PointingHandCursor)
@@ -2653,7 +2637,7 @@ class MainWindow(QMainWindow):
 
     def open_upgrade(self, method=""):
         """Opens the website: the parent logs in, buys the app, and the lessons open here by themselves.
-        Opened from Ada The Coder: the website's pay page, already logged in, starting Razorpay or PayPal."""
+        Opened from Ada The Coder: the website's pay page for this theme (log in there, then Razorpay or PayPal)."""
         if HOST_LOGIN and HOST_LOGIN.get("app_token"):
             return self._host_upgrade(method)
         url = CONFIG["locks"].get("upgrade_url")
@@ -2686,14 +2670,9 @@ class MainWindow(QMainWindow):
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def _host_upgrade(self, method):
-        theme = self.locks.theme_id
-        url = (HOST_LOGIN.get("server") or "").rstrip("/") + "/pay?theme=" + urllib.parse.quote(theme) + (
-            "&method=" + method if method else "")
-        try:
-            url = self._host_call("/v3/pay-link", {"theme": theme, "method": method}).get("url") or url
-        except Exception:
-            pass          # the website asks the parent to log in instead
+    def _host_upgrade(self, method=""):
+        # the parent logs in on the website, then pays with Razorpay or PayPal there
+        url = (HOST_LOGIN.get("server") or "").rstrip("/") + "/pay?theme=" + urllib.parse.quote(self.locks.theme_id)
         webbrowser.open(url)
         if not hasattr(self, "host_pay_timer"):
             self.host_pay_timer = QTimer(self)
