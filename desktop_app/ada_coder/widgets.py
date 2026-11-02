@@ -187,7 +187,7 @@ class ThemeCard(QFrame):
         self.setObjectName("ThemeCard")
         self.setCursor(Qt.PointingHandCursor)
         self.setFixedWidth(232)
-        self.setMinimumHeight(300)
+        self.setMinimumHeight(256)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(12, 10, 12, 12)
         lay.setSpacing(5)
@@ -196,9 +196,9 @@ class ThemeCard(QFrame):
         pics.setAlignment(Qt.AlignCenter)
         for name, picture, emoji in chars[:3]:
             lbl = QLabel()
-            lbl.setFixedSize(120, 120)        # the characters big
+            lbl.setFixedSize(100, 100)        # the characters big
             lbl.setAlignment(Qt.AlignCenter)
-            pix = scaled_pixmap(picture, 120, 120) if picture else None
+            pix = scaled_pixmap(picture, 100, 100) if picture else None
             if pix:
                 lbl.setPixmap(pix)
             else:
@@ -206,18 +206,18 @@ class ThemeCard(QFrame):
                 lbl.setFont(font(26))
             pics.addWidget(lbl)
         self.name = QLabel(course["name"])
-        self.name.setFont(font(14, True))
+        self.name.setFont(font(13, True))
         self.name.setWordWrap(True)
         # about 15 words on what the theme is
         self.about = QLabel(course.get("description") or course.get("tagline") or "")
         self.about.setObjectName("Muted")
-        self.about.setFont(font(13))
+        self.about.setFont(font(12))
         self.about.setWordWrap(True)
         self.badge = QLabel("")
         self.badge.setObjectName("ThemeBadge")
-        self.badge.setFont(font(15, True))
+        self.badge.setFont(font(13, True))
         self.button = pill("", "ThemeButton", size=12)
-        self.button.setFixedSize(170, 44)       # shorter and a little taller
+        self.button.setFixedSize(150, 40)
         self.button.clicked.connect(lambda: self.picked.emit(self.course_id))
         top = QHBoxLayout()                # Free / Purchased / the price, in the top right corner
         top.addStretch()

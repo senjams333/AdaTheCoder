@@ -200,7 +200,7 @@ class MainWindow(QMainWindow):
         self.theme_scroll.setWidgetResizable(True)
         self.theme_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.theme_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.theme_scroll.setFixedHeight(322)
+        self.theme_scroll.setFixedHeight(278)
         self.theme_cards = []
         self._fill_theme_cards()
         home_lay.addWidget(title)
@@ -711,7 +711,7 @@ class MainWindow(QMainWindow):
         side = self.sidebar.width() if self.sidebar.isVisible() else 0
         per_card = (w - side - 160) / 3.0
         # the three friends are big; the theme cards (about 330 px) sit below them
-        card_scale = max(0.3, min(scale * 1.15, per_card / 330.0, (h - 470) / 360.0))
+        card_scale = max(0.3, min(scale * 1.15, per_card / 380.0, (h - 470) / 410.0))
         for card in self.cards:
             card.set_scale(card_scale)
         # three theme cards in a row (the grid shares the width); more rows scroll up and down
