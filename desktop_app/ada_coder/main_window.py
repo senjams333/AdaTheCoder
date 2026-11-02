@@ -378,6 +378,11 @@ class MainWindow(QMainWindow):
             w.setEnabled(signed_in)
         self.sidebar.setVisible(signed_in)
         self.course_btn.setText("📚  Lessons")
+        # behind the log-in card: no theme cards and no name, just "Welcome to Ada The Coder"
+        self.theme_scroll.setVisible(signed_in)
+        if not signed_in:
+            self.kid_name = ""
+            self._hero_text()
 
     def logout(self):
         self.bridge.stop()
