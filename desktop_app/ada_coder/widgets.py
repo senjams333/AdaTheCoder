@@ -234,11 +234,7 @@ class ThemeCard(QFrame):
             self.badge.setText("✓ Purchased" if free_count is not None else "Free")
         else:
             self.badge.setText(price or f"{free_count} free lessons")   # not bought yet: its price
-        if current:
-            self.button.setText("▶  Playing now")
-        else:
-            # Play only for a bought theme; free themes and ones not bought yet say Try free
-            self.button.setText("▶  Play" if owned and free_count is not None else "✨  Try free")
+        self.button.setText("✨  Try free")      # every card says Try free
         self.setProperty("current", "true" if current else "false")
         self.style().unpolish(self)
         self.style().polish(self)

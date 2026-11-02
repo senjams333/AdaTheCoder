@@ -165,8 +165,20 @@ def show_profile(parent, user, done_count, lesson_count, course_name):
     """Profile: Byte the owl waves and says hi to the child by their first name."""
     first = (str(user.get("child_name") or user.get("full_name") or "").split() or ["friend"])[0]
     email = user.get("email") or ""
-    rows = [("👤 Name", user.get("full_name") or "Coder"), ("📧 Email", email or "–"),
-            ("⭐ Lessons finished", f"{done_count} of {lesson_count}"), ("🎨 Theme", course_name)]
+    online = bool(email)                      # logged in with a website account (not Try for free)
+    rows = [("🆔 User ID", user.get("id") or "usr_KIDS_1001"),
+            ("👤 Full Name", user.get("full_name") or "Coder"),
+            ("📧 Email", email or "–"),
+            ("🎓 Role", user.get("role") or "Student"),
+            ("🖼️ Avatar", user.get("avatar") or "Default (Ada the Teacher) 🐍"),
+            ("📝 Bio", user.get("bio") or "Young coder on a coding adventure! 🚀"),
+            ("⚧ Gender", user.get("gender") or "Not specified"),
+            ("📍 Address", user.get("address") or "Not specified"),
+            ("🔐 Auth Provider", user.get("auth_provider") or ("website" if online else "local")),
+            ("⚡ Active", "✅ Yes"),
+            ("🗓️ Created At", user.get("created_at") or "–"),
+            ("⭐ Lessons finished", f"{done_count} of {lesson_count} ({course_name})")]
+    notes = "" if online else "<p style='font-size:14px; color:#065f46;'>✨ Demo data — no internet or server needed! 🚀</p>"
 
     def change_password(note):
         """Asks the website to email the grown-up a password reset link (with a 6-digit code).
@@ -185,19 +197,22 @@ def show_profile(parent, user, done_count, lesson_count, course_name):
         else:
             note.setText("❌ The website couldn't send the email just now. Please try again in a minute.")
     buttons = [("🔑 Change password", change_password)] if email else []
-    kid_window(parent, "Profile 👤", "byte.png", f"👋 Hi, {first}!", "👤 My Profile 🌟", rows, buttons=buttons)
+    kid_window(parent, "Profile 👤", "byte.png", f"👋 Hi, {first}!", "👤 My Profile 🌟", rows, notes, buttons=buttons)
 
 
-def show_about(parent, picture="tom.png", licence_status=""):
-    """License (About): the theme's first character waves next to the licence details."""
-    rows = [("📜 App", APP_NAME), ("🔢 Version", APP_VERSION), ("🌐 Website", SERVER_URL.replace("https://", "")),
-            ("💌 Help", CONTACT_EMAIL)]
-    if licence_status:
-        rows.append(("⚡ Status", licence_status))
+def show_about(parent, picture="tom.png", licence_status="", theme_name="", user=None, licence_key=""):
+    """License: the theme's first character waves next to this theme's licence details."""
+    user = user or {}
+    rows = [("🎫 License Key", licence_key or "none yet"),
+            ("👤 Licensed To", user.get("full_name") or "–"),
+            ("📧 Email", user.get("email") or "–"),
+            ("🎯 Plan", "Personal & Educational"),
+            ("⚡ Status", licence_status or "–"),
+            ("🔢 Version", APP_VERSION)]
     notes = ("<p style='font-size:15px;'><b>📜 License:</b> Personal &amp; educational use only.</p><br>"
              "<p style='font-size:15px;'>This software is provided \"as is\", without warranty of any kind.</p>")
     kid_window(parent, "License 📜", picture or "tom.png", "👋 Hi, here's your license details",
-               "📜 " + html.escape(APP_NAME), rows, notes, row_bg="#fef9c3")
+               "📜 " + html.escape(theme_name or APP_NAME), rows, notes, row_bg="#fef9c3")
 
 
 def show_upgrade(parent, course, free_count, lesson_count, picture="ada_logo.png"):

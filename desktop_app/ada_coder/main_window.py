@@ -394,11 +394,13 @@ class MainWindow(QMainWindow):
         hero = course.characters(self.course)["hero"]
         picture = hero[0][1] if hero and hero[0][1] else "tom.png"
         free = course.free_count(self.course)
-        if course.owns(self.course, self.settings["licences"]):
-            status = f"{self.course['name']}: every lesson is open ✅"
+        owned = course.owns(self.course, self.settings["licences"])
+        if owned:
+            status = "every lesson is open ✅"
         else:
-            status = f"{self.course['name']}: {min(free or 0, len(self.lessons))} of {len(self.lessons)} lessons open 🔒"
-        show_about(self, picture, status)
+            status = f"{min(free or 0, len(self.lessons))} of {len(self.lessons)} lessons open 🔒"
+        key = "(website account)" if owned and free is not None else ("not needed (free)" if free is None else "none yet")
+        show_about(self, picture, status, self.course["name"], self.user or self.settings["user"] or {}, key)
 
     def open_profile(self):
         done = sum(1 for l in self.lessons if self.settings.is_completed(self.course["id"], l["id"]))
