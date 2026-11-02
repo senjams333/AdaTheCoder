@@ -1922,6 +1922,11 @@ class MainWindow(QMainWindow):
         if HOST_LOGIN:                 # opened from Ada The Coder: top-left button goes back there
             self.logout_btn.setText("<< Back")
             self.logout_btn.setToolTip("Back to Ada The Coder")
+            self.logout_btn.setStyleSheet("""
+                QPushButton { background: #f8fdff; color: #0c4a6e; border: 2px solid white;
+                              border-radius: 18px; padding: 6px 12px; }
+                QPushButton:hover { background: #e0f2fe; }
+            """)
             self.logout_btn.clicked.connect(self.close)
         else:
             self.logout_btn.clicked.connect(self.logout)
