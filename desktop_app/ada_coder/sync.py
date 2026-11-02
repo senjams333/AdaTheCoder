@@ -225,16 +225,32 @@ def new_announcement():
     except NETWORK_ERRORS:
         return ""
     message = (answer.get("message") or "").strip()
+    _save_home(answer)
     state = _read_json(_state_path(), {})
-    home = {"welcome": (answer.get("welcome") or "").strip(), "theme": (answer.get("home_theme") or "").strip()}
-    if home != state.get("home"):          # the home screen the admin set on the website
-        state["home"] = home
-        _write_json(_state_path(), state)
     if not message or message == state.get("last_message"):
         return ""
     state["last_message"] = message
     _write_json(_state_path(), state)
     return message
+
+
+def _save_home(answer):
+    """Keeps the home screen the admin set on the website. Returns True if it changed."""
+    state = _read_json(_state_path(), {})
+    home = {"welcome": (answer.get("welcome") or "").strip(), "theme": (answer.get("home_theme") or "").strip()}
+    if home == state.get("home"):
+        return False
+    state["home"] = home
+    _write_json(_state_path(), state)
+    return True
+
+
+def refresh_home():
+    """Fetches the home screen settings only (the repeating check). True if they changed."""
+    try:
+        return _save_home(_get_json("/api/v1/announcement"))
+    except NETWORK_ERRORS:
+        return False
 
 
 def home_screen():
@@ -309,7 +325,7 @@ def check_now(window, quiet=False):
         return
     window._checking = True
     result = {}
-    worker = threading.Thread(target=lambda: result.update(changed=sync_courses(), online=_online()), daemon=True)
+    worker = threading.Thread(target=lambda: result.update(changed=sync_courses(), home=refresh_home(), online=_online()), daemon=True)
     worker.start()
     timer = QTimer(window)
 
@@ -320,6 +336,8 @@ def check_now(window, quiet=False):
         window._checking = False
         if result.get("changed") or not quiet:
             window.reload_courses()   # (a manual check always refreshes what's on screen)
+        elif result.get("home"):
+            window.apply_theme()      # the admin changed the home screen's greeting or characters
         if quiet:
             return
         if not result.get("online"):
