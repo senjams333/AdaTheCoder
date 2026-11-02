@@ -1923,7 +1923,7 @@ class MainWindow(QMainWindow):
             self.logout_btn.setText("<< Back")
             self.logout_btn.setToolTip("Back to Ada The Coder")
             self.logout_btn.setStyleSheet("""
-                QPushButton { background: #f8fdff; color: #0c4a6e; border: 2px solid white;
+                QPushButton { background: #f8fdff; color: #0c4a6e; border: 2px solid #38bdf8;
                               border-radius: 18px; padding: 6px 12px; }
                 QPushButton:hover { background: #e0f2fe; }
             """)
