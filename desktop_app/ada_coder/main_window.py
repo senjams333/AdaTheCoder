@@ -207,7 +207,51 @@ class MainWindow(QMainWindow):
         home_lay.addWidget(title)
         title.hide()                  # no "Choose a theme" heading above the cards
         home_lay.addWidget(self.theme_scroll)
+        self._make_more_arrow()
         return home
+
+    def _make_more_arrow(self):
+        """A glowing ⬇ at the bottom right of the theme cards while more themes are below; it scrolls down one row."""
+        from PyQt5.QtCore import QPropertyAnimation, QEasingCurve
+        from PyQt5.QtWidgets import QGraphicsDropShadowEffect, QPushButton
+        btn = QPushButton("⬇", self.theme_scroll)
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setToolTip("More themes below")
+        btn.setFixedSize(46, 46)
+        btn.setFont(font(18, True))
+        btn.setStyleSheet("QPushButton { background: #ffd23f; color: #7b4dff; border: 3px solid white; border-radius: 23px; }"
+                          "QPushButton:hover { background: #ffe58a; }")
+        glow = QGraphicsDropShadowEffect(btn)
+        glow.setColor(QColor(255, 210, 63, 240))
+        glow.setOffset(0, 0)
+        glow.setBlurRadius(18)
+        btn.setGraphicsEffect(glow)
+        pulse = QPropertyAnimation(glow, b"blurRadius", btn)
+        pulse.setStartValue(10)
+        pulse.setKeyValueAt(0.5, 34)
+        pulse.setEndValue(10)
+        pulse.setDuration(1400)
+        pulse.setEasingCurve(QEasingCurve.InOutSine)
+        pulse.setLoopCount(-1)
+        pulse.start()
+        bar = self.theme_scroll.verticalScrollBar()
+        btn.clicked.connect(lambda: bar.setValue(bar.value() + self.theme_scroll.viewport().height()))
+        bar.valueChanged.connect(self._place_more_arrow)
+        bar.rangeChanged.connect(self._place_more_arrow)
+        self.more_arrow, self._more_pulse = btn, pulse
+        btn.hide()
+
+    def _place_more_arrow(self, *_):
+        if not hasattr(self, "more_arrow"):
+            return
+        bar = self.theme_scroll.verticalScrollBar()
+        more = self.theme_scroll.isVisible() and bar.maximum() - bar.value() > 6
+        self.more_arrow.setVisible(more)
+        if more:
+            scroll = self.theme_scroll
+            side = bar.width() if bar.isVisible() else 0
+            self.more_arrow.move(scroll.width() - side - 52, scroll.height() - 52)
+            self.more_arrow.raise_()
 
     def _fill_theme_cards(self):
         # three themes in a row, one row on show; more themes scroll up and down
@@ -381,6 +425,7 @@ class MainWindow(QMainWindow):
         self.course_btn.setText("📚  Lessons")
         # behind the log-in card: no theme cards and no name, just "Welcome to Ada The Coder"
         self.theme_scroll.setVisible(signed_in)
+        QTimer.singleShot(0, self._place_more_arrow)
         if not signed_in:
             self.kid_name = ""
             self._hero_text()
@@ -759,6 +804,7 @@ class MainWindow(QMainWindow):
 
     # ================================================================== sizes
     def _fit_home(self):
+        QTimer.singleShot(0, self._place_more_arrow)     # the ⬇ follows the cards' new size
         w, h = max(self.width(), 1), max(self.height(), 1)
         scale = max(0.45, min(min(w / 1366.0, h / 820.0), 1.25))
         self.hero_title.setFont(font(max(int(38 * scale), 18), True))
