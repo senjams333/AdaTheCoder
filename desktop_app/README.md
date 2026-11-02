@@ -86,7 +86,7 @@ Everything is managed in the website admin under **Themes & lessons**:
   lesson list), title, starting code, examples and video; add lessons; move them up or down.
 
 The app downloads the themes in the background (`/api/v3/courses`) when it opens and every 3 minutes
-(`SYNC_EVERY` in `config.py`), and the avatar menu has **🔄 Check for new lessons**. New and changed themes
+(`SYNC_EVERY` in `config.py`), and it checks again whenever the app opens. New and changed themes
 show straight away (if the child is in a lesson, when they go back Home).
 
 To test against the API on your own computer: `python run.py --server http://127.0.0.1:3000`

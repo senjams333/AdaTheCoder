@@ -128,6 +128,11 @@ def load_lessons(app_dir):
             lesson["video_path"] = video
         else:
             lesson["video_path"] = os.path.join(app_dir, *video.replace("\\", "/").split("/")) if video else ""
+            # not in this app's vid/ folder: use the same video from the Ada The Coder app (desktop_app/vid)
+            shared = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(app_dir))), "desktop_app", "vid",
+                                  os.path.basename(video)) if video else ""
+            if video and not os.path.exists(lesson["video_path"]) and os.path.exists(shared):
+                lesson["video_path"] = shared
         lesson.setdefault("examples", {})
         lesson.setdefault("default_code", "")
     return lessons, topics
