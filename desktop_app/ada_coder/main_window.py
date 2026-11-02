@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (QAction, QActionGroup, QFrame, QGridLayout, QHBoxLa
                              QScrollArea, QShortcut, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from . import lessons as course
+from . import sync
 from .bridge import CodeBridge
 from .config import APP_NAME
 from .dialogs import show_about, show_profile, show_upgrade
@@ -564,17 +565,24 @@ class MainWindow(QMainWindow):
                 pictures[k] = "../images/" + name
         self._js("setCharacters", pictures)
 
+    def _home_characters(self):
+        """Tom, Ada and Unicorn, or the characters of the theme the admin picked for the home screen."""
+        chosen = sync.home_screen()["theme"]
+        c = next((c for c in getattr(self, "courses", []) if c["id"] == chosen), None) if chosen else None
+        return course.characters(c)["hero"] if c else HOME_CHARACTERS
+
     def _hero_text(self):
         """The greeting in its own colour, with the student's name in another (pink) colour."""
         import html
         dark = bool(self.settings["dark_mode"])
         main, name_colour = ("#c4b5fd", "#f9a8d4") if dark else ("#5b2fe0", "#e23d8b")
         first = getattr(self, "kid_name", "")
+        welcome = html.escape(sync.home_screen()["welcome"])      # the admin sets it on the website
         if first:
             text = (f"<span style='color:{main}'>Hi </span><span style='color:{name_colour}'>{html.escape(first)}</span>"
-                    f"<span style='color:{main}'> ! Welcome to Ada The Coder</span>")
+                    f"<span style='color:{main}'> ! {welcome}</span>")
         else:
-            text = f"<span style='color:{main}'>Welcome to Ada The Coder</span>"
+            text = f"<span style='color:{main}'>{welcome}</span>"
         self.hero_title.setTextFormat(Qt.RichText)
         self.hero_title.setText(text)
 
@@ -589,8 +597,9 @@ class MainWindow(QMainWindow):
 
     def apply_theme(self):
         theme = course.characters(self.course)
-        for card, char in zip(self.cards, HOME_CHARACTERS):
+        for card, char in zip(self.cards, self._home_characters()):
             card.set_character(*char)
+        self._hero_text()
         self.hero_sub.setText(f"{self.course['name']}: {self.course.get('tagline') or theme['tagline']}")
         self._send_characters()
         self._fit_home()

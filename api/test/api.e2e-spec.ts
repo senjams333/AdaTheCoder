@@ -103,9 +103,10 @@ describe('Ada The Coder API', () => {
 
   it('admin: website text', async () => {
     await request(http).put('/api/admin/settings').set('Authorization', `Bearer ${admin}`)
-      .send({ hero_title: 'Code is fun', app_message: 'Hello from admin' }).expect(200);
+      .send({ hero_title: 'Code is fun', app_message: 'Hello from admin', app_welcome: 'Welcome back, coders', app_home_theme: 'space' }).expect(200);
     expect((await request(http).get('/api/site')).body.settings.hero_title).toBe('Code is fun');
-    expect((await request(http).get('/api/v1/announcement')).body).toEqual({ message: 'Hello from admin' });
+    expect((await request(http).get('/api/v1/announcement')).body)
+      .toEqual({ message: 'Hello from admin', welcome: 'Welcome back, coders', home_theme: 'space' });
   });
 
   it('admin: a new theme with its own characters, lessons inside, free lessons', async () => {

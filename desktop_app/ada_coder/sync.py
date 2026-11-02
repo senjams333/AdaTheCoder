@@ -221,15 +221,26 @@ def check_for_update():
 def new_announcement():
     """The website's message for the app, if the child hasn't seen it yet."""
     try:
-        message = (_get_json("/api/v1/announcement").get("message") or "").strip()
+        answer = _get_json("/api/v1/announcement")
     except NETWORK_ERRORS:
         return ""
+    message = (answer.get("message") or "").strip()
     state = _read_json(_state_path(), {})
+    home = {"welcome": (answer.get("welcome") or "").strip(), "theme": (answer.get("home_theme") or "").strip()}
+    if home != state.get("home"):          # the home screen the admin set on the website
+        state["home"] = home
+        _write_json(_state_path(), state)
     if not message or message == state.get("last_message"):
         return ""
     state["last_message"] = message
     _write_json(_state_path(), state)
     return message
+
+
+def home_screen():
+    """The greeting and the theme whose characters stand on the home screen, as the admin last set them."""
+    home = _read_json(_state_path(), {}).get("home") or {}
+    return {"welcome": home.get("welcome") or "Welcome to Ada The Coder", "theme": home.get("theme") or ""}
 
 
 def run_checks():
@@ -272,6 +283,8 @@ def start(window):
                 QDesktopServices.openUrl(QUrl(update["download_page"]))
         if results.get("lessons_updated"):
             window.reload_courses()   # new themes and lessons appear straight away
+        else:
+            window.apply_theme()      # the home screen greeting and characters the admin set
         if results.get("message"):
             QMessageBox.information(window, APP_NAME, results["message"])
 

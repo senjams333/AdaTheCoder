@@ -99,7 +99,9 @@ export class AppApiController {
 
   @Get('v1/announcement')
   async announcement() {
-    return { message: (await this.settings.all()).app_message || '' };
+    // also the app's home screen, which the admin sets on the Website text page
+    const s = await this.settings.all();
+    return { message: s.app_message || '', welcome: s.app_welcome || '', home_theme: s.app_home_theme || '' };
   }
 
   private text(err: unknown): string {

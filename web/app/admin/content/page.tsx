@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
-import { useAdminSettingsQuery, useSaveSettingsMutation } from '@/lib/api';
+import { useAdminSettingsQuery, useSaveSettingsMutation, useThemesQuery } from '@/lib/api';
 import { errorList } from '@/lib/errors';
 import { flash } from '@/lib/flashSlice';
 import { useAppDispatch } from '@/lib/hooks';
@@ -10,6 +10,7 @@ import type { Settings } from '@/lib/types';
 
 export default function AdminContent() {
   const { data } = useAdminSettingsQuery();
+  const { data: themes } = useThemesQuery();
   const [form, setForm] = useState<Settings | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [save, { isLoading }] = useSaveSettingsMutation();
@@ -48,6 +49,21 @@ export default function AdminContent() {
           <input id="app_message" type="text" value={form.app_message || ''} onChange={set('app_message')} />
           <span className="help">Kids see this as a pop-up the next time they open the app, once per new message. Keep it short and friendly, or leave it empty for no pop-up.</span>
         </div>
+        <h2 style={{ marginTop: 26 }}>Ada The Coder app: home screen</h2>
+        <div className="field">
+          <label htmlFor="app_welcome">Greeting</label>
+          <input id="app_welcome" type="text" value={form.app_welcome || ''} onChange={set('app_welcome')} placeholder="Welcome to Ada The Coder" />
+          <span className="help">The big line on the app&apos;s home screen. When a child is logged in, it starts with &quot;Hi Alex !&quot;.</span>
+        </div>
+        <div className="field">
+          <label htmlFor="app_home_theme">Characters on the home screen</label>
+          <select id="app_home_theme" value={form.app_home_theme || ''} onChange={set('app_home_theme')}>
+            <option value="">Tom, Ada and Unicorn (built into the app)</option>
+            {(themes || []).map((t) => <option key={t.slug} value={t.slug}>{t.name}&apos;s characters</option>)}
+          </select>
+          <span className="help">Pick a theme to show its characters instead. New themes are added on the Themes page: tick &quot;Show this theme in the app&quot; and give it at least one live lesson, and it appears in every installed app the next time the app checks the website (at start, then every few minutes).</span>
+        </div>
+        <h2 style={{ marginTop: 26 }}>Website</h2>
         <div className="field">
           <label htmlFor="parents_note">Note for parents</label>
           <textarea id="parents_note" rows={3} value={form.parents_note || ''} onChange={set('parents_note')} />

@@ -16,6 +16,7 @@ export const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 
 export const SETTING_FIELDS = [
   'hero_title', 'hero_subtitle', 'site_banner', 'app_message', 'parents_note', 'contact_email', 'author_name', 'author_note',
+  'app_welcome', 'app_home_theme',
 ] as const;
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
@@ -25,6 +26,9 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
     'the app; kids start making things in the very first lesson.',
   site_banner: '',
   app_message: '',
+  // the Ada The Coder app's home screen: the greeting, and the theme whose characters stand on it ('' = Tom, Ada and Unicorn)
+  app_welcome: 'Welcome to Ada The Coder',
+  app_home_theme: '',
   parents_note:
     'There are no ads, no chat and no strangers in Ada The Coder. Your child never needs an account, and their ' +
     'progress is saved on your own computer.',
