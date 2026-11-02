@@ -215,7 +215,7 @@ class ThemeCard(QFrame):
         self.about.setWordWrap(True)
         self.badge = QLabel("")
         self.badge.setObjectName("ThemeBadge")
-        self.badge.setFont(font(12, True))
+        self.badge.setFont(font(15, True))
         self.button = pill("", "ThemeButton", size=12)
         self.button.setFixedSize(170, 44)       # shorter and a little taller
         self.button.clicked.connect(lambda: self.picked.emit(self.course_id))
