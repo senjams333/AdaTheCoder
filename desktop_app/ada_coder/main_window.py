@@ -22,6 +22,8 @@ from .video_panel import VideoPanel
 from .widgets import CharacterCard, LessonButton, ThemeCard, pill, round_button, round_pixmap
 
 VIDEO, CODE = 0, 1          # pages of the lesson screen
+# The three friends on the home screen (the same for every theme; each theme's own characters are on its card)
+HOME_CHARACTERS = [("Tom", "tom.png", "🧒"), ("Ada", "girl_wave.png", "👧"), ("Fairy", "fairy.png", "🧚")]
 HOME, LESSON = 0, 1         # pages of the centre area
 
 
@@ -172,7 +174,7 @@ class MainWindow(QMainWindow):
         cards = QWidget()
         self.cards_layout = QHBoxLayout(cards)
         self.cards_layout.setAlignment(Qt.AlignCenter)
-        self.cards = [CharacterCard(*char) for char in course.characters(self.course)["hero"]]
+        self.cards = [CharacterCard(*char) for char in HOME_CHARACTERS]
         for card in self.cards:
             self.cards_layout.addWidget(card)
 
@@ -579,7 +581,7 @@ class MainWindow(QMainWindow):
 
     def apply_theme(self):
         theme = course.characters(self.course)
-        for card, char in zip(self.cards, theme["hero"]):
+        for card, char in zip(self.cards, HOME_CHARACTERS):
             card.set_character(*char)
         self.hero_sub.setText(f"{self.course['name']}: {self.course.get('tagline') or theme['tagline']}")
         self._send_characters()
