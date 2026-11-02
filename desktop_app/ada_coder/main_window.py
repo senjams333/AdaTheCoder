@@ -103,7 +103,7 @@ class MainWindow(QMainWindow):
         self.avatar.setToolTip("My account")
         self.avatar.setStyleSheet("QToolButton { border: 3px solid #ffd23f; border-radius: 24px; background: white; }"
                                   "QToolButton:hover { border-color: #7b4dff; } QToolButton::menu-indicator { image: none; }")
-        avatar_pix = round_pixmap("ada.png", 42)
+        avatar_pix = round_pixmap("ada_logo.png", 42)      # the Ada The Coder logo
         if avatar_pix:
             self.avatar.setIcon(QIcon(avatar_pix))
         self.avatar.setMenu(self._build_menu())
