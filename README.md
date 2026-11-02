@@ -34,14 +34,17 @@ bash test_on_my_computer.sh
 
 It installs what's missing (asks for your password once), sets up MySQL (database `admin_db`, user `Admin`
 from `api/.env`), starts the API on http://127.0.0.1:3000/api and the website on http://127.0.0.1:5000,
-opens the admin in your browser, and opens the app connected to them. Close the app to stop everything.
+opens the admin in your browser, and opens **Ada The Coder** connected to them (at http://127.0.0.1:5000:
+the website passes `/api` on to the API, like nginx on the real server). Close the app to stop everything.
 Logs: `api.log` and `web.log`.
 
 1. **Admin:** http://127.0.0.1:5000/admin/login. The first visit says *Create the admin account*; after
    that it's a normal log-in.
 2. **Themes & lessons → Add a theme** (for example *Learn Coding in Space*, with your own 3 character
    pictures, paid, 3 free lessons). Open a theme to edit its topics, lessons and videos.
-3. The script opens the kids app (`apps/python_adventure`) connected to your local website. Lesson 1 is
+3. The script opens Ada The Coder; log in with a parent account (step 4) or try for free, then **Try free** on
+   the Python Adventure card opens the theme. (`KIDS_ONLY=1 bash test_on_my_computer.sh` opens just the kids app
+   `apps/python_adventure`.) Lesson 1 is
    free and lessons 2–17 show 🔒. Unlock them with the licence key the script prints (also saved in
    `licence-key-for-testing.txt`) or a parent account.
 4. Parent account: sign up on the website, then in **Admin → Parents** give that parent a licence for
@@ -71,7 +74,7 @@ npm run dev                 # http://127.0.0.1:5000
 cd desktop_app
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-python run.py --server http://127.0.0.1:3000
+python run.py --server http://127.0.0.1:5000   # the website passes /api on to the API
 ```
 
 ## Adding themes
@@ -136,28 +139,32 @@ Parents can also pay from their account page (Get Licence).
 
 ## Putting it online
 
-- **MySQL 8** (any host), with the database and user from `api/.env`.
-- **API**: `cd api && npm install && npm run build && node dist/main` (keep it running with pm2 or a
-  systemd service) behind HTTPS, e.g. `https://api.adathecoder.com`. In `api/.env` set
-  `API_PUBLIC_URL=https://api.adathecoder.com`, `SITE_URL=https://www.adathecoder.com`,
-  `CORS_ORIGINS=https://www.adathecoder.com`, a long `JWT_SECRET`, and `HOST=0.0.0.0` if a proxy in front
-  needs it. Uploaded files live in `UPLOAD_DIR`: back that folder up with the database.
-- **Website**: `cd web && npm install && npm run build && npm start`, with
-  `NEXT_PUBLIC_API_URL=https://api.adathecoder.com/api` in `web/.env.local` (set it before `npm run build`).
-  Or deploy `web/` to Vercel with that setting.
-- **Desktop app**: set `DEFAULT_SERVER_URL` in `desktop_app/ada_coder/config.py` to the API's address
-  (`https://api.adathecoder.com`), raise `APP_VERSION`, build (see `desktop_app/README.md`), and upload
-  the installers in **Admin → App versions**.
-- **Kids app** (`apps/`, from `3-General.py`): in `apps/python_adventure/app.json` set
-  `"server": {"url": "https://api.adathecoder.com", "theme_id": "python_adventure"}` and
-  `"upgrade_url"` to your pricing page. Put the theme on the website:
-  `python apps/tools/export_theme.py python_adventure --price '$4.99'` then, on the server,
-  `cd api && npm run theme -- import ../apps/python_adventure/theme_pack`. Make licence keys with
-  `python apps/make_key.py python_adventure --count 50` (keep `licence_secret.txt` safe), put the lesson
-  videos in `apps/python_adventure/vid/`, and build on Windows: `python apps/build.py python_adventure`.
-  Upload the installer in **Admin → App versions**. See `apps/README.md`.
-- Then open `/admin/login` straight away and create the admin account: the first person to open it
-  becomes the admin.
+One address for everything, e.g. `https://www.adathecoder.com`: nginx sends `/api/` and `/media/` to the API
+(port 3000) and everything else to the website (port 5000). The desktop app uses that one address for the API and
+for the website pages it opens (sign-up, pay, forgot password).
+
+- **MySQL 8** (on AWS: RDS), with the database and user from `api/.env`.
+- **API**: `cd api && npm ci && npm run build && pm2 start dist/main.js --name ada-api`. In `api/.env` set
+  `SITE_URL` and `API_PUBLIC_URL` to `https://www.adathecoder.com`, `CORS_ORIGINS=https://www.adathecoder.com`,
+  a long `JWT_SECRET` (`openssl rand -hex 32`), and `DB_SYNC=true` for the very first start only (it makes the
+  tables), then `false`. Never `DEV_SHOW_CODES` on a real server. Uploaded files live in `UPLOAD_DIR`: back that
+  folder up with the database.
+- **Website**: `NEXT_PUBLIC_API_URL=https://www.adathecoder.com/api` in `web/.env.local` (before building), then
+  `cd web && npm ci && npm run build && pm2 start npm --name ada-web -- start`.
+- **nginx** (then `certbot --nginx` for HTTPS):
+  ```
+  server {
+    server_name www.adathecoder.com adathecoder.com;
+    client_max_body_size 600m;
+    location /api/   { proxy_pass http://127.0.0.1:3000; proxy_set_header Host $host; proxy_set_header X-Forwarded-For $remote_addr; }
+    location /media/ { proxy_pass http://127.0.0.1:3000; }
+    location /       { proxy_pass http://127.0.0.1:5000; proxy_set_header Host $host; }
+  }
+  ```
+- **Desktop app**: `DEFAULT_SERVER_URL` in `desktop_app/ada_coder/config.py` is that address; raise `APP_VERSION`,
+  build (see `desktop_app/README.md`), sign the installer, and upload it in **Admin → App versions**.
+- **Testing a server before the real one** (e.g. `https://test.adathecoder.com`): set it up the same way, then start
+  the app with `python run.py --server https://test.adathecoder.com` (remembered until `--server default`).
 
 ## Checks
 

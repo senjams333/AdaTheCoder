@@ -93,9 +93,17 @@ VPY="$HERE/.venv/bin/python"
 echo
 echo "Website:  $WEB          Admin: $WEB/admin/login (first visit: create the admin account)"
 echo "API:      $API/api"
-echo "App:      apps/$APP — lesson 1 free, 2-17 locked."
+echo "App:      Ada The Coder; theme $APP — lesson 1 free, 2-17 locked."
 echo "          Unlock: licence key $(cat "$HERE/licence-key-for-testing.txt")"
 echo "          or a parent with a licence for the theme $APP (Admin → Parents)"
 echo
-echo "Starting the app. Closing it stops the website and the API too."
-"$VPY" apps/run.py "$APP" --server "$API" --site "$WEB"
+if [ "${KIDS_ONLY:-}" = "1" ]; then
+  echo "Starting the kids app on its own. Closing it stops the website and the API too."
+  "$VPY" apps/run.py "$APP" --server "$API" --site "$WEB"
+else
+  # Ada The Coder: one address for the website and the API (the website passes /api on), like on the real server
+  "$VPY" -m pip install -q -r desktop_app/requirements.txt
+  echo "Starting Ada The Coder. Closing it stops the website and the API too."
+  echo "  (just the kids app: KIDS_ONLY=1 bash test_on_my_computer.sh)"
+  "$VPY" desktop_app/run.py --server "$WEB"
+fi

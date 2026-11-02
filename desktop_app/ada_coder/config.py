@@ -1,8 +1,9 @@
 """Settings baked into each build of the app.
 
 Before building a new version:
-  1. Set DEFAULT_SERVER_URL to where the API (api/ folder) runs, without /api and without a slash at the end,
-     for example https://api.adathecoder.com. The app calls <that>/api/v3/courses and so on.
+  1. Set DEFAULT_SERVER_URL to the website's address, without a slash at the end, for example
+     https://www.adathecoder.com. The same address must answer the API (<that>/api/v3/courses and so on;
+     nginx passes /api and /media to the API) and the website pages the app opens (/register, /pay ...).
   2. Raise APP_VERSION (for example 1.0.0 -> 1.1.0).
   3. Upload the new installer in the website admin under "App versions"
      with exactly the same version number.
