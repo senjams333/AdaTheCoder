@@ -702,7 +702,8 @@ class MainWindow(QMainWindow):
         self.cards_layout.setSpacing(max(int(90 * scale), 16))      # room between the three characters
         side = self.sidebar.width() if self.sidebar.isVisible() else 0
         per_card = (w - side - 160) / 3.0
-        card_scale = max(0.3, min(scale, per_card / 380.0, (h - 260) * 0.5 / 400.0))  # theme cards sit below
+        # the three friends are big; the theme cards (about 330 px) sit below them
+        card_scale = max(0.3, min(scale * 1.15, per_card / 330.0, (h - 470) / 360.0))
         for card in self.cards:
             card.set_scale(card_scale)
         # three theme cards in a row (the grid shares the width); more rows scroll up and down
