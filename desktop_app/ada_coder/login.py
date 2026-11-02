@@ -9,10 +9,10 @@ Without internet, a log-in works with the themes remembered from the last time.
 """
 import threading
 
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, QUrl, pyqtSignal
 from PyQt5.QtWidgets import (QCheckBox, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QLineEdit,
                              QProgressBar, QVBoxLayout, QWidget)
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QDesktopServices
 
 from . import sync
 from .config import SERVER_URL
@@ -138,7 +138,8 @@ class LoginOverlay(QFrame):
         self.switch_btn = pill("No account? Try for free ✨", "LinkButton", size=11)
         self.switch_btn.clicked.connect(self.toggle_mode)
         self.signup_btn = pill("Grown-up? Create an account 📝", "LinkButton", size=11)
-        self.signup_btn.clicked.connect(lambda: self.set_mode("login" if self.mode == "signup" else "signup"))
+        # opens the website's registration page in the browser
+        self.signup_btn.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(SERVER_URL.rstrip("/") + "/register")))
 
         lay.addWidget(logo)
         lay.addWidget(self.title)
