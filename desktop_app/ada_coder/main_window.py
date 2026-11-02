@@ -200,7 +200,7 @@ class MainWindow(QMainWindow):
         self.theme_scroll.setWidgetResizable(True)
         self.theme_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.theme_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.theme_scroll.setFixedHeight(290)
+        self.theme_scroll.setFixedHeight(322)
         self.theme_cards = []
         self._fill_theme_cards()
         home_lay.addWidget(title)
