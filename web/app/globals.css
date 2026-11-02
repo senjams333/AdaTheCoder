@@ -748,3 +748,20 @@ a.course-pic img { transition: transform .2s; }
 .copy-lessons label { font-weight: 800; }
 .copy-lessons select { padding: 8px 12px; border-radius: 12px; border: 2px solid var(--line); font: inherit; }
 .copy-lessons .help { flex-basis: 100%; }
+
+/* ---------- /pay: unlock a theme with Razorpay or PayPal ---------- */
+.pay-card { text-align: center; }
+.pay-pics { display: flex; justify-content: center; gap: 4px; margin: 6px 0 4px; }
+.pay-pics img { width: 92px; height: 92px; object-fit: contain; }
+.pay-features { text-align: left; margin: 8px auto 14px; max-width: 380px; }
+.pay-methods { display: grid; gap: 12px; margin: 16px 0 8px; }
+.pay-methods .btn { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; }
+.pay-methods .btn small { font-weight: 500; font-size: .82rem; opacity: .85; }
+.pay-razorpay { background: #0b72e7; border-color: #0b72e7; color: #fff; }
+.pay-paypal { background: #ffc439; border-color: #f2b51c; color: #111; }
+.pay-safe { font-size: .85rem; color: var(--ink-soft); margin-top: 6px; }
+.pay-licence { display: flex; flex-direction: column; gap: 4px; align-items: center; margin: 14px auto; padding: 12px 18px;
+  border: 2px dashed #22c997; border-radius: 16px; background: #ecfdf5; max-width: 340px; }
+.pay-licence span { font-size: .85rem; color: var(--ink-soft); }
+.pay-licence b { font: 700 1.25rem ui-monospace, Menlo, Consolas, monospace; letter-spacing: .04em; }
+.acct-pay-note { display: block; text-align: center; font-size: .8rem; color: var(--ink-soft); margin-top: 6px; }

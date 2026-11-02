@@ -34,8 +34,13 @@ export class Course {
   @Column({ length: 30, default: 'friends' })
   pack!: string;
 
+  /** Shown on cards, and what PayPal charges (in PAYPAL_CURRENCY, normally US dollars), e.g. "$4.99" */
   @Column({ length: 30, default: '' })
   price!: string;
+
+  /** What Razorpay charges in India, in rupees, e.g. "399" (empty: Razorpay isn't offered for this theme) */
+  @Column({ name: 'price_inr', length: 30, default: '' })
+  priceInr!: string;
 
   @Column({ default: false })
   premium!: boolean;

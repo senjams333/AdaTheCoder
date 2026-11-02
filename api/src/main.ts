@@ -7,7 +7,8 @@ import { uploadDir } from './common/util';
 import { validationErrors } from './common/validation';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // rawBody: Razorpay's webhook is checked against the exact bytes it sent
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
   app.setGlobalPrefix('api');
   const origins = (process.env.CORS_ORIGINS || 'http://127.0.0.1:5000,http://localhost:5000').split(',').map((o) => o.trim());
   app.enableCors({ origin: origins.includes('*') ? true : origins });

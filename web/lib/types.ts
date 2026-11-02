@@ -41,6 +41,8 @@ export interface Theme {
   pack: string;
   packLabel: string;
   price: string;
+  /** Razorpay's price in rupees ('' = not offered) */
+  priceInr: string;
   premium: boolean;
   freeLessons: number;
   imageFile: string;

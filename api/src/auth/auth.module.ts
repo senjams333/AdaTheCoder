@@ -5,7 +5,7 @@ import { randomBytes } from 'crypto';
 import { MailModule } from '../mail/mail.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AdminGuard, AuthGuard } from './guards';
+import { AdminGuard, AppTokenGuard, AuthGuard, PayGuard } from './guards';
 
 @Global()
 @Module({
@@ -25,7 +25,7 @@ import { AdminGuard, AuthGuard } from './guards';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard, AdminGuard],
-  exports: [AuthService, AuthGuard, AdminGuard, JwtModule],
+  providers: [AuthService, AuthGuard, AdminGuard, AppTokenGuard, PayGuard],
+  exports: [AuthService, AuthGuard, AdminGuard, AppTokenGuard, PayGuard, JwtModule],
 })
 export class AuthModule {}

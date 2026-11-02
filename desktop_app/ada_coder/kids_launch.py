@@ -110,7 +110,10 @@ def launch(parent, c, licences, user, on_closed=None):
     env = QProcessEnvironment.systemEnvironment()
     env.insert("KIDS_APP_DIR", folder)
     env.insert("KIDS_APP_ENGINE", engine)
-    env.insert("KIDS_APP_LOGIN", json.dumps({k: user.get(k, "") for k in ("full_name", "email", "child_name")}))
+    # app_token + server: the theme's Upgrade card pays with Razorpay or PayPal on the website, already logged in
+    login = {k: user.get(k, "") for k in ("full_name", "email", "child_name", "app_token")}
+    login["server"] = SERVER_URL
+    env.insert("KIDS_APP_LOGIN", json.dumps(login))
     if FROZEN:
         env.insert("KIDS_APP_HOST_RUNS_CODE", "1")
         program, args = sys.executable, ["--kids-app", folder]

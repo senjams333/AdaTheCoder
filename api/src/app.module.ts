@@ -13,6 +13,8 @@ import { SettingsService } from './common/settings.service';
 import { AppApiController } from './compat/app-api.controller';
 import { ENTITIES } from './entities';
 import { HealthController } from './health.controller';
+import { PaymentsController } from './payments/payments.controller';
+import { PaymentsService } from './payments/payments.service';
 import { SiteController } from './site/site.controller';
 
 /** MySQL (database admin_db) normally. Tests set DB_TYPE=sqljs to run with an in-memory database. */
@@ -49,6 +51,8 @@ class SettingsModule {}
   controllers: [
     HealthController, SiteController, AccountController, AppApiController,
     AdminController, AdminThemesController, AdminLessonsController, AdminReleasesController, AdminParentsController,
+    PaymentsController,
   ],
+  providers: [PaymentsService],
 })
 export class AppModule {}

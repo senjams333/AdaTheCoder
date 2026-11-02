@@ -299,6 +299,7 @@ class LoginOverlay(QFrame):
             # offline: let the child in, with the themes remembered from the last log-in
             if not same_person:
                 self.settings["licences"] = []
+                self.settings["app_token"] = ""
             user = {"full_name": saved.get("full_name") if same_person else email.split("@")[0].title(), "email": email,
                     "child_name": saved.get("child_name", "") if same_person else ""}
             return self._welcome(user, note="(offline: we'll check your themes next time) ")
@@ -306,6 +307,7 @@ class LoginOverlay(QFrame):
             self._busy(False, "")
             return self._error(answer.get("error") or "That email and password don't match.")
         self.settings["licences"] = list(answer.get("licences") or [])
+        self.settings["app_token"] = answer.get("app_token") or ""
         self._welcome({"full_name": answer.get("name") or email.split("@")[0].title(), "email": answer.get("email") or email,
                        "child_name": answer.get("child_name") or ""})
 

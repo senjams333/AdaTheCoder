@@ -47,7 +47,7 @@ export class CatalogService {
     return {
       id: c.id, slug: c.slug, name: c.name, tagline: c.tagline, description: c.description,
       features: c.features, featureList: (c.features || '').split('\n').map((f) => f.trim()).filter(Boolean),
-      pack: c.pack, packLabel: label, price: c.price, premium: c.premium, freeLessons: c.freeLessons,
+      pack: c.pack, packLabel: label, price: c.price, priceInr: c.priceInr, premium: c.premium, freeLessons: c.freeLessons,
       imageFile: c.imageFile, imageUrl: c.imageFile ? mediaUrl('courses', c.imageFile) : null,
       characters: chars, images, position: c.position, published: c.published, updatedAt: c.updatedAt,
     };

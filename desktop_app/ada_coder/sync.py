@@ -190,6 +190,37 @@ def register(details):
         return None
 
 
+def fetch_licences(app_token):
+    """The family's paid themes, asked again with the app's token: {"licences": [...]} or None."""
+    if not app_token:
+        return None
+    req = urllib.request.Request(SERVER_URL.rstrip("/") + "/api/v3/licences",
+                                 headers={"User-Agent": USER_AGENT, "Authorization": "Bearer " + app_token})
+    try:
+        with _open(req, 10) as resp:
+            answer = json.loads(resp.read().decode("utf-8"))
+        return answer if answer.get("ok") else None
+    except NETWORK_ERRORS + (ValueError,):
+        return None
+
+
+def pay_link(app_token, theme_id, method=""):
+    """The website page that pays for a theme with Razorpay or PayPal, already logged in (a 15-minute link).
+    Without a log-in from this app it's the plain page, where the parent logs in first."""
+    site = SERVER_URL.rstrip("/")
+    plain = f"{site}/pay?theme={urllib.parse.quote(theme_id)}" + (f"&method={method}" if method else "")
+    if not app_token:
+        return plain
+    body = json.dumps({"theme": theme_id, "method": method}).encode("utf-8")
+    req = urllib.request.Request(site + "/api/v3/pay-link", data=body, method="POST", headers={
+        "User-Agent": USER_AGENT, "Content-Type": "application/json", "Authorization": "Bearer " + app_token})
+    try:
+        with _open(req, 10) as resp:
+            return json.loads(resp.read().decode("utf-8")).get("url") or plain
+    except NETWORK_ERRORS + (ValueError,):
+        return plain
+
+
 def forgot_password(email):
     """Asks the website to email a password reset link (/api/auth/forgot-password).
     Returns True when the website accepted it, False when it said no, or None when it can't be reached.
@@ -338,6 +369,7 @@ def check_now(window, quiet=False):
             window.reload_courses()   # (a manual check always refreshes what's on screen)
         elif result.get("home"):
             window.apply_theme()      # the admin changed the home screen's greeting or characters
+        window.refresh_licences()     # a theme paid for on the website shows Purchased
         if quiet:
             return
         if not result.get("online"):

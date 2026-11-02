@@ -154,6 +154,30 @@ describe('Ada The Coder API', () => {
     expect(account.body.themes.find((t: { slug: string }) => t.slug === 'space').licence).toBe('ADA-SPACE-1');
   });
 
+  it('the app token: licences again, pay links; the pay page; Razorpay answers are checked', async () => {
+    const login = await request(http).post('/api/v3/login').send({ email: 'priya@example.com', password: 'goodpass1' }).expect(200);
+    const appToken = login.body.app_token;
+    expect(typeof appToken).toBe('string');
+    // the app token never opens the website account, and a website log-in isn't an app token
+    await request(http).get('/api/account').set('Authorization', `Bearer ${appToken}`).expect(401);
+    await request(http).get('/api/v3/licences').set('Authorization', `Bearer ${parent}`).expect(401);
+    const again = await request(http).get('/api/v3/licences').set('Authorization', `Bearer ${appToken}`).expect(200);
+    expect(again.body).toMatchObject({ ok: true, licences: ['space'] });
+    const link = await request(http).post('/api/v3/pay-link').set('Authorization', `Bearer ${appToken}`)
+      .send({ theme: 'space', method: 'paypal' }).expect(200);
+    expect(link.body.url).toMatch(/\/pay\?theme=space&method=paypal&t=/);
+    const t = decodeURIComponent(link.body.url.split('&t=')[1]);
+    // the pay page with that link: Priya already owns Space; no payment keys in tests, so no methods
+    const page = await request(http).get('/api/pay/space').set('Authorization', `Bearer ${t}`).expect(200);
+    expect(page.body).toMatchObject({ licence: 'ADA-SPACE-1', methods: { razorpay: null, paypal: null } });
+    await request(http).get('/api/pay/space').expect(401);
+    await request(http).get('/api/account').set('Authorization', `Bearer ${t}`).expect(401);
+    await request(http).post('/api/pay/space/razorpay').set('Authorization', `Bearer ${t}`).expect(400);
+    await request(http).post('/api/pay/razorpay/verify')
+      .send({ razorpay_order_id: 'order_x', razorpay_payment_id: 'pay_x', razorpay_signature: 'forged' }).expect(400);
+    await request(http).post('/api/pay/paypal/capture').send({ order_id: 'nope' }).expect(404);
+  });
+
   it('the app can register too', async () => {
     const r = await request(http).post('/api/v3/register').send({
       name: 'Lina', email: 'lina@example.com', password: 'goodpass1', city: 'Goa', country: 'India', consent: true,

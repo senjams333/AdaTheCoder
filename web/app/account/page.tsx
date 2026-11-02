@@ -160,7 +160,8 @@ function AccountInner() {
                           ) : (
                             <>
                               <div className="acct-price">{c.price} <span>one-time</span></div>
-                              <a className="acct-get acct-btn-block" href={`mailto:${contact}?subject=${encodeURIComponent(`Licence for the ${c.name} theme`)}`}>Get Licence</a>
+                              <Link className="acct-get acct-btn-block" href={`/pay?theme=${encodeURIComponent(c.slug)}`}>Get Licence</Link>
+                              <span className="acct-pay-note">Razorpay (UPI, cards) or PayPal</span>
                             </>
                           )}
                         </div>

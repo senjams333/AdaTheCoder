@@ -2,10 +2,10 @@
 import os
 
 from PyQt5.QtCore import Qt, QTimer, QUrl
-from PyQt5.QtGui import QColor, QIcon, QKeySequence
+from PyQt5.QtGui import QColor, QDesktopServices, QIcon, QKeySequence
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEngineView
-from PyQt5.QtWidgets import (QAction, QActionGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QMainWindow, QMenu, QProgressBar,
+from PyQt5.QtWidgets import (QAction, QActionGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QMainWindow, QMenu, QMessageBox, QProgressBar,
                              QScrollArea, QShortcut, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from . import lessons as course
@@ -389,6 +389,7 @@ class MainWindow(QMainWindow):
         self.bridge.stop()
         self.video.stop()
         self.settings["remember_me"] = False
+        self.settings["app_token"] = ""
         self.user = {}
         self.show_home()
         self._set_signed_in(False)
@@ -633,7 +634,7 @@ class MainWindow(QMainWindow):
         self.choose_course(course_id)
         if getattr(self, "kids_proc", None) and self.kids_proc.state() != 0:
             return                                       # already open
-        user = dict(self.user or self.settings["user"] or {})
+        user = dict(self.user or self.settings["user"] or {}, app_token=self.settings["app_token"])
         self.kids_proc = kids_launch.launch(self, self.course, self.settings["licences"], user, self._kids_closed)
         if self.kids_proc is None:
             if not self.sidebar.isVisible():
@@ -652,6 +653,32 @@ class MainWindow(QMainWindow):
             self.logout()
         else:
             self.show_home()
+            self.refresh_licences()      # paid for the theme from its Upgrade card? its card shows Purchased
+
+    def refresh_licences(self, quiet=True):
+        """Asks the website for the family's licences again (after paying with Razorpay or PayPal)."""
+        import threading
+        from PyQt5.QtCore import QTimer
+        answer = {}
+        worker = threading.Thread(target=lambda: answer.update(sync.fetch_licences(self.settings["app_token"]) or {}),
+                                  daemon=True)
+        worker.start()
+        timer = QTimer(self)
+
+        def done():
+            if worker.is_alive():
+                return
+            timer.stop()
+            new = answer.get("licences")
+            if new is not None and sorted(new) != sorted(self.settings["licences"]):
+                gained = [c["name"] for c in self.courses if c["id"] in set(new) - set(self.settings["licences"])]
+                self.settings["licences"] = list(new)
+                self._licences_changed()
+                if gained and not quiet:
+                    QMessageBox.information(self, APP_NAME, "Unlocked! 🎉 " + ", ".join(gained) + " now has every lesson.")
+        timer.timeout.connect(done)
+        timer.start(300)
+        self._licence_timer = timer
 
     def ask_upgrade(self):
         """The Upgrade pop-up. Upgrade opens the website's account page on this theme."""
@@ -660,7 +687,27 @@ class MainWindow(QMainWindow):
         free = course.free_count(self.course) or 0
         hero = course.characters(self.course)["hero"]
         picture = hero[-1][1] if hero and hero[-1][1] else "ada_logo.png"
-        show_upgrade(self, self.course, free, len(self.lessons), picture)
+        method = show_upgrade(self, self.course, free, len(self.lessons), picture)
+        if method in ("razorpay", "paypal"):
+            QDesktopServices.openUrl(QUrl(sync.pay_link(self.settings["app_token"], self.course["id"], method)))
+            self._watch_payment()
+
+    def _watch_payment(self):
+        """After Razorpay or PayPal: checks the licences every 15 seconds for 20 minutes."""
+        from PyQt5.QtCore import QTimer
+        if not hasattr(self, "_pay_watch"):
+            self._pay_watch = QTimer(self)
+            self._pay_watch.setInterval(15000)
+            self._pay_watch.timeout.connect(self._pay_tick)
+        self._pay_left = 80
+        self._pay_watch.start()
+
+    def _pay_tick(self):
+        self._pay_left -= 1
+        if self._pay_left <= 0 or course.owns(self.course, self.settings["licences"]):
+            self._pay_watch.stop()
+            return
+        self.refresh_licences(quiet=False)
 
     def _licences_changed(self):
         for menu in getattr(self, "course_menus", []):

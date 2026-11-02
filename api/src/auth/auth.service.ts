@@ -243,6 +243,16 @@ export class AuthService {
     return this.jwt.sign({ sub: user.id, email: user.email, role: user.role });
   }
 
+  /** The desktop app's own token: it only reads the family's licences and opens pay links. */
+  appToken(user: User): string {
+    return this.jwt.sign({ sub: user.id, purpose: 'app' }, { expiresIn: '365d' });
+  }
+
+  /** A 15-minute link for paying for one theme on the website, opened from the app's Upgrade card. */
+  payToken(user: User): string {
+    return this.jwt.sign({ sub: user.id, purpose: 'pay' }, { expiresIn: '15m' });
+  }
+
   private tooMany(key: string, max = MAX_FAILS): boolean {
     const now = Date.now();
     const recent = (this.fails.get(key) || []).filter((t) => now - t < WINDOW_MS);

@@ -104,7 +104,7 @@ export class AdminThemesController {
       slug: trimmed(body.slug, 60), name: trimmed(body.name, 120), tagline: trimmed(body.tagline),
       description: String(body.description || '').replace(/\r\n/g, '\n').trim(),
       features: String(body.features || '').replace(/\r\n/g, '\n').trim(),
-      pack: trimmed(body.pack, 30), price: trimmed(body.price, 30), premium: truthy(body.premium),
+      pack: trimmed(body.pack, 30), price: trimmed(body.price, 30), priceInr: trimmed(body.priceInr, 30).replace(/^₹\s*/, ''), premium: truthy(body.premium),
       position: trimmed(body.position || '0'), freeLessons: trimmed(body.freeLessons ?? '3') || '0', published: truthy(body.published),
     };
     const errors: string[] = [];
@@ -116,6 +116,7 @@ export class AdminThemesController {
     }
     if (!PACKS[data.pack]) errors.push('Choose the characters for this theme.');
     if (data.premium && !data.price) errors.push('Paid themes need a price, like $3.69.');
+    if (data.priceInr && !/^\d+(\.\d{1,2})?$/.test(data.priceInr)) errors.push('The price in rupees must be a number, like 399.');
     if (!/^-?\d+$/.test(data.position)) errors.push('Order must be a whole number.');
     if (!/^\d+$/.test(data.freeLessons)) errors.push('Free lessons must be a whole number, like 3.');
     if (image && !IMAGE_EXTENSIONS.includes(ext(image.originalname))) errors.push('Card pictures must be .png, .jpg or .webp files.');

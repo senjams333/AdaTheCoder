@@ -2581,6 +2581,22 @@ class MainWindow(QMainWindow):
         text.setMinimumWidth(460)
         row.addWidget(text, stretch=1)
         lay.addLayout(row)
+        if HOST_LOGIN and HOST_LOGIN.get("app_token"):
+            # opened from Ada The Coder after logging in: pay straight away with Razorpay or PayPal
+            choice = {}
+            pay_row = QHBoxLayout()
+            pay_row.setSpacing(14)
+            pay_row.addStretch()
+            for method, label in (("razorpay", "💳 Razorpay\nUPI · cards (India)"), ("paypal", "🅿️ PayPal\nPayPal · cards")):
+                b = QPushButton(label)
+                b.setObjectName("up")
+                b.setCursor(Qt.PointingHandCursor)
+                b.clicked.connect(lambda _=False, m=method: (choice.update(method=m), box.accept()))
+                pay_row.addWidget(b)
+            lay.addLayout(pay_row)
+            if box.exec_() == QDialog.Accepted:
+                self.open_upgrade(choice.get("method", ""))
+            return
         up_btn = QPushButton("⭐ Upgrade")
         up_btn.setObjectName("up")
         up_btn.setCursor(Qt.PointingHandCursor)
@@ -2635,8 +2651,11 @@ class MainWindow(QMainWindow):
         lay.addWidget(close_btn, alignment=Qt.AlignCenter)
         box.exec_()
 
-    def open_upgrade(self):
-        """Opens the website: the parent logs in, buys the app, and the lessons open here by themselves."""
+    def open_upgrade(self, method=""):
+        """Opens the website: the parent logs in, buys the app, and the lessons open here by themselves.
+        Opened from Ada The Coder: the website's pay page, already logged in, starting Razorpay or PayPal."""
+        if HOST_LOGIN and HOST_LOGIN.get("app_token"):
+            return self._host_upgrade(method)
         url = CONFIG["locks"].get("upgrade_url")
         if not url:
             return
@@ -2657,6 +2676,56 @@ class MainWindow(QMainWindow):
     def _stop_purchase_watch(self):
         if hasattr(self, "purchase_timer"):
             self.purchase_timer.stop()
+
+    # ---- opened from Ada The Coder: pay with the host's log-in (its app token), then watch for the licence
+    def _host_call(self, path, body=None):
+        url = (HOST_LOGIN.get("server") or "").rstrip("/") + "/api" + path
+        data = json.dumps(body).encode("utf-8") if body is not None else None
+        req = urllib.request.Request(url, data=data, method="POST" if data is not None else "GET", headers={
+            "Content-Type": "application/json", "Authorization": "Bearer " + HOST_LOGIN.get("app_token", "")})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    def _host_upgrade(self, method):
+        theme = self.locks.theme_id
+        url = (HOST_LOGIN.get("server") or "").rstrip("/") + "/pay?theme=" + urllib.parse.quote(theme) + (
+            "&method=" + method if method else "")
+        try:
+            url = self._host_call("/v3/pay-link", {"theme": theme, "method": method}).get("url") or url
+        except Exception:
+            pass          # the website asks the parent to log in instead
+        webbrowser.open(url)
+        if not hasattr(self, "host_pay_timer"):
+            self.host_pay_timer = QTimer(self)
+            self.host_pay_timer.setInterval(10000)
+            self.host_pay_timer.timeout.connect(self._host_recheck)
+        self._host_checks_left = 120          # 20 minutes
+        self.host_pay_timer.start()
+
+    def _host_recheck(self):
+        self._host_checks_left -= 1
+        if self._host_checks_left <= 0 or self.locks.has_full_access:
+            self.host_pay_timer.stop()
+            return
+        # the website is asked in the background; its answer is looked at on the next tick (the window never waits)
+        answer, self._host_answer = getattr(self, "_host_answer", None), None
+        if not getattr(self, "_host_asking", False):
+            self._host_asking = True
+
+            def ask():
+                self._host_answer = self._safe_host_licences()
+                self._host_asking = False
+            threading.Thread(target=ask, daemon=True).start()
+        if answer and answer.get("ok") and self.locks.set_account_licences(answer.get("licences") or []):
+            self.host_pay_timer.stop()
+            self.refresh_locks()
+            self.sunset_message("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀")
+
+    def _safe_host_licences(self):
+        try:
+            return self._host_call("/v3/licences")
+        except Exception:
+            return {}
 
     def _recheck_purchase(self):
         self._purchase_checks_left -= 1

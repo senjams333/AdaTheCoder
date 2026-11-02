@@ -25,7 +25,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
   const nextPosition = Math.max(0, ...(themes || []).map((t) => t.position)) + 1;
   const [form, setForm] = useState({
     name: theme?.name || '', slug: theme?.slug || '', tagline: theme?.tagline || '', description: theme?.description || '',
-    features: theme?.features || '', pack: theme?.pack || 'friends', price: theme?.price || '', premium: theme?.premium ?? false,
+    features: theme?.features || '', pack: theme?.pack || 'friends', price: theme?.price || '', priceInr: theme?.priceInr || '', premium: theme?.premium ?? false,
     freeLessons: String(theme?.freeLessons ?? 3), position: String(theme?.position ?? nextPosition),
     published: theme?.published ?? true, removeImage: false, copyFrom: '',
   });
@@ -43,7 +43,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
   async function submit(e: FormEvent) {
     e.preventDefault();
     const fd = new FormData();
-    for (const k of ['name', 'slug', 'tagline', 'description', 'features', 'pack', 'price', 'freeLessons', 'position'] as const) fd.append(k, String(form[k]));
+    for (const k of ['name', 'slug', 'tagline', 'description', 'features', 'pack', 'price', 'priceInr', 'freeLessons', 'position'] as const) fd.append(k, String(form[k]));
     fd.append('premium', String(form.premium));
     fd.append('published', String(form.published));
     fd.append('removeImage', String(form.removeImage));
@@ -136,7 +136,8 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
           <h2>Price and picture</h2>
           <div className="field"><label className="check"><input type="checkbox" checked={form.premium} onChange={set('premium')} /><span>Paid theme: children try the first lessons free, then parents buy a licence on their account page</span></label></div>
           <div className="row-3e">
-            <div className="field"><label htmlFor="price">Price</label><input id="price" type="text" value={form.price} onChange={set('price')} placeholder="$3.69" /></div>
+            <div className="field"><label htmlFor="price">Price</label><input id="price" type="text" value={form.price} onChange={set('price')} placeholder="$3.69" /><span className="help">Shown on the cards, and what PayPal charges.</span></div>
+            <div className="field"><label htmlFor="price_inr">Price in rupees <span className="muted">(Razorpay, India)</span></label><input id="price_inr" type="text" inputMode="decimal" value={form.priceInr} onChange={set('priceInr')} placeholder="299" /><span className="help">Empty: Razorpay isn&apos;t offered for this theme.</span></div>
             <div className="field"><label htmlFor="free_lessons">Free lessons to try</label><input id="free_lessons" type="number" min={0} value={form.freeLessons} onChange={set('freeLessons')} /><span className="help">The rest show 🔒 and an Upgrade button.</span></div>
             <div className="field"><label htmlFor="position">Order</label><input id="position" type="number" value={form.position} onChange={set('position')} /><span className="help">Lowest number comes first in the app.</span></div>
           </div>

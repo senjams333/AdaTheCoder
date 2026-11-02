@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpException, Ip, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, Ip, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -6,11 +6,12 @@ import type { Response } from 'express';
 import { Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { RegisterDto } from '../auth/dto/register.dto';
+import { AppTokenGuard, CurrentUser } from '../auth/guards';
 import { CatalogService } from '../catalog/catalog.service';
 import { PLATFORMS } from '../common/constants';
 import { SettingsService } from '../common/settings.service';
 import { revisionOf, siteUrl, versionNewer } from '../common/util';
-import { Release } from '../entities';
+import { Release, User } from '../entities';
 
 /** The addresses the desktop app calls, with exactly the answers it expects
  *  (the same as the old Python website, so installed apps keep working). */
@@ -52,10 +53,27 @@ export class AppApiController {
       const { user } = await this.auth.login(
         { email: String(body.email || '').trim().toLowerCase(), password: String(body.password || '') }, ip);
       return res.json({ ok: true, name: user.name, email: user.email, child_name: user.childName || '',
-        licences: await this.catalog.licencedSlugs(user.id) });
+        licences: await this.catalog.licencedSlugs(user.id), app_token: this.auth.appToken(user) });
     } catch (err) {
       return res.status(401).json({ ok: false, error: this.text(err) });
     }
+  }
+
+  /** The family's licences again (after paying on the website, the app unlocks the theme by itself). */
+  @Get('v3/licences')
+  @UseGuards(AppTokenGuard)
+  async licences(@CurrentUser() user: User) {
+    return { ok: true, licences: await this.catalog.licencedSlugs(user.id), child_name: user.childName || '' };
+  }
+
+  /** The Upgrade card's "Pay": a 15-minute page on the website for this theme, already logged in. */
+  @Post('v3/pay-link')
+  @HttpCode(200)
+  @UseGuards(AppTokenGuard)
+  async payLink(@CurrentUser() user: User, @Body() body: { theme?: string; method?: string }) {
+    const theme = String(body.theme || '').trim();
+    const method = ['razorpay', 'paypal'].includes(String(body.method)) ? `&method=${body.method}` : '';
+    return { ok: true, url: `${siteUrl()}/pay?theme=${encodeURIComponent(theme)}${method}&t=${encodeURIComponent(this.auth.payToken(user))}` };
   }
 
   /** The app's sign-up: 201 { ok, name, email, licences: [] } · 400/409/429 { ok: false, errors } */
