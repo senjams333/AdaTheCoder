@@ -211,7 +211,8 @@ class LoginOverlay(QFrame):
         self.name_box.findChild(QLabel).setText("Grown-up's name 👤" if signup else "Your name 👤")
         self.password_input.setPlaceholderText("At least 8 characters" if signup else "Password")
         self.go_btn.setText({"register": "🚀  Start for free", "signup": "📝  Create account"}.get(mode, "🚀  Let's code!"))
-        self.switch_btn.setText("No account? Try for free ✨" if mode == "login" else "Have an account? Log in 🔑")
+        self.switch_btn.setText("Have an account? Log in 🔑")
+        self.switch_btn.setVisible(mode != "login")      # no "Try for free" on the log-in card
         self.signup_btn.setVisible(mode == "login")
         self._set_status("", "#1e1b4b")
         (self.name_input if guest or signup else self.email_input).setFocus()
