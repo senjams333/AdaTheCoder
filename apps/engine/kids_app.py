@@ -1919,7 +1919,12 @@ class MainWindow(QMainWindow):
                 color: white;
             }
         """)
-        self.logout_btn.clicked.connect(self.logout)
+        if HOST_LOGIN:                 # opened from Ada The Coder: top-left button goes back there
+            self.logout_btn.setText("<< Back")
+            self.logout_btn.setToolTip("Back to Ada The Coder")
+            self.logout_btn.clicked.connect(self.close)
+        else:
+            self.logout_btn.clicked.connect(self.logout)
         self.logout_btn.hide()
 
         self.apply_responsive_layout()
@@ -2347,9 +2352,8 @@ class MainWindow(QMainWindow):
         self.sidebar_toggle.setText(">>")
         self.sidebar_toggle.show()
         self._position_sidebar_toggle()
-        if not HOST_LOGIN:             # opened from Ada The Coder: no Log out (Home Screen goes back there)
-            self.logout_btn.show()
-            self.logout_btn.raise_()
+        self.logout_btn.show()         # "<< Back" when opened from Ada The Coder
+        self.logout_btn.raise_()
 
         QTimer.singleShot(1200, self.login_overlay.hide)
 
