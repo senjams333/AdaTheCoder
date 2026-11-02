@@ -628,13 +628,16 @@ class MainWindow(QMainWindow):
             return
         self.showMinimized()                             # the theme opens in its own window
 
-    def _kids_closed(self):
-        """The theme's window was closed: come back to the home screen."""
+    def _kids_closed(self, logged_out=False):
+        """The theme's window was closed: come back to the home screen (or the log-in, after Log out there)."""
         self.kids_proc = None
         self.showMaximized()
         self.raise_()
         self.activateWindow()
-        self.show_home()
+        if logged_out:
+            self.logout()
+        else:
+            self.show_home()
 
     def ask_upgrade(self):
         """The Upgrade pop-up. Upgrade opens the website's account page on this theme."""

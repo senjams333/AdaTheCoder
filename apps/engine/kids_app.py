@@ -1591,6 +1591,10 @@ class MainWindow(QMainWindow):
         self.account_menu.addAction(self.profile_action)
         self.account_menu.addSeparator()
         self.account_menu.addAction(self.license_action)
+        self.account_menu.addSeparator()
+        self.logout_action = QAction("🚪 Log out", self)
+        self.logout_action.triggered.connect(self.menu_logout)
+        self.account_menu.addAction(self.logout_action)
         self.avatar_btn.setMenu(self.account_menu)
 
         top_bar.addWidget(logo)
@@ -1925,6 +1929,14 @@ class MainWindow(QMainWindow):
         self.web_page_ready = True
         if self.center_stack.currentIndex() == 1:
             self.push_active_lesson_to_ui()
+
+    def menu_logout(self):
+        """Log out from the avatar menu. Opened from Ada The Coder: it logs out there too (exit code 3)."""
+        if HOST_LOGIN:
+            close_opencv_windows()
+            QApplication.exit(3)
+            return
+        self.logout()
 
     def logout(self):
         close_opencv_windows()

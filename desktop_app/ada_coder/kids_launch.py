@@ -120,7 +120,8 @@ def launch(parent, c, licences, user, on_closed=None):
     proc.setProcessEnvironment(env)
     proc.setProcessChannelMode(QProcess.ForwardedChannels)
     if on_closed:
-        proc.finished.connect(lambda *_: on_closed())
-        proc.errorOccurred.connect(lambda *_: on_closed())
+        # exit code 3: the child chose Log out in the theme's menu
+        proc.finished.connect(lambda code, *_: on_closed(code == 3))
+        proc.errorOccurred.connect(lambda *_: on_closed(False))
     proc.start(program, args)
     return proc
