@@ -20,12 +20,12 @@ if ! command -v node >/dev/null 2>&1 || [ "$(node -p 'process.versions.node.spli
 fi
 
 # ---- 1. system pieces for the app window and lesson videos (Ubuntu / Debian)
-if command -v apt-get >/dev/null 2>&1; then
-  ALSA=libasound2t64; apt-cache show libasound2t64 >/dev/null 2>&1 || ALSA=libasound2
+# SKIP_SYSTEM=1 bash test_on_my_computer.sh   skips this part (if you install them yourself)
+if command -v apt-get >/dev/null 2>&1 && [ "${SKIP_SYSTEM:-}" != "1" ]; then
   NEED=(python3-venv python3-pip curl
         libxcb-xinerama0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1
         libxcb-render-util0 libxcb-shape0 libxcb-randr0 libgl1 libegl1 libnss3 libxcomposite1 libxdamage1
-        libxrandr2 libxtst6 libxkbfile1 "$ALSA"
+        libxrandr2 libxtst6 libxkbfile1
         libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good
         gstreamer1.0-plugins-bad gstreamer1.0-libav)
   MISSING=()
@@ -33,10 +33,17 @@ if command -v apt-get >/dev/null 2>&1; then
     dpkg -s "$p" >/dev/null 2>&1 && continue
     apt-cache show "$p" >/dev/null 2>&1 && MISSING+=("$p")   # skip names this Ubuntu doesn't have
   done
+  # sound: the app needs one of these; most computers already have it, so it's never forced
+  if ! dpkg -s libasound2t64 >/dev/null 2>&1 && ! dpkg -s libasound2 >/dev/null 2>&1; then
+    echo "Note: no ALSA sound library (libasound2 / libasound2t64) found; lesson videos may play without sound."
+  fi
   if [ ${#MISSING[@]} -gt 0 ]; then
     echo "Installing system pieces (asks for your password): ${MISSING[*]}"
-    sudo apt-get update -qq
-    sudo apt-get install -y "${MISSING[@]}"
+    sudo apt-get update -qq || true
+    # one at a time, so one package this computer can't install doesn't stop the rest
+    for p in "${MISSING[@]}"; do
+      sudo apt-get install -y "$p" >/dev/null 2>&1 || echo "  (skipped $p: it couldn't be installed here)"
+    done
   fi
 fi
 
