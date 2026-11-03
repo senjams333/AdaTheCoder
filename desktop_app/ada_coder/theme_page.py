@@ -20,6 +20,8 @@ _TEMPLATE_NODES = None
 
 # slim scroll bars with round ends (Qt's web view draws square ones with arrows otherwise)
 SCROLLBARS = '::-webkit-scrollbar { width: 12px; height: 12px; } ::-webkit-scrollbar:horizontal { height: 0; } ::-webkit-scrollbar-button { display: none; width: 0; height: 0; } ::-webkit-scrollbar-track { background: rgba(255, 255, 255, .45); border-radius: 8px; } ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 8px; border: 2px solid rgba(255, 255, 255, .7); } ::-webkit-scrollbar-thumb:hover { background: #0284c7; } ::-webkit-scrollbar-corner { background: transparent; }'
+# Qt's web view draws a square yellow box round a button after it's clicked; the round buttons don't want it
+NO_FOCUS_BOX = ' button:focus { outline: none !important; }'
 
 
 def _engine_dir():
@@ -55,7 +57,7 @@ def _template(cfg, app_dir):
     ns = {"html": html, "json": json, "CONFIG": cfg, "LOGO": cfg["logo"]}
     for node in _TEMPLATE_NODES:
         exec(compile(ast.Module([node], []), "kids_app", "exec"), ns)
-    page = ns["MASTER_HTML_TEMPLATE"].replace("</head>", "<style>" + SCROLLBARS + "</style></head>", 1)
+    page = ns["MASTER_HTML_TEMPLATE"].replace("</head>", "<style>" + SCROLLBARS + NO_FOCUS_BOX + "</style></head>", 1)
     for pic in {cfg["logo"], cfg["success_picture"], cfg["oops_picture"]}:
         if pic:
             page = page.replace('src="%s"' % pic, 'src="%s"' % _url(os.path.join(app_dir, pic)))

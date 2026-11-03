@@ -34,10 +34,9 @@ export default function SiteHeader() {
           <nav className="nav" aria-label="Main">
             <Link href="/#lessons">Lessons</Link>
             <Link href="/#parents">For parents</Link>
+            <Link href="/contact">Contact</Link>
             {user ? (
               <>
-                {user.role === 'admin' ? <Link href="/admin">Admin</Link> : null}
-                <Link href="/account">My account</Link>
                 <button className="link-btn" onClick={logout}>Log out</button>
               </>
             ) : (

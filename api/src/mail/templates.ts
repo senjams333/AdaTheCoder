@@ -14,6 +14,8 @@ export interface Email {
   subject: string;
   html: string;
   text: string;
+  /** Where "Reply" goes (a contact message replies to the person who wrote it). */
+  replyTo?: { email: string; name?: string };
 }
 
 const esc = (s: unknown): string =>
@@ -199,4 +201,27 @@ export function adminPaymentEmail(p: Purchase, siteUrl: string): Email {
 <p style="margin:0;">${button(`${siteUrl.replace(/\/$/, '')}/admin/parents`, 'Open Parents in the admin')}</p>`, siteUrl);
   const text = `New payment\n\n${rows.map(([k, v]) => `${k}: ${v}`).join('\n')}`;
   return { subject: `New payment: ${p.theme}, ${p.amount} (${p.email})`, html, text };
+}
+
+export interface ContactMessage {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+/** A message from the website's Contact page, sent to the admin. Replying answers the person who wrote it. */
+export function contactEmail(m: ContactMessage, siteUrl: string): Email {
+  const when = new Date().toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+  const html = layout(
+    'New message from the website',
+    `<h1 style="margin:0 0 12px;font-size:22px;color:#2B2257;">New message ✉️</h1>
+<p style="margin:0 0 6px;"><b>${esc(m.name)}</b> &lt;<a href="mailto:${esc(m.email)}" style="color:#7B4DFF;">${esc(m.email)}</a>&gt; wrote on the Contact page (${esc(when)}).</p>
+<p style="margin:0 0 6px;"><b>Subject:</b> ${esc(m.subject)}</p>
+<div style="margin:12px 0 18px;padding:14px 16px;background:#F4F1FF;border-radius:14px;white-space:pre-wrap;">${esc(m.message)}</div>
+<p style="margin:0;color:#6B6890;font-size:14px;">Just press Reply to answer ${esc(m.name)}.</p>`,
+    siteUrl,
+  );
+  const text = `New message from the Contact page\n\nFrom: ${m.name} <${m.email}>\nSubject: ${m.subject}\nSent: ${when}\n\n${m.message}\n`;
+  return { subject: `Contact: ${m.subject} (${m.name})`, html, text, replyTo: { email: m.email, name: m.name } };
 }

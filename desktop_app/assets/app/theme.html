@@ -266,6 +266,9 @@ body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !imp
 .kbtns button { background: #e0f2fe; color: #0f172a; border: 2px solid #38bdf8; border-radius: 14px; padding: 8px 14px; font: 700 13px var(--font-kid); cursor: pointer; }
 .kbtns button:hover { background: #38bdf8; color: #fff; }
 .okbox { color: #166534; background: #dcfce7; border-radius: 10px; padding: 8px; margin-top: 6px; }
+/* no square focus box round buttons after a click */
+button { -webkit-tap-highlight-color: transparent; }
+button:focus { outline: none !important; }
 </style>
 
 <div class="wrap">

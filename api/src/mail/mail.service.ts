@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminNewAccountEmail, adminPaymentEmail, Email, licenceEmail, NewAccount, passwordResetEmail, Purchase, signupCodeEmail, welcomeEmail } from './templates';
+import { adminNewAccountEmail, ContactMessage, contactEmail, adminPaymentEmail, Email, licenceEmail, NewAccount, passwordResetEmail, Purchase, signupCodeEmail, welcomeEmail } from './templates';
 
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
@@ -47,6 +47,13 @@ export class MailService {
     return this.send(user.email, user.name, signupCodeEmail(user, link, code, this.siteUrl));
   }
 
+  /** A Contact page message, to the admin (ADMIN_NOTIFY_EMAIL, else the contact email on the website, else the sender). */
+  async sendContact(m: ContactMessage, contactAddress?: string): Promise<boolean> {
+    const to = this.config.get<string>('ADMIN_NOTIFY_EMAIL') || contactAddress || this.config.get<string>('BREVO_SENDER_EMAIL');
+    if (!to) return false;
+    return this.send(to, 'Ada The Coder', contactEmail(m, this.siteUrl));
+  }
+
   async send(toEmail: string, toName: string, email: Email): Promise<boolean> {
     const apiKey = this.config.get<string>('BREVO_API_KEY');
     const senderEmail = this.config.get<string>('BREVO_SENDER_EMAIL');
@@ -64,6 +71,7 @@ export class MailService {
           subject: email.subject,
           htmlContent: email.html,
           textContent: email.text,
+          ...(email.replyTo ? { replyTo: email.replyTo } : {}),
         }),
       });
       if (!res.ok) {

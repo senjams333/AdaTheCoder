@@ -101,14 +101,26 @@ body { margin: 0; background: var(--page); color: var(--ink); font: 14px var(--u
 .center { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .home { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 30px; min-height: 0; position: relative; }
 /* a glowing arrow under the cards: more themes below (scroll or click) */
-.tmore { position: absolute; right: -10px; bottom: 6px; z-index: 3; width: 46px; height: 46px; border-radius: 50%;
-  border: 3px solid #fff; background: #ffd23f; color: #7b4dff; font: 900 24px/1 var(--font-kid); cursor: pointer; padding: 0;
-  box-shadow: 0 0 14px 5px rgba(255, 210, 63, .85); animation: tmoreGlow 1.4s ease-in-out infinite; }
-.tmore:hover { background: #ffe58a; }
+/* a big glowing star with an arrow, with little glitters twinkling round it */
+.tmore { position: absolute; right: -12px; bottom: 30px; z-index: 3; width: 92px; height: 92px; border: 0; background: none; padding: 0; cursor: pointer;
+  filter: drop-shadow(0 0 8px rgba(255, 210, 63, .95)) drop-shadow(0 3px 4px rgba(124, 77, 0, .3)); animation: tmoreBob 1.4s ease-in-out infinite; }
+.tmore .star { position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, #fff6c4 0 18%, #ffd23f 46%, #f5a700 100%);
+  clip-path: polygon(50% 0%, 61.8% 34.5%, 98% 34.5%, 68.8% 56%, 79.4% 91%, 50% 70%, 20.6% 91%, 31.2% 56%, 2% 34.5%, 38.2% 34.5%); }
+.tmore .arr { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font: 900 30px/1 var(--font-kid); color: #6d28d9; text-shadow: 0 1px 0 #fff; }
+.tmore .g { position: absolute; font-style: normal; color: #fff7b0; text-shadow: 0 0 6px #ffd23f, 0 0 2px #fff; pointer-events: none; animation: tmoreTwinkle 1.6s ease-in-out infinite; }
+.tmore .g1 { top: -10px; left: 2px; font-size: 18px; }
+.tmore .g2 { top: 4px; right: -12px; font-size: 14px; animation-delay: .4s; }
+.tmore .g3 { bottom: 2px; left: -14px; font-size: 15px; animation-delay: .8s; }
+.tmore .g4 { bottom: -8px; right: 0; font-size: 12px; animation-delay: 1.2s; }
+.tmore:hover .star { background: radial-gradient(circle at 50% 42%, #fffbe0 0 22%, #ffe066 50%, #ffb800 100%); }
 .tmore[hidden] { display: none; }
-@keyframes tmoreGlow { 0%, 100% { box-shadow: 0 0 10px 3px rgba(255, 210, 63, .7); transform: translateY(0); }
-  50% { box-shadow: 0 0 24px 10px rgba(255, 210, 63, 1); transform: translateY(6px); } }
-@media (prefers-reduced-motion: reduce) { .tmore { animation: none; } }
+@keyframes tmoreBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(7px) rotate(4deg); } }
+@keyframes tmoreTwinkle { 0%, 100% { opacity: .15; transform: scale(.5) rotate(0deg); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
+@media (prefers-reduced-motion: reduce) { .tmore, .tmore .g { animation: none; } }
+/* no focus box round buttons after a click (keyboard focus still shows a soft blue ring) */
+button { -webkit-tap-highlight-color: transparent; }
+button:focus { outline: none; }
+button:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(56, 189, 248, .55); }
 /* the greeting near the top, then the friends, then the theme cards right below them */
 .hero { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; min-height: 0; margin-top: -6px; }
 .hero h2 { font-size: 38px; margin: 0; text-align: center; }
@@ -253,7 +265,7 @@ body.night { background: #070b24; }
             <div class="chars" id="chars"></div>
           </div>
           <div class="tcards" id="tcards"></div>
-          <button class="tmore" id="tmore" type="button" title="More themes below" aria-label="More themes below" hidden>⬇</button>
+          <button class="tmore" id="tmore" type="button" title="More themes below" aria-label="More themes below" hidden><span class="star"></span><span class="arr">⬇</span><i class="g g1">✦</i><i class="g g2">✧</i><i class="g g3">✦</i><i class="g g4">✧</i></button>
         </div>
         <div class="lesson" id="lesson" hidden>
           <div class="lstack">
