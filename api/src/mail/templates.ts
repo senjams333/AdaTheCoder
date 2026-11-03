@@ -155,3 +155,48 @@ The link works for 1 hour, and only once. A new one: ${forgot}
 Didn't ask for this? Ignore this email: your password stays the same.`;
   return { subject: `Your Ada The Coder password code: ${code}`, html, text };
 }
+
+export interface Purchase {
+  name: string;
+  email: string;
+  theme: string;
+  licence: string;
+  amount: string;           // e.g. "₹299.00" or "USD 4.99"
+  provider: string;         // Razorpay or PayPal
+  reference: string;        // the payment's id at Razorpay or PayPal
+  when?: Date;
+}
+
+/** Sent to the parent when a payment goes through: the theme is unlocked, with the licence code. */
+export function licenceEmail(p: Purchase, siteUrl: string): Email {
+  const site = siteUrl.replace(/\/$/, '');
+  const box = `<div style="margin:0 0 18px;text-align:center;"><span style="display:inline-block;background:#ECFDF5;border:2px dashed #22C997;border-radius:16px;padding:12px 22px;font-size:22px;font-weight:bold;letter-spacing:2px;color:#2B2257;font-family:Consolas,monospace;">${esc(p.licence)}</span></div>`;
+  const html = layout(
+    'Your licence',
+    `<h1 style="margin:0 0 12px;font-size:22px;color:#2B2257;">Thank you! ${esc(p.theme)} is unlocked 🎉</h1>
+<p style="margin:0 0 14px;">Hi ${esc(p.name.split(' ')[0] || 'there')}, your payment of <b>${esc(p.amount)}</b> went through. Every lesson of <b>${esc(p.theme)}</b> is now open in the Ada The Coder app; it unlocks by itself within a minute.</p>
+<p style="margin:0 0 8px;">Your licence:</p>${box}
+<p style="margin:0 0 18px;font-size:14px;color:#6B6890;">Payment: ${esc(p.provider)} · reference ${esc(p.reference)}. Keep this email; the licence is also on your account page.</p>
+<p style="margin:0 0 18px;">${button(`${site}/account`, 'Open my account')}</p>
+<p style="margin:0;font-size:13px;color:#6B6890;">Not happy? You can ask for a refund within 7 days: <a href="${esc(site)}/refunds" style="color:#7B4DFF;">refund policy</a>.</p>`,
+    siteUrl,
+  );
+  const text = `Thank you! ${p.theme} is unlocked.\n\nPayment: ${p.amount} (${p.provider}, reference ${p.reference})\nYour licence: ${p.licence}\n\nEvery lesson is open in the Ada The Coder app. Your account: ${site}/account\nRefunds within 7 days: ${site}/refunds`;
+  return { subject: `Your Ada The Coder licence for ${p.theme}`, html, text };
+}
+
+/** Sent to the admin when a payment goes through. */
+export function adminPaymentEmail(p: Purchase, siteUrl: string): Email {
+  const rows: [string, string][] = [
+    ['Parent', `${p.name} (${p.email})`], ['Theme', p.theme], ['Amount', p.amount], ['Paid with', p.provider],
+    ['Reference', p.reference], ['Licence', p.licence], ['When', (p.when ?? new Date()).toISOString().replace('T', ' ').slice(0, 16) + ' UTC'],
+  ];
+  const table = rows
+    .map(([k, v]) => `<tr><td style="padding:7px 14px 7px 0;color:#6B6890;white-space:nowrap;">${esc(k)}</td><td style="padding:7px 0;font-weight:bold;">${esc(v)}</td></tr>`)
+    .join('');
+  const html = layout('New payment', `<h1 style="margin:0 0 12px;font-size:22px;color:#2B2257;">New payment 💳</h1>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;font-size:15px;">${table}</table>
+<p style="margin:0;">${button(`${siteUrl.replace(/\/$/, '')}/admin/parents`, 'Open Parents in the admin')}</p>`, siteUrl);
+  const text = `New payment\n\n${rows.map(([k, v]) => `${k}: ${v}`).join('\n')}`;
+  return { subject: `New payment: ${p.theme}, ${p.amount} (${p.email})`, html, text };
+}

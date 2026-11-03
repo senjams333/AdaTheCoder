@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminNewAccountEmail, Email, NewAccount, passwordResetEmail, signupCodeEmail, welcomeEmail } from './templates';
+import { adminNewAccountEmail, adminPaymentEmail, Email, licenceEmail, NewAccount, passwordResetEmail, Purchase, signupCodeEmail, welcomeEmail } from './templates';
 
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
@@ -24,6 +24,15 @@ export class MailService {
       adminTo ? this.send(adminTo, 'Ada The Coder admin', adminNewAccountEmail(user, this.siteUrl)) : Promise.resolve(false),
     ]);
     return { user: toUser, admin: toAdmin };
+  }
+
+  /** After a payment: the licence to the parent, and a notice to the admin. Never throws. */
+  async sendLicence(p: Purchase): Promise<void> {
+    const adminTo = this.config.get<string>('ADMIN_NOTIFY_EMAIL') || this.config.get<string>('BREVO_SENDER_EMAIL');
+    await Promise.all([
+      this.send(p.email, p.name, licenceEmail(p, this.siteUrl)),
+      adminTo ? this.send(adminTo, 'Ada The Coder admin', adminPaymentEmail(p, this.siteUrl)) : Promise.resolve(false),
+    ]).catch(() => undefined);
   }
 
   /** The "choose a new password" email: a link and a 6-digit code. Never throws. */

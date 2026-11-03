@@ -121,7 +121,7 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
 
 ## How the website controls the installed app
 
-| The admin does this on the website | What the installed app does (at start, then every 3 minutes) |
+| The admin does this on the website | What the installed app does (at start, then every minute) |
 | --- | --- |
 | **Themes & lessons → Add a theme**, ticks *Show this theme in the app*, adds at least one live lesson | A new theme card appears on the home screen; **Try free** opens it with its own characters and lessons |
 | Edits or adds lessons, examples, videos; changes a theme's price or free lessons | The theme shows the new lessons, videos, price and locks |

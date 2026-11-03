@@ -119,15 +119,17 @@ def sync_courses():
     for course in data["courses"]:
         for lesson in course.get("lessons") or []:
             video = lesson.get("video") or {}
-            if video.get("file") and video.get("url"):
-                name = os.path.basename(video["file"])
-                wanted.add(name)
-                dest = os.path.join(videos, name)
-                if not os.path.exists(dest):
-                    try:
-                        _download(video["url"], dest)
-                    except NETWORK_ERRORS:
-                        pass  # the bundled video plays until the download works next time
+            # the MP4, and the WebM copy the app's window plays (the website makes it when it has ffmpeg)
+            for file_key, url_key in (("file", "url"), ("webm_file", "webm_url")):
+                if video.get(file_key) and video.get(url_key):
+                    name = os.path.basename(video[file_key])
+                    wanted.add(name)
+                    dest = os.path.join(videos, name)
+                    if not os.path.exists(dest):
+                        try:
+                            _download(video[url_key], dest)
+                        except NETWORK_ERRORS:
+                            pass  # the bundled video plays until the download works next time
     pictures = characters_dir()
     for course in data["courses"]:
         for char in course.get("characters") or []:

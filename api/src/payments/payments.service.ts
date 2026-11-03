@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { CatalogService } from '../catalog/catalog.service';
 import { siteUrl } from '../common/util';
 import { Course, Licence, Payment, User } from '../entities';
+import { MailService } from '../mail/mail.service';
 
 /** A theme's price in the smallest unit (cents, paise), or null when it isn't a price. "$4.99" → 499 */
 export function minorUnits(price: string): number | null {
@@ -49,6 +50,7 @@ export class PaymentsService {
     @InjectRepository(Payment) private readonly payments: Repository<Payment>,
     @InjectRepository(Licence) private readonly licences: Repository<Licence>,
     @InjectRepository(User) private readonly users: Repository<User>,
+    private readonly mail: MailService,
   ) {}
 
   // ------------------------------------------------------------------ what can be paid, and how
@@ -101,6 +103,15 @@ export class PaymentsService {
     const licence = newLicenceCode();
     await this.licences.save({ userId: payment.userId, courseId: payment.courseId, licence });
     this.log.log(`Licence ${licence} for user ${payment.userId}, theme ${payment.courseId} (${payment.provider} ${payment.orderId})`);
+    // the licence by email to the parent, and a notice to the admin (in the background: never holds up the unlock)
+    void (async () => {
+      const user = await this.users.findOne({ where: { id: payment.userId } });
+      const course = await this.catalog.courses.findOne({ where: { id: payment.courseId } });
+      if (!user || !course) return;
+      const money = payment.currency === 'INR' ? `₹${(payment.amount / 100).toFixed(2)}` : `${payment.currency} ${(payment.amount / 100).toFixed(2)}`;
+      await this.mail.sendLicence({ name: user.name, email: user.email, theme: course.name, licence, amount: money,
+        provider: payment.provider.startsWith('razorpay') ? 'Razorpay' : 'PayPal', reference: providerPaymentId || payment.orderId });
+    })().catch((e) => this.log.warn(`Licence email not sent: ${e}`));
     return licence;
   }
 

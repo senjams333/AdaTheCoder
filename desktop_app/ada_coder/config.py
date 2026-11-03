@@ -32,7 +32,7 @@ def _server_url():
 SERVER_URL = _server_url()
 
 # How often the open app checks the website for new themes and lessons (seconds).
-SYNC_EVERY = 180
+SYNC_EVERY = 60
 CONTACT_EMAIL = "ada@adathecoder.com"
 
 # How long a child's program may run (seconds) before the app stops it.

@@ -123,6 +123,7 @@ export class AdminLessonsController {
       await this.catalog.removeUpload('videos', videoFile);
       videoFile = name;
       videoSize = video.size;
+      this.catalog.webmCopy(name);
     } else if (truthy(body.removeVideo) && videoFile) {
       await this.catalog.removeUpload('videos', videoFile);
       videoFile = '';

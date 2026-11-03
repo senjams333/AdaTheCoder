@@ -13,6 +13,7 @@ import { SettingsService } from './common/settings.service';
 import { AppApiController } from './compat/app-api.controller';
 import { ENTITIES } from './entities';
 import { HealthController } from './health.controller';
+import { MailModule } from './mail/mail.module';
 import { PaymentsController } from './payments/payments.controller';
 import { PaymentsService } from './payments/payments.service';
 import { SiteController } from './site/site.controller';
@@ -47,6 +48,7 @@ class SettingsModule {}
     CatalogModule,
     SettingsModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [
     HealthController, SiteController, AccountController, AppApiController,

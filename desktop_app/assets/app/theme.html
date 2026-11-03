@@ -1,0 +1,768 @@
+<meta charset="utf-8">
+<title>Kids App Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: a quiet control strip, then the PyQt window drawn 1:1 at 1280×780 and scaled to fit. */
+:root {
+  --page: #eef3f7; --ink: #0f1d2b; --muted: #556576; --line: #d5dee7; --chip: #ffffff; --accent: #0284c7;
+  --font-ui: "Nunito Sans", "Segoe UI", system-ui, sans-serif;
+  --font-kid: "Comic Sans MS", "Comic Neue", "Chalkboard SE", cursive;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #0c141c; --ink: #e6eef5; --muted: #93a4b5; --line: #24323f; --chip: #15212c; --accent: #38bdf8; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #0c141c; --ink: #e6eef5; --muted: #93a4b5; --line: #24323f; --chip: #15212c; --accent: #38bdf8; color-scheme: dark }
+[hidden] { display: none !important; }
+body { background: var(--page); color: var(--ink); font-family: var(--font-ui); }
+.wrap { max-width: 1320px; margin: 0 auto; padding-block: 18px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.strip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+.strip h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: .01em; }
+.strip .sub { color: var(--muted); font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--chip); }
+.seg button { font: 600 13px var(--font-ui); border: 0; background: transparent; color: var(--ink); padding: 8px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.seg button:focus-visible, .tbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tbtn { font: 600 13px var(--font-ui); border: 1px solid var(--line); background: var(--chip); color: var(--ink); padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.fact { font-size: 12px; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 5px 9px; background: var(--chip); }
+.fact b { color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 600; user-select: all; }
+.stage { position: relative; width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 10px 40px rgba(10, 30, 50, .18); }
+.note { color: var(--muted); font-size: 12.5px; margin-top: 10px; line-height: 1.5; max-width: 90ch; }
+
+/* ---------- the app window (PyQt look) ---------- */
+.win { position: absolute; top: 0; left: 0; width: 1280px; height: 780px; transform-origin: 0 0; overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif; color: #0f172a; background: #cbd5e1; }
+.titlebar { height: 30px; background: #e2e8f0; display: flex; align-items: center; gap: 8px; padding: 0 10px; font: 13px var(--font-ui); color: #334155; border-bottom: 1px solid #cbd5e1; }
+.titlebar img { width: 18px; height: 18px; border-radius: 50%; }
+.titlebar .dots { margin-left: auto; letter-spacing: 10px; color: #64748b; }
+.central { position: absolute; top: 30px; left: 0; right: 0; bottom: 0; padding: 15px; display: flex; flex-direction: column; gap: 6px; transition: background .3s; }
+/* the whole window's sky: day (sun, clouds, meadow, flowers) or night (moon, stars) */
+.central > *:not(.scene) { position: relative; z-index: 1; }
+.scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.central.day { background: linear-gradient(180deg, #5ec4ff 0%, #a5dcff 45%, #dff4ff 80%, #e9fbe3 100%) !important; }
+.central.night { background: radial-gradient(ellipse at 50% 0%, #2c3285 0%, #161c52 45%, #070b24 100%) !important; }
+.sc-sun, .sc-moon { position: absolute; left: 178px; top: 28px; width: 104px; height: 104px; border-radius: 50%; }
+.sc-sun { background: radial-gradient(circle, #fff700, #ff9d00); box-shadow: 0 0 50px 18px rgba(255, 213, 79, .7), 0 0 120px 40px rgba(255, 170, 0, .3); animation: pulse 3s ease-in-out infinite; }
+.sc-moon { background: radial-gradient(circle at 35% 35%, #fff, #fde68a 75%); box-shadow: 0 0 60px 20px rgba(253, 230, 138, .55), 0 0 140px 50px rgba(253, 230, 138, .25); animation: pulse 4s ease-in-out infinite; }
+.sc-moon::before, .sc-moon::after { content: ""; position: absolute; border-radius: 50%; background: rgba(234, 200, 120, .45); }
+.sc-moon::before { width: 22px; height: 22px; left: 26px; top: 34px; } .sc-moon::after { width: 14px; height: 14px; left: 58px; top: 60px; }
+@keyframes pulse { 50% { transform: scale(1.05); } }
+.sc-cloud { position: absolute; background: #fff; border-radius: 999px; opacity: .95; animation: drift linear infinite; }
+.sc-cloud::before, .sc-cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+.sc-cloud::before { width: 45%; height: 130%; left: 15%; bottom: 35%; } .sc-cloud::after { width: 36%; height: 105%; left: 48%; bottom: 30%; }
+@keyframes drift { from { transform: translateX(-260px); } to { transform: translateX(1540px); } }
+.sc-hill { position: absolute; left: -5%; right: -5%; border-radius: 50% 50% 0 0 / 40% 40% 0 0; }
+.sc-hill.back { bottom: 0; height: 150px; background: #4ade80; transform: translateX(-12%); }
+.sc-hill.front { bottom: -30px; height: 140px; background: linear-gradient(180deg, #86efac, #16a34a); transform: translateX(10%); }
+.sc-flower { position: absolute; transform-origin: 50% 100%; animation: sway 3.2s ease-in-out infinite; }
+@keyframes sway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+.sc-star { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff, 0 0 12px rgba(147, 197, 253, .7); animation: twinkle 3s ease-in-out infinite; }
+@keyframes twinkle { 0%, 100% { opacity: .2; transform: scale(.6); } 50% { opacity: 1; transform: scale(1.2); } }
+/* at night: a shooting star from the top right corner to the bottom left corner, 1 second after night mode
+   turns on (showing it restarts the animation), then every 30 seconds */
+.sc-shoot { position: absolute; left: 104%; top: -6%; width: 0; height: 0; opacity: 0; animation: shoot 30s linear 1s infinite; }
+.sc-shoot i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 6px 3px #fff, 0 0 16px 8px rgba(220, 235, 255, .85), 0 0 30px 12px rgba(170, 205, 255, .45); }
+.sc-shoot b { position: absolute; left: 0; top: -1.5px; width: 380px; height: 3px; transform-origin: 0 50%;
+  clip-path: polygon(0 0, 100% 50%, 0 100%); filter: drop-shadow(0 0 2px rgba(190, 220, 255, .8));
+  background: linear-gradient(90deg, #fff, #fff 12%, rgba(200, 225, 255, .55) 45%, rgba(170, 205, 255, 0)); }
+@keyframes shoot { 0% { left: 104%; top: -6%; opacity: 0; } .6% { opacity: 1; } 6.3% { opacity: 1; } 7.3% { left: -4%; top: 106%; opacity: 0; } 100% { left: -4%; top: 106%; opacity: 0; } }
+.central.day .night-only, .central.night .day-only { display: none; }
+@media (prefers-reduced-motion: reduce) { .sc-shoot { display: none; } .sc-cloud, .sc-flower, .sc-star, .sc-sun, .sc-moon { animation: none; } }
+.top { display: flex; align-items: center; gap: 8px; min-height: 52px; }
+.top .grow { flex: 1; }
+.qbtn { font: 700 18px var(--font-kid); border: none; cursor: pointer; background: rgba(255,255,255,.85); color: #0f172a; }
+.qbtn:disabled { opacity: .55; cursor: default; }
+.home { border-radius: 25px; width: 208px; height: 48px; }
+.round { width: 48px; height: 48px; border-radius: 24px; font-size: 18px; }
+.avatar { width: 52px; height: 52px; border-radius: 26px; border: 3px solid #ffd166; background: transparent; padding: 0; cursor: pointer; display: grid; place-items: center; }
+.avatar:hover:not(:disabled) { border-color: #38bdf8; }
+.avatar:disabled { opacity: .55; cursor: default; }
+.avatar img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
+.body { flex: 1; display: flex; gap: 18px; min-height: 0; }
+.center { flex: 1; min-width: 0; position: relative; }
+.hero { position: absolute; inset: 0; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; transition: background .3s; }
+.hero h2 { font: 700 47px/1.1 var(--font-kid); margin: 0; text-align: center; }
+.hero p { font: 700 22px var(--font-kid); margin: 0; text-align: center; }
+.chars { display: flex; gap: 30px; align-items: flex-end; justify-content: center; }
+.char { display: flex; flex-direction: column; align-items: center; padding-top: 30px; }
+.bubble { background: #fff; color: #0f172a; font: 700 22px var(--font-kid); padding: 9px 24px; border-radius: 22px; white-space: nowrap; }
+.char img, .char .emo { width: 280px; height: 280px; object-fit: contain; animation: bob 2.5s ease-in-out infinite; }
+.char .emo { display: grid; place-items: center; font-size: 120px; }
+.char:nth-child(2) img { animation-delay: -.8s; } .char:nth-child(3) img { animation-delay: -1.6s; }
+@keyframes bob { 50% { transform: translateY(-20px); } }
+@media (prefers-reduced-motion: reduce) { .char img { animation: none; } }
+.lesson { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 8px; }
+.lesson iframe { flex: 1; width: 100%; border: 0; background: transparent; }
+/* The app window is always drawn in its own light scheme. Without this, a viewer whose browser is in dark
+   mode gets the lesson frame painted solid white (browsers fill a frame whose colour scheme differs). */
+.win, .lesson iframe { color-scheme: light; }
+.side { width: 256px; border-radius: 40px; padding: 15px 14px; display: flex; flex-direction: column; gap: 8px; transition: background .3s;
+  border: 3px solid #fff; box-sizing: border-box; box-shadow: 0 0 22px rgba(56, 189, 248, .35); }
+.side h3 { font: 700 19px var(--font-kid); text-align: center; margin: 2px 0 4px; }
+.topics { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 2px; }
+.topic { font: 700 15px var(--font-kid); text-align: left; padding: 11px 15px; border-radius: 22px; cursor: pointer;
+  background: #fff; color: #0c4a6e; border: 2px solid #bae6fd; }
+.topic:hover { background: #e0f2fe; border-color: #38bdf8; color: #0369a1; }
+.topic.active { background: linear-gradient(90deg, #38bdf8, #0ea5e9); color: #fff; border: 3px solid #facc15; padding: 10px 14px; }
+.topic.locked { background: rgba(255,255,255,.45); color: #5b7a99; border: 2px dashed #7dd3fc; font-weight: 400; }
+.topic.locked:hover { background: rgba(255,255,255,.7); color: #0369a1; }
+.sidetoggle { position: absolute; width: 46px; height: 92px; border-radius: 20px; border: 3px solid #38bdf8; background: rgba(255,255,255,.92);
+  font: 700 18px var(--font-kid); color: #0f172a; cursor: pointer; z-index: 5; }
+.sidetoggle:hover { background: #38bdf8; color: #fff; }
+.logout { position: absolute; left: 18px; top: 48px; width: 120px; height: 42px; border-radius: 18px; border: 2px solid #38bdf8; background: #7dd3fc;
+  color: #083344; font: 700 12px Arial, sans-serif; cursor: pointer; z-index: 6; }
+.logout:hover { background: #38bdf8; color: #fff; }
+
+/* login card */
+.overlay { position: absolute; top: 30px; left: 0; right: 0; bottom: 0; display: grid; place-items: center; z-index: 20; }
+.login { background: rgba(15, 23, 42, .35); }
+.card { width: 460px; background: rgba(255,255,255,.9); border: 4px solid #38bdf8; border-radius: 35px; padding: 20px 28px; display: flex; flex-direction: column; gap: 8px; }
+.card .logo { width: 90px; height: 90px; object-fit: contain; align-self: center; }
+.card h4 { font: 700 26px var(--font-kid); text-align: center; margin: 0; }
+.card .lsub { font-size: 14px; color: #065f46; font-weight: 700; text-align: center; }
+.card label { font-size: 13px; font-weight: 700; color: #0284c7; display: block; margin-bottom: 2px; }
+.card input { width: 100%; box-sizing: border-box; background: #fff; color: #0f172a; border: 3px solid #7dd3fc; border-radius: 18px; padding: 10px 12px; font: 700 17px Arial, sans-serif; }
+.card input:focus { border: 4px solid #facc15; outline: none; padding: 9px 11px; }
+.hint { font-size: 12px; font-weight: 700; color: #065f46; background: #ecfdf5; border: 2px dashed #34d399; border-radius: 12px; padding: 6px; text-align: center; white-space: pre-line; }
+.status { font-size: 14px; font-weight: 700; text-align: center; min-height: 18px; }
+.bar { height: 14px; border: 2px solid #38bdf8; border-radius: 8px; background: #e0f2fe; overflow: hidden; position: relative; }
+.bar::after { content: ""; position: absolute; top: 0; bottom: 0; width: 30%; background: #38bdf8; border-radius: 6px; animation: slide 1s linear infinite; }
+@keyframes slide { from { left: -30%; } to { left: 100%; } }
+.go { min-height: 44px; font: 700 17px var(--font-kid); background: #ffd166; color: #0f172a; border: 3px solid #f59e0b; border-radius: 20px; cursor: pointer; }
+.go:hover:not(:disabled) { background: #38bdf8; color: #fff; border-color: #0284c7; }
+.link { text-align: center; display: block; background: transparent; border: none; color: #0284c7; text-decoration: underline; font: 700 15px var(--font-kid); cursor: pointer; padding: 4px; }
+
+/* intro video after log-in: the same player as the lessons' videos */
+.vstage { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.vbox { position: relative; flex: 1; width: 100%; min-height: 0; border-radius: 35px; overflow: hidden; }
+.vbox video { clip-path: inset(0 round 35px); }
+body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !important; }
+.vbox video { width: 100%; height: 100%; object-fit: fill; background: #000; border: 6px solid #ffea79; border-radius: 35px;
+  box-shadow: 0 0 30px rgba(255, 230, 100, .86); box-sizing: border-box; display: block; }
+.vmissing { position: absolute; inset: 0; border: 6px solid #ffea79; border-radius: 35px; box-sizing: border-box;
+  background: radial-gradient(circle at 50% 40%, #1e3a8a, #0b1026); color: #fff; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px; text-align: center; font: 700 22px var(--font-kid); padding: 20px; }
+.vmissing .big { font-size: 64px; }
+.vmissing .file { font: 600 16px ui-monospace, Menlo, Consolas, monospace; color: #fde68a; }
+.vmissing .small { font: 15px var(--font-kid); color: #cbd5e1; max-width: 520px; }
+.vnote { position: absolute; left: 25px; top: 10px; background: rgba(15, 23, 42, .65); color: #f8fafc; font: 10px Arial, sans-serif;
+  padding: 4px 8px; border-radius: 6px; }
+.vctrl { width: 100%; box-sizing: border-box; height: 64px; display: flex; align-items: center; gap: 12px; padding: 8px 14px;
+  background: rgba(15, 23, 42, .95); border: 2px solid rgba(124, 255, 178, .35); border-radius: 20px; }
+.vplay { width: 120px; font: 700 15px var(--font-kid); background: #ffd166; color: #0f172a; border: none; border-radius: 18px; padding: 8px; cursor: pointer; }
+.vplay:hover { background: #ffca3a; }
+.vtime { color: #d1fae5; font: 700 13px Arial, sans-serif; }
+#vSeek { flex: 1; accent-color: #38bdf8; }
+#vVol { width: 100px; flex: none; accent-color: #38bdf8; cursor: pointer; }
+.vmute { width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255, 255, 255, .9); cursor: pointer; }
+.vstop { height: 50px; padding: 0 35px; font: 700 19px var(--font-kid); background: #38bdf8; color: #0f172a; border: 3px solid #bae6fd;
+  border-radius: 25px; cursor: pointer; }
+.vstop:hover { background: #0284c7; color: #fff; }
+/* intro */
+.intro { background: #000; z-index: 30; }
+.intro video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+.skip, .sound { position: absolute; bottom: 24px; height: 46px; border-radius: 22px; border: 3px solid #ffd166; background: rgba(255,255,255,.9);
+  color: #0f172a; font: 700 17px var(--font-kid); cursor: pointer; }
+.skip { right: 24px; width: 130px; } .sound { right: 168px; width: 120px; }
+.skip:hover, .sound:hover { background: #ffd166; }
+
+/* avatar menu (QMenu) */
+.menu { position: absolute; right: 18px; top: 102px; background: #fff; color: #0f172a; border: 3px solid #38bdf8; border-radius: 14px; padding: 6px; z-index: 25;
+  font: 16px var(--font-kid); min-width: 300px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.menu button { display: block; width: 100%; text-align: left; font: inherit; border: none; background: transparent; padding: 10px 22px; border-radius: 10px; cursor: pointer; color: inherit; margin: 2px 0; }
+.menu button:hover, .menu button:focus-visible { background: #38bdf8; color: #fff; outline: none; }
+.menu hr { border: 0; height: 2px; background: #e2e8f0; margin: 4px 8px; }
+
+/* Qt dialogs */
+.modal { position: absolute; inset: 30px 0 0 0; background: rgba(15,23,42,.18); display: grid; place-items: center; z-index: 40; }
+.dlg { background: #fff; border: 1px solid #94a3b8; border-radius: 8px; box-shadow: 0 16px 40px rgba(0,0,0,.3); min-width: 420px; max-width: 620px; overflow: hidden; }
+.dlg .dt { background: #e2e8f0; font: 13px var(--font-ui); color: #334155; padding: 7px 12px; display: flex; }
+.dlg .dt span:nth-child(2) { margin-left: auto; color: #64748b; cursor: pointer; padding: 0 4px; }
+.dlg .db { padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; font: 15px var(--font-kid); color: #0f172a; }
+.dlg .db img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex: none; }
+.dlg .db h2 { color: #0284c7; font-size: 22px; margin: 0 0 8px; }
+.dlg .db p { margin: 6px 0; line-height: 1.4; }
+.dlg .db .box { border-radius: 8px; padding: 10px; line-height: 1.6; }
+.dlg .db input { width: 100%; box-sizing: border-box; font: 15px Arial, sans-serif; padding: 7px 9px; border: 1px solid #94a3b8; border-radius: 4px; margin-top: 8px; }
+.dlg .db input:focus { outline: 2px solid #38bdf8; }
+.dlg .df { display: flex; justify-content: flex-end; gap: 8px; padding: 0 16px 14px; flex-wrap: wrap; }
+.dlg .df button { font: 14px var(--font-ui); padding: 6px 14px; border: 1px solid #94a3b8; border-radius: 4px; background: #f8fafc; cursor: pointer; color: #0f172a; }
+.dlg .df a.lbtn { font: 14px var(--font-ui); padding: 6px 14px; border: 1px solid #94a3b8; border-radius: 4px; background: #f8fafc; color: #0f172a; text-decoration: none; }
+.dlg .df a.lbtn:hover { background: #e2e8f0; }
+.dlg .df button.primary { border-color: #0284c7; background: #e0f2fe; }
+.dlg .df button:hover { background: #e2e8f0; }
+.locks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 18px; margin-top: 8px; }
+.dlg.wide { width: 640px; max-width: 640px; }
+/* Profile: big window, big text, Byte waving */
+.dlg.profile { width: 810px; max-width: 810px; min-height: 540px; display: flex; flex-direction: column; background: #f0f9ff;
+  border: 4px solid #fff; border-radius: 34px; overflow: hidden;
+  box-shadow: 0 0 0 5px rgba(253, 186, 116, .5), 0 0 38px 10px rgba(251, 146, 60, .65), 0 0 80px 26px rgba(244, 114, 182, .45), 0 0 130px 40px rgba(167, 139, 250, .3); }
+.dlg.profile .db { flex: 1; padding: 2px 26px 18px; }
+/* Happy messages: sunset sky card, big letters, a big Close, no ✕ */
+.modal:has(.dlg.sunset) { background: rgba(131, 24, 67, .16); }
+.dlg.sunset { width: 680px; max-width: 680px; border: 4px solid #fff; border-radius: 36px; overflow: hidden;
+  background: linear-gradient(180deg, #fff1c1 0%, #fdba74 35%, #f9a8d4 70%, #c4b5fd 100%);
+  box-shadow: 0 0 0 6px rgba(249, 168, 212, .55), 0 0 50px 14px rgba(244, 114, 182, .8), 0 0 100px 30px rgba(249, 168, 212, .45);
+  animation: pinkglow 2.4s ease-in-out infinite; }
+@keyframes pinkglow { 50% { box-shadow: 0 0 0 8px rgba(249, 168, 212, .7), 0 0 70px 20px rgba(244, 114, 182, .95), 0 0 130px 40px rgba(249, 168, 212, .55); } }
+@media (prefers-reduced-motion: reduce) { .dlg.sunset { animation: none; } }
+.dlg.sunset .db { padding: 34px 40px 10px; font: 24px/1.45 var(--font-kid); color: #3b0764; text-align: center; display: block; }
+.dlg.sunset .db p { margin: 12px 0; }
+.suntitle { font: 700 36px var(--font-kid); color: #7c2d12; margin-bottom: 8px; }
+.dlg.sunset .df { justify-content: center; padding: 10px 30px 32px; gap: 14px; }
+.dlg.sunset .df button { font: 700 18px var(--font-kid); border-radius: 26px; padding: 10px 22px; background: rgba(255,255,255,.75); border: 3px solid #fff; color: #7c2d12; }
+.dlg.sunset .df button.primary { font-size: 24px; padding: 12px 42px; color: #fff; border: 4px solid #fff;
+  background: linear-gradient(90deg, #fb7185, #a855f7); }
+.dlg.sunset .df button.primary:hover { background: linear-gradient(90deg, #f43f5e, #9333ea); }
+/* Locked lesson: glowing sky card */
+.modal:has(.dlg.sky) { background: rgba(180, 83, 9, .14); }
+.dlg.sky { width: 680px; max-width: 680px; border: 4px solid #fff; border-radius: 36px; overflow: hidden;
+  background: linear-gradient(180deg, #f0fbff 0%, #bae6fd 45%, #7dd3fc 100%);
+  box-shadow: 0 0 0 6px rgba(254, 240, 138, .6), 0 0 48px 12px rgba(251, 191, 36, .8), 0 0 100px 26px rgba(251, 146, 60, .35); animation: skyglow 2.4s ease-in-out infinite; }
+@keyframes skyglow { 50% { box-shadow: 0 0 0 8px rgba(254, 240, 138, .75), 0 0 70px 20px rgba(251, 191, 36, .95), 0 0 130px 36px rgba(251, 146, 60, .45); } }
+@media (prefers-reduced-motion: reduce) { .dlg.sky { animation: none; } }
+.skytop { display: flex; justify-content: flex-end; padding: 16px 18px 0; }
+.skyx { width: 48px; height: 48px; border-radius: 24px; border: 3px solid #38bdf8; background: #fff; color: #0284c7;
+  font: 700 22px var(--font-kid); cursor: pointer; }
+.skyx:hover { background: #38bdf8; color: #fff; }
+.dlg.sky .db { padding: 0 32px 10px; gap: 22px; font: 22px var(--font-kid); }
+.dlg.sky .db img { width: 120px; height: 120px; }
+.skytitle { color: #0369a1; font: 700 30px var(--font-kid); margin-bottom: 6px; }
+.dlg.sky .db p { margin: 10px 0; }
+.dlg.sky .df { padding: 6px 30px 28px; }
+.dlg.sky .df button.primary { font: 700 22px var(--font-kid); background: #ffd166; border: 4px solid #f59e0b; border-radius: 28px; padding: 12px 34px; color: #0f172a; }
+.dlg.sky .df button.primary:hover { background: #ffe08a; }
+.bigclose-row { display: flex; justify-content: flex-end; padding: 14px 18px 0; }
+.bigclose { background: #ef4444; color: #fff; border: 4px solid #b91c1c; border-radius: 26px; font: 700 21px var(--font-kid);
+  padding: 8px 22px; min-height: 52px; cursor: pointer; }
+.bigclose:hover { background: #dc2626; }
+.bigclose:active { background: #b91c1c; }
+.bigclose:focus-visible { outline: 3px solid #facc15; outline-offset: 2px; }
+.prof { display: flex; gap: 28px; align-items: flex-start; }
+.bytecol { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; }
+.hello { max-width: 270px; text-align: center; background: #fff; border: 3px solid #38bdf8; border-radius: 22px; padding: 8px 16px; font: 700 22px var(--font-kid); }
+.dlg .db img.byte { width: 225px; height: 250px; border-radius: 0; object-fit: contain; transform-origin: 50% 90%; animation: gentle 5s ease-in-out infinite; }
+@keyframes gentle { 0%, 100% { transform: rotate(-4deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .dlg .db img.byte { animation: none; } }
+.pinfo { flex: 1; min-width: 0; font: 18px var(--font-kid); }
+.ptitle { color: #0284c7; font: 700 29px var(--font-kid); margin-bottom: 8px; }
+.pinfo table { background: #fff; border-radius: 14px; padding: 8px 14px; border-collapse: separate; }
+.pinfo th { text-align: left; color: #0369a1; padding: 5px 14px 5px 0; white-space: nowrap; }
+.pinfo td { padding: 5px 0; }
+.pnote { font-size: 14px; color: #065f46; }
+.pinfo table.lic { background: #fef9c3; }
+.lnote { font-size: 15px; margin: 10px 0 0; }
+.lnote.gap { margin-top: 1.6em; }
+.dlg.profile .df { padding: 0 26px 20px; gap: 12px; }
+.dlg.profile .df button, .dlg.profile .df a.lbtn { font: 700 18px var(--font-kid); border-radius: 22px; padding: 10px 26px; }
+.dlg.profile .df button.primary { background: #ffd166; border: 3px solid #f59e0b; }
+.dlg.profile .df a.lbtn { background: #e0f2fe; border: 3px solid #38bdf8; }
+.locks label { white-space: nowrap; display: flex; align-items: center; gap: 8px; font: 14px var(--font-kid); padding: 5px; cursor: pointer; }
+.locks input { width: 20px; height: 20px; margin: 0; }
+.kbtns { display: flex; gap: 8px; margin-top: 10px; }
+.kbtns button { background: #e0f2fe; color: #0f172a; border: 2px solid #38bdf8; border-radius: 14px; padding: 8px 14px; font: 700 13px var(--font-kid); cursor: pointer; }
+.kbtns button:hover { background: #38bdf8; color: #fff; }
+.okbox { color: #166534; background: #dcfce7; border-radius: 10px; padding: 8px; margin-top: 6px; }
+</style>
+
+<div class="wrap">
+  <div class="strip">
+    <div>
+      <h1>Kids App Preview</h1>
+      <div class="sub">The PyQt app from <code>apps/</code>, drawn in the browser. Click around as a child would.</div>
+    </div>
+    <div class="seg" role="group" aria-label="Which app">
+      <button id="app0" aria-pressed="true">Python Adventure</button>
+      <button id="app1" aria-pressed="false">Fairy Python (the copy)</button>
+    </div>
+    <button class="tbtn" id="restart">↺ Start again (log-in)</button>
+    <div class="facts">
+    </div>
+  </div>
+  <div class="stage" id="stage"><div class="win" id="win">
+    <div class="titlebar"><img id="tbIcon" alt=""><span id="tbTitle"></span><span class="dots">— ▢ ✕</span></div>
+    <div class="central" id="central">
+      <div class="scene" id="scene" aria-hidden="true"></div>
+      <div class="top">
+        <div class="grow"></div>
+        <button class="qbtn home" id="homeBtn" disabled>🏠 Home Screen 🌟</button>
+        <button class="qbtn round" id="themeBtn" disabled style="color:#f59e0b">☀️</button>
+        <button class="qbtn round" id="musicBtn" disabled>🔈</button>
+        <button class="avatar" id="avatarBtn" disabled title="Account ⭐"><img id="avatarImg" alt="Account"></button>
+      </div>
+      <div class="body">
+        <div class="center">
+          <div class="hero" id="hero">
+            <h2 id="heroTitle"></h2>
+            <p id="heroSub"></p>
+            <div class="chars" id="chars"></div>
+          </div>
+          <div class="lesson" id="lesson" hidden></div>
+          <div class="vstage" id="vstage" hidden>
+            <div class="vbox"><video id="introVid" playsinline preload="auto" src="__INTRO__"></video>
+              <div class="vmissing" id="vMissing" hidden></div>
+              <div class="vnote">This is an AI generated content from Google AI</div></div>
+            <div class="vctrl">
+              <button type="button" class="vplay" id="vPlay">⏸ Pause</button>
+              <span class="vtime" id="vTime">00:00</span>
+              <input type="range" id="vSeek" min="0" max="1000" value="0" aria-label="Video position">
+              <span class="vtime" id="vDur">00:00</span>
+              <button type="button" class="vmute" id="vMute" aria-label="Mute">🔊</button>
+              <input type="range" id="vVol" min="0" max="100" value="100" aria-label="Volume">
+            </div>
+            <button type="button" class="vstop" id="vStop">Stop video 🛑</button>
+          </div>
+        </div>
+        <div class="side" id="side" hidden>
+          <h3 id="sideTitle"></h3>
+          <div class="topics" id="topics"></div>
+        </div>
+      </div>
+    </div>
+    <button class="sidetoggle" id="sideToggle" hidden title="Hide lesson list">&gt;&gt;</button>
+    <button class="logout" id="logoutBtn" hidden>↩ LOGOUT 🚪</button>
+    <div class="menu" id="menu" hidden>
+      <button data-act="profile">👤 Profile</button><hr>
+      <button data-act="license">📜 License</button><hr>
+      <button data-act="logout">🚪 Log out</button>
+    </div>
+    <div class="overlay login" id="login">
+      <form class="card" id="loginForm" novalidate>
+        <img class="logo" id="loginLogo" alt="">
+        <h4 id="loginTitle">WELCOME! 🎉</h4>
+        <div class="lsub" id="loginSub"></div>
+        <div id="nameWrap" hidden><label for="nameIn">FULL NAME 👤</label><input id="nameIn" placeholder="e.g. Alex Student"></div>
+        <div><label for="emailIn">EMAIL 📧</label><input id="emailIn" value="kid@codingfun.com" placeholder="kid@codingfun.com"></div>
+        <div><label for="passIn">PASSWORD 🔑</label><input id="passIn" type="password" value="kid123" placeholder="kid123"></div>
+        <div class="hint">Demo login →      📧 kid@codingfun.com   🔑 kid123
+Any credentials work — no internet needed! ✨</div>
+        <div class="status" id="loginStatus"></div>
+        <div class="bar" id="loginBar" hidden></div>
+        <button class="go" id="loginBtn" type="submit">🚀 LOGIN &amp; START LEARNING ⭐</button>
+        <a class="link" id="modeBtn" href="#" target="_blank" rel="noopener">New here? Create an account ✨</a>
+      </form>
+    </div>
+
+    <div class="modal" id="modal" hidden></div>
+  </div></div>
+  <p class="note">
+    This is a browser drawing of the real window so you can see the flow: log-in → home → click a lesson → its video plays → the coding page opens. Lessons 2–17 show 🔒.
+    In the real app, a parent who logs in with a website account that has a licence for this app gets every lesson.
+    The lesson page is the app's own HTML. Pressing <b>Run</b> on an example shows that example's expected output, because the
+    app runs Python on the computer and the browser can't. The lesson videos aren't in the package yet,
+    so the preview shows which video file each lesson will play (video1.mp4, video2.mp4, comment.mp4...) and then opens the coding page.
+  </p>
+</div>
+
+<script>
+const APPS = /*__APPS__*/null;
+const $ = id => document.getElementById(id);
+let A = APPS[0], ai = 0;
+const st = {};             // per app: {overrides, key}
+let dark = false, music = false, loggedIn = false, cur = 0, view = "home", sideCollapsed = false, mode = "login";
+let frame = null, frameReady = false;
+
+function S() { return st[A.id] || (st[A.id] = { overrides: {}, key: false }); }
+function lockedBySetting(n) { if (n <= 1) return false; const o = S().overrides[n]; return o !== undefined ? o : A.locked.includes(n); }
+function isLocked(n) { return S().key ? false : lockedBySetting(n); }
+function demoKey() { return A.prefix + "-DEMO-2468-KEYS"; }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+/* ---------- scale the 1280×780 window into the page ---------- */
+function fit() {
+  const s = Math.min(1, $("stage").clientWidth / 1280);
+  $("win").style.transform = `scale(${s})`;
+  $("stage").style.height = (780 * s) + "px";
+}
+addEventListener("resize", fit);
+
+/* ---------- the window's sky (SceneWidget in the app) ---------- */
+function buildScene() {
+  const sc = $("scene");
+  let h = `<div class="sc-sun day-only"></div><div class="sc-moon night-only"></div>`;
+  [[50, 170, 52, 70], [150, 120, 40, 95], [95, 210, 62, 120], [230, 140, 44, 80], [30, 100, 34, 105]].forEach(([top, w, ht, secs], i) => {
+    h += `<div class="sc-cloud day-only" style="top:${top}px;width:${w}px;height:${ht}px;animation-duration:${secs}s;animation-delay:${-secs * i / 5}s"></div>`;
+  });
+  h += `<div class="sc-hill back day-only"></div><div class="sc-hill front day-only"></div>`;
+  const fl = ["🌼", "🌸", "🌷", "🌻", "🌺", "🌼", "🌸", "🌷"];
+  for (let i = 0; i < 26; i++) {
+    h += `<div class="sc-flower day-only" style="left:${(i + .5) / 26 * 100}%;bottom:${4 + (i * 37 % 60)}px;font-size:${18 + (i * 7 % 14)}px;animation-delay:${-(i % 7) * .45}s">${fl[i % fl.length]}</div>`;
+  }
+  for (let i = 0; i < 150; i++) {
+    const size = 1 + ((i * 53) % 25) / 10;
+    h += `<div class="sc-star night-only" style="left:${(i * 61.8) % 100}%;top:${(i * 38.2) % 92}%;width:${size}px;height:${size}px;animation-duration:${2 + (i % 9) * .4}s;animation-delay:${-(i % 13) * .37}s"></div>`;
+  }
+  h += `<div class="sc-shoot night-only"><b></b><i></i></div>`;
+  sc.innerHTML = h;
+  // point the tail back toward the top right corner, along the window's diagonal
+  const ang = Math.atan2(-(sc.clientHeight || 750), sc.clientWidth || 1280) * 180 / Math.PI;
+  sc.querySelector(".sc-shoot b").style.transform = `rotate(${ang}deg)`;
+}
+
+/* ---------- colours (update_app_style) ---------- */
+// app.json colours may be Qt gradients: qlineargradient(... stop:0 #e0f6ff, stop:1 #7dd3fc)
+function qtToCss(v) {
+  if (!/^qlineargradient/.test(v)) return v;
+  const stops = [...v.matchAll(/stop:([0-9.]+)\s+(#[0-9a-fA-F]{3,8})/g)].map(m => `${m[2]} ${Math.round(parseFloat(m[1]) * 100)}%`);
+  return `linear-gradient(180deg, ${stops.join(", ")})`;
+}
+function style() {
+  const c = A.cfg.colors;
+  $("central").classList.toggle("night", dark);
+  $("central").classList.toggle("day", !dark);
+  $("hero").style.background = "transparent";
+  $("heroTitle").style.color = dark ? "#ffffff" : "#0f172a";
+  $("heroSub").style.color = dark ? "#d1fae5" : "#065f46";
+  $("side").style.background = qtToCss(dark ? c.sidebar_dark : c.sidebar);
+  $("side").style.borderColor = dark ? "#0369a1" : "#ffffff";
+  $("sideTitle").style.color = dark ? "#e0f2fe" : "#0c4a6e";
+  const t = $("themeBtn");
+  t.textContent = dark ? "🌙" : "☀️";
+  t.style.cssText = dark ? "background:#000;color:#facc15;border:2px solid #facc15" : "background:rgba(255,255,255,.85);color:#f59e0b";
+}
+
+/* ---------- build the window for the chosen app ---------- */
+function renderApp() {
+  $("tbTitle").textContent = A.cfg.window_title;
+  $("tbIcon").src = $("avatarImg").src = $("loginLogo").src = A.logo;
+  $("heroTitle").textContent = A.cfg.hero_title;
+  $("heroSub").textContent = A.cfg.hero_subtitle;
+  $("sideTitle").textContent = A.cfg.sidebar_title;
+  $("loginSub").textContent = A.cfg.login_subtitle;
+  $("modeBtn").href = A.cfg.register_url;
+  $("modeBtn").title = A.cfg.register_url;
+  $("chars").innerHTML = A.chars.map(c => `<div class="char"><div class="bubble">${esc(c.name)}</div>` +
+    (c.img ? `<img src="${c.img}" alt="${esc(c.name)}">` : `<div class="emo">${c.emoji}</div>`) + `</div>`).join("");
+  $("topics").innerHTML = A.topics.map((t, i) => `<button class="topic" data-i="${i}"></button>`).join("");
+  $("topics").querySelectorAll(".topic").forEach(b => b.addEventListener("click", () => openLesson(+b.dataset.i)));
+  refreshTopics();
+  buildFrame();
+  style();
+}
+
+function refreshTopics() {
+  $("topics").querySelectorAll(".topic").forEach(b => {
+    const i = +b.dataset.i, t = A.topics[i], locked = isLocked(i + 1);
+    b.textContent = (locked ? "🔒 " : "") + t.emoji + "  " + t.name;
+    b.title = locked ? "Locked 🔒 — ask a grown-up to unlock it" : "";
+    b.classList.toggle("locked", locked && !(view === "lesson" && i === cur));
+    b.classList.toggle("active", view === "lesson" && i === cur);
+  });
+}
+
+/* ---------- lesson page: the app's own HTML in a frame ---------- */
+function buildFrame() {
+  frameReady = false;
+  $("lesson").innerHTML = "";
+  frame = document.createElement("iframe");
+  frame.title = "Lesson";
+  const shim = `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
+  frame.srcdoc = A.template.replace("</head>", shim + "</head>");
+  frame.addEventListener("load", () => { frameReady = true; if (view === "lesson") pushLesson(); });
+  $("lesson").appendChild(frame);
+}
+function pushLesson() {
+  if (!frameReady) return;
+  const w = frame.contentWindow, t = A.topics[cur], L = A.lessons[t.id];
+  try {
+    w.updateLessonData(L.title, L.subtitle, L.examples, L.default_code);
+    w.setDarkMode(dark);
+    w.toggleAudioEngine(music);
+  } catch (e) { console.warn(e); }
+}
+window.__runCode = function (code) {
+  const w = frame.contentWindow, L = A.lessons[A.topics[cur].id];
+  const norm = s => s.replace(/[ \t]+$/gm, "").trim();
+  const ex = Object.values(L.examples).find(e => norm(e.code) === norm(code));
+  const opens = (code.match(/\(/g) || []).length, closes = (code.match(/\)/g) || []).length;
+  const quotes = code.split("\n").some(l => !l.trim().startsWith("#") && ((l.match(/"/g) || []).length % 2 === 1));
+  if (ex) return w.handleCodeOutput(ex.output, false, "", true);
+  // the same explanations the app gives (apps/engine/explain.py), for the mistakes the preview can spot
+  const lines = code.split("\n");
+  const lineNo = test => { const i = lines.findIndex(test); return i < 0 ? 1 : i + 1; };
+  const tell = (short, n, why, fix, said) => w.handleCodeOutput(
+    `❌ ${short}\n📍 Line ${n}:  ${(lines[n - 1] || "").trim()}\n💡 Why: ${why}\n🔧 Try: ${fix}\n🐍 Python says: ${said}`, true, short + " 💡", true);
+  if (quotes) {
+    const n = lineNo(l => !l.trim().startsWith("#") && (l.match(/"/g) || []).length % 2 === 1);
+    return tell("A quote is missing", n, 'Words in Python go between two quotes, like "hello". One of the quotes is missing.',
+      `Add the missing " at the end of the words on line ${n}.`, "SyntaxError: unterminated string literal");
+  }
+  if (opens > closes) {
+    const n = lineNo(l => (l.match(/\(/g) || []).length > (l.match(/\)/g) || []).length);
+    return tell("A bracket is not closed", n, "You opened a bracket ( [ or { but didn't close it.",
+      `Add the closing bracket ) ] or } at the end of line ${n}.`, "SyntaxError: '(' was never closed");
+  }
+  if (opens < closes) {
+    const n = lineNo(l => (l.match(/\)/g) || []).length > (l.match(/\(/g) || []).length);
+    return tell("There is an extra bracket", n, "There's a closing bracket ) without an opening ( before it.",
+      `Remove the extra bracket on line ${n}, or add the one that's missing.`, "SyntaxError: unmatched ')'");
+  }
+  const typo = code.match(/\b(prnt|pritn|pirnt|prit|printt|Print|inptu|imput|lenn|rnage|rang)\s*\(/);
+  if (typo) {
+    const fixWord = { prnt: "print", pritn: "print", pirnt: "print", prit: "print", printt: "print", Print: "print",
+      inptu: "input", imput: "input", lenn: "len", rnage: "range", rang: "range" }[typo[1]];
+    const n = lineNo(l => l.includes(typo[1] + "("));
+    return tell("Mistake in function name or variable", n, `Python doesn't know the word ${typo[1]}.`,
+      `Did you mean ${fixWord}? Check the spelling.`, `NameError: name '${typo[1]}' is not defined`);
+  }
+  const prints = code.split("\n").filter(l => l.trim() && !l.trim().startsWith("#"));
+  const m = prints.map(l => l.match(/^\s*print\(\s*(["'])(.*)\1\s*\)\s*$/));
+  if (prints.length && m.every(Boolean)) return w.handleCodeOutput(m.map(x => x[2]).join("\n"), false, "", true);
+  w.document.getElementById("output").innerText = "🐍 In this preview, the examples show their answers.\nIn the app, your own code runs with real Python.";
+};
+
+/* ---------- navigation ---------- */
+function show(v) {
+  view = v;
+  $("hero").hidden = v !== "home";
+  $("lesson").hidden = v !== "lesson";
+  $("vstage").hidden = v !== "intro";
+  if (v !== "intro") $("introVid").pause();
+  refreshTopics();
+}
+function openLesson(i) {
+  if (isLocked(i + 1)) return lockedDialog(i);
+  cur = i; playIntro();          // the lesson's video first, then the coding page
+}
+$("homeBtn").onclick = () => show("home");
+$("themeBtn").onclick = () => { dark = !dark; style(); try { frame.contentWindow.setDarkMode(dark); } catch (e) {} };
+$("musicBtn").onclick = () => { music = !music; $("musicBtn").textContent = music ? "🔊" : "🔈"; try { frame.contentWindow.toggleAudioEngine(music); } catch (e) {} };
+function placeToggle() {
+  const t = $("sideToggle");
+  t.style.top = (30 + (750 - 92) / 2) + "px";
+  t.style.left = (sideCollapsed ? 1280 - 46 - 4 : 1280 - 15 - 256 - 26) + "px";
+}
+$("sideToggle").onclick = () => {
+  sideCollapsed = !sideCollapsed;
+  $("side").hidden = sideCollapsed;
+  $("sideToggle").textContent = sideCollapsed ? "<<" : ">>";
+  placeToggle();
+};
+
+/* ---------- avatar menu ---------- */
+$("avatarBtn").onclick = e => { e.stopPropagation(); $("menu").hidden = !$("menu").hidden; };
+document.addEventListener("click", e => { if (!$("menu").contains(e.target)) $("menu").hidden = true; });
+$("menu").addEventListener("click", e => {
+  const act = e.target.closest("button")?.dataset.act; if (!act) return;
+  $("menu").hidden = true;
+  ({ profile: profileDialog, license: licenseDialog,
+     logout: () => window.EMBED_THEME ? parent.postMessage("kids-logout", "*") : logout() })[act]();
+});
+
+/* ---------- Qt-style dialogs ---------- */
+function dialog({ title, body, icon, buttons, onShow, wide, kind }) {
+  return new Promise(res => {
+    const m = $("modal");
+    m.innerHTML = `<div class="dlg${wide ? " wide" : ""}${kind ? " " + kind : ""}" role="dialog" aria-label="${esc(title)}">${kind === "sunset" ? "" : kind === "sky" ? `<div class="skytop"><button type="button" class="skyx" title="Close">✕</button></div>`
+        : `${kind ? "" : `<div class="dt"><span>${esc(title)}</span><span>✕</span></div>`}${kind ? `<div class="bigclose-row"><button type="button" class="bigclose" title="Close this window">✕&nbsp; Close</button></div>` : ""}`}
+      <div class="db">${icon ? `<img src="${icon}" alt="">` : ""}<div style="flex:1;min-width:0">${body}</div></div>
+      <div class="df"${buttons.length ? "" : " hidden"}>${buttons.map((b, i) => b.href ? `<a data-i="${i}" class="lbtn" href="${esc(b.href)}" target="_blank" rel="noopener">${esc(b.label)}</a>`
+        : `<button data-i="${i}" class="${b.primary ? "primary" : ""}">${esc(b.label)}</button>`).join("")}</div></div>`;
+    m.hidden = false;
+    const close = v => { m.hidden = true; m.innerHTML = ""; res(v); };
+    m.querySelectorAll(".df button, .df a").forEach(b => b.onclick = () => {
+      const v = buttons[+b.dataset.i].value(m);
+      if (!(kind && b.tagName === "A")) close(v);     // big kid windows stay open until Close
+    });
+    const small = m.querySelector(".dt span:nth-child(2)");
+    if (small) small.onclick = () => close(null);
+    const sx = m.querySelector(".skyx");
+    if (sx) sx.onclick = () => close(null);
+    const big = m.querySelector(".bigclose");
+    if (big) big.onclick = () => close(null);
+    const inp = m.querySelector("input");
+    if (inp) { inp.focus(); inp.addEventListener("keydown", e => { if (e.key === "Enter") close(buttons.find(b => b.primary).value(m)); }); }
+    if (onShow) onShow(m);
+  });
+}
+const msg = (title, text) => dialog({ title, body: `<p>${text}</p>`, buttons: [{ label: "OK", primary: true, value: () => 1 }] });
+const ask = (title, label, password) => dialog({
+  title, body: `<p>${esc(label)}</p><input id="dlgIn" type="${password ? "password" : "text"}" autocomplete="off">`,
+  buttons: [{ label: "OK", primary: true, value: m => m.querySelector("#dlgIn").value }, { label: "Cancel", value: () => null }]
+});
+
+async function lockedDialog(i) {
+  const t = A.topics[i];
+  const r = await dialog({
+    title: "Locked lesson 🔒", icon: A.logo, kind: "sky",
+    body: `<div class="skytitle">🔒 ${t.emoji} ${esc(t.name)}</div><p>Lesson ${i + 1} is locked.</p><p>Lesson 1 is free to try. Ask a grown-up to unlock the rest ⭐</p>`,
+    buttons: [{ label: "⭐ Upgrade", primary: true, value: () => "up" }]
+  });
+  if (r === "up") buyFlow();
+}
+function sunsetMsg(title, heading, text) {
+  return dialog({ title, kind: "sunset", body: `<div class="suntitle">${heading}</div><p>${text}</p>`,
+    buttons: [{ label: "Close", primary: true, value: () => null }] });
+}
+async function buyFlow() {
+  if (window.EMBED_THEME) return embedBuyFlow();
+  const r = await dialog({
+    title: "Upgrade ⭐", kind: "sunset",
+    body: `<div class="suntitle">🌐 The website opens</div><p>The app opens <b>${esc(A.cfg.register_url.replace(/\/register$/, ""))}/account?theme=${esc(A.id)}</b> in the browser.
+      The parent logs in (or the login page comes first), and this app's card is waiting there to buy.</p>
+      <p>While that page is open, the app checks the parent's account every 20 seconds. As soon as the app is bought,
+      every lesson opens here by itself.</p>`,
+    buttons: [{ label: "Pretend the parent paid (preview only)", value: () => "paid" }, { label: "Close", primary: true, value: () => null }]
+  });
+  if (r === "paid") { S().key = true; refreshTopics(); sunsetMsg("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀"); }
+}
+// Opened from Ada The Coder: Upgrade opens the website's pay page; the parent logs in there and pays with
+// Razorpay or PayPal (never in the app). Then the theme unlocks here by itself.
+async function embedBuyFlow() {
+  const usd = window.EMBED_PRICE || "$4.99";
+  const r = await dialog({
+    title: "Upgrade ⭐", kind: "sunset",
+    body: `<div class="suntitle">🌐 The website opens</div><p>The browser opens <b>adathecoder.com/pay?theme=${esc(window.EMBED_THEME)}</b>.
+      The grown-up logs in, then pays ${esc(usd)} with <b>Razorpay</b> (UPI, cards, net banking) or <b>PayPal</b>.</p>
+      <p>As soon as the payment goes through, every lesson opens here by itself.</p>`,
+    buttons: [{ label: "Pretend the grown-up paid (preview only)", value: () => "paid" }, { label: "Close", primary: true, value: () => null }]
+  });
+  if (r !== "paid") return;
+  S().key = true; refreshTopics();
+  try { parent.postMessage({ kind: "kids-paid", theme: window.EMBED_THEME }, "*"); } catch (e) {}
+  sunsetMsg("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀");
+}
+async function askKey() {
+  const k = await ask("Licence key 🔑", `Type the licence key (it looks like ${A.prefix}-XXXX-XXXX-XXXX):`);
+  if (k === null || !k.trim()) return;
+  const n = s => s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (n(k) === n(demoKey())) { S().key = true; refreshTopics(); msg("Unlocked! 🎉", "Every lesson is open now. Have fun coding! 🚀"); }
+  else msg("Licence key 🔑", "That key doesn't work for this app. Check it and try again.");
+}
+function profileDialog() {
+  const email = $("emailIn").value || "alex@kidscodingfun.com";
+  const rows = [["🆔 User ID", "usr_KIDS_1001"], ["👤 Full Name", "Alex Student"], ["📧 Email", email], ["🎓 Role", "Student"],
+    ["🖼️ Avatar", "Default (Ada the Teacher) 🐍"], ["📝 Bio", "Young coder on a coding adventure! 🚀"], ["⚧ Gender", "Not specified"],
+    ["📍 Address", "123 Learning Lane, Kidstown 🌳"], ["🔐 Auth Provider", "local"], ["⚡ Active", "✅ Yes"], ["🗓️ Created At", "2024-01-15T10:30:00Z"]];
+  dialog({
+    title: "Profile 👤", kind: "profile",
+    body: `<div class="prof"><div class="bytecol"><div class="hello">👋 Hi, Alex!</div><img class="byte" src="${A.byte}" alt="Byte the owl waving"></div>
+      <div class="pinfo"><div class="ptitle">👤 My Profile 🌟</div><table>${rows.map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join("")}</table>
+      <p class="pnote">✨ Demo data — no internet or server needed! 🚀</p></div></div>`,
+    buttons: [{ label: "🔑 Change password", href: A.cfg.password_url, value: () => "pw" }]
+  });
+}
+async function licenseDialog() {
+  const total = A.topics.length, locked = A.topics.filter((t, i) => isLocked(i + 1)).length;
+  const status = S().key ? "UNLOCKED ✅ — every lesson is open" : locked ? `${total - locked} of ${total} lessons open 🔒` : "Every lesson is open ✅";
+  const who = A.chars[0], name = who.name.split(" ").slice(1).join(" ").toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) || "a friend";
+  const rows = [["🎫 License Key", S().key ? demoKey() : "none yet"], ["👤 Licensed To", "Alex Student"], ["📧 Email", $("emailIn").value],
+    ["🎯 Plan", "Personal & Educational"], ["⚡ Status", status], ["🔢 Version", A.cfg.version]];
+  await dialog({
+    title: "License 📜", kind: "profile",
+    body: `<div class="prof"><div class="bytecol"><div class="hello">👋 Hi, here's your license details</div><img class="byte" src="${who.img}" alt="${esc(name)} waving"></div>
+      <div class="pinfo"><div class="ptitle">📜 ${esc(A.cfg.name)}</div><table class="lic">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join("")}</table>
+      <p class="lnote"><b>📜 License:</b> Personal &amp; educational use only.</p>
+      <p class="lnote gap">This software is provided "as is", without warranty of any kind.</p></div></div>`,
+    buttons: []
+  });
+}
+
+/* ---------- login / register (the demo log-in from 3-General.py) ---------- */
+function setEnabled(on) { ["homeBtn", "themeBtn", "musicBtn", "avatarBtn"].forEach(id => $(id).disabled = !on); }
+function busy(on, text) {
+  $("loginBar").hidden = !on;
+  ["loginBtn", "modeBtn", "emailIn", "passIn", "nameIn"].forEach(id => $(id).disabled = on);
+  $("loginBtn").textContent = on ? "⏳ Please wait..." : (mode === "login" ? "🚀 LOGIN & START LEARNING ⭐" : "📝 REGISTER & START ⭐");
+  if (text) status(text, "#2563eb");
+}
+function status(t, c) { $("loginStatus").textContent = t; $("loginStatus").style.color = c; }
+function setMode(m) {
+  mode = m;
+  $("nameWrap").hidden = m === "login";
+  $("loginTitle").textContent = m === "login" ? "WELCOME! 🎉" : "CREATE ACCOUNT 🚀";
+  $("loginSub").textContent = m === "login" ? A.cfg.login_subtitle : "Join the adventure — it only takes a second ✨";
+  $("loginBtn").textContent = m === "login" ? "🚀 LOGIN & START LEARNING ⭐" : "📝 REGISTER & START ⭐";
+  $("modeBtn").textContent = m === "login" ? "New here? Create an account ✨" : "Already have an account? Login 🔑";
+  status("", "#dc2626");
+}
+$("modeBtn").addEventListener("click", () => status("🌐 The sign-up page opened in your browser. Come back and log in! ✨", "#2563eb"));
+$("loginForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const email = $("emailIn").value.trim(), pass = $("passIn").value;
+  if (mode === "login") {
+    if (!email || !pass) { status("❌ Please enter both email and password.", "#dc2626"); return; }
+    busy(true, "⏳ Logging in...");
+    setTimeout(() => {
+      busy(false); loggedIn = true;
+      status("✅ Welcome, Alex Student! 🎉", "#16a34a");
+      setEnabled(true);
+      sideCollapsed = false; $("side").hidden = false; $("sideToggle").hidden = false; $("sideToggle").textContent = ">>"; placeToggle();
+      $("logoutBtn").hidden = false;
+      refreshTopics();
+      setTimeout(() => $("login").hidden = true, 1200);
+    }, 900);
+  } else {
+    const name = $("nameIn").value.trim();
+    if (!name) return status("❌ Please enter your full name.", "#dc2626");
+    if (!email) return status("❌ Please enter your email.", "#dc2626");
+    if (!pass) return status("❌ Please enter a password.", "#dc2626");
+    busy(true, "⏳ Creating your account...");
+    setTimeout(() => { busy(false); setMode("login"); status("✅ Account created! You can login now. 🎉", "#16a34a"); $("passIn").value = ""; }, 900);
+  }
+});
+function logout() {
+  loggedIn = false; show("home"); setEnabled(false);
+  $("side").hidden = true; $("sideToggle").hidden = true; $("logoutBtn").hidden = true; $("menu").hidden = true;
+  $("emailIn").value = "kid@codingfun.com"; $("passIn").value = "kid123"; $("nameIn").value = ""; setMode("login");
+  $("login").hidden = false;
+}
+$("logoutBtn").onclick = logout;
+
+/* ---------- intro video: after log-in, in the lesson video player; then the home screen ---------- */
+const fmt = t => { t = Math.max(0, Math.floor(t || 0)); return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0"); };
+let missingTimer = null;
+function playIntro() {
+  // Each lesson plays its own video (lessons.py → "video"). Those files aren't in this package yet,
+  // so the preview shows which file the lesson will play, then opens the coding page.
+  const v = $("introVid"), L = A.lessons[A.topics[cur].id];
+  show("intro");
+  clearTimeout(missingTimer);
+  v.pause();
+  const file = String(L.video || "").split(/[\\/]/).pop();
+  const url = (window.VIDEO_URLS || {})[file];
+  if (url) {                                   // the lesson's real video (uploaded with the preview)
+    $("vMissing").hidden = true;
+    v.src = url; v.currentTime = 0; v.muted = false;
+    v.play().catch(() => { v.muted = true; $("vMute").textContent = "🔇"; v.play().catch(() => {}); });
+    return;
+  }
+  $("vMissing").hidden = false;
+  $("vMissing").innerHTML = `<div class="big">🎬</div><div>${esc(L.title)}</div>
+    <div class="file">${esc(L.video || "(no video set)")}</div>
+    <div class="small">This lesson's own video plays here in the app. The video file isn't uploaded yet, so the coding page opens in a moment.</div>`;
+  $("vTime").textContent = "00:00"; $("vDur").textContent = "00:00"; $("vSeek").value = 0;
+  missingTimer = setTimeout(() => { if (!$("vstage").hidden) endIntro(); }, 4000);
+}
+function endIntro() { clearTimeout(missingTimer); show("lesson"); pushLesson(); }
+$("vStop").onclick = endIntro;
+$("introVid").addEventListener("ended", endIntro);
+$("introVid").addEventListener("play", () => { $("vPlay").textContent = "⏸ Pause"; document.body.classList.add("vplaying"); });
+$("introVid").addEventListener("pause", () => { $("vPlay").textContent = "▶ Play"; document.body.classList.remove("vplaying"); });
+$("introVid").addEventListener("timeupdate", () => {
+  const v = $("introVid");
+  $("vTime").textContent = fmt(v.currentTime); $("vDur").textContent = fmt(v.duration);
+  if (v.duration) $("vSeek").value = Math.round(v.currentTime / v.duration * 1000);
+});
+$("vSeek").addEventListener("input", () => { const v = $("introVid"); if (v.duration) v.currentTime = $("vSeek").value / 1000 * v.duration; });
+$("vPlay").onclick = () => { const v = $("introVid"); v.paused ? v.play().catch(() => {}) : v.pause(); };
+function volLook() { const v = $("introVid"), off = v.muted || v.volume === 0; $("vMute").textContent = off ? "🔇" : "🔊"; $("vVol").value = off ? 0 : Math.round(v.volume * 100); }
+$("vMute").onclick = () => { const v = $("introVid"); v.muted = !v.muted; if (!v.muted && v.volume === 0) v.volume = 1; volLook(); };
+$("vVol").addEventListener("input", () => { const v = $("introVid"); v.volume = $("vVol").value / 100; v.muted = v.volume === 0; volLook(); });
+$("introVid").addEventListener("volumechange", volLook);
+$("restart").onclick = logout;
+
+/* ---------- app switcher ---------- */
+function pick(i) {
+  ai = i; A = APPS[i];
+  $("app0").setAttribute("aria-pressed", i === 0); $("app1").setAttribute("aria-pressed", i === 1);
+  dark = false; cur = 0; renderApp(); logout();
+}
+$("app0").onclick = () => pick(0);
+$("app1").onclick = () => pick(1);
+
+buildScene(); renderApp(); fit(); logout();
+</script>

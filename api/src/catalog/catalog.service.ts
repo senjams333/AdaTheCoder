@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { spawn } from 'child_process';
+import { existsSync } from 'fs';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
 import { Repository } from 'typeorm';
@@ -57,6 +59,9 @@ export class CatalogService {
   lessonPayload(l: Lesson) {
     const video: Record<string, unknown> = { bundled: l.videoBundled };
     if (l.videoFile) Object.assign(video, { file: l.videoFile, size: Number(l.videoSize), url: mediaUrl('videos', l.videoFile) });
+    // the WebM copy the app's window plays (made by webmCopy after the upload, when the server has ffmpeg)
+    const webm = l.videoFile ? l.videoFile.replace(/\.[^.]+$/, '') + '.webm' : '';
+    if (webm && existsSync(join(uploadDir('videos'), webm))) Object.assign(video, { webm_file: webm, webm_url: mediaUrl('videos', webm) });
     return {
       id: l.slug, position: l.position, emoji: l.emoji, name: l.name, title: l.title, subtitle: l.subtitle,
       video, default_code: l.defaultCode, examples: l.examples || [],
@@ -84,8 +89,25 @@ export class CatalogService {
     return rows.filter((r) => r.licence && r.course).map((r) => r.course.slug);
   }
 
+  /** The app's window plays WebM, not MP4: an uploaded lesson video also gets a light 720p WebM copy, made in the
+   *  background with ffmpeg (sudo apt install ffmpeg on the server). Without ffmpeg the app plays nothing new. */
+  webmCopy(file: string) {
+    const src = join(uploadDir('videos'), file);
+    const out = src.replace(/\.[^.]+$/, '') + '.webm';
+    const part = out + '.part.webm';
+    const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-i', src, '-vf', 'scale=-2:720', '-r', '25', '-c:v', 'libvpx', '-b:v', '1400k',
+      '-crf', '10', '-deadline', 'good', '-cpu-used', '4', '-c:a', 'libvorbis', '-b:a', '96k', part], { stdio: 'ignore' });
+    ff.on('error', () => undefined);                       // no ffmpeg on this server
+    ff.on('close', async (code) => {
+      const { rename } = await import('fs/promises');
+      if (code === 0) await rename(part, out).catch(() => undefined);
+      else await unlink(part).catch(() => undefined);
+    });
+  }
+
   async removeUpload(kind: 'videos' | 'courses' | 'releases', file: string | null | undefined) {
     if (!file) return;
+    if (kind === 'videos') await unlink(join(uploadDir(kind), file.replace(/\.[^.]+$/, '') + '.webm')).catch(() => undefined);
     try {
       await unlink(join(uploadDir(kind), file));
     } catch {

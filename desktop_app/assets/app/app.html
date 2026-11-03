@@ -305,7 +305,7 @@ body.night { background: #070b24; }
 const D = JSON.parse(document.getElementById("data").textContent);
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-let course = D.courses.find(c => c.id === "python_adventure") || D.courses[0];
+let course = D.courses.find(c => c.id === D.lastCourse) || D.courses.find(c => c.id === "python_adventure") || D.courses[0];
 let index = 0, dark = false, music = false, page = "home", frameReady = false, videoTimer = null;
 const done = {};          // course id -> Set of finished lesson ids
 const img = n => D.images[n] || "";
@@ -363,9 +363,9 @@ function renderHome() {
   $("tcards").innerHTML = D.courses.slice().sort((a, b) => (b.id === course.id) - (a.id === course.id) || (a.premium ? 1 : 0) - (b.premium ? 1 : 0) || (a.position || 0) - (b.position || 0)).map(c => {
     const pk = D.packs[c.pack] || D.packs.friends, cur = c.id === course.id, own = owned(c);
     const bought = freeCount(c) !== null && own;
-    const badge = bought ? "✓ Purchased" : own ? "Free" : c.price;
+    const badge = bought ? "✓ Purchased" : own ? "Free" : "";
     return `<div class="tcard${cur ? " cur" : ""}" data-id="${c.id}"><div class="pics">${heroPics(c).map(u => u ? `<img src="${u}" alt="">` : "").join("")}</div>
-      <div class="tn">${esc(c.name)}</div><div class="about">${esc(c.description || c.tagline || "")}</div><span class="badge${bought ? " bought" : own ? " free" : " price"}">${esc(badge)}</span><button>✨  Try free</button></div>`;
+      <div class="tn">${esc(c.name)}</div><div class="about">${esc(c.description || c.tagline || "")}</div>${badge ? `<span class="badge${bought ? " bought" : " free"}">${esc(badge)}</span>` : ""}<button>✨  Try free</button></div>`;
   }).join("");
   $("tcards").querySelectorAll(".tcard").forEach(t => t.onclick = () => openKids(t.dataset.id));
   setTimeout(moreArrow, 0);
@@ -521,13 +521,38 @@ function openKids(id) {
   $("kloadImg").src = heroPics(course)[0] || img("ada_logo.png"); $("kloadText").textContent = `Opening ${course.name}…`;
   const bar = ld.querySelector(".kbar i"); bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = "";
   ld.hidden = false;
-  setTimeout(() => host && host.playTheme(course.id), 900);
+  kidsReady = false; kidsTimeUp = false;
+  host && host.playTheme(course.id);                    // the app makes the theme's page: themePage below
+  setTimeout(() => { kidsTimeUp = true; showKids(); }, 900);
 }
-// the theme's window closed (<< Back / Home Screen), or the child logged out there
+let kidsReady = false, kidsTimeUp = false;
+function themePage(html) { $("kids").srcdoc = html; }
+function showKids() {
+  if (!kidsReady || !kidsTimeUp) return;
+  $("kload").hidden = true; $("kids").classList.add("on"); $("kids").focus();
+  $("scene").hidden = true;                             // the home sky rests behind the theme (less work for the computer)
+}
+function closeKids() {
+  $("kids").classList.remove("on"); $("kids").srcdoc = ""; $("scene").hidden = false;
+  host && host.themeClosedByPage();
+  show("home");
+}
+// the theme couldn't open (or the child logged out there)
 function themeClosed(loggedOut) {
-  $("kload").hidden = true;
+  $("kload").hidden = true; $("kids").classList.remove("on"); $("kids").srcdoc = ""; $("scene").hidden = false;
   if (loggedOut) { host && host.logout(); D.user = null; showLogin(); } else show("home");
 }
+addEventListener("message", e => {
+  if (e.data === "kids-close") closeKids();
+  if (e.data === "kids-logout") { closeKids(); host && host.logout(); D.user = null; LICENCES = []; showLogin(); }
+  if (e.data === "kids-ready") { kidsReady = true; showKids(); }
+});
+// the theme page's code runs in the app (web_app.py LessonRunner); its answers come back through lessonCall
+const K = () => $("kids").contentWindow;
+window.appRunCode = code => host && host.runCode(code);
+window.appSubmitInput = v => host && host.submitInput(v);
+window.appEmptyInput = () => host && host.emptyInput();
+window.appUpgrade = id => host && host.upgrade(id);
 
 /* ---------- log-in: before the home screen ---------- */
 let loginMode = "login";
@@ -589,6 +614,10 @@ if (window.qt && window.QWebChannel) new QWebChannel(qt.webChannelTransport, ch 
   host.loginDone.connect(j => loginDone(JSON.parse(j)));
   host.dataChanged.connect(j => dataChanged(JSON.parse(j)));
   host.themeClosed.connect(loggedOut => themeClosed(loggedOut));
+  host.themePage.connect(html => themePage(html));
+  host.lessonCall.connect((fn, args) => { try { K().__lessonCall(fn, JSON.parse(args)); } catch (e) { console.warn(e); } });
+  host.themeUpdate.connect(j => { try { K().__updateApp(JSON.parse(j)); } catch (e) {} });
+  host.themeUnlock.connect(() => { try { K().__unlockAll(); } catch (e) {} });
   host.message.connect(t => toast(t));
 });
 

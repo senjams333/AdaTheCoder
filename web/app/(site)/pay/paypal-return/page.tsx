@@ -27,10 +27,11 @@ function ReturnInner() {
           <img className="peek" src="/img/byte.webp" alt="" />
           {paid ? (
             <>
-              <h1>Unlocked! 🎉</h1>
+              <div className="pay-done-icon" aria-hidden="true">✓</div>
+              <h1>Payment successful 🎉</h1>
               <p className="sub">{paid.message}</p>
               <div className="pay-licence"><span>Your licence</span><b>{paid.licence}</b></div>
-              <p className="sub">Keep this code. It is also on your <Link href={`/account?theme=${encodeURIComponent(paid.theme)}`}>account page</Link>.
+              <p className="sub">We&apos;ve emailed it to you too. It is also on your <Link href={`/account?theme=${encodeURIComponent(paid.theme)}`}>account page</Link>.
                 You can close this page and go back to Ada The Coder.</p>
             </>
           ) : (
