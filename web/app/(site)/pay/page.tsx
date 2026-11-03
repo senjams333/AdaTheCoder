@@ -145,11 +145,13 @@ function PayInner() {
                   </button>
                 )}
                 {!page.methods.razorpay && !page.methods.paypal && (
-                  <p className="sub">Online payment isn&apos;t switched on yet. Please write to us to get a licence.</p>
+                  <p className="sub">Online payment isn&apos;t available right now. Please write to us and we&apos;ll send you a licence.</p>
                 )}
               </div>
-              <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.<br />
-                By paying you agree to the <Link href="/terms">terms</Link>. Not happy? <Link href="/refunds">7-day refund</Link>.</p>
+              {(page.methods.razorpay || page.methods.paypal) && (
+                <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.<br />
+                  By paying you agree to the <Link href="/terms">terms</Link>. Not happy? <Link href="/refunds">7-day refund</Link>.</p>
+              )}
             </>
           )}
         </div>
