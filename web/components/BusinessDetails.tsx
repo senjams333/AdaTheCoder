@@ -5,7 +5,7 @@ import { useGetSiteQuery } from '@/lib/api';
 /** Who runs Ada The Coder and how to reach them (Admin → Website text → Business details). */
 export function useContact() {
   const { data } = useGetSiteQuery();
-  const s = data?.settings || {};
+  const s: Record<string, string> = data?.settings || {};
   return { email: s.contact_email || 'ada@adathecoder.com', details: (s.business_details || '').trim() };
 }
 
