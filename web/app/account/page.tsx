@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useEffect, useRef, useState } from 'react';
 import Flashes, { FormErrors } from '@/components/Flashes';
 import InstallHelp from '@/components/InstallHelp';
+import SiteHeader from '@/components/SiteHeader';
 import Modal from '@/components/Modal';
 import {
   api, useChangePasswordMutation, useDeleteAccountMutation, useDownloadLinkMutation, useGetAccountQuery, useGetSiteQuery,
@@ -50,7 +51,7 @@ function AccountInner() {
       const side = sideRef.current;
       if (!side || window.innerWidth === lastWidth) return;
       lastWidth = window.innerWidth;
-      const h = Math.min(window.innerHeight, (screen.availHeight || window.innerHeight) - 100) - 32;
+      const h = Math.min(window.innerHeight, (screen.availHeight || window.innerHeight) - 100) - 32 - 84;   // 84: the top panel
       side.style.setProperty('--sidebar-h', `${Math.max(520, Math.round(h))}px`);
     };
     size();
@@ -80,6 +81,7 @@ function AccountInner() {
     <>
       <a className="skip" href="#apps">Skip to your apps</a>
       {site?.settings.site_banner ? <div className="banner">{site.settings.site_banner}</div> : null}
+      <SiteHeader />
       <div className="acct-page">
         <div className="wrap acct-wrap">
           <div className="acct-layout">
