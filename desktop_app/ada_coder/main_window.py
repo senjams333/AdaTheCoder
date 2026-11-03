@@ -588,7 +588,9 @@ class MainWindow(QMainWindow):
     # ================================================================== look and sound
     def _js(self, function, *args):
         import json
-        self.web.page().runJavaScript(f"{function}({', '.join(json.dumps(a) for a in args)});")
+        # the lesson page may still be loading: then the call is skipped (it's sent again once the page has loaded)
+        call = f"{function}({', '.join(json.dumps(a) for a in args)});"
+        self.web.page().runJavaScript(f"if (typeof {function} === 'function') {{ {call} }}")
 
     def _page_loaded(self, ok):
         self.page_ready = ok
