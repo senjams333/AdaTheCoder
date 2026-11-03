@@ -244,12 +244,12 @@ export class AuthService {
   }
 
   /** The desktop app's own token: it only reads the family's licences and opens pay links. */
-  appToken(user: User): string {
+  appToken(user: { id: number }): string {
     return this.jwt.sign({ sub: user.id, purpose: 'app' }, { expiresIn: '365d' });
   }
 
   /** A 15-minute link for paying for one theme on the website, opened from the app's Upgrade card. */
-  payToken(user: User): string {
+  payToken(user: { id: number }): string {
     return this.jwt.sign({ sub: user.id, purpose: 'pay' }, { expiresIn: '15m' });
   }
 
