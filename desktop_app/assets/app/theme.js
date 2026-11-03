@@ -14,7 +14,17 @@
   $("logoutBtn").onclick = back;
   $("logoutBtn").textContent = "<< Back";
   $("logoutBtn").title = "Back to Ada The Coder";
-  fit();
+  // the same picture as the preview, made bigger or smaller to fill the whole window
+  function fill() {
+    var s = Math.min(innerWidth / 1280, innerHeight / 748), w = $("win");
+    w.style.transformOrigin = "0 0";
+    w.style.transform = "scale(" + s + ")";
+    w.style.width = innerWidth / s + "px";
+    w.style.height = innerHeight / s + "px";
+    placeToggle();
+  }
+  addEventListener("resize", fill);
+  fit(); fill();
   (function ready() {
     if (!$("side").hidden) { parent.postMessage("kids-ready", "*"); return; }
     setTimeout(ready, 50);

@@ -120,7 +120,6 @@ def theme_page(c, licences):
             'html, body { height: 100%%; overflow: hidden; margin: 0; } '
             '.wrap { padding: 0 !important; max-width: none !important; margin: 0 !important; height: 100%%; } '
             '.stage { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; box-shadow: none !important; } '
-            '.win { width: 100vw !important; height: 100vh !important; transform: none !important; } '
             '.titlebar { display: none !important; } .central { top: 0 !important; } '
             '.overlay, .modal { top: 0 !important; inset: 0 !important; } #logoutBtn { top: 18px !important; } '
             '%s</style>\n'
