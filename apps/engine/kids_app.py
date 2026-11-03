@@ -65,7 +65,7 @@ LOGO = CONFIG["logo"]
 
 from PyQt5.QtCore import QProcess, Qt, QUrl, QPropertyAnimation, QEasingCurve, QPoint, QObject, pyqtSlot, pyqtSignal, QTimer, QEvent
 from PyQt5.QtGui import (QFont, QPixmap, QColor, QPalette, QIcon, QPainter, QPainterPath, QTransform,
-                         QLinearGradient, QRadialGradient, QBrush, QPen)
+                         QLinearGradient, QRadialGradient, QBrush, QPen, QRegion)
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, QScrollArea, QFrame, QGraphicsDropShadowEffect, QStackedWidget, QLineEdit, QMessageBox, QSlider, QProgressBar, QToolButton, QMenu, QAction,
@@ -75,7 +75,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget, QGraphicsVideoItem
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
-from PyQt5.QtCore import QSizeF, QPointF
+from PyQt5.QtCore import QSizeF, QPointF, QRectF
 
 
 class ClickableSlider(QSlider):
@@ -1112,6 +1112,13 @@ class VideoView(QGraphicsView):
         self.item.setPos(0, 0)
         self.item.setSize(QSizeF(r.width(), r.height()))
         self.scene().setSceneRect(0, 0, r.width(), r.height())
+        # round corners: the video is cut to the same rounded shape as its yellow border (no square corners outside it)
+        outer = QPainterPath()
+        outer.addRoundedRect(QRectF(self.rect()), 35, 35)
+        self.setMask(QRegion(outer.toFillPolygon().toPolygon()))
+        inner = QPainterPath()
+        inner.addRoundedRect(QRectF(r), 29, 29)
+        self.viewport().setMask(QRegion(inner.toFillPolygon().toPolygon()))
 
 
 class SceneWidget(QWidget):
@@ -1861,7 +1868,15 @@ class MainWindow(QMainWindow):
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setStyleSheet("background: transparent; border: none;")
+        # a slim, rounded scroll bar (no square arrows)
+        scroll_area.setStyleSheet("""
+            QScrollArea { background: transparent; border: none; }
+            QScrollBar:vertical { background: rgba(255, 255, 255, 0.55); width: 12px; margin: 6px 2px; border-radius: 6px; }
+            QScrollBar::handle:vertical { background: #38bdf8; min-height: 40px; border-radius: 6px; }
+            QScrollBar::handle:vertical:hover { background: #0284c7; }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; border: none; background: none; }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
+        """)
 
         scroll_content = QWidget()
         scroll_content.setStyleSheet("background: transparent;")
