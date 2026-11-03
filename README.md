@@ -119,6 +119,25 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
 | `POST /pay/razorpay/verify`, `POST /pay/razorpay/webhook`, `POST /pay/paypal/capture` | Payment confirmations, checked with the Razorpay secrets or with PayPal itself; then the family gets a licence (`ADA-XXXX-XXXX-XXXX`) |
 | `/media/videos/...`, `/media/courses/...` | Uploaded lesson videos and theme pictures (outside `/api`) |
 
+## How the website controls the installed app
+
+| The admin does this on the website | What the installed app does (at start, then every 3 minutes) |
+| --- | --- |
+| **Themes & lessons → Add a theme**, ticks *Show this theme in the app*, adds at least one live lesson | A new theme card appears on the home screen; **Try free** opens it with its own characters and lessons |
+| Edits or adds lessons, examples, videos; changes a theme's price or free lessons | The theme shows the new lessons, videos, price and locks |
+| **Website text → Ada The Coder app: home screen**: greeting, which characters | The home screen's greeting and characters change |
+| **Website text → Message in the app** | A pop-up, once per new message |
+| **Parents** → gives or removes a licence (or the parent pays on the pay page) | The theme unlocks (✓ Purchased) or locks again |
+| **App versions** → uploads a new installer | The app tells the family a new version is ready |
+
+## Installing the app
+
+- **Windows**: `desktop_app\build_windows.bat` makes `AdaTheCoder-<version>-Windows-Setup.exe` (or GitHub builds it: `.github/workflows/build-apps.yml`).
+- **Mac**: `bash desktop_app/build_mac.sh` makes the `.dmg`.
+- **Ubuntu / Linux**: `bash desktop_app/install_linux.sh` installs it with an icon in the app menu (search *Ada The Coder*);
+  `bash desktop_app/install_linux.sh http://127.0.0.1:5000` makes it use your test website. Uninstall:
+  `bash ~/.local/share/ada-the-coder/uninstall.sh`.
+
 ## Payments (Razorpay and PayPal)
 
 A child presses a locked lesson → the Upgrade card → **⭐ Upgrade** opens the website's `/pay` page for that theme.
