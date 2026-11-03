@@ -20,7 +20,7 @@ from .styles import font
 from .widgets import pill, round_pixmap
 
 CARD_QSS = """
-QFrame#LoginCard { background: #ffffff; border-radius: 32px; }
+QFrame#LoginCard { background: rgba(255, 255, 255, 245); border: 4px solid #ffffff; border-radius: 30px; }
 QLabel { color: #1e1b4b; background: transparent; }
 QLabel#FieldLabel { color: #5b2fe0; font-weight: bold; }
 QLabel#Status { font-weight: bold; }
@@ -44,7 +44,8 @@ class LoginOverlay(QFrame):
         self.mode = "login"
         self.pending = None
         self.setObjectName("LoginOverlay")
-        self.setStyleSheet("QFrame#LoginOverlay { background: rgba(17, 12, 46, 0.45); }")
+        # as in the preview: only a light veil over the sky behind the log-in card
+        self.setStyleSheet("QFrame#LoginOverlay { background: rgba(15, 23, 42, 0.25); }")
 
         outer = QVBoxLayout(self)
         outer.setAlignment(Qt.AlignCenter)
@@ -56,7 +57,7 @@ class LoginOverlay(QFrame):
         shadow = QGraphicsDropShadowEffect(self.card)
         shadow.setBlurRadius(50)
         shadow.setOffset(0, 12)
-        shadow.setColor(QColor(30, 27, 75, 90))
+        shadow.setColor(QColor(56, 189, 248, 170))       # a soft sky-blue glow, not a dark shadow
         self.card.setGraphicsEffect(shadow)
 
         lay = QVBoxLayout(self.card)
