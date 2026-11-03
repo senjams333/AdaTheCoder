@@ -43,6 +43,8 @@ export interface Theme {
   price: string;
   /** Razorpay's price in rupees ('' = not offered) */
   priceInr: string;
+  /** a Razorpay Payment Button id (pl_...), or '' */
+  razorpayButton?: string;
   premium: boolean;
   freeLessons: number;
   imageFile: string;

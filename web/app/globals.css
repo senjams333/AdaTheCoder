@@ -777,3 +777,6 @@ a.course-pic img { transition: transform .2s; }
 .pay-licence b { font: 700 1.25rem ui-monospace, Menlo, Consolas, monospace; letter-spacing: .04em; }
 .acct-pay-note { display: block; text-align: center; font-size: .8rem; color: var(--ink-soft); margin-top: 6px; }
 .biz { font-style: normal; line-height: 1.7; color: var(--ink-soft); margin-top: 8px; }
+.pay-rzp-button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px; border: 2px solid #0b72e7;
+  border-radius: 16px; background: #f0f7ff; }
+.pay-rzp-button small { font-size: .82rem; color: var(--ink-soft); }

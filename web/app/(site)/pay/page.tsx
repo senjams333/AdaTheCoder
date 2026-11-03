@@ -133,6 +133,12 @@ function PayInner() {
               <FormErrors errors={errors} />
               <div className="pay-methods">
                 {/* both buttons always show; one that isn't set up yet says what's missing when pressed */}
+                {page.methods.razorpay?.button ? (
+                  <div className="pay-rzp-button">
+                    <RazorpayPaymentButton id={page.methods.razorpay.button} />
+                    <small>UPI · cards · net banking (India). On Razorpay&apos;s form, use <b>{page.user.email}</b> so the theme unlocks for this account.</small>
+                  </div>
+                ) : (
                 <button type="button" className="btn pay-razorpay" disabled={!!busy}
                   onClick={() => (page.methods.razorpay ? razorpay() : setErrors([!page.theme.priceInr
                     ? 'Razorpay needs this theme\'s price in rupees: in the admin, open the theme → Settings → Price in rupees.'
@@ -141,6 +147,7 @@ function PayInner() {
                     : `Pay ${page.methods.razorpay?.label || (page.theme.priceInr ? `₹${page.theme.priceInr}` : '')} with Razorpay`.replace('Pay  with', 'Pay with')}
                   <small>UPI · cards · net banking (India)</small>
                 </button>
+                )}
                 <button type="button" className="btn pay-paypal" disabled={!!busy}
                   onClick={() => (page.methods.paypal ? paypal() : setErrors([
                     'PayPal isn\'t switched on yet: add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in api/.env, then restart the website.']))}>
@@ -156,6 +163,23 @@ function PayInner() {
       </section>
     </div>
   );
+}
+
+/** Razorpay's own Payment Button (made in the Razorpay dashboard: Payment Button → pl_...). Razorpay's script turns the
+ *  form into its "Pay Now" button; the payment is confirmed to us by Razorpay's webhook, which unlocks the theme. */
+function RazorpayPaymentButton({ id }: { id: string }) {
+  const form = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const f = form.current;
+    if (!f) return;
+    f.innerHTML = '';
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/payment-button.js';
+    s.async = true;
+    s.dataset.payment_button_id = id;
+    f.appendChild(s);
+  }, [id]);
+  return <form ref={form} />;
 }
 
 export default function PayPage() {

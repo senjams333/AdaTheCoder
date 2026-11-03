@@ -48,6 +48,7 @@ export class PaymentsService {
     private readonly catalog: CatalogService,
     @InjectRepository(Payment) private readonly payments: Repository<Payment>,
     @InjectRepository(Licence) private readonly licences: Repository<Licence>,
+    @InjectRepository(User) private readonly users: Repository<User>,
   ) {}
 
   // ------------------------------------------------------------------ what can be paid, and how
@@ -66,12 +67,20 @@ export class PaymentsService {
     return course;
   }
 
-  /** The ways this theme can be paid for: { razorpay: {amount, currency, label} | null, paypal: ... } */
+  /** A Razorpay Payment Button made in the Razorpay dashboard (Payment Button → pl_...): the theme's own, or the .env one. */
+  buttonFor(course: Course): string {
+    return course.razorpayButton || this.config.get<string>('RAZORPAY_PAYMENT_BUTTON_ID') || '';
+  }
+
+  /** The ways this theme can be paid for: { razorpay: {amount, currency, label, button?} | null, paypal: ... }
+   *  razorpay.button: the pay page shows Razorpay's own Payment Button instead of opening Checkout with an order. */
   methods(course: Course) {
     const inr = minorUnits(course.priceInr);
     const usd = minorUnits(course.price);
+    const button = this.buttonFor(course);
     return {
-      razorpay: this.razorpayKey && this.razorpaySecret && inr ? { amount: inr, currency: 'INR', label: `₹${course.priceInr}` } : null,
+      razorpay: button ? { amount: inr || 0, currency: 'INR', label: course.priceInr ? `₹${course.priceInr}` : '', button }
+        : this.razorpayKey && this.razorpaySecret && inr ? { amount: inr, currency: 'INR', label: `₹${course.priceInr}` } : null,
       paypal: this.paypalClient && this.paypalSecret && usd ? { amount: usd, currency: this.paypalCurrency, label: course.price } : null,
     };
   }
@@ -121,7 +130,9 @@ export class PaymentsService {
   // ------------------------------------------------------------------ Razorpay
   async razorpayOrder(user: User, course: Course) {
     const price = this.methods(course).razorpay;
-    if (!price) throw new BadRequestException(['Razorpay is not available for this theme.']);
+    if (!price || !price.amount || !this.razorpayKey || !this.razorpaySecret) {
+      throw new BadRequestException(['Razorpay is not available for this theme.']);
+    }
     const order = await this.provider('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
@@ -163,14 +174,38 @@ export class PaymentsService {
     if (!sameText(expected, signature)) throw new BadRequestException('bad signature');
     const event = JSON.parse(raw.toString('utf8'));
     const entity = event?.payload?.payment?.entity;
-    if (!['payment.captured', 'order.paid'].includes(event?.event) || !entity?.order_id) return { ok: true, ignored: true };
+    if (!['payment.captured', 'order.paid'].includes(event?.event) || !entity) return { ok: true, ignored: true };
+    if (!entity.order_id) return this.paymentButtonPaid(entity);
     const payment = await this.payments.findOne({ where: { orderId: String(entity.order_id), provider: 'razorpay' } });
-    if (!payment) return { ok: true, ignored: true };
+    if (!payment) return this.paymentButtonPaid(entity);
     if (Number(entity.amount) !== payment.amount) {
       this.log.error(`Razorpay ${payment.orderId}: paid ${entity.amount}, expected ${payment.amount}`);
       return { ok: true, ignored: true };
     }
     await this.grant(payment, String(entity.id || ''));
+    return { ok: true };
+  }
+
+  /** A payment through a Razorpay Payment Button: no order of ours, so the parent is found by the email typed on
+   *  Razorpay's form, and the theme by the button (or, failing that, by the amount among themes with a button). */
+  private async paymentButtonPaid(entity: Record<string, any>) {
+    if (entity.status && entity.status !== 'captured') return { ok: true, ignored: true };
+    const email = String(entity.email || entity.notes?.email || '').trim().toLowerCase();
+    const user = email ? await this.users.findOne({ where: { email } }) : null;
+    const themes = (await this.catalog.courses.find({ where: { premium: true } }))
+      .filter((c) => this.buttonFor(c) && minorUnits(c.priceInr) === Number(entity.amount));
+    const buttonId = String(entity.payment_button_id || entity.notes?.payment_button_id || '');
+    const byButton = buttonId ? themes.filter((c) => this.buttonFor(c) === buttonId) : [];
+    const course = byButton.length === 1 ? byButton[0] : themes.length === 1 ? themes[0] : null;
+    if (!user || !course) {
+      this.log.warn(`Razorpay button payment ${entity.id} (${email || 'no email'}, ${entity.amount}): no matching `
+        + `${user ? 'theme (give each theme its own button and price in rupees)' : 'parent account (they must use their account email)'}`);
+      return { ok: true, ignored: true };
+    }
+    const existing = await this.payments.findOne({ where: { orderId: String(entity.id) } });
+    const payment = existing || await this.payments.save({ userId: user.id, courseId: course.id, provider: 'razorpay-button',
+      orderId: String(entity.id), amount: Number(entity.amount), currency: String(entity.currency || 'INR') });
+    await this.grant(payment, String(entity.id));
     return { ok: true };
   }
 

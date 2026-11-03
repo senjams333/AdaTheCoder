@@ -17,9 +17,9 @@ export async function payCall<T>(path: string, token: string | null, body?: unkn
   return data as T;
 }
 
-export interface PayMethod { amount: number; currency: string; label: string }
+export interface PayMethod { amount: number; currency: string; label: string; button?: string }
 export interface PayPage {
-  theme: { slug: string; name: string; tagline: string; images: string[]; featureList: string[]; price: string; priceInr: string };
+  theme: { slug: string; name: string; tagline: string; images: string[]; featureList: string[]; price: string; priceInr: string; razorpayButton?: string };
   licence: string | null;
   methods: { razorpay: PayMethod | null; paypal: PayMethod | null };
   user: { name: string; email: string };

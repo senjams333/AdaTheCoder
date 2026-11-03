@@ -169,7 +169,7 @@ describe('Ada The Coder API', () => {
     const t = decodeURIComponent(link.body.url.split('&t=')[1]);
     // the pay page with that link: Priya already owns Space; no payment keys in tests, so no methods
     const page = await request(http).get('/api/pay/space').set('Authorization', `Bearer ${t}`).expect(200);
-    expect(page.body).toMatchObject({ licence: 'ADA-SPACE-1', methods: { razorpay: null, paypal: null } });
+    expect(page.body).toMatchObject({ licence: 'ADA-SPACE-1', methods: { paypal: null } });
     await request(http).get('/api/pay/space').expect(401);
     await request(http).get('/api/account').set('Authorization', `Bearer ${t}`).expect(401);
     await request(http).post('/api/pay/space/razorpay').set('Authorization', `Bearer ${t}`).expect(400);

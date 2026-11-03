@@ -42,6 +42,10 @@ export class Course {
   @Column({ name: 'price_inr', length: 30, default: '' })
   priceInr!: string;
 
+  /** A Razorpay Payment Button for this theme (pl_...); empty: RAZORPAY_PAYMENT_BUTTON_ID from .env, if any */
+  @Column({ name: 'razorpay_button', length: 40, default: '' })
+  razorpayButton!: string;
+
   @Column({ default: false })
   premium!: boolean;
 
