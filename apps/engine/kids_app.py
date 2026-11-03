@@ -64,7 +64,7 @@ APP_ID = CONFIG["id"]
 LOGO = CONFIG["logo"]
 
 from PyQt5.QtCore import QProcess, Qt, QUrl, QPropertyAnimation, QEasingCurve, QPoint, QObject, pyqtSlot, pyqtSignal, QTimer, QEvent
-from PyQt5.QtGui import (QFont, QPixmap, QColor, QIcon, QPainter, QPainterPath, QTransform,
+from PyQt5.QtGui import (QFont, QPixmap, QColor, QPalette, QIcon, QPainter, QPainterPath, QTransform,
                          QLinearGradient, QRadialGradient, QBrush, QPen)
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
@@ -3134,6 +3134,14 @@ if __name__ == "__main__":
     if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY") and not os.environ.get("QT_QPA_PLATFORM"):
         os.environ["QT_QPA_PLATFORM"] = "xcb"
     app = QApplication(sys.argv)
+    # the same bright look on every computer (a dark desktop theme can't paint panels black)
+    app.setStyle("Fusion")
+    _pal = QPalette()
+    for _role, _c in ((QPalette.Window, "#dff4ff"), (QPalette.WindowText, "#0f172a"), (QPalette.Base, "#ffffff"),
+                      (QPalette.Text, "#0f172a"), (QPalette.Button, "#ffffff"), (QPalette.ButtonText, "#0f172a"),
+                      (QPalette.Highlight, "#38bdf8"), (QPalette.HighlightedText, "#ffffff")):
+        _pal.setColor(_role, QColor(_c))
+    app.setPalette(_pal)
     app.setApplicationName(CONFIG["name"])
     
     icon_p = resource_path(LOGO)

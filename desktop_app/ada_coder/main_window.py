@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
         body = QHBoxLayout()
         body.setSpacing(16)
         self.center = QStackedWidget()
+        self.center.setAutoFillBackground(False)
         self.center.addWidget(self._build_home())
         self.center.addWidget(self._build_lesson_screen())
         body.addWidget(self.center, 1)
@@ -202,6 +203,10 @@ class MainWindow(QMainWindow):
         self.theme_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.theme_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.theme_scroll.setFixedHeight(278)
+        # see-through, so the sky shows behind the cards (Qt fills a scroll area's inside with a colour otherwise)
+        self.theme_scroll.setFrameShape(QFrame.NoFrame)
+        self.theme_scroll.viewport().setAutoFillBackground(False)
+        self.theme_scroll.setStyleSheet("QScrollArea, QScrollArea > QWidget, QScrollArea > QWidget > QWidget { background: transparent; border: none; }")
         self.theme_cards = []
         self._fill_theme_cards()
         home_lay.addWidget(title)

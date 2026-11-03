@@ -27,6 +27,20 @@ def choose_server(args):
     config.SERVER_URL = config._server_url()
 
 
+def use_light_look(app):
+    """The same bright look on every computer: Qt's Fusion style with a light palette, so a dark desktop theme
+    (common on Ubuntu) can't paint the app's panels black or grey behind the sky."""
+    from PyQt5.QtGui import QColor, QPalette
+    app.setStyle("Fusion")
+    pal = QPalette()
+    for role, colour in ((QPalette.Window, "#dff4ff"), (QPalette.WindowText, "#1e1b4b"), (QPalette.Base, "#ffffff"),
+                         (QPalette.AlternateBase, "#f0f9ff"), (QPalette.Text, "#1e1b4b"), (QPalette.Button, "#ffffff"),
+                         (QPalette.ButtonText, "#1e1b4b"), (QPalette.ToolTipBase, "#ffffff"), (QPalette.ToolTipText, "#1e1b4b"),
+                         (QPalette.Highlight, "#7b4dff"), (QPalette.HighlightedText, "#ffffff"), (QPalette.Link, "#0284c7")):
+        pal.setColor(role, QColor(colour))
+    app.setPalette(pal)
+
+
 def main():
     # The packaged app also runs the children's programs: "AdaTheCoder --ada-run my_code.py".
     # This keeps working on computers that don't have Python installed.
@@ -76,6 +90,7 @@ def main():
     from ada_coder.paths import image
 
     app = QApplication(sys.argv)
+    use_light_look(app)
     app.setApplicationName(APP_NAME)
     app.setApplicationVersion(APP_VERSION)
     app.setOrganizationName("Ada The Coder")

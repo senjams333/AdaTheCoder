@@ -26,6 +26,8 @@ class SceneWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setAutoFillBackground(False)
+        self.setAttribute(Qt.WA_OpaquePaintEvent)     # it paints every pixel itself: the sky, never a plain colour
         self.dark = False
         self.t = 0.0
         self.night_since = 0.0
