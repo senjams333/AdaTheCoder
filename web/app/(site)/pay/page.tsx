@@ -132,26 +132,24 @@ function PayInner() {
               <p className="sub">One payment, every lesson, for <b>{page.user.email}</b>. No subscription.</p>
               <FormErrors errors={errors} />
               <div className="pay-methods">
-                {page.methods.razorpay && (
-                  <button type="button" className="btn pay-razorpay" disabled={!!busy} onClick={razorpay}>
-                    {busy === 'razorpay' ? 'Opening Razorpay…' : `Pay ${page.methods.razorpay.label} with Razorpay`}
-                    <small>UPI · cards · net banking (India)</small>
-                  </button>
-                )}
-                {page.methods.paypal && (
-                  <button type="button" className="btn pay-paypal" disabled={!!busy} onClick={paypal}>
-                    {busy === 'paypal' ? 'Going to PayPal…' : `Pay ${page.methods.paypal.label} with PayPal`}
-                    <small>PayPal or any card</small>
-                  </button>
-                )}
-                {!page.methods.razorpay && !page.methods.paypal && (
-                  <p className="sub">Online payment isn&apos;t available right now. Please write to us and we&apos;ll send you a licence.</p>
-                )}
+                {/* both buttons always show; one that isn't set up yet says what's missing when pressed */}
+                <button type="button" className="btn pay-razorpay" disabled={!!busy}
+                  onClick={() => (page.methods.razorpay ? razorpay() : setErrors([!page.theme.priceInr
+                    ? 'Razorpay needs this theme\'s price in rupees: in the admin, open the theme → Settings → Price in rupees.'
+                    : 'Razorpay isn\'t switched on yet: add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in api/.env, then restart the website.']))}>
+                  {busy === 'razorpay' ? 'Opening Razorpay…'
+                    : `Pay ${page.methods.razorpay?.label || (page.theme.priceInr ? `₹${page.theme.priceInr}` : '')} with Razorpay`.replace('Pay  with', 'Pay with')}
+                  <small>UPI · cards · net banking (India)</small>
+                </button>
+                <button type="button" className="btn pay-paypal" disabled={!!busy}
+                  onClick={() => (page.methods.paypal ? paypal() : setErrors([
+                    'PayPal isn\'t switched on yet: add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in api/.env, then restart the website.']))}>
+                  {busy === 'paypal' ? 'Going to PayPal…' : `Pay ${page.methods.paypal?.label || page.theme.price} with PayPal`}
+                  <small>PayPal or any card</small>
+                </button>
               </div>
-              {(page.methods.razorpay || page.methods.paypal) && (
-                <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.<br />
-                  By paying you agree to the <Link href="/terms">terms</Link>. Not happy? <Link href="/refunds">7-day refund</Link>.</p>
-              )}
+              <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.<br />
+                By paying you agree to the <Link href="/terms">terms</Link>. Not happy? <Link href="/refunds">7-day refund</Link>.</p>
             </>
           )}
         </div>
