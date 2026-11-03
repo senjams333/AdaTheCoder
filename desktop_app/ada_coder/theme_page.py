@@ -18,6 +18,9 @@ from .paths import asset
 
 _TEMPLATE_NODES = None
 
+# slim scroll bars with round ends (Qt's web view draws square ones with arrows otherwise)
+SCROLLBARS = '::-webkit-scrollbar { width: 12px; height: 12px; } ::-webkit-scrollbar:horizontal { height: 0; } ::-webkit-scrollbar-button { display: none; width: 0; height: 0; } ::-webkit-scrollbar-track { background: rgba(255, 255, 255, .45); border-radius: 8px; } ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 8px; border: 2px solid rgba(255, 255, 255, .7); } ::-webkit-scrollbar-thumb:hover { background: #0284c7; } ::-webkit-scrollbar-corner { background: transparent; }'
+
 
 def _engine_dir():
     path = kids_launch.engine_path()
@@ -52,7 +55,7 @@ def _template(cfg, app_dir):
     ns = {"html": html, "json": json, "CONFIG": cfg, "LOGO": cfg["logo"]}
     for node in _TEMPLATE_NODES:
         exec(compile(ast.Module([node], []), "kids_app", "exec"), ns)
-    page = ns["MASTER_HTML_TEMPLATE"]
+    page = ns["MASTER_HTML_TEMPLATE"].replace("</head>", "<style>" + SCROLLBARS + "</style></head>", 1)
     for pic in {cfg["logo"], cfg["success_picture"], cfg["oops_picture"]}:
         if pic:
             page = page.replace('src="%s"' % pic, 'src="%s"' % _url(os.path.join(app_dir, pic)))
@@ -113,9 +116,13 @@ def theme_page(c, licences):
             '<style>body { margin: 0; } .strip, .note, #login { display: none !important; } '
             '#logoutBtn { background: #f8fdff; color: #0c4a6e; border: 2px solid #38bdf8; box-shadow: 0 3px 10px rgba(3, 105, 161, .25); } '
             '#logoutBtn:hover { background: #e0f2fe; color: #0c4a6e; } '
-            '.wrap { padding: 0 !important; max-width: none !important; margin: 0 !important; } '
-            # inside the app's own window: no drawn title bar, and the page fits the window's 1280 x 748 exactly
-            '.titlebar { display: none !important; } .win { height: 748px !important; } .central { top: 0 !important; } '
-            '.overlay, .modal { top: 0 !important; inset: 0 !important; } #logoutBtn { top: 18px !important; }</style>\n'
-            % (json.dumps(c["id"]), json.dumps(data["videos"]), json.dumps(c.get("price", ""))))
+            # inside the app's own window: the lesson screen fills the whole window (no drawn window, no frame around it)
+            'html, body { height: 100%%; overflow: hidden; margin: 0; } '
+            '.wrap { padding: 0 !important; max-width: none !important; margin: 0 !important; height: 100%%; } '
+            '.stage { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; box-shadow: none !important; } '
+            '.win { width: 100vw !important; height: 100vh !important; transform: none !important; } '
+            '.titlebar { display: none !important; } .central { top: 0 !important; } '
+            '.overlay, .modal { top: 0 !important; inset: 0 !important; } #logoutBtn { top: 18px !important; } '
+            '%s</style>\n'
+            % (json.dumps(c["id"]), json.dumps(data["videos"]), json.dumps(c.get("price", "")), SCROLLBARS))
     return head + page, data

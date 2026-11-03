@@ -217,6 +217,9 @@ body.night { background: #070b24; }
 .stagewrap { padding: 0; height: 100%; display: grid; place-items: center; }
 .stage { width: 1280px; height: 748px; transform-origin: 50% 50%; margin: 0; }
 .win { width: 1280px; height: 748px; border-radius: 0; box-shadow: none; }
+/* a theme ("Try free") covers the whole window: the lesson screen fills it, nothing behind it shows */
+.kids { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 100 !important; }
+::-webkit-scrollbar { width: 12px; height: 12px; } ::-webkit-scrollbar:horizontal { height: 0; } ::-webkit-scrollbar-button { display: none; width: 0; height: 0; } ::-webkit-scrollbar-track { background: rgba(255, 255, 255, .45); border-radius: 8px; } ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 8px; border: 2px solid rgba(255, 255, 255, .7); } ::-webkit-scrollbar-thumb:hover { background: #0284c7; } ::-webkit-scrollbar-corner { background: transparent; }
 </style>
 <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <div class="top">
@@ -312,9 +315,17 @@ const img = n => D.images[n] || "";
 
 /* scale the 1280 x 780 window to the page */
 function fit() {
-  // the 1280 x 748 window inside, scaled to the real window (the same picture as the preview, at any size)
-  const s = Math.min(innerWidth / 1280, innerHeight / 748);
-  $("stage").style.transform = `scale(${s})`;
+  // fills the real window; on a window smaller than 1280 x 748 the same picture is scaled down to fit
+  const st = $("stage"), w = $("win");
+  if (innerWidth >= 1280 && innerHeight >= 748) {
+    st.style.transform = "none";
+    st.style.width = w.style.width = innerWidth + "px";
+    st.style.height = w.style.height = innerHeight + "px";
+  } else {
+    st.style.width = w.style.width = "1280px"; st.style.height = w.style.height = "748px";
+    st.style.transform = `scale(${Math.min(innerWidth / 1280, innerHeight / 748)})`;
+  }
+  setTimeout(moreArrow, 0);
 }
 addEventListener("resize", fit);
 
@@ -622,6 +633,7 @@ if (window.qt && window.QWebChannel) new QWebChannel(qt.webChannelTransport, ch 
 });
 
 /* start */
+document.body.appendChild($("kids"));       // the theme's frame sits over the whole window, outside the scaled picture
 $("logo").src = img("ada_logo.png"); $("loginLogo").src = img("ada_logo.png"); $("tbIcon").src = img("ada_logo.png"); $("avatarImg").src = img("ada_logo.png");
 buildScene(); fit();
 $("frame").srcdoc = D.lessonPage;

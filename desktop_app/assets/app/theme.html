@@ -531,10 +531,13 @@ $("homeBtn").onclick = () => show("home");
 $("themeBtn").onclick = () => { dark = !dark; style(); try { frame.contentWindow.setDarkMode(dark); } catch (e) {} };
 $("musicBtn").onclick = () => { music = !music; $("musicBtn").textContent = music ? "🔊" : "🔈"; try { frame.contentWindow.toggleAudioEngine(music); } catch (e) {} };
 function placeToggle() {
-  const t = $("sideToggle");
-  t.style.top = (30 + (750 - 92) / 2) + "px";
-  t.style.left = (sideCollapsed ? 1280 - 46 - 4 : 1280 - 15 - 256 - 26) + "px";
+  // halfway down, on the lesson list's left edge, for whatever size the window is
+  const t = $("sideToggle"), W = $("win").clientWidth, H = $("win").clientHeight;
+  const top = $("central").offsetTop;
+  t.style.top = (top + (H - top - 92) / 2) + "px";
+  t.style.left = (sideCollapsed ? W - 46 - 4 : W - 15 - 256 - 26) + "px";
 }
+addEventListener("resize", () => placeToggle());
 $("sideToggle").onclick = () => {
   sideCollapsed = !sideCollapsed;
   $("side").hidden = sideCollapsed;
