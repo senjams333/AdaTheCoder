@@ -154,7 +154,7 @@ export default function RegisterPage() {
             <div className="field">
               <label className="check">
                 <input type="checkbox" checked={form.consent} onChange={set('consent')} />
-                <span>I&apos;m the parent or legal guardian, and I&apos;ve read the <Link href="/privacy" target="_blank">privacy page</Link>.</span>
+                <span>I&apos;m the parent or legal guardian, and I agree to the <Link href="/terms" target="_blank">terms</Link> and have read the <Link href="/privacy" target="_blank">privacy page</Link>.</span>
               </label>
             </div>
             <button className="btn" type="submit" disabled={isLoading}>{isLoading ? 'Sending your code…' : 'Create account'}</button>

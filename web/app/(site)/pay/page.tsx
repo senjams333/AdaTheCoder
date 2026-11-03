@@ -148,7 +148,8 @@ function PayInner() {
                   <p className="sub">Online payment isn&apos;t switched on yet. Please write to us to get a licence.</p>
                 )}
               </div>
-              <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.</p>
+              <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.<br />
+                By paying you agree to the <Link href="/terms">terms</Link>. Not happy? <Link href="/refunds">7-day refund</Link>.</p>
             </>
           )}
         </div>

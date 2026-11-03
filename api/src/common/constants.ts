@@ -16,7 +16,7 @@ export const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 
 export const SETTING_FIELDS = [
   'hero_title', 'hero_subtitle', 'site_banner', 'app_message', 'parents_note', 'contact_email', 'author_name', 'author_note',
-  'app_welcome', 'app_home_theme',
+  'app_welcome', 'app_home_theme', 'business_details',
 ] as const;
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
@@ -29,6 +29,8 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   // the Ada The Coder app's home screen: the greeting, and the theme whose characters stand on it ('' = Tom, Ada and Unicorn)
   app_welcome: 'Welcome to Ada The Coder',
   app_home_theme: '',
+  // on the Terms, Refunds and Privacy pages (payment providers ask for a legal name and address)
+  business_details: 'Ada The Coder\n(Your legal name)\n(Your address, city, PIN code, India)\nPhone: (your phone number)',
   parents_note:
     'There are no ads, no chat and no strangers in Ada The Coder. Your child never needs an account, and their ' +
     'progress is saved on your own computer.',
