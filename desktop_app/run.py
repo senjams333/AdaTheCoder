@@ -97,7 +97,10 @@ def main():
     app.setWindowIcon(QIcon(image("ada_logo.png")))
 
     from ada_coder import sync
-    from ada_coder.main_window import MainWindow
+    if os.environ.get("ADA_CLASSIC") == "1":            # the earlier, hand-built window (kept for comparison)
+        from ada_coder.main_window import MainWindow
+    else:                                               # the window made from the preview (assets/app/app.html)
+        from ada_coder.web_app import WebMainWindow as MainWindow
 
     window = MainWindow()
     window.showMaximized()

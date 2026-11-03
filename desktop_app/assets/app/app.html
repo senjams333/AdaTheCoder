@@ -1,0 +1,603 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Ada The Coder</title>
+<style>
+:root { --font-kid: "Comic Sans MS", "Chalkboard SE", "Comic Neue", "Segoe UI", sans-serif; --ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --page: #eef2f7; --ink: #1e293b; --muted: #64748b; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --page: #0b1020; --ink: #e2e8f0; --muted: #94a3b8; } }
+:root[data-theme="dark"] { --page: #0b1020; --ink: #e2e8f0; --muted: #94a3b8; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+/* the log-in card over the sky */
+.login { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(15, 23, 42, .25); backdrop-filter: blur(4px); font-family: var(--font-kid); }
+.login-card { width: 440px; background: rgba(255, 255, 255, .96); border: 4px solid #fff; border-radius: 30px; padding: 22px 30px 18px; display: flex; flex-direction: column; gap: 8px;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, .5), 0 20px 50px rgba(30, 27, 75, .3); color: #1e1b4b; }
+.login-logo { width: 84px; height: 84px; border-radius: 50%; align-self: center; border: 4px solid #ffd23f; background: #fff; object-fit: cover; }
+.login-card h2 { margin: 2px 0 0; text-align: center; font-size: 28px; color: #5b2fe0; }
+.login-sub { margin: 0 0 4px; text-align: center; font-weight: 700; color: #065f46; }
+.lf { display: flex; flex-direction: column; gap: 3px; font-weight: 700; font-size: 14px; color: #0369a1; }
+.lf input { font: 600 17px var(--ui); border: 3px solid #bae6fd; border-radius: 16px; padding: 9px 14px; color: #1e1b4b; background: #fff; }
+.lf input:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 4px rgba(56, 189, 248, .2); }
+.login-hint { margin: 2px 0 0; font-size: 12.5px; color: #4c4a7a; text-align: center; }
+.login-status { margin: 0; min-height: 20px; text-align: center; font-weight: 700; font-size: 14px; }
+.login-go { font: 700 19px var(--font-kid); background: #ffd23f; color: #1e1b4b; border: 0; border-bottom: 4px solid #f2b500; border-radius: 22px; padding: 12px; cursor: pointer; }
+.login-go:hover { background: #ffdc5e; } .login-go:disabled { opacity: .7; cursor: wait; }
+.login-link { background: none; border: 0; color: #0284c7; font: 700 14px var(--font-kid); text-decoration: underline; cursor: pointer; padding: 2px; }
+/* Play on a theme: a short loading card, then the theme opens in the Python Adventure app (kids-embed.html) */
+/* the app is built into this page (srcdoc): it loads out of sight and only shows once it's ready */
+.kids { position: absolute; inset: 0; z-index: 50; width: 100%; height: 100%; border: 0; background: transparent; color-scheme: light;
+  opacity: 0; pointer-events: none; visibility: hidden; }
+.kids.on { opacity: 1; pointer-events: auto; visibility: visible; transition: opacity .25s; }
+.kload { position: absolute; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(255, 255, 255, .35); backdrop-filter: blur(3px); font-family: var(--font-kid); }
+.kload-card { background: #fff; border-radius: 26px; padding: 22px 30px; text-align: center; box-shadow: 0 14px 34px rgba(43, 34, 87, .2); font-weight: 700; color: #2b2257; min-width: 300px; font-size: 18px; }
+.kload-card img { height: 120px; animation: bob 1s ease-in-out infinite alternate; }
+.kbar { height: 10px; border-radius: 6px; background: #e0f2fe; overflow: hidden; margin-top: 12px; }
+.kbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #38bdf8, #7b4dff); border-radius: 6px; animation: kload 1.3s ease-out forwards; }
+@keyframes kload { to { width: 100%; } }
+body { margin: 0; background: var(--page); color: var(--ink); font: 14px var(--ui); }
+.top { max-width: 1320px; margin: 0 auto; padding: 18px 16px 10px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.top h1 { font-size: 18px; margin: 0; } .top p { margin: 2px 0 0; color: var(--muted); }
+.stagewrap { padding: 0 16px 16px; }
+.stage { width: 1280px; height: 780px; transform-origin: 0 0; margin: 0 auto; }
+.foot { max-width: 1320px; margin: 0 auto; padding: 0 16px 24px; color: var(--muted); line-height: 1.5; }
+
+/* ---------------- the app window ---------------- */
+.win { width: 1280px; height: 780px; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(15, 23, 42, .25); display: flex; flex-direction: column; color-scheme: light; position: relative; }
+.titlebar { height: 32px; flex: none; background: #e9edf3; display: flex; align-items: center; gap: 8px; padding: 0 12px; font: 13px var(--ui); color: #334155; }
+.titlebar img { width: 18px; height: 18px; border-radius: 50%; } .titlebar .ctl { margin-left: auto; letter-spacing: 18px; color: #64748b; }
+.central { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; padding: 12px 16px 16px; gap: 12px; font-family: var(--font-kid); color: #1e1b4b; }
+.central.night { color: #f5f3ff; }
+.central > .bar, .central > .body { position: relative; z-index: 1; }
+
+/* the sky (ada_coder/scene.py) */
+.scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.central.day { background: linear-gradient(180deg, #5ec4ff 0%, #a5dcff 45%, #dff4ff 80%, #e9fbe3 100%); }
+.central.night { background: radial-gradient(ellipse at 50% 0%, #2c3285 0%, #161c52 45%, #070b24 100%); }
+.sc-sun, .sc-moon { position: absolute; left: 178px; top: 28px; width: 104px; height: 104px; border-radius: 50%; }
+.sc-sun { background: radial-gradient(circle, #fff700, #ff9d00); box-shadow: 0 0 50px 18px rgba(255, 213, 79, .7), 0 0 120px 40px rgba(255, 170, 0, .3); animation: pulse 3s ease-in-out infinite; }
+.sc-moon { background: radial-gradient(circle at 35% 35%, #fff, #fde68a 75%); box-shadow: 0 0 60px 20px rgba(253, 230, 138, .55), 0 0 140px 50px rgba(253, 230, 138, .25); animation: pulse 4s ease-in-out infinite; }
+.sc-moon::before, .sc-moon::after { content: ""; position: absolute; border-radius: 50%; background: rgba(234, 200, 120, .45); }
+.sc-moon::before { width: 22px; height: 22px; left: 26px; top: 34px; } .sc-moon::after { width: 14px; height: 14px; left: 58px; top: 60px; }
+@keyframes pulse { 50% { transform: scale(1.05); } }
+.sc-cloud { position: absolute; background: #fff; border-radius: 999px; opacity: .95; animation: drift linear infinite; }
+.sc-cloud::before, .sc-cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+.sc-cloud::before { width: 45%; height: 130%; left: 15%; bottom: 35%; } .sc-cloud::after { width: 36%; height: 105%; left: 48%; bottom: 30%; }
+@keyframes drift { from { transform: translateX(-260px); } to { transform: translateX(1540px); } }
+.sc-hill { position: absolute; left: -5%; right: -5%; border-radius: 50% 50% 0 0 / 40% 40% 0 0; }
+.sc-hill.back { bottom: 0; height: 150px; background: #4ade80; transform: translateX(-12%); }
+.sc-hill.front { bottom: -30px; height: 140px; background: linear-gradient(180deg, #86efac, #16a34a); transform: translateX(10%); }
+.sc-flower { position: absolute; transform-origin: 50% 100%; animation: sway 3.2s ease-in-out infinite; }
+@keyframes sway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+.sc-star { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff, 0 0 12px rgba(147, 197, 253, .7); animation: twinkle 3s ease-in-out infinite; }
+@keyframes twinkle { 0%, 100% { opacity: .2; transform: scale(.6); } 50% { opacity: 1; transform: scale(1.2); } }
+.sc-shoot { position: absolute; left: 104%; top: -6%; width: 0; height: 0; opacity: 0; animation: shoot 30s linear 1s infinite; }
+.sc-shoot i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 6px 3px #fff, 0 0 16px 8px rgba(220, 235, 255, .85), 0 0 30px 12px rgba(170, 205, 255, .45); }
+.sc-shoot b { position: absolute; left: 0; top: -1.5px; width: 380px; height: 3px; transform-origin: 0 50%;
+  clip-path: polygon(0 0, 100% 50%, 0 100%); filter: drop-shadow(0 0 2px rgba(190, 220, 255, .8));
+  background: linear-gradient(90deg, #fff, #fff 12%, rgba(200, 225, 255, .55) 45%, rgba(170, 205, 255, 0)); }
+@keyframes shoot { 0% { left: 104%; top: -6%; opacity: 0; } .6% { opacity: 1; } 6.3% { opacity: 1; } 7.3% { left: -4%; top: 106%; opacity: 0; } 100% { left: -4%; top: 106%; opacity: 0; } }
+.central.day .night-only, .central.night .day-only { display: none; }
+@media (prefers-reduced-motion: reduce) { .sc-shoot { display: none; } .sc-cloud, .sc-flower, .sc-star, .sc-sun, .sc-moon { animation: none; } }
+
+/* top bar */
+.bar { display: flex; align-items: center; gap: 10px; height: 50px; }
+.bar .logo { width: 46px; height: 46px; border-radius: 50%; background: #fff; object-fit: cover; }
+.bar .appname { font-size: 25px; font-weight: 700; }
+.bar .gap { flex: 1; }
+.pill { font: 700 16px var(--font-kid); background: rgba(255, 255, 255, .85); color: #1e1b4b; border: 2px solid #e2dcf8; border-radius: 22px; padding: 9px 18px; cursor: pointer; }
+.pill:hover { border-color: #7b4dff; }
+.round { width: 46px; height: 46px; border-radius: 23px; padding: 0; font-size: 20px; }
+.central.night .pill { background: rgba(30, 23, 69, .8); color: #f5f3ff; border-color: #3b3280; }
+.avatar { width: 48px; height: 48px; border-radius: 24px; border: 3px solid #ffd23f; background: #fff; padding: 0; overflow: hidden; cursor: pointer; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.menu { position: absolute; right: 16px; top: 60px; z-index: 20; background: #fff; color: #1e1b4b; border: 2px solid #e2dcf8; border-radius: 14px; padding: 6px; min-width: 250px; box-shadow: 0 14px 30px rgba(0, 0, 0, .18); }
+.menu button { display: block; width: 100%; text-align: left; font: 16px var(--font-kid); background: none; border: 0; padding: 9px 18px; border-radius: 9px; cursor: pointer; color: inherit; }
+.menu button:hover { background: #7b4dff; color: #fff; }
+.menu hr { border: 0; height: 2px; background: #e2dcf8; margin: 4px 8px; }
+
+/* body */
+.body { flex: 1; min-height: 0; display: flex; gap: 16px; }
+.center { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.home { flex: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0; position: relative; }
+/* a glowing arrow under the cards: more themes below (scroll or click) */
+.tmore { position: absolute; right: -10px; bottom: 6px; z-index: 3; width: 46px; height: 46px; border-radius: 50%;
+  border: 3px solid #fff; background: #ffd23f; color: #7b4dff; font: 900 24px/1 var(--font-kid); cursor: pointer; padding: 0;
+  box-shadow: 0 0 14px 5px rgba(255, 210, 63, .85); animation: tmoreGlow 1.4s ease-in-out infinite; }
+.tmore:hover { background: #ffe58a; }
+.tmore[hidden] { display: none; }
+@keyframes tmoreGlow { 0%, 100% { box-shadow: 0 0 10px 3px rgba(255, 210, 63, .7); transform: translateY(0); }
+  50% { box-shadow: 0 0 24px 10px rgba(255, 210, 63, 1); transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .tmore { animation: none; } }
+.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 0; }
+.hero h2 { font-size: 38px; margin: 0; text-align: center; }
+.hero p { font-size: 20px; margin: 0; font-weight: 700; color: #4c4a7a; text-align: center; }
+.central.night .hero p { color: #c4b5fd; }
+.chars { display: flex; gap: 90px; align-items: flex-end; margin-top: 8px; }
+.char { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.char .nm { background: #fff; color: #1e1b4b; border-radius: 22px; padding: 6px 20px; font-size: 21px; font-weight: 700; box-shadow: 0 4px 14px rgba(0, 0, 0, .12); }
+.char img { height: 222px; max-width: 270px; object-fit: contain; animation: bob 2.4s ease-in-out infinite alternate; }
+.char:nth-child(2) img { animation-delay: .4s; } .char:nth-child(3) img { animation-delay: .8s; }
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+.start { font: 700 19px var(--font-kid); background: #ffd23f; color: #1e1b4b; border: 0; border-bottom: 4px solid #f2b500; border-radius: 22px; padding: 12px 32px; cursor: pointer; margin-top: 6px; }
+.start:hover { background: #ffdc5e; }
+.ttitle { font-size: 19px; font-weight: 700; }
+/* three theme cards in a row, one row on show; more scroll up and down */
+.tcards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 258px; gap: 14px 40px; height: 270px; overflow-y: auto; overflow-x: hidden; scroll-snap-type: y mandatory; padding: 4px 40px 4px 36px; }
+.tcards .tcard { width: auto; scroll-snap-align: start; }
+.hero h2 { color: #5b2fe0; text-shadow: 0 2px 10px rgba(255, 255, 255, .7); } .hero h2 .kid { color: #e23d8b; }
+.central.night .hero h2 { color: #c4b5fd; } .central.night .hero h2 .kid { color: #f9a8d4; }
+.tcard { flex: none; width: 222px; background: #fff; color: #1e1b4b; border: 2px solid #e2dcf8; border-radius: 22px; padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 5px; cursor: pointer; }
+/* a white 3px border around every card */
+.tcard, .tcard:hover, .tcard.cur { border: 3px solid #fff; box-shadow: 0 8px 20px rgba(43, 34, 87, .14); }
+.central.night .tcard { background: #1e1745; color: #f5f3ff; border-color: #fff; }
+.tcard .pics { display: flex; justify-content: center; margin-top: 8px; } .tcard .pics img { width: 102px; height: 102px; object-fit: contain; margin: 0 -6px; }
+.tcard .about { font-size: 14.5px; line-height: 1.35; color: #4c4a7a; flex: none; margin-bottom: 6px; min-height: calc(1.35em * 3); }
+.central.night .tcard .about { color: #c4b5fd; }
+.tcard .badge.bought { background: #d8f8ec; color: #0b6e4f; }
+.tcard .badge.price { background: #ffe5f1; color: #e23d8b; }
+.tcard .tn { font-weight: 700; font-size: 15.5px; }
+.tcard { position: relative; }
+/* Free / Purchased / the price, in the card's top right corner */
+.tcard .badge { position: absolute; top: 10px; right: 10px; z-index: 1; font-size: 16px !important; font-weight: 800 !important; padding: 5px 13px !important; border-radius: 999px !important; box-shadow: 0 2px 6px rgba(0, 0, 0, .1); }
+.tcard .badge.free { background: #e0f2fe; color: #0369a1; }
+.tcard .badge { align-self: flex-start; background: #f4f1ff; color: #5b2fe0; border-radius: 9px; padding: 2px 9px; font-size: 12px; font-weight: 700; }
+.central.night .tcard .badge { background: #2a2160; color: #c4b5fd; }
+.tcard button { margin-top: auto; align-self: center; min-width: 136px; font: 700 14px var(--font-kid); background: #7b4dff; color: #fff; border: 0; border-radius: 18px; padding: 9px 22px; cursor: pointer; }
+.tcard.cur button { background: #22c997; }
+
+/* lesson screen */
+.lesson { flex: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.lstack { flex: 1; min-height: 0; position: relative; }
+.lstack iframe { width: 100%; height: 100%; border: 0; background: transparent; color-scheme: light; }
+.vstage { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 8px; }
+.vscreen { flex: 1; background: #000; border: 5px solid #ffea79; border-radius: 30px; box-shadow: 0 0 30px rgba(255, 210, 63, .8); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; color: #fff; gap: 10px; position: relative; overflow: hidden; }
+.vscreen .big { font-size: 34px; font-weight: 700; } .vscreen .small { font: 14px var(--ui); color: #cbd5e1; }
+.vscreen .note { position: absolute; left: 16px; top: 10px; background: rgba(30, 27, 75, .65); color: #f5f3ff; font: 10px var(--ui); padding: 3px 8px; border-radius: 6px; }
+.vbar { height: 8px; background: #3b3280; border-radius: 4px; overflow: hidden; width: 60%; } .vbar i { display: block; height: 100%; width: 0; background: #38bdf8; }
+.vctl { height: 58px; background: #1e1745; border-radius: 18px; display: flex; align-items: center; gap: 10px; padding: 0 12px; color: #e9e4ff; }
+.vctl button { font: 700 15px var(--font-kid); background: #ffd23f; color: #1e1b4b; border: 0; border-radius: 16px; padding: 7px 18px; }
+.lbar { display: flex; justify-content: space-between; align-items: center; }
+.accent { font: 700 15px var(--font-kid); background: #7b4dff; color: #fff; border: 0; border-radius: 20px; padding: 9px 22px; cursor: pointer; }
+.pill:disabled, .accent:disabled { opacity: .5; cursor: default; }
+
+/* the lesson list */
+.side { width: 310px; flex: none; border-radius: 30px; border: 3px solid rgba(255, 255, 255, .9); padding: 16px 10px 14px 14px; display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(180deg, #e0f6ff, #bae6fd 50%, #7dd3fc); }
+.central.night .side { background: linear-gradient(180deg, #0c4a6e, #075985); border-color: rgba(125, 211, 252, .45); }
+.side .ct { font-size: 19px; font-weight: 700; }
+.side .prog { font-size: 14px; font-weight: 700; color: #4c4a7a; } .central.night .side .prog { color: #c4b5fd; }
+.side .pbar { height: 14px; border-radius: 7px; background: rgba(255, 255, 255, .85); overflow: hidden; } .side .pbar i { display: block; height: 100%; background: #22c997; border-radius: 7px; }
+.central.night .side .pbar { background: rgba(15, 23, 42, .55); }
+.up { font: 700 14px var(--font-kid); background: #ff5fa8; color: #fff; border: 0; border-radius: 18px; padding: 9px 14px; cursor: pointer; }
+.up:hover { background: #7b4dff; }
+.lessons { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; padding-right: 6px; }
+.lb { font: 700 15px var(--font-kid); text-align: left; background: rgba(255, 255, 255, .85); color: #1e1b4b; border: 2px solid transparent; border-radius: 16px; padding: 10px 12px; cursor: pointer; }
+.lb:hover { background: #fff; border-color: #e2dcf8; }
+.lb.on { background: #38bdf8; color: #fff; border-color: #ffd23f; }
+.lb.locked { color: #4c4a7a; }
+.central.night .lb { background: rgba(15, 23, 42, .55); color: #f5f3ff; } .central.night .lb.on { background: #38bdf8; }
+
+/* dialogs */
+.modal { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, .25); font-family: var(--font-kid); }
+.kidcard { width: 810px; min-height: 540px; background: #f0f9ff; border: 4px solid #fff; border-radius: 34px; padding: 16px 20px 20px 26px; color: #0f172a;
+  box-shadow: 0 0 40px 12px rgba(251, 128, 114, .8), 0 0 90px 30px rgba(249, 168, 212, .45); display: flex; flex-direction: column; gap: 10px; }
+.kidcard .closer { align-self: flex-end; font: 700 21px var(--font-kid); background: #ef4444; color: #fff; border: 4px solid #b91c1c; border-radius: 26px; padding: 12px 22px; cursor: pointer; }
+.kidcard .closer:hover { background: #dc2626; }
+.kidrow { display: flex; gap: 28px; flex: 1; }
+.kidside { width: 270px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.hello { max-width: 270px; text-align: center; background: #fff; border: 3px solid #38bdf8; border-radius: 22px; padding: 10px 18px; font: 700 22px var(--font-kid); }
+.kidside img { width: 225px; height: 250px; object-fit: contain; animation: gentle 5s ease-in-out infinite; }
+@keyframes gentle { 0%, 100% { transform: rotate(-4deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-8px); } }
+.kidinfo { flex: 1; font-size: 18px; }
+.kidinfo .hd { color: #0284c7; font-size: 29px; font-weight: 700; margin-bottom: 8px; }
+.kidinfo table { border-collapse: collapse; } .kidinfo th { white-space: nowrap; text-align: left; color: #0369a1; padding: 5px 14px 5px 0; } .kidinfo td { padding: 5px 0; }
+.kidinfo .lic { background: #fef9c3; }
+.kidinfo p { font-size: 15px; }
+.soft { font: 700 18px var(--font-kid); background: #e0f2fe; color: #0f172a; border: 3px solid #38bdf8; border-radius: 24px; padding: 12px 30px; cursor: pointer; align-self: flex-end; }
+.skycard { width: 700px; border: 4px solid #fff; border-radius: 36px; padding: 18px 18px 26px 30px; color: #0f172a;
+  background: linear-gradient(180deg, #f0fbff, #bae6fd 45%, #7dd3fc);
+  box-shadow: 0 0 0 6px rgba(254, 240, 138, .6), 0 0 48px 12px rgba(251, 191, 36, .8), 0 0 100px 26px rgba(251, 146, 60, .35); animation: skyglow 2.4s ease-in-out infinite; }
+@keyframes skyglow { 50% { box-shadow: 0 0 0 8px rgba(254, 240, 138, .75), 0 0 70px 20px rgba(251, 191, 36, .95), 0 0 130px 36px rgba(251, 146, 60, .45); } }
+.skycard .x { float: right; width: 48px; height: 48px; border-radius: 24px; border: 3px solid #38bdf8; background: #fff; color: #0284c7; font: 700 22px var(--font-kid); cursor: pointer; }
+.skycard .x:hover { background: #38bdf8; color: #fff; }
+.skyrow { display: flex; gap: 22px; clear: both; }
+.skyrow img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background: #fff; flex: none; }
+.skyrow .t1 { color: #0369a1; font-size: 30px; font-weight: 700; } .skyrow p { font-size: 22px; margin: 10px 0; }
+.skycard .upb { float: right; font: 700 22px var(--font-kid); background: #ffd166; color: #0f172a; border: 4px solid #f59e0b; border-radius: 28px; padding: 12px 34px; cursor: pointer; }
+.skycard::after { content: ""; display: block; clear: both; }
+.toast { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 40; background: #1e1b4b; color: #fff; font: 14px var(--ui); padding: 10px 16px; border-radius: 10px; }
+
+/* ---- in the app: only the window's inside, scaled to fill the real window (the same look as the preview) ---- */
+html, body { height: 100%; overflow: hidden; }
+body { background: linear-gradient(180deg, #5ec4ff 0%, #a5dcff 45%, #dff4ff 80%, #e9fbe3 100%); }
+body.night { background: #070b24; }
+.top, .foot, .titlebar { display: none !important; }
+.stagewrap { padding: 0; height: 100%; display: grid; place-items: center; }
+.stage { width: 1280px; height: 748px; transform-origin: 50% 50%; margin: 0; }
+.win { width: 1280px; height: 748px; border-radius: 0; box-shadow: none; }
+</style>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<div class="top">
+  <div><h1>Ada The Coder · preview</h1><p>The main app with the Python Adventure look for every theme. Pick a theme below the characters; only the characters and lessons change.</p></div>
+</div>
+<div class="stagewrap"><div class="stage" id="stage">
+<div class="win" id="win">
+  <iframe class="kids" id="kids" title="The theme opened in the Python Adventure app" tabindex="-1"></iframe>
+  <div class="titlebar"><img id="tbIcon" alt=""><span>Ada The Coder 🐍</span><span class="ctl">— ☐ ✕</span></div>
+  <div class="central day" id="central">
+    <div class="scene" id="scene" aria-hidden="true"></div>
+    <div class="bar">
+      <img class="logo" id="logo" alt="">
+      <span class="gap"></span>
+      <button class="pill" id="homeBtn">🏠  Home</button>
+      <button class="pill round" id="themeBtn" title="Day or night">☀️</button>
+      <button class="pill round" id="musicBtn" title="Music">🔈</button>
+      <button class="avatar" id="avatarBtn" title="My account"><img id="avatarImg" alt="My account"></button>
+    </div>
+    <div class="menu" id="menu" hidden>
+      <button data-act="profile">👤  My profile</button>
+      <hr><button data-act="license">📜  License</button>
+      <hr><button data-act="logout">🚪  Log out</button>
+    </div>
+    <div class="body">
+      <div class="center">
+        <div class="home" id="home">
+          <div class="hero">
+            <h2 id="heroTitle">Hi <span class="kid">Alex</span> ! Welcome to Ada The Coder</h2>
+            <div class="chars" id="chars"></div>
+          </div>
+          <div class="tcards" id="tcards"></div>
+          <button class="tmore" id="tmore" type="button" title="More themes below" aria-label="More themes below" hidden>⬇</button>
+        </div>
+        <div class="lesson" id="lesson" hidden>
+          <div class="lstack">
+            <iframe id="frame" title="Lesson page"></iframe>
+            <div class="vstage" id="vstage" hidden>
+              <div class="vscreen"><span class="note">This video includes AI-generated content (Google AI)</span>
+                <div class="big" id="vTitle">🎬</div><div class="small" id="vFile"></div><div class="vbar"><i id="vProg"></i></div>
+                <div class="small">(In the app the lesson's real video plays here, then the coding page opens.)</div></div>
+              <div class="vctl"><button>⏸ Pause</button><span>00:0<span id="vSec">0</span></span></div>
+            </div>
+          </div>
+          <div class="lbar">
+            <button class="pill" id="prevBtn">◀  Back</button>
+            <button class="accent" id="videoBtn">⏭  Skip to coding</button>
+            <button class="pill" id="nextBtn">Next lesson  ▶</button>
+          </div>
+        </div>
+      </div>
+      <div class="side" id="side">
+        <div class="ct" id="courseTitle"></div>
+        <div class="prog" id="progText"></div>
+        <div class="pbar"><i id="progBar"></i></div>
+        <button class="up" id="upBtn">⭐  Upgrade to unlock every lesson</button>
+        <div class="lessons" id="lessonList"></div>
+      </div>
+    </div>
+    <div class="modal" id="modal" hidden></div>
+    <!-- the log-in card: shown first, before the home screen (ada_coder/login.py) -->
+    <div class="login" id="login">
+      <form class="login-card" id="loginForm" novalidate>
+        <img class="login-logo" id="loginLogo" alt="Ada The Coder">
+        <h2 id="loginTitle">Welcome back! 🎉</h2>
+        <p class="login-sub" id="loginSub">Log in to continue your Python adventure 🚀</p>
+        <label class="lf" id="nameRow" hidden><span>Your name 👤</span><input id="nameIn" type="text" autocomplete="off" placeholder="Your name"></label>
+        <label class="lf" id="emailRow"><span>Email 📧</span><input id="emailIn" type="email" autocomplete="off" value="" placeholder="grown-up@example.com"></label>
+        <label class="lf" id="passRow"><span>Password 🔑</span><input id="passIn" type="password" value="" placeholder="Password"></label>
+        <p class="login-hint" id="loginHint">Grown-ups: use your adathecoder.com account to unlock the themes you bought ⭐</p>
+        <p class="login-status" id="loginStatus" role="status"></p>
+        <button class="login-go" id="loginGo" type="submit">🚀  Let's code!</button>
+        <button class="login-link" id="loginSwitch" type="button" hidden>Have an account? Log in 🔑</button>
+        <button class="login-link" id="loginSignup" type="button">Grown-up? Create an account 📝</button>
+      </form>
+    </div>
+    <div class="kload" id="kload" hidden><div class="kload-card"><img id="kloadImg" alt=""><div id="kloadText">Opening…</div><div class="kbar"><i></i></div></div></div>
+  </div>
+</div>
+</div></div>
+<div class="foot">A browser drawing of the real window. In the app the code really runs; here, pressing <b>RUN</b> on an example shows its expected output and the celebration, then the next example glows. Lessons after the free ones show 🔒 and open the Upgrade card. The ☀️ button switches to night: the shooting star comes 1 second later, then every 30 seconds.</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("data").textContent);
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let course = D.courses.find(c => c.id === "python_adventure") || D.courses[0];
+let index = 0, dark = false, music = false, page = "home", frameReady = false, videoTimer = null;
+const done = {};          // course id -> Set of finished lesson ids
+const img = n => D.images[n] || "";
+
+/* scale the 1280 x 780 window to the page */
+function fit() {
+  // the 1280 x 748 window inside, scaled to the real window (the same picture as the preview, at any size)
+  const s = Math.min(innerWidth / 1280, innerHeight / 748);
+  $("stage").style.transform = `scale(${s})`;
+}
+addEventListener("resize", fit);
+
+function buildScene() {
+  let h = `<div class="sc-sun day-only"></div><div class="sc-moon night-only"></div>`;
+  [[50, 170, 52, 70], [150, 120, 40, 95], [95, 210, 62, 120], [230, 140, 44, 80], [30, 100, 34, 105]].forEach(([top, w, ht, secs], i) => {
+    h += `<div class="sc-cloud day-only" style="top:${top}px;width:${w}px;height:${ht}px;animation-duration:${secs}s;animation-delay:${-secs * i / 5}s"></div>`;
+  });
+  h += `<div class="sc-hill back day-only"></div><div class="sc-hill front day-only"></div>`;
+  const fl = ["🌼", "🌸", "🌷", "🌻", "🌺", "🌼", "🌸", "🌷"];
+  for (let i = 0; i < 26; i++) h += `<div class="sc-flower day-only" style="left:${(i + .5) / 26 * 100}%;bottom:${4 + (i * 37 % 60)}px;font-size:${18 + (i * 7 % 14)}px;animation-delay:${-(i % 7) * .45}s">${fl[i % fl.length]}</div>`;
+  for (let i = 0; i < 150; i++) {
+    const size = 1 + ((i * 53) % 25) / 10;
+    h += `<div class="sc-star night-only" style="left:${(i * 61.8) % 100}%;top:${(i * 38.2) % 92}%;width:${size}px;height:${size}px;animation-duration:${2 + (i % 9) * .4}s;animation-delay:${-(i % 13) * .37}s"></div>`;
+  }
+  h += `<div class="sc-shoot night-only"><b></b><i></i></div>`;
+  $("scene").innerHTML = h;
+  $("scene").querySelector(".sc-shoot b").style.transform = `rotate(${Math.atan2(-748, 1280) * 180 / Math.PI}deg)`;
+}
+
+const pack = () => D.packs[course.pack] || D.packs.friends;
+// a theme's characters: its own pictures (themes made in the admin) or its built-in pack's
+const heroPics = c => c.heroPics || (D.packs[c.pack] || D.packs.friends).hero.map(h => img(h[1]));
+const freeCount = c => c.premium ? (c.free_lessons ?? 3) : null;
+// the family's paid themes (from the website log-in; refreshed after paying)
+let LICENCES = (D.licences || []).slice();
+const owned = c => freeCount(c) === null || LICENCES.includes(c.id);
+const unlocked = i => owned(course) || i < freeCount(course);
+const doneSet = () => (done[course.id] = done[course.id] || new Set());
+
+// the glowing ⬇ shows while more theme cards are below; it scrolls down one row
+function moreArrow() {
+  const t = $("tcards");
+  $("tmore").hidden = t.hidden || t.scrollHeight - t.clientHeight - t.scrollTop < 6;
+}
+$("tcards").addEventListener("scroll", moreArrow);
+addEventListener("resize", moreArrow);
+$("tmore").onclick = () => $("tcards").scrollBy({ top: $("tcards").clientHeight, behavior: "smooth" });
+function renderHome() {
+  const p = pack();
+  // the three friends on the home screen: the same for every theme
+  // set by the admin on the website (Website text → app home screen); Tom, Ada and Unicorn by default
+  const HOME = (D.home && D.home.chars) || [["Tom", img("tom.png"), "🧒"], ["Ada", img("girl_wave.png"), "👧"], ["Unicorn", img("unicorn.png"), "🦄"]];
+  $("chars").innerHTML = HOME.map(([n, pic, e]) => `<div class="char"><div class="nm">${e} ${esc(n)}</div>${pic ? `<img src="${pic}" alt="${esc(n)}">` : `<div style="font-size:120px">${e}</div>`}</div>`).join("");
+  // the theme being played first (top left), then the free themes, then the others in the admin's order
+  $("tcards").innerHTML = D.courses.slice().sort((a, b) => (b.id === course.id) - (a.id === course.id) || (a.premium ? 1 : 0) - (b.premium ? 1 : 0) || (a.position || 0) - (b.position || 0)).map(c => {
+    const pk = D.packs[c.pack] || D.packs.friends, cur = c.id === course.id, own = owned(c);
+    const bought = freeCount(c) !== null && own;
+    const badge = bought ? "✓ Purchased" : own ? "Free" : c.price;
+    return `<div class="tcard${cur ? " cur" : ""}" data-id="${c.id}"><div class="pics">${heroPics(c).map(u => u ? `<img src="${u}" alt="">` : "").join("")}</div>
+      <div class="tn">${esc(c.name)}</div><div class="about">${esc(c.description || c.tagline || "")}</div><span class="badge${bought ? " bought" : own ? " free" : " price"}">${esc(badge)}</span><button>✨  Try free</button></div>`;
+  }).join("");
+  $("tcards").querySelectorAll(".tcard").forEach(t => t.onclick = () => openKids(t.dataset.id));
+  setTimeout(moreArrow, 0);
+}
+
+function renderSide() {
+  const L = D.lessons, ds = doneSet(), free = freeCount(course);
+  $("courseTitle").textContent = `🎨  ${course.name}  ▾`;
+  const n = ds.size;
+  $("progText").textContent = n === L.length ? "All lessons finished! 🏆" : free === null ? `${n} of ${L.length} lessons finished` : `${n} of ${L.length} finished · ${free} free to try`;
+  $("progBar").style.width = (n / L.length * 100) + "%";
+  $("upBtn").hidden = owned(course);
+  $("lessonList").innerHTML = L.map((l, i) => `<button class="lb${i === index && page === "lesson" ? " on" : ""}${unlocked(i) ? "" : " locked"}" data-i="${i}">${unlocked(i) ? (ds.has(l.id) ? "✅" : l.emoji) : "🔒"}  ${i + 1}. ${esc(l.name)}</button>`).join("");
+  $("lessonList").querySelectorAll(".lb").forEach(b => b.onclick = () => openLesson(+b.dataset.i));
+}
+
+function chooseCourse(id) {
+  const c = D.courses.find(x => x.id === id);
+  if (!c || c.id === course.id) return;
+  course = c; index = 0; sendCharacters(); renderAll();
+}
+
+function renderAll() { renderHome(); renderSide(); }
+
+function show(which) {
+  page = which;
+  $("side").hidden = which === "home";      // no lesson list on the home screen
+  $("home").hidden = which !== "home"; $("lesson").hidden = which !== "lesson";
+  if (which === "home") { stopVideo(); }
+  renderAll();
+}
+
+/* ---------- the lesson page (assets/web/lesson.html) inside the window ---------- */
+const F = () => $("frame").contentWindow;
+function sendCharacters() {
+  if (!frameReady) return;
+  const p = pack();
+  F().setCharacters({ guide: img(p.guide), success: img(p.success), oops: img(p.oops) });
+}
+function pushLesson() {
+  if (!frameReady) return;
+  const l = D.lessons[index];
+  F().updateLessonData({ title: l.title, subtitle: l.subtitle || "", number: index + 1, count: D.lessons.length, examples: l.examples, defaultCode: l.default_code || "" });
+}
+$("frame").addEventListener("load", () => {
+  frameReady = true;
+  const w = F();
+  w.pyqtBridge = {
+    executePython(code) {
+      const l = D.lessons[index];
+      const ex = l.examples.find(e => e.code.trim() === code.trim());
+      w.setRunning(true);
+      setTimeout(() => {
+        w.setRunning(false);
+        if (/input\(/.test(code)) { w.showOutput("(In the app, input() asks for an answer right here.)", false, ""); return; }
+        w.showOutput(ex ? ex.output : "(In the app your own code runs for real. Here only the examples are shown.)", false, "");
+        w.showSuccess(false);
+        doneSet().add(l.id); renderSide();
+      }, 500);
+    },
+    submitInput() {}, notifyEmptyInput() {}, stopCode() {}
+  };
+  w.setDarkMode(dark);
+  sendCharacters();
+  pushLesson();
+});
+
+function openLesson(i) {
+  i = Math.max(0, Math.min(i, D.lessons.length - 1));
+  if (!unlocked(i)) { upgrade(); return; }
+  index = i;
+  show("lesson");
+  $("prevBtn").disabled = index === 0; $("nextBtn").disabled = index === D.lessons.length - 1;
+  pushLesson();
+  playVideo();
+}
+function playVideo() {
+  stopVideo();
+  const l = D.lessons[index];
+  $("vstage").hidden = false; $("videoBtn").textContent = "⏭  Skip to coding";
+  $("vTitle").textContent = `🎬 ${l.title}`; $("vFile").textContent = (l.video && l.video.bundled) || "";
+  let t = 0;
+  videoTimer = setInterval(() => { t += .1; $("vProg").style.width = Math.min(t / 4 * 100, 100) + "%"; $("vSec").textContent = Math.floor(t); if (t >= 4) showCode(); }, 100);
+}
+function stopVideo() { clearInterval(videoTimer); videoTimer = null; }
+function showCode() {
+  stopVideo();
+  if (!$("vstage").hidden) { $("vstage").hidden = true; if (frameReady) { F().playTwinkleChime(); F().showTutorialOverlay(); } }
+  $("videoBtn").textContent = "🎬  Watch the video";
+}
+$("videoBtn").onclick = () => $("vstage").hidden ? playVideo() : showCode();
+$("prevBtn").onclick = () => openLesson(index - 1);
+$("nextBtn").onclick = () => openLesson(index + 1);
+$("homeBtn").onclick = () => show("home");
+$("themeBtn").onclick = () => {
+  dark = !dark;
+  $("central").classList.toggle("night", dark); $("central").classList.toggle("day", !dark);
+  $("themeBtn").textContent = dark ? "🌙" : "☀️";
+  document.body.classList.toggle("night", dark);
+  if (frameReady) F().setDarkMode(dark);
+};
+$("musicBtn").onclick = () => { music = !music; $("musicBtn").textContent = music ? "🎵" : "🔈"; if (frameReady) F().toggleAudioEngine(music); };
+$("avatarBtn").onclick = e => { e.stopPropagation(); $("menu").hidden = !$("menu").hidden; };
+document.addEventListener("click", () => $("menu").hidden = true);
+$("menu").querySelectorAll("button").forEach(b => b.onclick = () => {
+  $("menu").hidden = true;
+  ({ profile, license, themes: () => show("home"), check: () => host && host.checkNow(),
+     logout: () => { host && host.logout(); D.user = null; LICENCES = []; showLogin(); } })[b.dataset.act]();
+});
+$("upBtn").onclick = upgrade;
+
+function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; $("central").appendChild(d); setTimeout(() => d.remove(), 2200); }
+
+/* ---------- pop-ups (ada_coder/dialogs.py) ---------- */
+function modal(html, onclick) { const m = $("modal"); m.innerHTML = html; m.hidden = false; m.onclick = onclick; }
+function closeModal() { $("modal").hidden = true; $("modal").innerHTML = ""; }
+function kidWindow(picture, hello, heading, rows, notes, buttons, lic) { kidWindowPic(img(picture), hello, heading, rows, notes, buttons, lic); }
+function kidWindowPic(pictureUrl, hello, heading, rows, notes, buttons, lic) {
+  modal(`<div class="kidcard"><button class="closer">✕  Close</button><div class="kidrow"><div class="kidside"><div class="hello">${esc(hello)}</div><img src="${pictureUrl || ""}" alt=""></div>
+    <div class="kidinfo"><div class="hd">${heading}</div><table class="${lic ? "lic" : ""}">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join("")}</table>${notes || ""}</div></div>
+    ${buttons ? `<button class="soft">${buttons}</button>` : ""}</div>`,
+    e => { if (e.target.classList.contains("closer")) closeModal(); else if (e.target.classList.contains("soft")) { host && host.forgotPassword((D.user || {}).email || ""); toast("🔑 The website's Forgot password page opens in your browser."); } });
+}
+function profile() {
+  const u = D.user || {};
+  kidWindow("byte.png", kidName() ? `👋 Hi, ${kidName()}!` : "👋 Hi!", "👤 My Profile 🌟",
+    [["👤 Full Name", u.full_name || ""], ["📧 Email", u.email || ""], ["🧒 Child", u.child_name || "—"], ["🎓 Role", "Parent account"],
+     ["⭐ Themes unlocked", String(LICENCES.length)], ["🔐 Account", "adathecoder.com"], ["⚡ Active", "✅ Yes"]],
+    `<p style="color:#065f46">✨ Your account on the website. Change your details there.</p>`, "🔑 Change password");
+}
+function license() {
+  const own = owned(course), free = freeCount(course);
+  const u = D.user || {};
+  kidWindowPic(heroPics(course)[0], "👋 Hi, here's your license details", "📜 " + esc(course.name),
+    [["🎫 License Key", own && free !== null ? "(on your account page)" : free === null ? "free theme" : "none yet"], ["👤 Licensed To", u.full_name || ""], ["📧 Email", u.email || ""],
+     ["🎯 Plan", "Personal & Educational"],
+     ["⚡ Status", own ? "every lesson is open ✅" : `${free} of ${D.lessons.length} lessons open 🔒`], ["🔢 Version", D.version || ""]],
+    `<p><b>📜 License:</b> Personal &amp; educational use only.</p><p>This software is provided "as is", without warranty of any kind.</p>`, "", true);
+}
+function upgrade() {
+  stopVideo();
+  const p = pack(), free = freeCount(course);
+  modal(`<div class="skycard"><button class="x" title="Close">✕</button><div class="skyrow"><img src="${img(p.hero[2][1])}" alt="">
+    <div><div class="t1">🔒 ${esc(course.name)}</div><p>This lesson is locked. ${free} of ${D.lessons.length} lessons are free to try.</p>
+    <p>Ask a grown-up to unlock every lesson${course.price ? " for " + esc(course.price) : ""} ⭐</p></div></div><button class="upb">⭐ Upgrade</button></div>`,
+    e => { if (e.target.classList.contains("x")) closeModal(); else if (e.target.classList.contains("upb")) { closeModal(); toast("⭐ Opens the website's account page at this theme."); } });
+}
+
+/* Play / Try free / Playing now: open the theme in the Python Adventure app, already logged in */
+function openKids(id) {
+  chooseCourse(id);
+  const ld = $("kload");
+  $("kloadImg").src = heroPics(course)[0] || img("ada_logo.png"); $("kloadText").textContent = `Opening ${course.name}…`;
+  const bar = ld.querySelector(".kbar i"); bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = "";
+  ld.hidden = false;
+  setTimeout(() => host && host.playTheme(course.id), 900);
+}
+// the theme's window closed (<< Back / Home Screen), or the child logged out there
+function themeClosed(loggedOut) {
+  $("kload").hidden = true;
+  if (loggedOut) { host && host.logout(); D.user = null; showLogin(); } else show("home");
+}
+
+/* ---------- log-in: before the home screen ---------- */
+let loginMode = "login";
+function setLoginMode(m) {
+  loginMode = m;
+  $("loginTitle").textContent = { register: "Let's try it! 🚀", signup: "Create an account 📝" }[m] || "Welcome back! 🎉";
+  $("loginSub").textContent = { register: "Type your name and start coding for free ✨", signup: "For grown-ups: one account for the website and the app" }[m] || "Log in to continue your Python adventure 🚀";
+  $("nameRow").hidden = m === "login"; $("emailRow").hidden = m === "register"; $("passRow").hidden = m === "register";
+  $("loginGo").textContent = { register: "🚀  Start for free", signup: "📝  Create account" }[m] || "🚀  Let's code!";
+  $("loginSwitch").textContent = "Have an account? Log in 🔑"; $("loginSwitch").hidden = m === "login";   // no "Try for free" on the log-in card
+  $("loginSignup").hidden = m !== "login"; $("loginHint").hidden = m === "register";
+  $("loginStatus").textContent = "";
+}
+// behind the log-in card: no theme cards and no name, just "Welcome to Ada The Coder"
+function loggedOutLook(out) {
+  setTimeout(moreArrow, 0);
+  $("tcards").hidden = out;
+  const welcome = esc((D.home && D.home.welcome) || "Welcome to Ada The Coder"), kid = kidName();
+  $("heroTitle").innerHTML = out || !kid ? welcome : `Hi <span class="kid">${esc(kid)}</span> ! ${welcome}`;
+}
+const kidName = () => { const u = D.user || {}; return ((u.child_name || u.full_name || "").trim().split(" ")[0]) || ""; };
+function showLogin() {
+  stopVideo(); closeModal(); show("home"); $("menu").hidden = true; loggedOutLook(true);
+  setLoginMode("login"); $("loginGo").disabled = false; $("login").hidden = false;
+}
+function loginStatus(text, colour) { $("loginStatus").textContent = text; $("loginStatus").style.color = colour; }
+$("loginSwitch").onclick = () => setLoginMode(loginMode === "login" ? "register" : "login");
+// "Create an account" opens the website's registration page (www.adathecoder.com/register); here, the website preview's
+$("loginSignup").onclick = () => host && host.openUrl((D.site || "") + "/register");
+$("loginForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const email = $("emailIn").value.trim(), pass = $("passIn").value, name = $("nameIn").value.trim();
+  if (loginMode !== "register" && (!email || !pass)) return loginStatus("❌ Please type the email and the password.", "#dc2626");
+  if (loginMode !== "login" && !name) return loginStatus("❌ Please type a name.", "#dc2626");
+  $("loginGo").disabled = true; loginStatus("⏳ Logging in…", "#0369a1");
+  host && host.login(email, pass);          // the website checks it; the answer comes back in loginDone
+});
+// the website's answer: {ok, error, user, licences}
+function loginDone(answer) {
+  $("loginGo").disabled = false;
+  if (!answer.ok) return loginStatus("❌ " + (answer.error || "That email and password don't match."), "#dc2626");
+  D.user = answer.user; LICENCES = answer.licences || [];
+  loginStatus(`✅ Welcome, ${kidName() || answer.user.full_name || ""}! 🎉`, "#16a34a");
+  setTimeout(() => { $("login").hidden = true; loggedOutLook(false); show("home"); }, 700);
+}
+// new themes, lessons, prices, licences or home screen from the website
+function dataChanged(fresh) {
+  ["courses", "packs", "home", "licences", "site"].forEach(k => { if (fresh[k] !== undefined) D[k] = fresh[k]; });
+  if (fresh.licences) LICENCES = fresh.licences.slice();
+  course = D.courses.find(c => c.id === course.id) || D.courses[0];
+  renderAll();
+  if ($("login").hidden) loggedOutLook(false); else loggedOutLook(true);
+}
+
+/* the app's side (ada_coder/web_app.py), reached through Qt's web channel */
+let host = null;
+if (window.qt && window.QWebChannel) new QWebChannel(qt.webChannelTransport, ch => {
+  host = ch.objects.host;
+  host.loginDone.connect(j => loginDone(JSON.parse(j)));
+  host.dataChanged.connect(j => dataChanged(JSON.parse(j)));
+  host.themeClosed.connect(loggedOut => themeClosed(loggedOut));
+  host.message.connect(t => toast(t));
+});
+
+/* start */
+$("logo").src = img("ada_logo.png"); $("loginLogo").src = img("ada_logo.png"); $("tbIcon").src = img("ada_logo.png"); $("avatarImg").src = img("ada_logo.png");
+buildScene(); fit();
+$("frame").srcdoc = D.lessonPage;
+$("side").hidden = true;          // the home screen has no lesson list
+renderAll();
+if (D.user) { $("login").hidden = true; loggedOutLook(false); }   // still logged in from last time
+else loggedOutLook(true);                                        // the log-in card shows first
+</script>
