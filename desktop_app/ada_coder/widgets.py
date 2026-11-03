@@ -230,10 +230,9 @@ class ThemeCard(QFrame):
 
     def set_state(self, current, owned, free_count, price):
         """current: the theme on screen. owned: free theme or bought. free_count: lessons free to try."""
-        if owned:
-            self.badge.setText("✓ Purchased" if free_count is not None else "Free")
-        else:
-            self.badge.setText(price or f"{free_count} free lessons")   # not bought yet: its price
+        # no price on the cards: it shows when they press Upgrade (the website's pay page)
+        self.badge.setText(("✓ Purchased" if free_count is not None else "Free") if owned else "")
+        self.badge.setVisible(bool(owned))
         self.button.setText("✨  Try free")      # every card says Try free
         self.setProperty("current", "true" if current else "false")
         self.style().unpolish(self)
