@@ -11,7 +11,8 @@ export const PLATFORMS: Record<string, { label: string; extensions: string[] }> 
   windows: { label: 'Windows', extensions: ['.exe', '.msi', '.zip'] },
   mac: { label: 'Mac', extensions: ['.dmg', '.pkg', '.zip'] },
 };
-export const VIDEO_EXTENSIONS = ['.mp4', '.m4v'];
+/** Lesson videos the admin can upload; the API makes the WebM copy the app plays from any of them (ffmpeg). */
+export const VIDEO_EXTENSIONS = ['.mp4', '.m4v', '.mov', '.webm', '.mkv', '.avi'];
 export const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 
 export const SETTING_FIELDS = [

@@ -2,16 +2,43 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FormEvent, KeyboardEvent, useState } from 'react';
-import { useCreateLessonMutation, useThemesQuery, useUpdateLessonMutation } from '@/lib/api';
+import { FormEvent, KeyboardEvent, useEffect, useState } from 'react';
+import { api, useCreateLessonMutation, useThemesQuery, useUpdateLessonMutation } from '@/lib/api';
+import { API_URL } from '@/lib/config';
 import { errorList } from '@/lib/errors';
 import { flash } from '@/lib/flashSlice';
 import { mb } from '@/lib/format';
-import { useAppDispatch } from '@/lib/hooks';
+import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import type { Example, LessonDetail } from '@/lib/types';
 import { FormErrors } from './Flashes';
 
 const EMPTY_EXAMPLE: Example = { label: '', explain: '', output: '', code: '' };
+// any common video file: the website makes the WebM copy the app plays (with ffmpeg)
+const VIDEO_ACCEPT = 'video/*,.mp4,.m4v,.mov,.webm,.mkv,.avi';
+
+type Saved = { ok: boolean; id: number; courseId: number; message?: string };
+
+/** Sends the lesson with its video and reports how much has gone up (fetch can't show upload progress). */
+function sendWithProgress(method: 'POST' | 'PUT', url: string, body: FormData, token: string | null, progress: (done: number) => void): Promise<Saved> {
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open(method, url);
+    if (token) x.setRequestHeader('Authorization', `Bearer ${token}`);
+    x.upload.onprogress = (e) => { if (e.lengthComputable) progress(e.loaded / e.total); };
+    x.onload = () => {
+      let data: { message?: string | string[] } & Partial<Saved> = {};
+      try { data = JSON.parse(x.responseText || '{}'); } catch { /* not JSON */ }
+      if (x.status >= 200 && x.status < 300) return resolve(data as Saved);
+      const m = data.message;
+      const text = x.status === 413
+        ? 'That video is too big. Make it smaller (under 500 MB), or raise MAX_UPLOAD_MB in api/.env.'
+        : Array.isArray(m) ? m.join(' ') : m || `The upload didn't work (error ${x.status}). Please try again.`;
+      reject(new Error(x.status === 401 ? 'Your admin log-in has ended. Log in again, then upload the video.' : text));
+    };
+    x.onerror = () => reject(new Error("The video couldn't be sent: the API isn't reachable. Check that the API is running, then try again."));
+    x.send(body);
+  });
+}
 
 /** Tab in a code box types 4 spaces instead of leaving the box. */
 function tabToSpaces(e: KeyboardEvent<HTMLTextAreaElement>, change: (v: string) => void) {
@@ -41,6 +68,15 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
     return list;
   });
   const [video, setVideo] = useState<File | null>(null);
+  const [sent, setSent] = useState<number | null>(null);          // upload progress 0..1 while the video goes up
+  const [preview, setPreview] = useState('');                    // the chosen video, playable before it's uploaded
+  const token = useAppSelector((s) => s.auth.token);
+  useEffect(() => {
+    if (!video) { setPreview(''); return; }
+    const u = URL.createObjectURL(video);
+    setPreview(u);
+    return () => URL.revokeObjectURL(u);
+  }, [video]);
   const [errors, setErrors] = useState<string[]>([]);
   const set = (k: keyof typeof form) => (e: { target: { value: string; checked?: boolean; type?: string } }) =>
     setForm({ ...form, [k]: e.target.type === 'checkbox' ? Boolean(e.target.checked) : e.target.value });
@@ -55,16 +91,25 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
     fd.append('examples', JSON.stringify(examples.filter((x) => x.label || x.explain || x.output || x.code)));
     if (video) fd.append('video', video);
     try {
-      const res = isNew ? await create(fd).unwrap() : await update({ id: lesson.id as number, form: fd }).unwrap();
+      let res: Saved;
+      if (video) {
+        setSent(0);
+        res = await sendWithProgress(isNew ? 'POST' : 'PUT', `${API_URL}/admin/lessons${isNew ? '' : `/${lesson.id}`}`, fd, token, setSent);
+        dispatch(api.util.invalidateTags(['Themes', 'Theme', 'Dashboard', 'Site', ...(lesson.id ? [{ type: 'Lesson' as const, id: lesson.id }] : [])]));
+      } else {
+        res = isNew ? await create(fd).unwrap() : await update({ id: lesson.id as number, form: fd }).unwrap();
+      }
+      setSent(null);
       dispatch(flash('success', res.message || 'Lesson saved.'));
       router.push(`/admin/themes/${res.courseId ?? form.courseId}`);
     } catch (err) {
-      setErrors(errorList(err));
+      setSent(null);
+      setErrors(err instanceof Error && !(err as { data?: unknown }).data ? [err.message] : errorList(err));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
-  const busy = creating || updating;
+  const busy = creating || updating || sent !== null;
   return (
     <>
       <div className="toolbar">
@@ -119,9 +164,16 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
             </>
           ) : null}
           <div className="field">
-            <label htmlFor="video">{lesson.videoFile ? 'Replace with a new video' : 'Upload a video'} <span className="muted">(optional, .mp4)</span></label>
-            <input id="video" type="file" accept="video/mp4,.mp4,.m4v" onChange={(e) => setVideo(e.target.files?.[0] || null)} />
-            <span className="help">Use this for new lessons, or to swap a video without releasing a new version of the app.{video ? ` Chosen: ${video.name} (${mb(video.size)}).` : ''}</span>
+            <label htmlFor="video">{lesson.videoFile ? 'Replace with a new video' : 'Upload a video'} <span className="muted">(optional: .mp4, .mov, .webm, .mkv…)</span></label>
+            <input id="video" type="file" accept={VIDEO_ACCEPT} onChange={(e) => setVideo(e.target.files?.[0] || null)} />
+            <span className="help">Use this for new lessons, or to swap a video without releasing a new version of the app. It uploads when you press {isNew ? 'Add lesson' : 'Save lesson'}.{video ? ` Chosen: ${video.name} (${mb(video.size)}).` : ''}</span>
+            {preview ? <video className="video-preview" style={{ marginTop: 10 }} src={preview} controls preload="metadata" /> : null}
+            {sent !== null ? (
+              <div className="upload-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(sent * 100)}>
+                <div className="upload-bar"><span style={{ width: `${Math.round(sent * 100)}%` }} /></div>
+                <span>{sent < 1 ? `Uploading the video… ${Math.round(sent * 100)}%` : 'Saving the lesson…'}</span>
+              </div>
+            ) : null}
           </div>
           <div className="field">
             <label htmlFor="video_bundled">Video inside the app</label>
@@ -150,7 +202,7 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
 
         <div className="card">
           <div className="field"><label className="check"><input type="checkbox" checked={form.published} onChange={set('published')} /><span>Show this lesson in the app</span></label></div>
-          <button className="btn" disabled={busy}>{busy ? (video ? 'Uploading the video…' : 'Saving…') : isNew ? 'Add lesson' : 'Save lesson'}</button>
+          <button className="btn" disabled={busy}>{busy ? (video ? `Uploading the video… ${Math.round((sent || 0) * 100)}%` : 'Saving…') : isNew ? 'Add lesson' : 'Save lesson'}</button>
         </div>
       </form>
     </>

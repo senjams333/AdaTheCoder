@@ -832,3 +832,8 @@ a.course-pic img { transition: transform .2s; }
 .acct-card .licence-copy { flex-direction: column; align-items: stretch; text-align: center; gap: 8px; } .acct-card .licence-copy-code b { white-space: nowrap; font-size: 1.02rem; }
 .acct-unlock-hint { font-size: .85rem; color: var(--ink-soft); margin: 8px 0 0; }
 @media (max-width: 520px) { .licence-copy { flex-direction: column; align-items: stretch; text-align: center; } .licence-copy.big .licence-copy-code b { font-size: 1.2rem; } }
+
+/* admin: lesson video upload progress */
+.upload-progress { display: grid; gap: 6px; margin-top: 12px; font-weight: 700; color: var(--ink-soft); }
+.upload-bar { height: 12px; border-radius: 999px; background: #EDE9FE; overflow: hidden; }
+.upload-bar span { display: block; height: 100%; background: linear-gradient(90deg, #7B4DFF, #38BDF8); border-radius: 999px; transition: width .2s; }

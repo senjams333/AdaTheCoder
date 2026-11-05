@@ -107,7 +107,7 @@ export class AdminLessonsController {
     if (!SLUG_RE.test(data.slug)) errors.push('The lesson ID can only use letters, numbers, - and _, like lesson_loops.');
     if (!/^-?\d+$/.test(data.position)) errors.push('Order must be a whole number.');
     if (!examples.length) errors.push('Add at least one example.');
-    if (video && !VIDEO_EXTENSIONS.includes(ext(video.originalname))) errors.push('Lesson videos must be .mp4 files.');
+    if (video && !VIDEO_EXTENSIONS.includes(ext(video.originalname))) errors.push('Lesson videos must be video files: .mp4, .mov, .webm, .mkv or .avi.');
     if (data.courseId && SLUG_RE.test(data.slug)) {
       const other = await this.catalog.lessons.findOne({ where: { courseId: data.courseId, slug: data.slug } });
       if (other && other.id !== id) errors.push('Another lesson in this theme already uses that lesson ID. Choose a different one.');
