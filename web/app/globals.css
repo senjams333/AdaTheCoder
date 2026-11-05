@@ -837,3 +837,31 @@ a.course-pic img { transition: transform .2s; }
 .upload-progress { display: grid; gap: 6px; margin-top: 12px; font-weight: 700; color: var(--ink-soft); }
 .upload-bar { height: 12px; border-radius: 999px; background: #EDE9FE; overflow: hidden; }
 .upload-bar span { display: block; height: 100%; background: linear-gradient(90deg, #7B4DFF, #38BDF8); border-radius: 999px; transition: width .2s; }
+
+/* admin: draft / published lesson */
+.video-note { margin: 8px 0 0; font-size: .92rem; color: var(--ink-soft); }
+.lesson-state { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; font-weight: 700; }
+.lesson-state.draft { background: #FEF3C7; color: #92400E; }
+.lesson-state.live { background: #DCFCE7; color: #166534; }
+.lesson-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+/* admin: lesson preview (laid out like the app's coding page) */
+.lp-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.lp-app { background: linear-gradient(180deg, #7dd3fc, #e0f2fe 70%, #bbf7d0); border-radius: 24px; padding: 20px; }
+.lp-head { text-align: center; margin-bottom: 14px; }
+.lp-head h2 { margin: 0; color: #0f172a; }
+.lp-head p { margin: 4px 0 0; color: #065f46; font-weight: 700; }
+.lp-video { max-width: 760px; margin: 0 auto 16px; }
+.lp-video video { width: 100%; aspect-ratio: 16 / 9; background: #000; border: 6px solid #ffea79; border-radius: 28px; display: block; }
+.lp-cols { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.6fr); gap: 18px; }
+.lp-examples { background: rgba(255, 255, 255, .6); border: 2px solid #fff; border-radius: 28px; padding: 16px; max-height: 520px; overflow: auto; }
+.lp-examples h3 { margin: 0 0 10px; }
+.lp-ex button { width: 100%; text-align: left; font: 700 1rem var(--font-body); padding: 12px 14px; border: 0; border-radius: 16px; background: #fff; cursor: pointer; margin-bottom: 8px; }
+.lp-ex.on button { box-shadow: 0 0 0 3px #38bdf8; }
+.lp-box { background: #fff; border: 3px solid #38bdf8; border-radius: 16px; padding: 10px 14px; margin: -2px 0 10px; }
+.lp-k { color: #0284c7; font-weight: 800; margin: 6px 0 4px; }
+.lp-box pre { background: #0f172a; color: #86efac; border-radius: 12px; padding: 10px; white-space: pre-wrap; margin: 0; }
+.lp-editor { background: #1e293b; border-radius: 28px; padding: 16px; display: grid; gap: 12px; }
+.lp-code { background: #0f172a; color: #86efac; border-radius: 16px; padding: 14px; min-height: 160px; white-space: pre-wrap; margin: 0; font-size: 1.05rem; }
+.lp-run { background: #ffd166; color: #0f172a; text-align: center; font-weight: 800; border-radius: 14px; padding: 12px; }
+.lp-out { background: #fff; color: #0f172a; border-radius: 16px; padding: 14px; min-height: 120px; white-space: pre-wrap; margin: 0; }
+@media (max-width: 860px) { .lp-cols { grid-template-columns: minmax(0, 1fr); } }

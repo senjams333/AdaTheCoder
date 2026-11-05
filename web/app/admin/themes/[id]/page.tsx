@@ -93,9 +93,10 @@ export default function AdminThemePage() {
                       : <span className="pill pill-grey">None</span>}
                   </td>
                   <td>{l.exampleCount}</td>
-                  <td>{l.published ? <span className="pill pill-green">Live</span> : <span className="pill pill-grey">Hidden</span>}</td>
+                  <td>{l.published ? <span className="pill pill-green">Live</span> : <span className="pill pill-sun">Draft</span>}</td>
                   <td><div className="actions">
                     <Link className="btn btn-small btn-ghost" href={`/admin/lessons/${l.id}`}>Edit</Link>
+                    <Link className="btn btn-small btn-ghost" href={`/admin/lessons/${l.id}/preview`}>Preview</Link>
                     <button className="btn btn-small btn-danger" onClick={() => {
                       if (confirm('Delete this lesson? Apps will stop showing it.')) run(remove(l.id).unwrap());
                     }}>Delete</button>

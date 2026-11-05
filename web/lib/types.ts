@@ -137,6 +137,7 @@ export interface LessonDetail {
   videoFile: string;
   videoSize: number;
   videoUrl: string | null;
+  webmUrl?: string | null;
   defaultCode: string;
   examples: Example[];
   published: boolean;

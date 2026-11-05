@@ -96,6 +96,10 @@ export const api = createApi({
       query: ({ id, form }) => ({ url: `admin/lessons/${id}`, method: 'PUT', body: form }),
       invalidatesTags: (_r, _e, { id }) => ['Themes', 'Theme', 'Dashboard', 'Site', { type: 'Lesson', id }],
     }),
+    publishLesson: b.mutation<Done & { published: boolean }, { id: number; published: boolean }>({
+      query: ({ id, published }) => ({ url: `admin/lessons/${id}/publish`, method: 'POST', body: { published } }),
+      invalidatesTags: (_r, _e, { id }) => ['Themes', 'Theme', 'Dashboard', 'Site', { type: 'Lesson', id }],
+    }),
     deleteLesson: b.mutation<Done, number>({
       query: (id) => ({ url: `admin/lessons/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Themes', 'Theme', 'Dashboard', 'Site'],
@@ -140,7 +144,7 @@ export const {
   useGetAccountQuery, useUpdateAccountMutation, useChangePasswordMutation, useDeleteAccountMutation, useDownloadLinkMutation,
   useDashboardQuery, useAdminSettingsQuery, useSaveSettingsMutation,
   useThemesQuery, useThemeQuery, useCreateThemeMutation, useUpdateThemeMutation, useDeleteThemeMutation, useCopyLessonsMutation,
-  useLessonQuery, useBlankLessonQuery, useCreateLessonMutation, useUpdateLessonMutation, useDeleteLessonMutation, useMoveLessonMutation,
+  useLessonQuery, useBlankLessonQuery, useCreateLessonMutation, useUpdateLessonMutation, useDeleteLessonMutation, useMoveLessonMutation, usePublishLessonMutation,
   useReleasesQuery, useUploadReleaseMutation, useMakeLatestMutation, useDeleteReleaseMutation,
   useParentsQuery, useToggleParentMutation, useSaveParentPlanMutation, useDeleteParentMutation,
 } = api;

@@ -82,11 +82,17 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
     setForm({ ...form, [k]: e.target.type === 'checkbox' ? Boolean(e.target.checked) : e.target.value });
   const setEx = (i: number, k: keyof Example, v: string) => setExamples(examples.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
 
+  // what the save button pressed means: keep as a draft, open the preview, or publish to the app
+  const [intent, setIntent] = useState<'draft' | 'preview' | 'publish'>('draft');
+  const [chosenBad, setChosenBad] = useState(false);
+  const [savedBad, setSavedBad] = useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault();
+    // "Save as draft" / "Unpublish" hide it from the app; "Save & preview" keeps a published lesson published
+    const publish = intent === 'publish' || (intent === 'preview' && !isNew && lesson.published);
     const fd = new FormData();
     for (const k of ['courseId', 'slug', 'position', 'emoji', 'name', 'title', 'subtitle', 'videoBundled', 'defaultCode'] as const) fd.append(k, form[k]);
-    fd.append('published', String(form.published));
+    fd.append('published', String(publish));
     fd.append('removeVideo', String(form.removeVideo));
     fd.append('examples', JSON.stringify(examples.filter((x) => x.label || x.explain || x.output || x.code)));
     if (video) fd.append('video', video);
@@ -100,7 +106,12 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
         res = isNew ? await create(fd).unwrap() : await update({ id: lesson.id as number, form: fd }).unwrap();
       }
       setSent(null);
-      dispatch(flash('success', res.message || 'Lesson saved.'));
+      if (intent === 'preview') {
+        dispatch(flash('info', publish ? 'Saved. This is how the lesson looks in the app.' : 'Saved as a draft. This is how the lesson will look in the app.'));
+        router.push(`/admin/lessons/${res.id}/preview`);
+        return;
+      }
+      dispatch(flash('success', publish ? `${res.message || 'Lesson saved.'} It is published in the app.` : 'Saved as a draft: it is hidden from the app until you publish it.'));
       router.push(`/admin/themes/${res.courseId ?? form.courseId}`);
     } catch (err) {
       setSent(null);
@@ -159,7 +170,15 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
           {lesson.videoFile ? (
             <>
               <p>Uploaded video: <b>{lesson.videoFile}</b> <span className="muted">({mb(lesson.videoSize)})</span>. Installed apps download it and play it instead of the one inside the app.</p>
-              {lesson.videoUrl ? <video className="video-preview" src={lesson.videoUrl} controls preload="metadata" /> : null}
+              {lesson.videoUrl ? (
+                <video className="video-preview" controls preload="metadata" onError={() => setSavedBad(true)} onLoadedMetadata={() => setSavedBad(false)}>
+                  {lesson.webmUrl ? <source src={lesson.webmUrl} type="video/webm" /> : null}
+                  <source src={lesson.videoUrl} onError={() => setSavedBad(true)} />
+                </video>
+              ) : null}
+              <p className="video-note">{lesson.webmUrl ? '✓ The app\'s copy (WebM) is ready: installed apps play this video.'
+                : '⏳ The website is making the copy the app plays (needs ffmpeg on the server). Reload this page in a minute.'}
+                {savedBad && !lesson.webmUrl ? ' This browser can\'t play the original file; the preview works when the app\'s copy is ready.' : ''}</p>
               <label className="check" style={{ margin: '12px 0 18px' }}><input type="checkbox" checked={form.removeVideo} onChange={set('removeVideo')} /><span>Remove the uploaded video and go back to the one inside the app</span></label>
             </>
           ) : null}
@@ -167,7 +186,13 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
             <label htmlFor="video">{lesson.videoFile ? 'Replace with a new video' : 'Upload a video'} <span className="muted">(optional: .mp4, .mov, .webm, .mkv…)</span></label>
             <input id="video" type="file" accept={VIDEO_ACCEPT} onChange={(e) => setVideo(e.target.files?.[0] || null)} />
             <span className="help">Use this for new lessons, or to swap a video without releasing a new version of the app. It uploads when you press {isNew ? 'Add lesson' : 'Save lesson'}.{video ? ` Chosen: ${video.name} (${mb(video.size)}).` : ''}</span>
-            {preview ? <video className="video-preview" style={{ marginTop: 10 }} src={preview} controls preload="metadata" /> : null}
+            {preview ? (
+              <>
+                <video key={preview} className="video-preview" style={{ marginTop: 10 }} src={preview} controls preload="metadata"
+                  onError={() => setChosenBad(true)} onLoadedMetadata={() => setChosenBad(false)} />
+                {chosenBad ? <p className="video-note">This browser can&apos;t play this file here (many Ubuntu browsers can&apos;t play MP4). That&apos;s fine: it still uploads, and the website makes the copy the app plays.</p> : null}
+              </>
+            ) : null}
             {sent !== null ? (
               <div className="upload-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(sent * 100)}>
                 <div className="upload-bar"><span style={{ width: `${Math.round(sent * 100)}%` }} /></div>
@@ -201,8 +226,16 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
         </div>
 
         <div className="card">
-          <div className="field"><label className="check"><input type="checkbox" checked={form.published} onChange={set('published')} /><span>Show this lesson in the app</span></label></div>
-          <button className="btn" disabled={busy}>{busy ? (video ? `Uploading the video… ${Math.round((sent || 0) * 100)}%` : 'Saving…') : isNew ? 'Add lesson' : 'Save lesson'}</button>
+          <p className={`lesson-state ${lesson.published ? 'live' : 'draft'}`}>
+            {isNew ? '📝 New lesson: save it as a draft, preview it, then publish it to the app.'
+              : lesson.published ? '✅ Published: children see this lesson in the app.' : '📝 Draft: hidden from the app until you publish it.'}
+          </p>
+          {busy ? <p className="muted"><b>{video ? `Uploading the video… ${Math.round((sent || 0) * 100)}%` : 'Saving…'}</b></p> : null}
+          <div className="lesson-actions">
+            <button className="btn btn-ghost" disabled={busy} onClick={() => setIntent('draft')}>{!isNew && lesson.published ? 'Unpublish (back to draft)' : 'Save as draft'}</button>
+            <button className="btn btn-ghost" disabled={busy} onClick={() => setIntent('preview')}>Save &amp; preview 👀</button>
+            <button className="btn" disabled={busy} onClick={() => setIntent('publish')}>{!isNew && lesson.published ? 'Save changes' : 'Publish to the app 🚀'}</button>
+          </div>
         </div>
       </form>
     </>

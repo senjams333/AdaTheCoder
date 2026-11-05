@@ -7,7 +7,9 @@ import { AdminGuard } from '../auth/guards';
 import { CatalogService } from '../catalog/catalog.service';
 import { VIDEO_EXTENSIONS } from '../common/constants';
 import { discard, keep, uploadOptions, UploadedFile } from '../common/uploads';
-import { ext, mediaUrl, SLUG_RE, trimmed, truthy } from '../common/util';
+import { existsSync } from 'fs';
+import { join } from 'path';
+import { ext, mediaUrl, SLUG_RE, trimmed, truthy, uploadDir } from '../common/util';
 import { Example, Lesson } from '../entities';
 
 /** Admin: lessons inside a theme. The topic (emoji + name) is what the app's lesson list shows. */
@@ -23,8 +25,27 @@ export class AdminLessonsController {
       id: l.id, courseId: l.courseId, slug: l.slug, position: l.position, emoji: l.emoji, name: l.name, title: l.title,
       subtitle: l.subtitle, videoBundled: l.videoBundled, videoFile: l.videoFile, videoSize: Number(l.videoSize),
       videoUrl: l.videoFile ? mediaUrl('videos', l.videoFile) : null, defaultCode: l.defaultCode,
+      // the WebM copy the app plays (made in the background after the upload); the admin's preview plays it too
+      webmUrl: this.webmOf(l.videoFile) ? mediaUrl('videos', this.webmOf(l.videoFile)) : null,
       examples: l.examples || [], published: l.published,
     };
+  }
+
+  private webmOf(file: string | null | undefined): string {
+    if (!file) return '';
+    const webm = file.replace(/\.[^.]+$/, '') + '.webm';
+    return existsSync(join(uploadDir('videos'), webm)) ? webm : '';
+  }
+
+  /** Publish a draft (it appears in installed apps within a minute), or take a lesson back to draft. */
+  @Post(':id/publish')
+  @HttpCode(200)
+  async publish(@Param('id', ParseIntPipe) id: number, @Body() body: { published?: boolean | string }) {
+    const l = await this.find(id);
+    l.published = body.published === true || body.published === 'true';
+    await this.catalog.lessons.save(l);
+    return { ok: true, id: l.id, courseId: l.courseId, published: l.published,
+      message: l.published ? `Lesson '${l.name}' is published. Installed apps get it within a minute.` : `Lesson '${l.name}' is a draft again: it's hidden from the app.` };
   }
 
   /** What a new lesson in this theme starts with. */
@@ -33,7 +54,7 @@ export class AdminLessonsController {
     const next = Math.max(0, ...(await this.catalog.courseLessons(courseId)).map((l) => l.position)) + 1;
     return {
       courseId, slug: `lesson${next}`, position: next, emoji: '', name: '', title: '', subtitle: '', videoBundled: '',
-      videoFile: '', videoSize: 0, videoUrl: null, defaultCode: '', examples: [{ label: '', explain: '', output: '', code: '' }], published: true,
+      videoFile: '', videoSize: 0, videoUrl: null, webmUrl: null, defaultCode: '', examples: [{ label: '', explain: '', output: '', code: '' }], published: false,
     };
   }
 
