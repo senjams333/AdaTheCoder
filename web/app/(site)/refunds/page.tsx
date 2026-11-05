@@ -7,22 +7,18 @@ export default function RefundsPage() {
   return (
     <article className="prose wrap">
       <h1>Refund and cancellation policy</h1>
-      <p className="muted">Last updated: 3 November 2026. Template text: review it with a legal adviser before launch.</p>
+      <p className="muted">Last updated: 6 November 2026. Template text: review it with a legal adviser before launch.</p>
 
-      <h2>Try before you buy</h2>
-      <p>Every paid theme lets your child try the first lessons free, so you can see whether it suits them before you pay.</p>
+      <h2>No refunds</h2>
+      <p>Our themes cost very little, and every paid theme lets your child <b>try the first lessons free</b> before you buy. So all sales are final: we don&apos;t give refunds once a theme is bought and unlocked.</p>
 
-      <h2>7-day refund</h2>
-      <p>If you&apos;re not happy with a theme you bought, email <a href={`mailto:${email}`}>{email}</a> within <b>7 days</b> of paying, with the email address of your account and the theme&apos;s name. We&apos;ll refund the full amount; no questions asked. The licence for that theme is then removed.</p>
-
-      <h2>Problems with a purchase</h2>
+      <h2>Problems with a payment</h2>
+      <p>We will always put right a payment mistake. Write to <a href={`mailto:${email}`}>{email}</a> with your account&apos;s email and the payment reference (from Razorpay or PayPal):</p>
       <ul>
-        <li><b>Charged twice, or charged but the theme didn&apos;t unlock:</b> write to us at any time with your payment&apos;s reference (from Razorpay or PayPal). We&apos;ll unlock the theme or refund the extra payment.</li>
-        <li><b>The app doesn&apos;t work on your computer:</b> tell us within 7 days and we&apos;ll help, or refund you if we can&apos;t make it work.</li>
+        <li><b>Charged twice for the same theme:</b> we refund the extra payment.</li>
+        <li><b>Charged, but the theme didn&apos;t unlock:</b> we unlock it for you, or refund you if we can&apos;t.</li>
       </ul>
-
-      <h2>How refunds are paid</h2>
-      <p>Refunds go back to the way you paid: to your card, UPI or bank account through Razorpay, or to your PayPal account or card through PayPal. We send the refund within 2 working days of agreeing to it; your bank or PayPal usually shows it within 5 to 7 working days.</p>
+      <p>Money for a payment mistake goes back the way you paid (card, UPI, bank or PayPal) within 2 working days of us confirming it; your bank or PayPal usually shows it within 5 to 7 working days.</p>
 
       <h2>Cancellation</h2>
       <p>Licences are one-time payments, not subscriptions, so there is nothing to cancel and you&apos;ll never be charged again automatically. You can delete your account at any time from your account page.</p>

@@ -27,7 +27,7 @@ export default function TermsPage() {
       <p>When a payment goes through you get a licence code straight away, shown on screen and on your account page, and the app unlocks the theme by itself.</p>
 
       <h2>6. Refunds</h2>
-      <p>See our <Link href="/refunds">refund and cancellation policy</Link>.</p>
+      <p>All sales are final: there are no refunds once a theme is bought, because every theme lets you try its first lessons free. Payment mistakes (charged twice, or a theme that didn&apos;t unlock) are always put right. See our <Link href="/refunds">refund and cancellation policy</Link>.</p>
 
       <h2>7. Using the app and the lessons</h2>
       <p>The app, lessons, videos, characters and pictures belong to us or to the people who licensed them to us. You may use them to learn, and children may keep and share the programs they write themselves. Please don&apos;t copy, resell or publish our lessons, videos or characters, or try to get round the licence checks.</p>

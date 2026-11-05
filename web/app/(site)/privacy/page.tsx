@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <h2>What we collect</h2>
       <p>When a parent or guardian creates an account we store their name, email address, city and country, and a scrambled (hashed) version of their password. Parents can choose to add their child&apos;s first name and age; the app uses the first name to greet the child. We also record when the account last logged in and when the app is downloaded.</p>
       <h2>Payments</h2>
-      <p>Paid themes are bought on this website through <b>Razorpay</b> or <b>PayPal</b>. They handle your card, UPI, bank or PayPal details; we never see or store them. We keep a record of each purchase: which theme, the amount, the date, whether it went through, and the payment reference Razorpay or PayPal gives us, so we can show your licence and help with refunds. Razorpay&apos;s and PayPal&apos;s own privacy policies cover what they collect.</p>
+      <p>Paid themes are bought on this website through <b>Razorpay</b> or <b>PayPal</b>. They handle your card, UPI, bank or PayPal details; we never see or store them. We keep a record of each purchase: which theme, the amount, the date, whether it went through, and the payment reference Razorpay or PayPal gives us, so we can show your licence and sort out any payment problem. Razorpay&apos;s and PayPal&apos;s own privacy policies cover what they collect.</p>
       <h2>Emails</h2>
       <p>We send account emails (your sign-up code, a welcome, password reset links) through our email provider, Brevo. We don&apos;t send marketing emails unless you ask for them.</p>
       <h2>What we don&apos;t collect</h2>
