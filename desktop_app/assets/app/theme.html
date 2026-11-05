@@ -73,6 +73,16 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 @media (prefers-reduced-motion: reduce) { .sc-shoot { display: none; } .sc-cloud, .sc-flower, .sc-star, .sc-sun, .sc-moon { animation: none; } }
 .top { display: flex; align-items: center; gap: 8px; min-height: 52px; }
 .top .grow { flex: 1; }
+/* the twinkling background sound's volume: a little upright slider under the sound button while it plays */
+.central > .top { z-index: 3; }        /* so the slider shows over the lesson list */
+.musicwrap { position: relative; display: inline-flex; }
+.bgvol { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column;
+  align-items: center; gap: 6px; padding: 12px 8px 8px; background: rgba(255, 255, 255, .95); border: 2px solid #7dd3fc; border-radius: 22px;
+  box-shadow: 0 6px 16px rgba(3, 105, 161, .25); }
+.bgvol[hidden] { display: none; }
+.bgvol input { -webkit-appearance: slider-vertical; appearance: slider-vertical; writing-mode: vertical-lr; direction: rtl;
+  width: 22px; height: 120px; margin: 0; accent-color: #38bdf8; cursor: pointer; }
+.bgvol small { font: 700 11px var(--font-kid); color: #0369a1; }
 .qbtn { font: 700 18px var(--font-kid); border: none; cursor: pointer; background: rgba(255,255,255,.85); color: #0f172a; }
 .qbtn:disabled { opacity: .55; cursor: default; }
 .home { border-radius: 25px; width: 208px; height: 48px; }
@@ -312,7 +322,8 @@ button:focus { outline: none !important; }
         <div class="grow"></div>
         <button class="qbtn home" id="homeBtn" disabled>🏠 Home Screen 🌟</button>
         <button class="qbtn round" id="themeBtn" disabled style="color:#f59e0b">☀️</button>
-        <button class="qbtn round" id="musicBtn" disabled>🔈</button>
+        <span class="musicwrap"><button class="qbtn round" id="musicBtn" disabled>🔈</button>
+          <span class="bgvol" id="bgVolBox" hidden><input type="range" id="bgVol" min="0" max="100" value="50" aria-label="Twinkle sound volume" title="Twinkle sound volume"><small id="bgVolPct">50%</small></span></span>
         <button class="avatar" id="avatarBtn" disabled title="Account ⭐"><img id="avatarImg" alt="Account"></button>
       </div>
       <div class="body">
@@ -507,7 +518,7 @@ function buildFrame() {
     `.giant-teddy-card h2{font-size:22px!important;padding:10px 20px!important;border-width:3px!important}</style>`;
   const shim = lift + `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
   frame.srcdoc = A.template.replace("</head>", shim + "</head>");
-  frame.addEventListener("load", () => { frameReady = true; patchTutorial(); if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
+  frame.addEventListener("load", () => { frameReady = true; patchTutorial(); addBgVolume(); if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
   $("lesson").appendChild(frame);
 }
 // "🎬 See video" on the coding page, in the same place and colours as "Skip video" on the video page
@@ -617,7 +628,40 @@ function openLesson(i) {
 }
 $("homeBtn").onclick = () => show("home");
 $("themeBtn").onclick = () => { dark = !dark; style(); try { frame.contentWindow.setDarkMode(dark); } catch (e) {} };
-$("musicBtn").onclick = () => { music = !music; $("musicBtn").textContent = music ? "🔊" : "🔈"; try { frame.contentWindow.toggleAudioEngine(music); } catch (e) {} };
+$("musicBtn").onclick = () => {
+  music = !music; $("musicBtn").textContent = music ? "🔊" : "🔈";
+  $("bgVolBox").hidden = !music;
+  try { frame.contentWindow.toggleAudioEngine(music); } catch (e) {}
+};
+// the twinkling sound's volume (0–100, 50 = as it always was), remembered on this computer
+function bgVolume() { try { const v = localStorage.getItem("ada-bg-volume"); return v === null ? 50 : Math.min(100, Math.max(0, +v)); } catch (e) { return 50; } }
+function applyBgVolume() {
+  const v = +$("bgVol").value;
+  $("bgVolPct").textContent = v + "%";
+  try { frame.contentWindow.setBgVolume && frame.contentWindow.setBgVolume(v / 50); } catch (e) {}
+}
+$("bgVol").value = bgVolume(); $("bgVolPct").textContent = $("bgVol").value + "%";
+$("bgVol").addEventListener("input", applyBgVolume);
+$("bgVol").addEventListener("change", () => { try { localStorage.setItem("ada-bg-volume", $("bgVol").value); } catch (e) {} });
+// the lesson page's twinkles all go through one volume knob (its own sounds stay as they were)
+function addBgVolume() {
+  try {
+    const d = frame.contentDocument, sc = d.createElement("script");
+    sc.textContent = `let bgVolGain = null, bgVolLevel = 1;
+      function bgVolNode() { ensureAudioContext(); if (!bgVolGain) { bgVolGain = bgAudioContext.createGain(); bgVolGain.gain.value = bgVolLevel; bgVolGain.connect(bgAudioContext.destination); } return bgVolGain; }
+      window.setBgVolume = function (v) { bgVolLevel = v; if (bgVolGain) bgVolGain.gain.value = v; };
+      playSoftTinkle = function (freq, delay = 0) {
+        ensureAudioContext(); if (!bgAudioContext) return;
+        const osc = bgAudioContext.createOscillator(), gain = bgAudioContext.createGain();
+        osc.type = "sine"; osc.frequency.value = freq; osc.connect(gain); gain.connect(bgVolNode());
+        const t = bgAudioContext.currentTime + delay;
+        gain.gain.setValueAtTime(0.0001, t); gain.gain.exponentialRampToValueAtTime(0.02, t + 0.08); gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+        osc.start(t); osc.stop(t + 1.8);
+      };`;
+    d.body.appendChild(sc);
+    applyBgVolume();
+  } catch (e) {}
+}
 function placeToggle() {
   // halfway down, on the lesson list's left edge, for whatever size the window is
   const t = $("sideToggle"), W = $("win").clientWidth, H = $("win").clientHeight;
