@@ -448,6 +448,7 @@ function pushLesson() {
 $("frame").addEventListener("load", () => {
   frameReady = true;
   try { F().document.addEventListener("mousedown", () => { $("bgVolBox").hidden = true; }, true); } catch (e) {}
+  setTimeout(homeSound, 0);   // the sound as the child left it
   const w = F();
   w.pyqtBridge = {
     executePython(code) {
@@ -506,10 +507,26 @@ $("themeBtn").onclick = () => {
 $("musicBtn").onclick = () => {
   // playing with the slider closed: the button just opens the slider again; otherwise it turns the sound on or off
   if (music && $("bgVolBox").hidden) { $("bgVolBox").hidden = false; return; }
-  music = !music; $("musicBtn").textContent = music ? "🎵" : "🔈";
+  setMusic(!music);
   $("bgVolBox").hidden = !music;
-  if (frameReady) { F().setBgVolume && F().setBgVolume(+$("bgVol").value / 50); F().toggleAudioEngine(music && +$("bgVol").value > 0); }
 };
+// ONE twinkling-sound setting for the whole app: this button, and the sound button inside every theme
+// (a theme asks for it when it opens, and tells the app when the child changes it)
+let themeOpen = false;
+function homeSound() {
+  if (!frameReady) return;
+  try { F().setBgVolume && F().setBgVolume(+$("bgVol").value / 50); F().toggleAudioEngine(music && !themeOpen && +$("bgVol").value > 0); } catch (e) {}
+}
+function setMusic(on) {
+  music = !!on; $("musicBtn").textContent = music ? "🎵" : "🔈";
+  if (!music) $("bgVolBox").hidden = true;
+  try { localStorage.setItem("ada-bg-music", music ? "1" : "0"); } catch (e) {}
+  homeSound();
+}
+window.appMusicState = () => music;
+window.appSetMusic = on => { setMusic(on); $("bgVolBox").hidden = true; };
+window.appSetBgVolume = v => { $("bgVol").value = v; bgVolLabel(); try { localStorage.setItem("ada-bg-volume", String(v)); } catch (e) {} homeSound(); };
+try { music = localStorage.getItem("ada-bg-music") === "1"; $("musicBtn").textContent = music ? "🎵" : "🔈"; } catch (e) {}
 // the twinkling sound's volume (0–100, 50 = as always, 0 = silent); the same setting as inside the themes
 function bgVolume() { try { const v = localStorage.getItem("ada-bg-volume"); return v === null ? 50 : Math.min(100, Math.max(0, +v)); } catch (e) { return 50; } }
 function bgVolLabel() { $("bgVolPct").textContent = +$("bgVol").value === 0 ? "Off" : $("bgVol").value + "%"; }
@@ -518,7 +535,7 @@ $("bgVol").value = bgVolume(); bgVolLabel();
 document.addEventListener("mousedown", e => { if (!e.target.closest(".musicwrap")) $("bgVolBox").hidden = true; }, true);
 $("bgVol").addEventListener("input", () => {
   bgVolLabel();
-  if (frameReady) { F().setBgVolume && F().setBgVolume(+$("bgVol").value / 50); if (music) F().toggleAudioEngine(+$("bgVol").value > 0); }
+  homeSound();
 });
 $("bgVol").addEventListener("change", () => { try { localStorage.setItem("ada-bg-volume", $("bgVol").value); } catch (e) {} });
 $("avatarBtn").onclick = e => { e.stopPropagation(); $("menu").hidden = !$("menu").hidden; };
@@ -582,17 +599,20 @@ function openKids(id) {
 let kidsReady = false, kidsTimeUp = false;
 function themePage(html) { $("kids").srcdoc = html; }
 function showKids() {
+  themeOpen = true; homeSound();
   if (!kidsReady || !kidsTimeUp) return;
   $("kload").hidden = true; $("kids").classList.add("on"); $("kids").focus();
   $("scene").hidden = true;                             // the home sky rests behind the theme (less work for the computer)
 }
 function closeKids() {
+  themeOpen = false; $("bgVol").value = bgVolume(); bgVolLabel(); homeSound();
   $("kids").classList.remove("on"); $("kids").srcdoc = ""; $("scene").hidden = false;
   host && host.themeClosedByPage();
   show("home");
 }
 // the theme couldn't open (or the child logged out there)
 function themeClosed(loggedOut) {
+  themeOpen = false; homeSound();
   $("kload").hidden = true; $("kids").classList.remove("on"); $("kids").srcdoc = ""; $("scene").hidden = false;
   if (loggedOut) { host && host.logout(); D.user = null; showLogin(); } else show("home");
 }

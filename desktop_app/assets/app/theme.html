@@ -633,10 +633,17 @@ $("themeBtn").onclick = () => { dark = !dark; style(); try { frame.contentWindow
 $("musicBtn").onclick = () => {
   // playing with the slider closed: the button just opens the slider again; otherwise it turns the sound on or off
   if (music && $("bgVolBox").hidden) { $("bgVolBox").hidden = false; return; }
-  music = !music; $("musicBtn").textContent = music ? "🔊" : "🔈";
+  setThemeMusic(!music, true);
   $("bgVolBox").hidden = !music;
-  try { frame.contentWindow.toggleAudioEngine(music && +$("bgVol").value > 0); } catch (e) {}
 };
+// the app's one sound setting: the same on the home screen and in every theme
+function inApp() { try { return parent !== window && typeof parent.appMusicState === "function"; } catch (e) { return false; } }
+function setThemeMusic(on, tellApp) {
+  music = !!on; $("musicBtn").textContent = music ? "🔊" : "🔈";
+  if (!music) $("bgVolBox").hidden = true;
+  try { frame.contentWindow.toggleAudioEngine(music && +$("bgVol").value > 0); } catch (e) {}
+  if (tellApp && inApp()) try { parent.appSetMusic(music); } catch (e) {}
+}
 // the twinkling sound's volume (0–100, 50 = as it always was), remembered on this computer
 function bgVolume() { try { const v = localStorage.getItem("ada-bg-volume"); return v === null ? 50 : Math.min(100, Math.max(0, +v)); } catch (e) { return 50; } }
 function applyBgVolume() {
@@ -653,7 +660,12 @@ $("bgVol").value = bgVolume(); $("bgVolPct").textContent = +$("bgVol").value ===
 $("bgVol").addEventListener("input", applyBgVolume);
 // a click anywhere else closes the slider (the sound keeps playing)
 document.addEventListener("mousedown", e => { if (!e.target.closest(".musicwrap")) $("bgVolBox").hidden = true; }, true);
-$("bgVol").addEventListener("change", () => { try { localStorage.setItem("ada-bg-volume", $("bgVol").value); } catch (e) {} });
+$("bgVol").addEventListener("change", () => {
+  try { localStorage.setItem("ada-bg-volume", $("bgVol").value); } catch (e) {}
+  if (inApp()) try { parent.appSetBgVolume(+$("bgVol").value); } catch (e) {}
+});
+// opening a theme: the sound is as the child left it on the home screen
+if (inApp()) try { $("bgVol").value = bgVolume(); setThemeMusic(parent.appMusicState(), false); } catch (e) {}
 // the lesson page's twinkles all go through one volume knob (its own sounds stay as they were)
 function addBgVolume() {
   try {
