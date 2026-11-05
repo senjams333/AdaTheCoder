@@ -156,7 +156,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .stage { position: relative; height: 560px; display: flex; align-items: center; justify-content: flex-end; gap: 34px; padding-bottom: 40px; }
 /* Twinkle floats on the left of the code tablet and Ada on the right: big, the same size, with clear space
    between them and the tablet */
-.stage .tablet { flex: 0 1 390px; min-width: 330px; transform: rotate(-2deg); z-index: 2; }
+.stage .tablet { flex: 0 1 470px; min-width: 380px; transform: rotate(-2deg); z-index: 2; }
 .stage .twinkle, .stage .ada { flex: none; height: clamp(280px, 24vw, 460px); width: auto; z-index: 3; object-fit: contain; }
 .stage .twinkle { margin-left: 0; }
 /* Ada's picture ends at her waist: it fades out softly instead of a hard edge */
@@ -191,7 +191,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 
 @media (max-width: 1240px) {
   .stage { height: 470px; gap: 16px; }
-  .stage .tablet { min-width: 260px; }
+  .stage .tablet { min-width: 300px; }
   .stage .twinkle, .stage .ada { height: clamp(200px, 20vw, 260px); }
 }
 @media (max-width: 880px) {
@@ -200,7 +200,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
   .hero-text { padding-bottom: 0; }
   .stage { height: auto; padding-bottom: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "editor editor" "twinkle ada"; margin-top: 8px; }
   .stage .tablet, .stage .twinkle, .stage .ada { position: static; transform: none; }
-  .stage .tablet { grid-area: editor; justify-self: center; width: min(100%, 430px); margin-bottom: 8px; }
+  .stage .tablet { grid-area: editor; justify-self: center; width: min(100%, 480px); margin-bottom: 8px; }
   .stage .twinkle { grid-area: twinkle; height: auto; width: 100%; max-height: 260px; justify-self: center; align-self: center; }
   .stage .ada { grid-area: ada; height: auto; width: 100%; max-width: none; max-height: 290px; justify-self: center; }
 }
