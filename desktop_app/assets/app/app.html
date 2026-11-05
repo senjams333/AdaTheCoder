@@ -509,7 +509,7 @@ function kidWindowPic(pictureUrl, hello, heading, rows, notes, buttons, lic) {
   modal(`<div class="kidcard"><button class="closer">✕  Close</button><div class="kidrow"><div class="kidside"><div class="hello">${esc(hello)}</div><img src="${pictureUrl || ""}" alt=""></div>
     <div class="kidinfo"><div class="hd">${heading}</div><table class="${lic ? "lic" : ""}">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join("")}</table>${notes || ""}</div></div>
     ${buttons ? `<button class="soft">${buttons}</button>` : ""}</div>`,
-    e => { if (e.target.classList.contains("closer")) closeModal(); else if (e.target.classList.contains("soft")) { host && host.forgotPassword((D.user || {}).email || ""); toast("🔑 The website's Forgot password page opens in your browser."); } });
+    e => { if (e.target.classList.contains("closer")) closeModal(); else if (e.target.classList.contains("soft")) { appChangePassword(); } });
 }
 function profile() {
   const u = D.user || {};
@@ -575,6 +575,10 @@ window.appRunCode = code => host && host.runCode(code);
 window.appSubmitInput = v => host && host.submitInput(v);
 window.appEmptyInput = () => host && host.emptyInput();
 window.appUpgrade = id => host && host.upgrade(id);
+window.appUser = () => D.user || {};
+window.appLicenceCount = () => LICENCES.length;
+// Profile → Change password: the website's account page, where the parent changes it
+window.appChangePassword = () => { host && host.changePassword(); toast("🔑 The website opens in your browser to change the password."); };
 window.appVideoFull = on => host && host.setVideoFull(!!on);
 window.appRedeem = (id, code) => host && host.redeemLicence(id, code);
 

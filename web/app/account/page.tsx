@@ -30,7 +30,9 @@ function AccountInner() {
   const [mine, setMine] = useState<'windows' | 'mac' | null>(null);
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const wanted = useSearchParams().get('theme') || '';
+  const params = useSearchParams();
+  const wanted = params.get('theme') || '';
+  const askPassword = params.get('change') === 'password';   // the app's Profile → Change password
   const sideRef = useRef<HTMLElement>(null);
   const contact = site?.settings.contact_email || 'ada@adathecoder.com';
 
@@ -63,6 +65,10 @@ function AccountInner() {
   useEffect(() => {
     if (wanted && data) document.getElementById(`theme-${wanted}`)?.scrollIntoView({ block: 'nearest', inline: 'center' });
   }, [wanted, data]);
+
+  useEffect(() => {
+    if (askPassword && data) setModal('password');
+  }, [askPassword, data]);
 
   if (!allowed || isLoading || !data) {
     return <div className="acct-page"><div className="wrap acct-wrap"><p className="acct-text">Loading your account…</p></div></div>;

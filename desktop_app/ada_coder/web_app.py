@@ -285,6 +285,12 @@ class Host(QObject):
         if url.startswith("http"):
             QDesktopServices.openUrl(QUrl(url))
 
+    @pyqtSlot()
+    def changePassword(self):
+        """Profile → Change password: the website's account page opens with "Change your password" ready
+        (the website asks the parent to log in first if needed)."""
+        QDesktopServices.openUrl(QUrl(SERVER_URL.rstrip("/") + "/account?change=password"))
+
     @pyqtSlot(str)
     def forgotPassword(self, email):
         from urllib.parse import quote

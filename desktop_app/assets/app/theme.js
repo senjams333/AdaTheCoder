@@ -62,6 +62,23 @@
     if (r.ok) { if (!S().key) window.__unlockAll(); return; }
     msg("Licence 🔑", esc(r.error || "That licence didn't work. Check it and try again."));
   };
+  // ---- Profile: the parent's real account (from the app), and Change password on the website
+  profileDialog = async function () {
+    var u = (parent.appUser && parent.appUser()) || {};
+    var rows = [["👤 Full Name", u.full_name || ""], ["📧 Email", u.email || ""], ["🧒 Child", u.child_name || "—"],
+                ["🎓 Role", "Parent account"], ["⭐ Themes unlocked", String(parent.appLicenceCount ? parent.appLicenceCount() : 0)],
+                ["🔐 Account", "adathecoder.com"], ["⚡ Active", "✅ Yes"]];
+    var hi = u.child_name ? "👋 Hi, " + esc(u.child_name) + "!" : "👋 Hi!";
+    var r = await dialog({
+      title: "Profile 👤", kind: "profile",
+      body: '<div class="prof"><div class="bytecol"><div class="hello">' + hi + '</div><img class="byte" src="' + A.byte + '" alt="Byte the owl waving"></div>' +
+            '<div class="pinfo"><div class="ptitle">👤 My Profile 🌟</div><table>' +
+            rows.map(function (x) { return "<tr><th>" + x[0] + "</th><td>" + esc(x[1]) + "</td></tr>"; }).join("") + "</table>" +
+            '<p class="pnote">✨ Your account on the website. Change your details there.</p></div></div>',
+      buttons: [{ label: "🔑 Change password", value: function () { return "pw"; } }]
+    });
+    if (r === "pw" && parent.appChangePassword) parent.appChangePassword();
+  };
   window.__unlockAll = function () {
     S().key = true; refreshTopics();
     sunsetMsg("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀");
