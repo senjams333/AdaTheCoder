@@ -145,6 +145,9 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
 `/pay/paypal-return`, which shows the same. With Razorpay's **Payment Button**, the page waits for Razorpay's webhook
 and switches by itself; in the Razorpay dashboard (Payment Button → Edit → "Redirect after payment") you can set
 `https://www.adathecoder.com/pay?theme=<theme>&paid=1`, which shows "Confirming your payment…" and then the licence.
+With `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in `api/.env`, that page also asks Razorpay directly every few
+seconds, so it works on your own computer too, where Razorpay's webhook can't reach (the parent must type their
+account email on Razorpay's form).
 The parent's account page shows each bought theme's licence with **Copy**.
 
 **In the app.** A paid theme unlocks by itself (the app asks the website every minute, and every 15 seconds after

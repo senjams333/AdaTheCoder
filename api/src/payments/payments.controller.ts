@@ -16,6 +16,7 @@ export class PaymentsController {
   @UseGuards(PayGuard)
   async page(@CurrentUser() user: User, @Param('slug') slug: string) {
     const course = await this.pay.theme(slug);
+    if (!(await this.pay.owns(user, course))) await this.pay.checkButtonPayment(user, course);
     return {
       theme: this.catalog.card(course), licence: await this.pay.owns(user, course),
       methods: this.pay.methods(course), user: { name: user.name, email: user.email },

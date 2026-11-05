@@ -238,6 +238,39 @@ export class PaymentsService {
     return { ok: true };
   }
 
+  private readonly lastCheck = new Map<number, number>();
+
+  /** The pay page asks every few seconds while a Payment Button payment is being confirmed. Razorpay's webhook can't
+   *  reach a computer at home (127.0.0.1), and may be slow on a server, so this also asks Razorpay directly
+   *  (with RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET): a captured payment in the last 2 hours from this parent's email,
+   *  for this theme's price, unlocks the theme. At most once every 8 seconds per parent. */
+  async checkButtonPayment(user: User, course: Course): Promise<void> {
+    if (!this.razorpayKey || !this.razorpaySecret || !this.buttonFor(course)) return;
+    const price = minorUnits(course.priceInr);
+    if (!price) return;
+    const now = Date.now();
+    if (now - (this.lastCheck.get(user.id) || 0) < 8000) return;
+    this.lastCheck.set(user.id, now);
+    let list: Record<string, any>;
+    try {
+      const from = Math.floor(now / 1000) - 2 * 3600;
+      list = await this.provider(`https://api.razorpay.com/v1/payments?from=${from}&count=100`, {
+        headers: { Authorization: 'Basic ' + Buffer.from(`${this.razorpayKey}:${this.razorpaySecret}`).toString('base64') },
+      }, 'Razorpay payments list');
+    } catch {
+      return;
+    }
+    const email = user.email.trim().toLowerCase();
+    const found = (list.items || []).find((p: Record<string, any>) => p.status === 'captured' && !p.order_id
+      && Number(p.amount) === price && String(p.email || p.notes?.email || '').trim().toLowerCase() === email);
+    if (!found) return;
+    const existing = await this.payments.findOne({ where: { orderId: String(found.id) } });
+    if (existing && existing.courseId !== course.id) return;   // that payment already unlocked another theme
+    const payment = existing || await this.payments.save({ userId: user.id, courseId: course.id, provider: 'razorpay-button',
+      orderId: String(found.id), amount: Number(found.amount), currency: String(found.currency || 'INR') });
+    await this.grant(payment, String(found.id));
+  }
+
   // ------------------------------------------------------------------ PayPal
   private async paypalAuth(): Promise<string> {
     if (this.paypalToken && this.paypalToken.until > Date.now()) return this.paypalToken.value;
