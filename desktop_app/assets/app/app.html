@@ -522,7 +522,7 @@ function license() {
   const own = owned(course), free = freeCount(course);
   const u = D.user || {};
   kidWindowPic(heroPics(course)[0], "👋 Hi, here's your license details", "📜 " + esc(course.name),
-    [["🎫 License Key", own && free !== null ? "(on your account page)" : free === null ? "free theme" : "none yet"], ["👤 Licensed To", u.full_name || ""], ["📧 Email", u.email || ""],
+    [["🎫 License Key", (D.licenceCodes || {})[course.id] || (own && free !== null ? "(on your account page)" : free === null ? "free theme" : "none yet")], ["👤 Licensed To", u.full_name || ""], ["📧 Email", u.email || ""],
      ["🎯 Plan", "Personal & Educational"],
      ["⚡ Status", own ? "every lesson is open ✅" : `${free} of ${D.lessons.length} lessons open 🔒`], ["🔢 Version", D.version || ""]],
     `<p><b>📜 License:</b> Personal &amp; educational use only.</p><p>This software is provided "as is", without warranty of any kind.</p>`, "", true);
@@ -577,6 +577,7 @@ window.appEmptyInput = () => host && host.emptyInput();
 window.appUpgrade = id => host && host.upgrade(id);
 window.appUser = () => D.user || {};
 window.appLicenceCount = () => LICENCES.length;
+window.appLicenceCode = id => (D.licenceCodes || {})[id] || "";
 // Profile → Change password: the website's account page, where the parent changes it
 window.appChangePassword = () => { host && host.changePassword(); toast("🔑 The website opens in your browser to change the password."); };
 window.appVideoFull = on => host && host.setVideoFull(!!on);
@@ -622,13 +623,13 @@ $("loginForm").addEventListener("submit", e => {
 function loginDone(answer) {
   $("loginGo").disabled = false;
   if (!answer.ok) return loginStatus("❌ " + (answer.error || "That email and password don't match."), "#dc2626");
-  D.user = answer.user; LICENCES = answer.licences || [];
+  D.user = answer.user; LICENCES = answer.licences || []; D.licenceCodes = answer.licenceCodes || {};
   loginStatus(`✅ Welcome, ${kidName() || answer.user.full_name || ""}! 🎉`, "#16a34a");
   setTimeout(() => { $("login").hidden = true; loggedOutLook(false); show("home"); }, 700);
 }
 // new themes, lessons, prices, licences or home screen from the website
 function dataChanged(fresh) {
-  ["courses", "packs", "home", "licences", "site"].forEach(k => { if (fresh[k] !== undefined) D[k] = fresh[k]; });
+  ["courses", "packs", "home", "licences", "licenceCodes", "site"].forEach(k => { if (fresh[k] !== undefined) D[k] = fresh[k]; });
   if (fresh.licences) LICENCES = fresh.licences.slice();
   course = D.courses.find(c => c.id === course.id) || D.courses[0];
   renderAll();

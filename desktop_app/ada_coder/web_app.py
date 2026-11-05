@@ -361,7 +361,8 @@ class WebMainWindow(QMainWindow):
         return {
             "courses": courses, "packs": packs, "images": images, "lessons": lessons, "version": APP_VERSION,
             "home": {"welcome": home["welcome"], "chars": [[n, _url(p), e] for n, p, e in chars]},
-            "user": self._user(), "licences": list(self.settings["licences"] or []), "site": SERVER_URL.rstrip("/"),
+            "user": self._user(), "licences": list(self.settings["licences"] or []),
+            "licenceCodes": dict(self.settings["licence_codes"] or {}), "site": SERVER_URL.rstrip("/"),
             "lastCourse": self.settings["course"] or "",
         }
 
@@ -377,7 +378,7 @@ class WebMainWindow(QMainWindow):
     def _push(self):
         """New data from the website: the page updates without reloading (the child doesn't lose their place)."""
         data = self._data()
-        self.host.dataChanged.emit(json.dumps({k: data[k] for k in ("courses", "packs", "home", "licences", "site")}, ensure_ascii=False))
+        self.host.dataChanged.emit(json.dumps({k: data[k] for k in ("courses", "packs", "home", "licences", "licenceCodes", "site")}, ensure_ascii=False))
         if self.open_theme_id:          # the open theme's lessons change in place too
             c = next((c for c in self.courses if c["id"] == self.open_theme_id), None)
             if c:
@@ -420,6 +421,10 @@ class WebMainWindow(QMainWindow):
             if worker.is_alive():
                 return
             timer.stop()
+            codes = answer.get("licence_codes")
+            if codes is not None and codes != (self.settings["licence_codes"] or {}):
+                self.settings["licence_codes"] = dict(codes)
+                self._push()
             new = answer.get("licences")
             old = list(self.settings["licences"] or [])
             if new is not None and sorted(new) != sorted(old):
@@ -451,6 +456,8 @@ class WebMainWindow(QMainWindow):
             timer.stop()
             if not answer:
                 answer.update(ok=False, error="The app can't reach the website. Check the internet connection and try again.")
+            if answer.get("licence_codes") is not None:
+                self.settings["licence_codes"] = dict(answer["licence_codes"])
             new = answer.get("licences")
             if new is not None and sorted(new) != sorted(self.settings["licences"] or []):
                 self.settings["licences"] = list(new)
@@ -487,9 +494,11 @@ class WebMainWindow(QMainWindow):
                         "child_name": answer.get("child_name") or ""}
                 self.settings["user"] = user
                 self.settings["licences"] = list(answer.get("licences") or [])
+                self.settings["licence_codes"] = dict(answer.get("licence_codes") or {})
                 self.settings["app_token"] = answer.get("app_token") or ""
                 self.settings["remember_me"] = True
-                out = {"ok": True, "user": user, "licences": self.settings["licences"]}
+                out = {"ok": True, "user": user, "licences": self.settings["licences"],
+                       "licenceCodes": self.settings["licence_codes"] or {}}
             self.host.loginDone.emit(json.dumps(out, ensure_ascii=False))
         timer.timeout.connect(done)
         timer.start(150)
@@ -499,6 +508,7 @@ class WebMainWindow(QMainWindow):
         self.settings["user"] = {}
         self.settings["app_token"] = ""
         self.settings["licences"] = []
+        self.settings["licence_codes"] = {}
         self.settings["remember_me"] = False
 
     # ------------------------------------------------------------------ a theme, as the next page of this window

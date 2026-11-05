@@ -79,6 +79,42 @@
     });
     if (r === "pw" && parent.appChangePassword) parent.appChangePassword();
   };
+  // ---- License: the licence bought for this theme (from the website), with Copy
+  licenseDialog = async function () {
+    var u = (parent.appUser && parent.appUser()) || {};
+    var code = (parent.appLicenceCode && parent.appLicenceCode(A.id)) || "";
+    var total = A.topics.length, locked = A.topics.filter(function (t, i) { return isLocked(i + 1); }).length;
+    var status = S().key || code ? "UNLOCKED ✅ — every lesson is open" : locked ? (total - locked) + " of " + total + " lessons open 🔒" : "Every lesson is open ✅";
+    var who = A.chars[0];
+    var rows = [["👤 Licensed To", u.full_name || ""], ["📧 Email", u.email || ""],
+                ["🎯 Plan", "Personal & Educational"], ["⚡ Status", status], ["🔢 Version", A.cfg.version]];
+    var key = code
+      ? '<div class="lickey"><span>🎫 Your licence</span><b id="licCode">' + esc(code) + '</b><button type="button" id="licCopy">Copy</button></div>'
+      : '<div class="lickey none"><span>🎫 Licence</span><b>' + (locked ? "Not bought yet — press Upgrade ⭐ to unlock every lesson" : "Free theme") + '</b></div>';
+    var p = dialog({
+      title: "License 📜", kind: "profile",
+      body: '<style>.lickey{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;border-radius:16px;background:#f4f1ff;border:2px dashed #7b4dff}' +
+            '.lickey span{font:700 13px var(--font-kid);color:#5b21b6;white-space:nowrap}.lickey b{flex:1;font:700 17px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.03em;white-space:nowrap;color:#1e1b4b;user-select:all}' +
+            '.lickey.none b{font:600 14px var(--font-kid);letter-spacing:0;color:#475569}' +
+            '.lickey button{font:700 14px var(--font-kid);background:#7b4dff;color:#fff;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}</style>' +
+            '<div class="prof"><div class="bytecol"><div class="hello">👋 Hi, here\'s your license details</div><img class="byte" src="' + who.img + '" alt=""></div>' +
+            '<div class="pinfo"><div class="ptitle">📜 ' + esc(A.cfg.name) + '</div>' + key + '<table class="lic">' +
+            rows.map(function (x) { return "<tr><th>" + x[0] + "</th><td>" + esc(x[1]) + "</td></tr>"; }).join("") + '</table>' +
+            '<p class="lnote"><b>📜 License:</b> Personal &amp; educational use only.</p>' +
+            '<p class="lnote gap">This software is provided "as is", without warranty of any kind.</p></div></div>',
+      buttons: []
+    });
+    setTimeout(function () {
+      var b = document.getElementById("licCopy");
+      if (!b) return;
+      b.onclick = function () {
+        var done = function () { b.textContent = "Copied ✓"; setTimeout(function () { b.textContent = "Copy"; }, 1800); };
+        try { navigator.clipboard.writeText(code).then(done, function () { fallbackCopy(code); done(); }); } catch (e) { fallbackCopy(code); done(); }
+      };
+    }, 0);
+    await p;
+  };
+  function fallbackCopy(t) { var x = document.createElement("textarea"); x.value = t; document.body.appendChild(x); x.select(); try { document.execCommand("copy"); } catch (e) {} x.remove(); }
   window.__unlockAll = function () {
     S().key = true; refreshTopics();
     sunsetMsg("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀");

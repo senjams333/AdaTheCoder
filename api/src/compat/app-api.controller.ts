@@ -55,7 +55,8 @@ export class AppApiController {
       const { user } = await this.auth.login(
         { email: String(body.email || '').trim().toLowerCase(), password: String(body.password || '') }, ip);
       return res.json({ ok: true, name: user.name, email: user.email, child_name: user.childName || '',
-        licences: await this.catalog.licencedSlugs(user.id), app_token: this.auth.appToken(user) });
+        licences: await this.catalog.licencedSlugs(user.id), licence_codes: await this.catalog.licenceCodes(user.id),
+        app_token: this.auth.appToken(user) });
     } catch (err) {
       return res.status(401).json({ ok: false, error: this.text(err) });
     }
@@ -65,7 +66,8 @@ export class AppApiController {
   @Get('v3/licences')
   @UseGuards(AppTokenGuard)
   async licences(@CurrentUser() user: User) {
-    return { ok: true, licences: await this.catalog.licencedSlugs(user.id), child_name: user.childName || '' };
+    return { ok: true, licences: await this.catalog.licencedSlugs(user.id), licence_codes: await this.catalog.licenceCodes(user.id),
+      child_name: user.childName || '' };
   }
 
   /** The app's "I have a licence 🔑": { ok, theme, name, licences } or 400/404 { ok: false, error }. */
@@ -75,7 +77,7 @@ export class AppApiController {
   async redeem(@CurrentUser() user: User, @Body() body: { licence?: string; theme?: string }, @Res() res: Response) {
     try {
       const got = await this.payments.redeem(user, String(body.licence || ''), body.theme ? String(body.theme) : undefined);
-      return res.json({ ...got, licences: await this.catalog.licencedSlugs(user.id) });
+      return res.json({ ...got, licences: await this.catalog.licencedSlugs(user.id), licence_codes: await this.catalog.licenceCodes(user.id) });
     } catch (err) {
       const status = err instanceof HttpException ? err.getStatus() : 500;
       return res.status(status).json({ ok: false, error: this.text(err), licences: await this.catalog.licencedSlugs(user.id) });

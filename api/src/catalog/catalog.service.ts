@@ -84,6 +84,12 @@ export class CatalogService {
   }
 
   /** Slugs of the themes a family holds a licence for. */
+  /** The family's licence codes by theme: { "friends": "ADA-7KQ2-M9XD-4TFP" } (the app shows them on a theme's License page). */
+  async licenceCodes(userId: number): Promise<Record<string, string>> {
+    const rows = await this.licences.find({ where: { userId }, relations: { course: true } });
+    return Object.fromEntries(rows.filter((r) => r.licence && r.course).map((r) => [r.course.slug, r.licence]));
+  }
+
   async licencedSlugs(userId: number): Promise<string[]> {
     const rows = await this.licences.find({ where: { userId }, relations: { course: true } });
     return rows.filter((r) => r.licence && r.course).map((r) => r.course.slug);
