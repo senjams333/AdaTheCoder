@@ -490,7 +490,7 @@ function buildFrame() {
     `.example-panel::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:8px;border:2px solid rgba(255,255,255,.7)}</style>`;
   const shim = lift + `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
   frame.srcdoc = A.template.replace("</head>", shim + "</head>");
-  frame.addEventListener("load", () => { frameReady = true; if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
+  frame.addEventListener("load", () => { frameReady = true; patchTutorial(); if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
   $("lesson").appendChild(frame);
 }
 // "🎬 See video" on the coding page, in the same place and colours as "Skip video" on the video page
@@ -505,6 +505,31 @@ function placeSeeVideo() {
 }
 addEventListener("resize", () => requestAnimationFrame(placeSeeVideo));
 $("seeVidBtn").onclick = () => playIntro();
+// "Click the examples here to start!" with Ada: covers the whole examples panel, for 2.5 seconds
+function patchTutorial() {
+  try {
+    const w = frame.contentWindow, d = frame.contentDocument;
+    const st = d.createElement("style");
+    st.textContent = ".tutorial-overlay{top:-2px;bottom:auto!important;left:-2px!important;right:-2px!important;box-sizing:border-box!important;border-radius:35px!important;" +
+      "background:linear-gradient(180deg,#1e3a5f,#0f172a)!important;transition:opacity .3s ease!important}";
+    d.head.appendChild(st);
+    let hideTimer = 0;
+    w.showTutorialOverlay = function () {
+      setTimeout(() => {
+        const o = d.getElementById("tutorialOverlay"), panel = d.getElementById("exampleContainer");
+        if (!o) return;
+        if (panel) {
+          o.style.setProperty("top", (panel.scrollTop - 2) + "px", "important");
+          o.style.setProperty("height", (panel.clientHeight + 4) + "px", "important");
+        }
+        o.classList.add("show");
+        try { w.speakWithKidVoice("Click the examples here to start !"); } catch (e) {}
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => o.classList.remove("show"), 2500);
+      }, 300);
+    };
+  } catch (e) {}
+}
 function pushLesson() {
   if (!frameReady) return;
   setTimeout(placeSeeVideo, 0);
