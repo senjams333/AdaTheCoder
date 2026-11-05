@@ -90,12 +90,16 @@
                 ["🎯 Plan", "Personal & Educational"], ["⚡ Status", status], ["🔢 Version", A.cfg.version]];
     var key = code
       ? '<div class="lickey"><span>🎫 Your licence</span><b id="licCode">' + esc(code) + '</b><button type="button" id="licCopy">Copy</button></div>'
-      : '<div class="lickey none"><span>🎫 Licence</span><b>' + (locked ? "Not bought yet — press Upgrade ⭐ to unlock every lesson" : "Free theme") + '</b></div>';
+      : locked ? '<div class="lickey none"><span>🎫 Your licence</span><b class="ph">ADA-XXXX-XXXX-XXXX</b></div>' +
+                 '<p class="licwait">🔒 Not bought yet. Press <b>Upgrade ⭐</b> to unlock every lesson; your licence appears here.</p>'
+               : '<div class="lickey none"><span>🎫 Licence</span><b>Free theme — every lesson is open</b></div>';
     var p = dialog({
       title: "License 📜", kind: "profile",
       body: '<style>.lickey{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;border-radius:16px;background:#f4f1ff;border:2px dashed #7b4dff}' +
             '.lickey span{font:700 13px var(--font-kid);color:#5b21b6;white-space:nowrap}.lickey b{flex:1;font:700 17px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.03em;white-space:nowrap;color:#1e1b4b;user-select:all}' +
             '.lickey.none b{font:600 14px var(--font-kid);letter-spacing:0;color:#475569}' +
+            '.lickey.none b.ph{font:700 17px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.03em;color:#94a3b8}' +
+            '.licwait{margin:-4px 0 12px;font:600 13.5px var(--font-kid);color:#92400e}' +
             '.lickey button{font:700 14px var(--font-kid);background:#7b4dff;color:#fff;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}</style>' +
             '<div class="prof"><div class="bytecol"><div class="hello">👋 Hi, here\'s your license details</div><img class="byte" src="' + who.img + '" alt=""></div>' +
             '<div class="pinfo"><div class="ptitle">📜 ' + esc(A.cfg.name) + '</div>' + key + '<table class="lic">' +

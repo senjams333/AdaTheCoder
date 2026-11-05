@@ -17,6 +17,7 @@ DEFAULTS = {
     "user": {},           # {"full_name": ..., "email": ...}
     "licences": [],       # ids of the paid themes the family has bought (from the website log-in)
     "licence_codes": {},  # theme id → its licence code (shown on the theme's License page)
+    "app_licence": "",    # the family's free licence for the app itself (from the website log-in)
     "app_token": "",      # from the website log-in: re-reads the licences and opens pay links (never the password)
     "intro_seen": False,
 }

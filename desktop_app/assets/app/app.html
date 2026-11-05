@@ -518,14 +518,15 @@ function profile() {
      ["⭐ Themes unlocked", String(LICENCES.length)], ["🔐 Account", "adathecoder.com"], ["⚡ Active", "✅ Yes"]],
     `<p style="color:#065f46">✨ Your account on the website. Change your details there.</p>`, "🔑 Change password");
 }
+// the home screen's License: the family's free licence for the Ada The Coder app (each paid theme's own licence
+// is on that theme's License page)
 function license() {
-  const own = owned(course), free = freeCount(course);
   const u = D.user || {};
-  kidWindowPic(heroPics(course)[0], "👋 Hi, here's your license details", "📜 " + esc(course.name),
-    [["🎫 License Key", (D.licenceCodes || {})[course.id] || (own && free !== null ? "(on your account page)" : free === null ? "free theme" : "none yet")], ["👤 Licensed To", u.full_name || ""], ["📧 Email", u.email || ""],
-     ["🎯 Plan", "Personal & Educational"],
-     ["⚡ Status", own ? "every lesson is open ✅" : `${free} of ${D.lessons.length} lessons open 🔒`], ["🔢 Version", D.version || ""]],
-    `<p><b>📜 License:</b> Personal &amp; educational use only.</p><p>This software is provided "as is", without warranty of any kind.</p>`, "", true);
+  kidWindow("byte.png", "👋 Hi, here's your license details", "📜 Ada The Coder",
+    [["🎫 License Key", D.appLicence || "ADA-FREE-XXXX-XXXX"], ["👤 Licensed To", u.full_name || ""], ["📧 Email", u.email || ""],
+     ["🎯 Plan", "Free · Personal & Educational"], ["⭐ Themes bought", String(LICENCES.length)],
+     ["⚡ Status", "Active ✅"], ["🔢 Version", D.version || ""]],
+    `<p><b>📜 License:</b> Personal &amp; educational use only. The free lessons of every theme are included.</p><p>A theme you buy has its own licence: open the theme, then 📜 License.</p><p>This software is provided "as is", without warranty of any kind.</p>`, "", true);
 }
 function upgrade() {
   stopVideo();
@@ -623,13 +624,13 @@ $("loginForm").addEventListener("submit", e => {
 function loginDone(answer) {
   $("loginGo").disabled = false;
   if (!answer.ok) return loginStatus("❌ " + (answer.error || "That email and password don't match."), "#dc2626");
-  D.user = answer.user; LICENCES = answer.licences || []; D.licenceCodes = answer.licenceCodes || {};
+  D.user = answer.user; LICENCES = answer.licences || []; D.licenceCodes = answer.licenceCodes || {}; D.appLicence = answer.appLicence || "";
   loginStatus(`✅ Welcome, ${kidName() || answer.user.full_name || ""}! 🎉`, "#16a34a");
   setTimeout(() => { $("login").hidden = true; loggedOutLook(false); show("home"); }, 700);
 }
 // new themes, lessons, prices, licences or home screen from the website
 function dataChanged(fresh) {
-  ["courses", "packs", "home", "licences", "licenceCodes", "site"].forEach(k => { if (fresh[k] !== undefined) D[k] = fresh[k]; });
+  ["courses", "packs", "home", "licences", "licenceCodes", "appLicence", "site"].forEach(k => { if (fresh[k] !== undefined) D[k] = fresh[k]; });
   if (fresh.licences) LICENCES = fresh.licences.slice();
   course = D.courses.find(c => c.id === course.id) || D.courses[0];
   renderAll();

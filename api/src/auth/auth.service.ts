@@ -248,6 +248,15 @@ export class AuthService {
     return this.jwt.sign({ sub: user.id, purpose: 'app' }, { expiresIn: '365d' });
   }
 
+  /** The family's free licence for the Ada The Coder app itself ("ADA-FREE-7KQ2-M9XD"), made when the account is
+   *  created and always the same for that account. Paid themes have their own licences (Licence table). */
+  appLicence(user: { id: number; createdAt?: Date }): string {
+    const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const h = createHash('sha256').update(`ada-the-coder-app:${user.id}:${user.createdAt ? new Date(user.createdAt).getTime() : 0}`).digest();
+    const chars = Array.from(h.subarray(0, 8), (b) => abc[b % abc.length]).join('');
+    return `ADA-FREE-${chars.slice(0, 4)}-${chars.slice(4, 8)}`;
+  }
+
   /** A 15-minute link for paying for one theme on the website, opened from the app's Upgrade card. */
   payToken(user: { id: number }): string {
     return this.jwt.sign({ sub: user.id, purpose: 'pay' }, { expiresIn: '15m' });

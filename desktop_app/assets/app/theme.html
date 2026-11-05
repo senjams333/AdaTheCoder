@@ -747,7 +747,7 @@ async function licenseDialog() {
   const total = A.topics.length, locked = A.topics.filter((t, i) => isLocked(i + 1)).length;
   const status = S().key ? "UNLOCKED ✅ — every lesson is open" : locked ? `${total - locked} of ${total} lessons open 🔒` : "Every lesson is open ✅";
   const who = A.chars[0], name = who.name.split(" ").slice(1).join(" ").toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) || "a friend";
-  const rows = [["🎫 License Key", S().key ? demoKey() : "none yet"], ["👤 Licensed To", "Alex Student"], ["📧 Email", $("emailIn").value],
+  const rows = [["🎫 License Key", S().key ? demoKey() : "ADA-XXXX-XXXX-XXXX (not bought yet)"], ["👤 Licensed To", "Alex Student"], ["📧 Email", $("emailIn").value],
     ["🎯 Plan", "Personal & Educational"], ["⚡ Status", status], ["🔢 Version", A.cfg.version]];
   await dialog({
     title: "License 📜", kind: "profile",

@@ -56,7 +56,7 @@ export class AppApiController {
         { email: String(body.email || '').trim().toLowerCase(), password: String(body.password || '') }, ip);
       return res.json({ ok: true, name: user.name, email: user.email, child_name: user.childName || '',
         licences: await this.catalog.licencedSlugs(user.id), licence_codes: await this.catalog.licenceCodes(user.id),
-        app_token: this.auth.appToken(user) });
+        app_licence: this.auth.appLicence(user), app_token: this.auth.appToken(user) });
     } catch (err) {
       return res.status(401).json({ ok: false, error: this.text(err) });
     }
@@ -67,7 +67,7 @@ export class AppApiController {
   @UseGuards(AppTokenGuard)
   async licences(@CurrentUser() user: User) {
     return { ok: true, licences: await this.catalog.licencedSlugs(user.id), licence_codes: await this.catalog.licenceCodes(user.id),
-      child_name: user.childName || '' };
+      app_licence: this.auth.appLicence(user), child_name: user.childName || '' };
   }
 
   /** The app's "I have a licence 🔑": { ok, theme, name, licences } or 400/404 { ok: false, error }. */
