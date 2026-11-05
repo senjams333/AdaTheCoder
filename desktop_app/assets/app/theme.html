@@ -76,11 +76,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 .qbtn { font: 700 18px var(--font-kid); border: none; cursor: pointer; background: rgba(255,255,255,.85); color: #0f172a; }
 .qbtn:disabled { opacity: .55; cursor: default; }
 .home { border-radius: 25px; width: 208px; height: 48px; }
-/* on the coding page: watch the lesson's video again */
-.seevid { border-radius: 25px; height: 48px; padding: 0 22px; margin-right: 10px; background: #ffd166 !important; color: #0f172a !important;
-  border: 3px solid #f59e0b !important; box-shadow: 0 3px 10px rgba(245, 158, 11, .35); }
-.seevid:hover { background: #38bdf8 !important; color: #fff !important; border-color: #0284c7 !important; }
-.seevid[hidden] { display: none; }
+
 .round { width: 48px; height: 48px; border-radius: 24px; font-size: 18px; }
 .avatar { width: 52px; height: 52px; border-radius: 26px; border: 3px solid #ffd166; background: transparent; padding: 0; cursor: pointer; display: grid; place-items: center; }
 .avatar:hover:not(:disabled) { border-color: #38bdf8; }
@@ -308,7 +304,6 @@ button:focus { outline: none !important; }
       <div class="scene" id="scene" aria-hidden="true"></div>
       <div class="top">
         <div class="grow"></div>
-        <button class="qbtn seevid" id="seeVidBtn" hidden title="Watch this lesson's video again">🎬 See video</button>
         <button class="qbtn home" id="homeBtn" disabled>🏠 Home Screen 🌟</button>
         <button class="qbtn round" id="themeBtn" disabled style="color:#f59e0b">☀️</button>
         <button class="qbtn round" id="musicBtn" disabled>🔈</button>
@@ -483,11 +478,29 @@ function buildFrame() {
   frame.title = "Lesson";
   const shim = `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
   frame.srcdoc = A.template.replace("</head>", shim + "</head>");
-  frame.addEventListener("load", () => { frameReady = true; if (view === "lesson") pushLesson(); });
+  frame.addEventListener("load", () => { frameReady = true; addSeeVideo(); if (view === "lesson") pushLesson(); });
   $("lesson").appendChild(frame);
+}
+// "🎬 See video" just under the code editor: plays the lesson's video again
+function addSeeVideo() {
+  try {
+    const d = frame.contentDocument, ed = d.getElementById("editorSection");
+    if (!ed || d.getElementById("seeVidBtn")) return;
+    const st = d.createElement("style");
+    st.textContent = "#seeVidBtn{flex:none;align-self:center;margin-top:10px;height:38px;padding:0 26px;" +
+      "border-radius:16px;border:3px solid #f59e0b;background:#ffd166;color:#0f172a;font:700 15px 'Comic Sans MS','Comic Neue',cursive,sans-serif;" +
+      "cursor:pointer;box-shadow:0 3px 10px rgba(245,158,11,.35);white-space:nowrap}#seeVidBtn:hover{background:#38bdf8;color:#fff;border-color:#0284c7}" +
+      "#seeVidBtn[hidden]{display:none}#seeVidBtn:focus{outline:none}";
+    d.head.appendChild(st);
+    const b = d.createElement("button");
+    b.id = "seeVidBtn"; b.type = "button"; b.textContent = "🎬 See video"; b.title = "Watch this lesson's video again";
+    b.onclick = () => playIntro();
+    ed.appendChild(b);
+  } catch (e) {}
 }
 function pushLesson() {
   if (!frameReady) return;
+  try { const L0 = A.lessons[A.topics[cur].id], sb = frame.contentDocument.getElementById("seeVidBtn"); if (sb) sb.hidden = !L0.video; } catch (e) {}
   const w = frame.contentWindow, t = A.topics[cur], L = A.lessons[t.id];
   try {
     w.updateLessonData(L.title, L.subtitle, L.examples, L.default_code);
@@ -545,8 +558,6 @@ function show(v) {
   if (v === "intro") setTimeout(sizeVideo, 0);
   if (v !== "intro") $("introVid").pause();
   if (v !== "intro" && videoIsFull()) setVideoFull(false);
-  const L = A && A.topics && A.topics[cur] ? A.lessons[A.topics[cur].id] : null;
-  $("seeVidBtn").hidden = !(v === "lesson" && L && L.video);
   refreshTopics();
 }
 function openLesson(i) {
@@ -775,7 +786,7 @@ function playIntro() {
 }
 function endIntro() { clearTimeout(missingTimer); show("lesson"); pushLesson(); }
 $("vStop").onclick = endIntro;
-$("seeVidBtn").onclick = () => playIntro();
+
 $("introVid").addEventListener("ended", endIntro);
 // the video keeps its own shape (no stretching): as big as fits, bigger when the lesson list is hidden
 function sizeVideo() {
