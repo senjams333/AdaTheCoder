@@ -32,6 +32,7 @@ export default function SiteHeader() {
             Ada The Coder
           </Link>
           <nav className="nav" aria-label="Main">
+            <Link href="/">Home</Link>
             <Link href="/#lessons">Lessons</Link>
             <Link href="/#parents">For parents</Link>
             <Link href="/contact">Contact</Link>
@@ -41,7 +42,6 @@ export default function SiteHeader() {
               </>
             ) : (
               <>
-                <Link href="/login">Log in</Link>
                 <Link className="btn btn-small" href="/register">Sign up free</Link>
               </>
             )}
