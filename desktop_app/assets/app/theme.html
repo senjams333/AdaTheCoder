@@ -158,7 +158,7 @@ body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !imp
 .vmissing .big { font-size: 64px; }
 .vmissing .file { font: 600 16px ui-monospace, Menlo, Consolas, monospace; color: #fde68a; }
 .vmissing .small { font: 15px var(--font-kid); color: #cbd5e1; max-width: 520px; }
-.vnote { position: absolute; left: 25px; top: 10px; background: rgba(15, 23, 42, .65); color: #f8fafc; font: 10px Arial, sans-serif;
+.vnote { display: none !important; position: absolute; left: 25px; top: 10px; background: rgba(15, 23, 42, .65); color: #f8fafc; font: 10px Arial, sans-serif;
   padding: 4px 8px; border-radius: 6px; }
 .vctrl { width: 100%; box-sizing: border-box; height: 64px; display: flex; align-items: center; gap: 12px; padding: 8px 14px;
   background: rgba(15, 23, 42, .95); border: 2px solid rgba(124, 255, 178, .35); border-radius: 20px; }
@@ -500,7 +500,11 @@ function buildFrame() {
     `@keyframes nextGlowRound{0%,100%{box-shadow:0 0 0 4px #facc15,0 0 14px 4px rgba(250,204,21,.55)}50%{box-shadow:0 0 0 5px #fbbf24,0 0 28px 10px rgba(251,191,36,.8)}}` +
     `.example-panel::-webkit-scrollbar{width:10px}.example-panel::-webkit-scrollbar-button{display:none;height:0}` +
     `.example-panel::-webkit-scrollbar-track{margin:34px 0;background:rgba(255,255,255,.35);border-radius:8px}` +
-    `.example-panel::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:8px;border:2px solid rgba(255,255,255,.7)}</style>`;
+    `.example-panel::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:8px;border:2px solid rgba(255,255,255,.7)}` +
+    // the cheering teddy after a right answer: smaller, top right, no dark cover, so the output stays readable
+    `.giant-teddy-overlay{background:transparent!important;align-items:flex-start!important;padding:14px 10px 0 0!important}` +
+    `.giant-teddy-card{gap:10px!important}.giant-teddy-card img{width:230px!important;height:230px!important}` +
+    `.giant-teddy-card h2{font-size:22px!important;padding:10px 20px!important;border-width:3px!important}</style>`;
   const shim = lift + `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
   frame.srcdoc = A.template.replace("</head>", shim + "</head>");
   frame.addEventListener("load", () => { frameReady = true; patchTutorial(); if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
