@@ -174,7 +174,7 @@ body.vfull-body .sidetoggle, body.vfull-body #sideToggle, body.vfull-body #logou
 .vstop { height: 50px; padding: 0 35px; font: 700 19px var(--font-kid); background: #38bdf8; color: #0f172a; border: 3px solid #bae6fd;
   border-radius: 25px; cursor: pointer; }
 .vstop:hover { background: #0284c7; color: #fff; }
-.seevid { position: absolute; z-index: 6; transform: translateX(-50%); height: 44px; padding: 0 30px; white-space: nowrap; }
+.seevid { position: absolute; z-index: 6; left: 50%; bottom: 8px; transform: translateX(-50%); white-space: nowrap; }
 .seevid[hidden] { display: none; }
 /* intro */
 .intro { background: #000; z-index: 30; }
@@ -479,12 +479,14 @@ function buildFrame() {
   $("lesson").innerHTML = "";
   frame = document.createElement("iframe");
   frame.title = "Lesson";
-  const shim = `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
+  // the title and the three panels sit a little higher, so "See video" fits below them
+  const lift = `<style>.header{margin-top:-4px!important}.coding-box{margin-top:2px!important;height:calc(100vh - 152px)!important}</style>`;
+  const shim = lift + `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
   frame.srcdoc = A.template.replace("</head>", shim + "</head>");
   frame.addEventListener("load", () => { frameReady = true; if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
   $("lesson").appendChild(frame);
 }
-// "🎬 See video" under the code editor's panel (outside it), in the same colours as "Skip video"
+// "🎬 See video" on the coding page, in the same place and colours as "Skip video" on the video page
 function placeSeeVideo() {
   const b = $("seeVidBtn");
   if (!b) return;
@@ -493,11 +495,6 @@ function placeSeeVideo() {
   if (!ed) { b.hidden = true; return; }
   let L = null; try { L = A.lessons[A.topics[cur].id]; } catch (e) {}
   b.hidden = !(L && L.video);
-  const r = ed.getBoundingClientRect(), f = frame.getBoundingClientRect(), box = $("lesson").getBoundingClientRect();
-  const sc = box.width / $("lesson").offsetWidth || 1;                  // the window is drawn scaled; work in its own units
-  const left = (f.left - box.left) / sc + r.left + r.width / 2, top = (f.top - box.top) / sc + r.bottom + 6;
-  const room = $("lesson").offsetHeight - 6 - b.offsetHeight;          // keep it inside the window
-  b.style.left = left + "px"; b.style.top = Math.min(top, room) + "px";
 }
 addEventListener("resize", () => requestAnimationFrame(placeSeeVideo));
 $("seeVidBtn").onclick = () => playIntro();
