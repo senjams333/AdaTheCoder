@@ -34,7 +34,7 @@ export default function SiteHeader() {
           <nav className="nav" aria-label="Main">
             <Link href="/">Home</Link>
             <Link href="/#lessons">Lessons</Link>
-            <Link href="/#parents">For parents</Link>
+            <Link href="/#parents">For Parents</Link>
             <Link href="/contact">Contact</Link>
             {user ? (
               <>
