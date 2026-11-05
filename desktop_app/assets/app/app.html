@@ -22,6 +22,7 @@
 .login-status { margin: 0; min-height: 20px; text-align: center; font-weight: 700; font-size: 14px; }
 .login-go { font: 700 19px var(--font-kid); background: #ffd23f; color: #1e1b4b; border: 0; border-bottom: 4px solid #f2b500; border-radius: 22px; padding: 12px; cursor: pointer; }
 .login-go:hover { background: #ffdc5e; } .login-go:disabled { opacity: .7; cursor: wait; }
+.login-link.forgot { align-self: flex-end; font-size: 13px; margin: -4px 0 2px; }
 .login-link { background: none; border: 0; color: #0284c7; font: 700 14px var(--font-kid); text-decoration: underline; cursor: pointer; padding: 2px; }
 /* Play on a theme: a short loading card, then the theme opens in the Python Adventure app (kids-embed.html) */
 /* the app is built into this page (srcdoc): it loads out of sight and only shows once it's ready */
@@ -306,6 +307,7 @@ body.night { background: #070b24; }
         <label class="lf" id="passRow"><span>Password 🔑</span><input id="passIn" type="password" value="" placeholder="Password"></label>
         <p class="login-hint" id="loginHint">Grown-ups: use your adathecoder.com account to unlock the themes you bought ⭐</p>
         <p class="login-status" id="loginStatus" role="status"></p>
+        <button class="login-link forgot" id="loginForgot" type="button">Forgot password? 🔑</button>
         <button class="login-go" id="loginGo" type="submit">🚀  Let's code!</button>
         <button class="login-link" id="loginSwitch" type="button" hidden>Have an account? Log in 🔑</button>
         <button class="login-link" id="loginSignup" type="button">Grown-up? Create an account 📝</button>
@@ -612,6 +614,10 @@ function loginStatus(text, colour) { $("loginStatus").textContent = text; $("log
 $("loginSwitch").onclick = () => setLoginMode(loginMode === "login" ? "register" : "login");
 // "Create an account" opens the website's registration page (www.adathecoder.com/register); here, the website preview's
 $("loginSignup").onclick = () => host && host.openUrl((D.site || "") + "/register");
+// Forgot password: the website's "Forgot your password?" page opens with the email filled in; it emails a link to choose a new one
+$("loginForgot").onclick = () => {
+  if (host) { host.forgotPassword($("emailIn").value.trim()); loginStatus("🔑 The website opens in your browser: it emails you a link to choose a new password.", "#0369a1"); }
+};
 $("loginForm").addEventListener("submit", e => {
   e.preventDefault();
   const email = $("emailIn").value.trim(), pass = $("passIn").value, name = $("nameIn").value.trim();
