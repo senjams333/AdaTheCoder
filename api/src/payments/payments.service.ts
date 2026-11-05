@@ -245,30 +245,52 @@ export class PaymentsService {
    *  (with RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET): a captured payment in the last 2 hours from this parent's email,
    *  for this theme's price, unlocks the theme. At most once every 8 seconds per parent. */
   async checkButtonPayment(user: User, course: Course): Promise<void> {
-    if (!this.razorpayKey || !this.razorpaySecret || !this.buttonFor(course)) return;
+    if (!this.buttonFor(course)) return;
+    if (!this.razorpayKey || !this.razorpaySecret) {
+      this.warnOnce('keys', 'Razorpay check: RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are empty in api/.env, so a Payment Button payment can only unlock through the webhook.');
+      return;
+    }
     const price = minorUnits(course.priceInr);
-    if (!price) return;
+    if (!price) {
+      this.warnOnce(`price-${course.id}`, `Razorpay check: ${course.name} has no price in rupees (admin → theme → Settings → Price in rupees).`);
+      return;
+    }
     const now = Date.now();
     if (now - (this.lastCheck.get(user.id) || 0) < 8000) return;
     this.lastCheck.set(user.id, now);
     let list: Record<string, any>;
     try {
-      const from = Math.floor(now / 1000) - 2 * 3600;
+      const from = Math.floor(now / 1000) - 24 * 3600;
       list = await this.provider(`https://api.razorpay.com/v1/payments?from=${from}&count=100`, {
         headers: { Authorization: 'Basic ' + Buffer.from(`${this.razorpayKey}:${this.razorpaySecret}`).toString('base64') },
-      }, 'Razorpay payments list');
+      }, 'Razorpay payments list (check the key ID and secret, and that they are the same mode, Test or Live, as the button)');
     } catch {
       return;
     }
+    const items: Record<string, any>[] = list.items || [];
     const email = user.email.trim().toLowerCase();
-    const found = (list.items || []).find((p: Record<string, any>) => p.status === 'captured' && !p.order_id
-      && Number(p.amount) === price && String(p.email || p.notes?.email || '').trim().toLowerCase() === email);
-    if (!found) return;
+    const mailOf = (p: Record<string, any>) => String(p.email || p.notes?.email || '').trim().toLowerCase();
+    const found = items.find((p) => ['captured', 'authorized'].includes(p.status) && Number(p.amount) === price && mailOf(p) === email);
+    if (!found) {
+      const seen = items.slice(0, 5).map((p) => `${p.id} ${p.status} ${p.amount} ${mailOf(p) || 'no email'}`).join('; ');
+      this.log.warn(`Razorpay check for ${email}, ${course.name} (${price} paise): no matching payment in the last 24 hours. `
+        + `Razorpay's latest: ${seen || 'none'}`);
+      return;
+    }
+    if (found.order_id && await this.payments.findOne({ where: { orderId: String(found.order_id), provider: 'razorpay' } })) return; // our own Checkout order: verify/webhook handle it
     const existing = await this.payments.findOne({ where: { orderId: String(found.id) } });
     if (existing && existing.courseId !== course.id) return;   // that payment already unlocked another theme
     const payment = existing || await this.payments.save({ userId: user.id, courseId: course.id, provider: 'razorpay-button',
       orderId: String(found.id), amount: Number(found.amount), currency: String(found.currency || 'INR') });
+    this.log.log(`Razorpay check: payment ${found.id} (${found.status}) from ${email} unlocks ${course.name}`);
     await this.grant(payment, String(found.id));
+  }
+
+  private readonly warned = new Set<string>();
+  private warnOnce(key: string, text: string) {
+    if (this.warned.has(key)) return;
+    this.warned.add(key);
+    this.log.warn(text);
   }
 
   // ------------------------------------------------------------------ PayPal
