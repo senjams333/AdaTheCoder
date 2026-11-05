@@ -385,7 +385,7 @@ class WebMainWindow(QMainWindow):
             if c:
                 from .theme_page import theme_data
                 fresh = theme_data(c, self.settings["licences"] or [])
-                self.host.themeUpdate.emit(json.dumps({k: fresh[k] for k in ("topics", "lessons", "locked")}, ensure_ascii=False))
+                self.host.themeUpdate.emit(json.dumps({k: fresh[k] for k in ("topics", "lessons", "locked", "videos")}, ensure_ascii=False))
 
     # sync.py calls these
     def reload_courses(self):

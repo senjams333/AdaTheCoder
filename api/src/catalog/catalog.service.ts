@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { spawn } from 'child_process';
 import { existsSync } from 'fs';
@@ -11,7 +11,12 @@ import { Course, Lesson, Licence } from '../entities';
 
 /** Themes and lessons as the website, the admin and the desktop app see them. */
 @Injectable()
-export class CatalogService {
+export class CatalogService implements OnApplicationBootstrap {
+  private readonly log = new Logger('Videos');
+  private webmQueue: string[] = [];
+  private webmBusy = false;
+  private noFfmpeg = false;
+
   constructor(
     @InjectRepository(Course) readonly courses: Repository<Course>,
     @InjectRepository(Lesson) readonly lessons: Repository<Lesson>,
@@ -95,20 +100,62 @@ export class CatalogService {
     return rows.filter((r) => r.licence && r.course).map((r) => r.course.slug);
   }
 
-  /** The app's window plays WebM, not MP4: an uploaded lesson video also gets a light 720p WebM copy, made in the
-   *  background with ffmpeg (sudo apt install ffmpeg on the server). Without ffmpeg the app plays nothing new. */
+  /** The app's window plays WebM, not MP4: every uploaded lesson video also gets a light 720p WebM copy, made in the
+   *  background with ffmpeg (sudo apt install ffmpeg on the server), one video at a time. Until the copy is ready the
+   *  app says the video is being prepared; when it is, the app downloads it by itself (within a minute). */
   webmCopy(file: string) {
+    if (!file || this.webmQueue.includes(file)) return;
+    this.webmQueue.push(file);
+    void this.nextWebm();
+  }
+
+  private async nextWebm() {
+    if (this.webmBusy) return;
+    const file = this.webmQueue.shift();
+    if (!file) return;
+    this.webmBusy = true;
     const src = join(uploadDir('videos'), file);
     const out = src.replace(/\.[^.]+$/, '') + '.webm';
     const part = out + '.part.webm';
+    const done = async (ok: boolean, why = '') => {
+      const { rename } = await import('fs/promises');
+      if (ok) {
+        await rename(part, out).catch(() => undefined);
+        this.log.log(`WebM ready for the app: ${file}`);
+      } else {
+        await unlink(part).catch(() => undefined);
+        if (why) this.log.warn(`No WebM for ${file}: ${why}`);
+      }
+      this.webmBusy = false;
+      void this.nextWebm();
+    };
+    if (!existsSync(src)) return done(false, 'the video file is missing');
+    this.log.log(`Making the WebM copy the app plays: ${file}`);
     const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-i', src, '-vf', 'scale=-2:720', '-r', '25', '-c:v', 'libvpx', '-b:v', '1400k',
       '-crf', '10', '-deadline', 'good', '-cpu-used', '4', '-c:a', 'libvorbis', '-b:a', '96k', part], { stdio: 'ignore' });
-    ff.on('error', () => undefined);                       // no ffmpeg on this server
-    ff.on('close', async (code) => {
-      const { rename } = await import('fs/promises');
-      if (code === 0) await rename(part, out).catch(() => undefined);
-      else await unlink(part).catch(() => undefined);
+    let failed = false;
+    ff.on('error', () => {
+      failed = true;
+      if (!this.noFfmpeg) this.log.error('ffmpeg is not installed, so uploaded videos cannot play in the app. Install it: sudo apt install ffmpeg (then restart the API).');
+      this.noFfmpeg = true;
+      void done(false);
     });
+    ff.on('close', (code) => { if (!failed) void done(code === 0, code === 0 ? '' : `ffmpeg stopped with code ${code}`); });
+  }
+
+  /** At start: any uploaded lesson video without its WebM copy (uploaded before ffmpeg was installed, or with a theme pack)
+   *  gets one now. */
+  async onApplicationBootstrap() {
+    try {
+      const lessons = await this.lessons.find();
+      for (const l of lessons) {
+        if (!l.videoFile) continue;
+        const webm = l.videoFile.replace(/\.[^.]+$/, '') + '.webm';
+        if (existsSync(join(uploadDir('videos'), l.videoFile)) && !existsSync(join(uploadDir('videos'), webm))) this.webmCopy(l.videoFile);
+      }
+    } catch (err) {
+      this.log.warn(`Couldn't check the lesson videos: ${(err as Error).message}`);
+    }
   }
 
   async removeUpload(kind: 'videos' | 'courses' | 'releases', file: string | null | undefined) {

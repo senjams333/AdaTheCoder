@@ -830,13 +830,28 @@ function playIntro() {
     return;
   }
   $("vMissing").hidden = false;
-  $("vMissing").innerHTML = `<div class="big">🎬</div><div>${esc(L.title)}</div>
-    <div class="file">${esc(L.video || "(no video set)")}</div>
-    <div class="small">This lesson's own video plays here in the app. The video file isn't uploaded yet, so the coding page opens in a moment.</div>`;
+  videoNotReady(L);
   $("vTime").textContent = "00:00"; $("vDur").textContent = "00:00"; $("vSeek").value = 0;
   missingTimer = setTimeout(() => { if (!$("vstage").hidden) endIntro(); }, 4000);
 }
 function endIntro() { clearTimeout(missingTimer); show("lesson"); pushLesson(); }
+// a lesson whose video isn't ready for the app yet (the website is still making the copy the app plays)
+function videoNotReady(L) {
+  $("vMissing").hidden = false;
+  $("vMissing").innerHTML = window.EMBED_THEME
+    ? `<div class="big">🎬</div><div>${esc(L.title)}</div>
+       <div class="small">This lesson's video is getting ready. It will play here in a few minutes. Let's start coding! 🚀</div>`
+    : `<div class="big">🎬</div><div>${esc(L.title)}</div><div class="file">${esc(L.video || "(no video set)")}</div>
+       <div class="small">This lesson's own video plays here in the app. The video file isn't uploaded yet, so the coding page opens in a moment.</div>`;
+  $("vTime").textContent = "00:00"; $("vDur").textContent = "00:00"; $("vSeek").value = 0;
+  clearTimeout(missingTimer);
+  missingTimer = setTimeout(() => { if (!$("vstage").hidden) endIntro(); }, 4000);
+}
+// a video file the app can't play: the same friendly message instead of a black box
+$("introVid").addEventListener("error", () => {
+  if ($("vstage").hidden || !$("introVid").getAttribute("src")) return;
+  try { videoNotReady(A.lessons[A.topics[cur].id]); } catch (e) {}
+});
 $("vStop").onclick = endIntro;
 
 $("introVid").addEventListener("ended", endIntro);

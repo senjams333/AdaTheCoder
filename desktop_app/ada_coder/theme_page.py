@@ -65,12 +65,13 @@ def _template(cfg, app_dir):
 
 
 def _webm(video):
-    """Qt's web view plays WebM: the .webm next to a lesson's .mp4 (bundled, or downloaded with it)."""
+    """Qt's web view plays WebM, not MP4: the .webm next to a lesson's .mp4 (bundled, or downloaded with it).
+    No WebM yet (the website is still making it) → "" and the page says the video is getting ready."""
     if not video:
         return ""
-    base, _ = os.path.splitext(video)
-    for candidate in (base + ".webm", video):
-        if os.path.exists(candidate):
+    base, ext = os.path.splitext(video)
+    for candidate in (base + ".webm", video if ext.lower() in (".webm", ".ogv", ".ogg") else ""):
+        if candidate and os.path.exists(candidate):
             return _url(candidate)
     return ""
 

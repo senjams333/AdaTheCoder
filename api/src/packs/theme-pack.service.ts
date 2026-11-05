@@ -174,6 +174,7 @@ export class ThemePackService {
         if (videoFile && videoFile !== name) await this.catalog.removeUpload('videos', videoFile);
         videoFile = name;
         videoSize = statSync(join(root, pl.video)).size;
+        this.catalog.webmCopy(name);                  // the copy the app's window plays
       } else if (videoFile) {
         await this.catalog.removeUpload('videos', videoFile);  // the pack no longer has a video for it
         videoFile = '';

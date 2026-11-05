@@ -22,7 +22,7 @@ fi
 # ---- 1. system pieces for the app window and lesson videos (Ubuntu / Debian)
 # SKIP_SYSTEM=1 bash test_on_my_computer.sh   skips this part (if you install them yourself)
 if command -v apt-get >/dev/null 2>&1 && [ "${SKIP_SYSTEM:-}" != "1" ]; then
-  NEED=(python3-venv python3-pip curl
+  NEED=(python3-venv python3-pip curl ffmpeg
         libxcb-xinerama0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1
         libxcb-render-util0 libxcb-shape0 libxcb-randr0 libgl1 libegl1 libnss3 libxcomposite1 libxdamage1
         libxrandr2 libxtst6 libxkbfile1

@@ -127,6 +127,7 @@
   // ---- the admin changed the lessons while the app is open: the list and the open lesson update
   window.__updateApp = function (fresh) {
     A.topics = fresh.topics; A.lessons = fresh.lessons; A.locked = fresh.locked;
+    if (fresh.videos) window.VIDEO_URLS = fresh.videos;      // a new or newly ready video plays straight away
     APPS[ai] = A;
     $("topics").innerHTML = A.topics.map(function (t, i) { return '<button class="topic" data-i="' + i + '"></button>'; }).join("");
     $("topics").querySelectorAll(".topic").forEach(function (b) { b.addEventListener("click", function () { openLesson(+b.dataset.i); }); });

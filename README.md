@@ -138,6 +138,14 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
   `bash desktop_app/install_linux.sh http://127.0.0.1:5000` makes it use your test website. Uninstall:
   `bash ~/.local/share/ada-the-coder/uninstall.sh`.
 
+### Lesson videos and ffmpeg
+
+The app's window plays **WebM** videos, not MP4. When the admin uploads a lesson video (or imports a theme pack), the API
+makes a 720p WebM copy with **ffmpeg**, one video at a time, and the app downloads it by itself within a minute. Until the
+copy is ready, the app says "This lesson's video is getting ready". **Install ffmpeg on every server and on your test
+computer:** `sudo apt install -y ffmpeg` (test_on_my_computer.sh does it). When the API starts, it makes the missing WebM
+copy for any video uploaded before ffmpeg was installed. The API log says "WebM ready for the app: …" for each one.
+
 ## Payments (Razorpay and PayPal)
 
 **After paying (the landing page).** The pay page itself turns into **"Payment successful 🎉"** with the licence
