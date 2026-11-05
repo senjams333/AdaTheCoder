@@ -184,6 +184,8 @@ body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !imp
 #vstage.vfull-on { position: fixed; inset: 0; z-index: 900; background: #000; padding: 18px !important; box-sizing: border-box; }
 #vstage.vfull-on .vstop { display: none; }
 body.vfull-body .sidetoggle, body.vfull-body #sideToggle, body.vfull-body #logoutBtn { visibility: hidden !important; }
+/* full screen: only the video and its controls (Exit full screen); Home, day/night, sound, profile and the menu stay hidden */
+body.vfull-body .top, body.vfull-body .menu, body.vfull-body .side { visibility: hidden !important; }
 .vmute { width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255, 255, 255, .9); cursor: pointer; }
 .vstop { flex: none; height: 40px; padding: 0 26px; font: 700 16px var(--font-kid); background: #38bdf8; color: #0f172a; border: 3px solid #bae6fd;
   border-radius: 25px; cursor: pointer; }
@@ -629,6 +631,8 @@ function openLesson(i) {
 $("homeBtn").onclick = () => show("home");
 $("themeBtn").onclick = () => { dark = !dark; style(); try { frame.contentWindow.setDarkMode(dark); } catch (e) {} };
 $("musicBtn").onclick = () => {
+  // playing with the slider closed: the button just opens the slider again; otherwise it turns the sound on or off
+  if (music && $("bgVolBox").hidden) { $("bgVolBox").hidden = false; return; }
   music = !music; $("musicBtn").textContent = music ? "🔊" : "🔈";
   $("bgVolBox").hidden = !music;
   try { frame.contentWindow.toggleAudioEngine(music && +$("bgVol").value > 0); } catch (e) {}
@@ -647,6 +651,8 @@ function applyBgVolume() {
 }
 $("bgVol").value = bgVolume(); $("bgVolPct").textContent = +$("bgVol").value === 0 ? "Off" : $("bgVol").value + "%";
 $("bgVol").addEventListener("input", applyBgVolume);
+// a click anywhere else closes the slider (the sound keeps playing)
+document.addEventListener("mousedown", e => { if (!e.target.closest(".musicwrap")) $("bgVolBox").hidden = true; }, true);
 $("bgVol").addEventListener("change", () => { try { localStorage.setItem("ada-bg-volume", $("bgVol").value); } catch (e) {} });
 // the lesson page's twinkles all go through one volume knob (its own sounds stay as they were)
 function addBgVolume() {
@@ -664,6 +670,7 @@ function addBgVolume() {
         osc.start(t); osc.stop(t + 1.8);
       };`;
     d.body.appendChild(sc);
+    d.addEventListener("mousedown", () => { $("bgVolBox").hidden = true; }, true);   // clicks in the lesson close the slider too
     applyBgVolume();
   } catch (e) {}
 }

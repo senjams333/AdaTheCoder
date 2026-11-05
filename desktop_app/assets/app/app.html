@@ -447,6 +447,7 @@ function pushLesson() {
 }
 $("frame").addEventListener("load", () => {
   frameReady = true;
+  try { F().document.addEventListener("mousedown", () => { $("bgVolBox").hidden = true; }, true); } catch (e) {}
   const w = F();
   w.pyqtBridge = {
     executePython(code) {
@@ -503,6 +504,8 @@ $("themeBtn").onclick = () => {
   if (frameReady) F().setDarkMode(dark);
 };
 $("musicBtn").onclick = () => {
+  // playing with the slider closed: the button just opens the slider again; otherwise it turns the sound on or off
+  if (music && $("bgVolBox").hidden) { $("bgVolBox").hidden = false; return; }
   music = !music; $("musicBtn").textContent = music ? "🎵" : "🔈";
   $("bgVolBox").hidden = !music;
   if (frameReady) { F().setBgVolume && F().setBgVolume(+$("bgVol").value / 50); F().toggleAudioEngine(music && +$("bgVol").value > 0); }
@@ -511,6 +514,8 @@ $("musicBtn").onclick = () => {
 function bgVolume() { try { const v = localStorage.getItem("ada-bg-volume"); return v === null ? 50 : Math.min(100, Math.max(0, +v)); } catch (e) { return 50; } }
 function bgVolLabel() { $("bgVolPct").textContent = +$("bgVol").value === 0 ? "Off" : $("bgVol").value + "%"; }
 $("bgVol").value = bgVolume(); bgVolLabel();
+// a click anywhere else closes the slider (the sound keeps playing)
+document.addEventListener("mousedown", e => { if (!e.target.closest(".musicwrap")) $("bgVolBox").hidden = true; }, true);
 $("bgVol").addEventListener("input", () => {
   bgVolLabel();
   if (frameReady) { F().setBgVolume && F().setBgVolume(+$("bgVol").value / 50); if (music) F().toggleAudioEngine(+$("bgVol").value > 0); }
