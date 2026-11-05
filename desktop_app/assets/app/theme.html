@@ -85,7 +85,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 .bgvol small { font: 700 11px var(--font-kid); color: #0369a1; }
 .qbtn { font: 700 18px var(--font-kid); border: none; cursor: pointer; background: rgba(255,255,255,.85); color: #0f172a; }
 .qbtn:disabled { opacity: .55; cursor: default; }
-.home { border-radius: 25px; width: 208px; height: 48px; }
+.home { border-radius: 25px; width: auto; padding: 0 24px; height: 48px; }
 
 .round { width: 48px; height: 48px; border-radius: 24px; font-size: 18px; }
 .avatar { width: 52px; height: 52px; border-radius: 26px; border: 3px solid #ffd166; background: transparent; padding: 0; cursor: pointer; display: grid; place-items: center; }
@@ -320,7 +320,7 @@ button:focus { outline: none !important; }
       <div class="scene" id="scene" aria-hidden="true"></div>
       <div class="top">
         <div class="grow"></div>
-        <button class="qbtn home" id="homeBtn" disabled>🏠 Home Screen 🌟</button>
+        <button class="qbtn home" id="homeBtn" disabled>🏠 Home</button>
         <button class="qbtn round" id="themeBtn" disabled style="color:#f59e0b">☀️</button>
         <span class="musicwrap"><button class="qbtn round" id="musicBtn" disabled>🔈</button>
           <span class="bgvol" id="bgVolBox" hidden><input type="range" id="bgVol" min="0" max="100" value="50" aria-label="Twinkle sound volume" title="Twinkle sound volume"><small id="bgVolPct">50%</small></span></span>
@@ -565,7 +565,7 @@ function pushLesson() {
   try {
     w.updateLessonData(L.title, L.subtitle, L.examples, L.default_code);
     w.setDarkMode(dark);
-    w.toggleAudioEngine(music);
+    w.toggleAudioEngine(music && +$("bgVol").value > 0);
   } catch (e) { console.warn(e); }
 }
 window.__runCode = function (code) {
@@ -631,16 +631,21 @@ $("themeBtn").onclick = () => { dark = !dark; style(); try { frame.contentWindow
 $("musicBtn").onclick = () => {
   music = !music; $("musicBtn").textContent = music ? "🔊" : "🔈";
   $("bgVolBox").hidden = !music;
-  try { frame.contentWindow.toggleAudioEngine(music); } catch (e) {}
+  try { frame.contentWindow.toggleAudioEngine(music && +$("bgVol").value > 0); } catch (e) {}
 };
 // the twinkling sound's volume (0–100, 50 = as it always was), remembered on this computer
 function bgVolume() { try { const v = localStorage.getItem("ada-bg-volume"); return v === null ? 50 : Math.min(100, Math.max(0, +v)); } catch (e) { return 50; } }
 function applyBgVolume() {
   const v = +$("bgVol").value;
-  $("bgVolPct").textContent = v + "%";
-  try { frame.contentWindow.setBgVolume && frame.contentWindow.setBgVolume(v / 50); } catch (e) {}
+  $("bgVolPct").textContent = v === 0 ? "Off" : v + "%";
+  try {
+    const w = frame.contentWindow;
+    if (w.setBgVolume) w.setBgVolume(v / 50);
+    // 0% is silent: the twinkles stop altogether, and start again when the slider moves up
+    if (music) w.toggleAudioEngine(v > 0);
+  } catch (e) {}
 }
-$("bgVol").value = bgVolume(); $("bgVolPct").textContent = $("bgVol").value + "%";
+$("bgVol").value = bgVolume(); $("bgVolPct").textContent = +$("bgVol").value === 0 ? "Off" : $("bgVol").value + "%";
 $("bgVol").addEventListener("input", applyBgVolume);
 $("bgVol").addEventListener("change", () => { try { localStorage.setItem("ada-bg-volume", $("bgVol").value); } catch (e) {} });
 // the lesson page's twinkles all go through one volume knob (its own sounds stay as they were)
@@ -649,7 +654,7 @@ function addBgVolume() {
     const d = frame.contentDocument, sc = d.createElement("script");
     sc.textContent = `let bgVolGain = null, bgVolLevel = 1;
       function bgVolNode() { ensureAudioContext(); if (!bgVolGain) { bgVolGain = bgAudioContext.createGain(); bgVolGain.gain.value = bgVolLevel; bgVolGain.connect(bgAudioContext.destination); } return bgVolGain; }
-      window.setBgVolume = function (v) { bgVolLevel = v; if (bgVolGain) bgVolGain.gain.value = v; };
+      window.setBgVolume = function (v) { bgVolLevel = v; if (bgVolGain) bgVolGain.gain.setValueAtTime(v, bgAudioContext.currentTime); };
       playSoftTinkle = function (freq, delay = 0) {
         ensureAudioContext(); if (!bgAudioContext) return;
         const osc = bgAudioContext.createOscillator(), gain = bgAudioContext.createGain();

@@ -210,7 +210,10 @@ function playErrorSound() {
   osc.start(); osc.stop(ctx.currentTime + 0.45);
 }
 function playTwinkleChime() { [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) => tone(f, i * 0.15, 1.6, "sine", 0.03)); }
-function musicTick() { if (musicOn) for (let i = 0; i < 8; i++) tone(NOTES[Math.floor(Math.random() * NOTES.length)], Math.random() * 4, 1.6, "sine", 0.02); }
+// the twinkles' volume: 1 = as always, 0 = silent (the app's volume slider)
+let bgLevel = 1;
+function setBgVolume(v) { bgLevel = Math.max(0, Math.min(2, +v || 0)); }
+function musicTick() { if (musicOn && bgLevel > 0) for (let i = 0; i < 8; i++) tone(NOTES[Math.floor(Math.random() * NOTES.length)], Math.random() * 4, 1.6, "sine", 0.02 * bgLevel); }
 
 /* ------------------------------------------------------------------ celebrations */
 function confetti() {
