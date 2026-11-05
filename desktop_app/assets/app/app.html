@@ -518,7 +518,7 @@ function homeSound() {
   try { F().setBgVolume && F().setBgVolume(+$("bgVol").value / 50); F().toggleAudioEngine(music && !themeOpen && +$("bgVol").value > 0); } catch (e) {}
 }
 function setMusic(on) {
-  music = !!on; $("musicBtn").textContent = music ? "🎵" : "🔈";
+  music = !!on; $("musicBtn").textContent = music ? "🔊" : "🔈";
   if (!music) $("bgVolBox").hidden = true;
   try { localStorage.setItem("ada-bg-music", music ? "1" : "0"); } catch (e) {}
   homeSound();
@@ -526,7 +526,7 @@ function setMusic(on) {
 window.appMusicState = () => music;
 window.appSetMusic = on => { setMusic(on); $("bgVolBox").hidden = true; };
 window.appSetBgVolume = v => { $("bgVol").value = v; bgVolLabel(); try { localStorage.setItem("ada-bg-volume", String(v)); } catch (e) {} homeSound(); };
-try { music = localStorage.getItem("ada-bg-music") === "1"; $("musicBtn").textContent = music ? "🎵" : "🔈"; } catch (e) {}
+try { music = localStorage.getItem("ada-bg-music") === "1"; $("musicBtn").textContent = music ? "🔊" : "🔈"; } catch (e) {}
 // the twinkling sound's volume (0–100, 50 = as always, 0 = silent); the same setting as inside the themes
 function bgVolume() { try { const v = localStorage.getItem("ada-bg-volume"); return v === null ? 50 : Math.min(100, Math.max(0, +v)); } catch (e) { return 50; } }
 function bgVolLabel() { $("bgVolPct").textContent = +$("bgVol").value === 0 ? "Off" : $("bgVol").value + "%"; }
