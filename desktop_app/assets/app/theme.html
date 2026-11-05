@@ -162,6 +162,13 @@ body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !imp
 .vtime { color: #d1fae5; font: 700 13px Arial, sans-serif; }
 #vSeek { flex: 1; accent-color: #38bdf8; }
 #vVol { width: 100px; flex: none; accent-color: #38bdf8; cursor: pointer; }
+.vfull { flex: none; height: 38px; padding: 0 14px; border-radius: 19px; border: 2px solid #bae6fd; background: #38bdf8; color: #0f172a;
+  font: 700 14px var(--font-kid); cursor: pointer; white-space: nowrap; }
+.vfull:hover { background: #0284c7; color: #fff; }
+/* full screen: just the video and its controls on black */
+#vstage:fullscreen { background: #000; padding: 18px; box-sizing: border-box; }
+#vstage:-webkit-full-screen { background: #000; padding: 18px; box-sizing: border-box; }
+#vstage:fullscreen .vstop, #vstage:-webkit-full-screen .vstop { display: none; }
 .vmute { width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255, 255, 255, .9); cursor: pointer; }
 .vstop { height: 50px; padding: 0 35px; font: 700 19px var(--font-kid); background: #38bdf8; color: #0f172a; border: 3px solid #bae6fd;
   border-radius: 25px; cursor: pointer; }
@@ -320,6 +327,7 @@ button:focus { outline: none !important; }
               <span class="vtime" id="vDur">00:00</span>
               <button type="button" class="vmute" id="vMute" aria-label="Mute">🔊</button>
               <input type="range" id="vVol" min="0" max="100" value="100" aria-label="Volume">
+              <button type="button" class="vfull" id="vFull" title="Full screen">⛶ Full screen</button>
             </div>
             <button type="button" class="vstop" id="vStop">Stop video 🛑</button>
           </div>
@@ -530,6 +538,7 @@ function show(v) {
   $("vstage").hidden = v !== "intro";
   if (v === "intro") setTimeout(sizeVideo, 0);
   if (v !== "intro") $("introVid").pause();
+  if (v !== "intro" && videoIsFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
   refreshTopics();
 }
 function openLesson(i) {
@@ -765,7 +774,17 @@ function sizeVideo() {
   if (!st || st.hidden) return;
   const v = $("introVid"), box = st.querySelector(".vbox"), c = st.querySelector(".vctrl"), b = 12;   // 6px border each side
   const ar = v.videoWidth && v.videoHeight ? v.videoWidth / v.videoHeight : 16 / 9;
-  const W = st.clientWidth - b, H = st.clientHeight - (c ? c.offsetHeight + 8 : 0) - b;
+  // keep clear of the buttons along the top (<< Back, Home Screen) and of Stop video below
+  const full = videoIsFull(), stop = st.querySelector(".vstop");
+  let top = 0;
+  if (!full) {
+    const r = st.getBoundingClientRect(), sc = r.width / st.offsetWidth || 1;
+    const low = Math.max(...["homeBtn", "logoutBtn"].map(id => $(id) && $(id).offsetParent ? $(id).getBoundingClientRect().bottom : 0));
+    top = Math.max(0, (low - r.top) / sc + 6);
+  }
+  st.style.paddingTop = top + "px"; st.style.boxSizing = "border-box";
+  const below = (c ? c.offsetHeight + 8 : 0) + (!full && stop ? stop.offsetHeight + 8 : 0);
+  const W = st.clientWidth - (full ? 36 : 0) - b, H = st.clientHeight - top - (full ? 36 : 0) - below - b;
   if (W <= 0 || H <= 0) return;
   const iw = Math.min(W, H * ar), ih = iw / ar;
   box.style.flex = "none"; box.style.width = (iw + b) + "px"; box.style.height = (ih + b) + "px";
@@ -773,6 +792,20 @@ function sizeVideo() {
 }
 addEventListener("resize", () => setTimeout(sizeVideo, 0));
 $("introVid").addEventListener("loadedmetadata", sizeVideo);
+function videoIsFull() { const f = document.fullscreenElement || document.webkitFullscreenElement; return !!f && f === $("vstage"); }
+function videoFull() {
+  const st = $("vstage");
+  if (videoIsFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else (st.requestFullscreen || st.webkitRequestFullscreen).call(st);
+}
+$("vFull").onclick = videoFull;
+$("introVid").addEventListener("dblclick", videoFull);
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
+  const on = videoIsFull();
+  $("vFull").textContent = on ? "🗗 Exit full screen" : "⛶ Full screen";
+  $("vFull").title = on ? "Exit full screen (Esc)" : "Full screen";
+  setTimeout(sizeVideo, 50);
+}));
 function videoPlayPause() { const v = $("introVid"); v.paused ? v.play().catch(() => {}) : v.pause(); }
 $("introVid").addEventListener("click", videoPlayPause);
 document.addEventListener("keydown", e => {

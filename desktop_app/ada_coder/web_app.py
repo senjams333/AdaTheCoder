@@ -309,6 +309,10 @@ class WebMainWindow(QMainWindow):
         for attr in (QWebEngineSettings.LocalContentCanAccessFileUrls, QWebEngineSettings.LocalContentCanAccessRemoteUrls):
             s.setAttribute(attr, True)
         self.view.page().setBackgroundColor(Qt.transparent)
+        # the lesson video's ⛶ Full screen button: the window goes full screen while the video is
+        s.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
+        self.view.page().fullScreenRequested.connect(self._full_screen_request)
+        self._was_maximized = False
         self.host = Host(self)
         self.runner = LessonRunner(lambda fn, args: self.host.lessonCall.emit(fn, json.dumps(args, ensure_ascii=False)))
         self.channel = QWebChannel(self.view.page())
@@ -377,6 +381,14 @@ class WebMainWindow(QMainWindow):
         if courses:
             self.courses = courses
         self._push()
+
+    def _full_screen_request(self, request):
+        request.accept()
+        if request.toggleOn():
+            self._was_maximized = self.isMaximized()
+            self.showFullScreen()
+        elif self.isFullScreen():
+            self.showMaximized() if self._was_maximized else self.showNormal()
 
     def apply_theme(self):
         self._push()
