@@ -621,12 +621,18 @@ async function embedBuyFlow() {
   const usd = window.EMBED_PRICE || "$4.99";
   const r = await dialog({
     title: "Upgrade ⭐", kind: "sunset",
-    body: `<div class="suntitle">🌐 The website opens</div><p>The browser opens <b>adathecoder.com/pay?theme=${esc(window.EMBED_THEME)}</b>.
+    body: `<div class="suntitle">🌐 Unlock every lesson</div><p>The browser opens <b>adathecoder.com/pay?theme=${esc(window.EMBED_THEME)}</b>.
       The grown-up logs in, then pays ${esc(usd)} with <b>Razorpay</b> (UPI, cards, net banking) or <b>PayPal</b>.</p>
-      <p>As soon as the payment goes through, every lesson opens here by itself.</p>`,
-    buttons: [{ label: "Pretend the grown-up paid (preview only)", value: () => "paid" }, { label: "Close", primary: true, value: () => null }]
+      <p>As soon as the payment goes through, every lesson opens here by itself.</p>
+      <p>Already paid? Press <b>I have a licence 🔑</b> and type the licence from the website or the email.</p>`,
+    buttons: [{ label: "I have a licence 🔑", value: () => "key" }, { label: "Pretend the grown-up paid (preview only)", value: () => "paid" }, { label: "Close", primary: true, value: () => null }]
   });
-  if (r !== "paid") return;
+  if (r === "key") {
+    const k = await ask("Licence 🔑", "Type or paste the licence (it looks like ADA-XXXX-XXXX-XXXX). It is on your account page on the website and in the payment email:");
+    if (k === null || !String(k).trim()) return;
+    // the real app checks the licence with the website; this preview takes any code in the right shape
+    if (!/^ADA[A-Z0-9]{12}$/.test(String(k).toUpperCase().replace(/[^A-Z0-9]/g, ""))) { msg("Licence 🔑", "That licence wasn't found. Check it on your account page on the website and try again."); return; }
+  } else if (r !== "paid") return;
   S().key = true; refreshTopics();
   try { parent.postMessage({ kind: "kids-paid", theme: window.EMBED_THEME }, "*"); } catch (e) {}
   sunsetMsg("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀");

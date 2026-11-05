@@ -40,13 +40,27 @@
 
   // ---- Upgrade: the website's pay page opens (log in there, pay with Razorpay or PayPal); the theme unlocks by itself
   embedBuyFlow = async function () {
-    parent.appUpgrade(A.id);
-    await dialog({
+    var r = await dialog({
       title: "Upgrade ⭐", kind: "sunset",
-      body: '<div class="suntitle">🌐 The website opens</div><p>A grown-up logs in there and pays with <b>Razorpay</b> or <b>PayPal</b>.</p>' +
-            '<p>As soon as the payment goes through, every lesson opens here by itself.</p>',
-      buttons: [{ label: "OK", primary: true, value: function () { return null; } }]
+      body: '<div class="suntitle">🌐 Unlock every lesson</div><p>A grown-up pays on the website with <b>Razorpay</b> or <b>PayPal</b>. ' +
+            'As soon as the payment goes through, every lesson opens here by itself.</p>' +
+            '<p>Already paid? Press <b>I have a licence 🔑</b> and type the licence from the website or the email.</p>',
+      buttons: [{ label: "I have a licence 🔑", value: function () { return "key"; } },
+                { label: "Open the website to pay", primary: true, value: function () { return "pay"; } },
+                { label: "Close", value: function () { return null; } }]
     });
+    if (r === "pay") { parent.appUpgrade(A.id); msg("Upgrade ⭐", "The website is opening in the browser. When the payment goes through, every lesson opens here by itself."); }
+    if (r === "key") enterLicence();
+  };
+  // "I have a licence 🔑": the app checks the code with the website (web_app.py → /api/v3/licence)
+  async function enterLicence() {
+    var k = await ask("Licence 🔑", "Type or paste the licence (it looks like ADA-XXXX-XXXX-XXXX). It is on your account page on the website and in the payment email:");
+    if (k === null || !String(k).trim()) return;
+    parent.appRedeem(A.id, String(k).trim());
+  }
+  window.__licenceResult = function (r) {
+    if (r.ok) { if (!S().key) window.__unlockAll(); return; }
+    msg("Licence 🔑", esc(r.error || "That licence didn't work. Check it and try again."));
   };
   window.__unlockAll = function () {
     S().key = true; refreshTopics();

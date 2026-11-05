@@ -12,6 +12,7 @@ import { PLATFORMS } from '../common/constants';
 import { SettingsService } from '../common/settings.service';
 import { revisionOf, siteUrl, versionNewer } from '../common/util';
 import { Release, User } from '../entities';
+import { PaymentsService } from '../payments/payments.service';
 
 /** The addresses the desktop app calls, with exactly the answers it expects
  *  (the same as the old Python website, so installed apps keep working). */
@@ -24,6 +25,7 @@ export class AppApiController {
     private readonly auth: AuthService,
     private readonly settings: SettingsService,
     @InjectRepository(Release) private readonly releases: Repository<Release>,
+    private readonly payments: PaymentsService,
   ) {}
 
   @Get('v3/courses')
@@ -64,6 +66,20 @@ export class AppApiController {
   @UseGuards(AppTokenGuard)
   async licences(@CurrentUser() user: User) {
     return { ok: true, licences: await this.catalog.licencedSlugs(user.id), child_name: user.childName || '' };
+  }
+
+  /** The app's "I have a licence 🔑": { ok, theme, name, licences } or 400/404 { ok: false, error }. */
+  @Post('v3/licence')
+  @HttpCode(200)
+  @UseGuards(AppTokenGuard)
+  async redeem(@CurrentUser() user: User, @Body() body: { licence?: string; theme?: string }, @Res() res: Response) {
+    try {
+      const got = await this.payments.redeem(user, String(body.licence || ''), body.theme ? String(body.theme) : undefined);
+      return res.json({ ...got, licences: await this.catalog.licencedSlugs(user.id) });
+    } catch (err) {
+      const status = err instanceof HttpException ? err.getStatus() : 500;
+      return res.status(status).json({ ok: false, error: this.text(err), licences: await this.catalog.licencedSlugs(user.id) });
+    }
   }
 
   /** The Upgrade card's "Pay": a 15-minute page on the website for this theme, already logged in. */

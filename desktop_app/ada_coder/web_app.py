@@ -233,6 +233,7 @@ class Host(QObject):
     themeUpdate = pyqtSignal(str)          # the open theme's new lessons (the admin changed them)
     themeUnlock = pyqtSignal()             # the open theme was paid for
     lessonCall = pyqtSignal(str, str)      # (js function, JSON arguments) for the open lesson page
+    licenceResult = pyqtSignal(str)        # the answer to "I have a licence 🔑" (JSON)
 
     def __init__(self, window):
         super().__init__(window)
@@ -270,6 +271,10 @@ class Host(QObject):
     def upgrade(self, course_id):
         QDesktopServices.openUrl(QUrl(sync.pay_page(course_id)))
         self.window.watch_payment()
+
+    @pyqtSlot(str, str)
+    def redeemLicence(self, course_id, code):
+        self.window.redeem_licence(course_id, code)
 
     @pyqtSlot(str)
     def openUrl(self, url):
@@ -402,6 +407,35 @@ class WebMainWindow(QMainWindow):
         timer.timeout.connect(done)
         timer.start(300)
         self._licence_timer = timer
+
+    def redeem_licence(self, course_id, code):
+        """"I have a licence 🔑": the website checks the code; a good one unlocks the theme straight away."""
+        token = self.settings["app_token"]
+        if not token:
+            self.host.licenceResult.emit(json.dumps({"ok": False, "error": "Please log in again, then type the licence."}))
+            return
+        answer = {}
+        worker = threading.Thread(target=lambda: answer.update(sync.redeem_licence(token, code, course_id) or {}), daemon=True)
+        worker.start()
+        timer = QTimer(self)
+
+        def done():
+            if worker.is_alive():
+                return
+            timer.stop()
+            if not answer:
+                answer.update(ok=False, error="The app can't reach the website. Check the internet connection and try again.")
+            new = answer.get("licences")
+            if new is not None and sorted(new) != sorted(self.settings["licences"] or []):
+                self.settings["licences"] = list(new)
+                self._push()
+            if answer.get("ok") and self.open_theme_id and self.open_theme_id in (new or []):
+                self.host.themeUnlock.emit()
+            self.host.licenceResult.emit(json.dumps({"ok": bool(answer.get("ok")), "error": answer.get("error", ""),
+                                                     "theme": answer.get("theme", "")}))
+        timer.timeout.connect(done)
+        timer.start(200)
+        self._redeem_timer = timer
 
     # ------------------------------------------------------------------ log-in
     def check_login(self, email, password):

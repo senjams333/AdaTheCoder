@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
+import PaidCard from '@/components/PaidCard';
 import { Paid, payCall } from '@/lib/pay';
 
 /** PayPal sends the parent back here (?token=<PayPal order id>): the API captures the payment and unlocks the theme. */
@@ -26,14 +26,7 @@ function ReturnInner() {
         <div className="auth-card has-peek pay-card">
           <img className="peek" src="/img/byte.webp" alt="" />
           {paid ? (
-            <>
-              <div className="pay-done-icon" aria-hidden="true">✓</div>
-              <h1>Payment successful 🎉</h1>
-              <p className="sub">{paid.message}</p>
-              <div className="pay-licence"><span>Your licence</span><b>{paid.licence}</b></div>
-              <p className="sub">We&apos;ve emailed it to you too. It is also on your <Link href={`/account?theme=${encodeURIComponent(paid.theme)}`}>account page</Link>.
-                You can close this page and go back to Ada The Coder.</p>
-            </>
+            <PaidCard licence={paid.licence} themeName={paid.name} themeSlug={paid.theme} />
           ) : (
             <>
               <h1>Finishing your PayPal payment…</h1>

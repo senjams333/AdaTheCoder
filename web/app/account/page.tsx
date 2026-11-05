@@ -17,6 +17,7 @@ import { flash } from '@/lib/flashSlice';
 import { day, mb } from '@/lib/format';
 import { useAppDispatch } from '@/lib/hooks';
 import { useRequireLogin } from '@/lib/useRequireLogin';
+import { LicenceCopy } from '@/components/PaidCard';
 
 const PLATFORM_LABELS = { windows: 'Windows', mac: 'Mac' } as const;
 type ModalName = 'details' | 'password' | 'delete' | 'install' | null;
@@ -216,20 +217,10 @@ function DownloadButton({ platform, label, release, yours }: {
 }
 
 function LicenceBox({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
   return (
-    <div className="acct-license">
-      <div className="acct-license-code"><strong>Your licence</strong><span>{code}</span></div>
-      <button
-        type="button"
-        className="acct-btn"
-        onClick={() => navigator.clipboard.writeText(code).then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1500);
-        })}
-      >
-        {copied ? 'Copied!' : 'Copy'}
-      </button>
+    <div className="acct-licence-wrap">
+      <LicenceCopy code={code} />
+      <p className="acct-unlock-hint">To unlock in the app: open the theme → <b>Upgrade ⭐</b> → <b>I have a licence 🔑</b>, then paste this licence. (It usually unlocks by itself when you log in to the app.)</p>
     </div>
   );
 }

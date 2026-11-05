@@ -206,6 +206,26 @@ def fetch_licences(app_token):
         return None
 
 
+def redeem_licence(app_token, code, theme_id=""):
+    """"I have a licence 🔑": {"ok": True, "theme", "licences"} or {"ok": False, "error"}; None when offline."""
+    body = json.dumps({"licence": code, "theme": theme_id}).encode("utf-8")
+    req = urllib.request.Request(SERVER_URL.rstrip("/") + "/api/v3/licence", data=body, method="POST",
+                                 headers={"User-Agent": USER_AGENT, "Content-Type": "application/json",
+                                          "Accept": "application/json", "Authorization": "Bearer " + app_token})
+    try:
+        with _open(req, TIMEOUT) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            return {"ok": False, "error": "Please log out and log in again, then type the licence."}
+        try:
+            return json.loads(e.read().decode("utf-8"))
+        except ValueError:
+            return {"ok": False, "error": "The website couldn't check the licence. Please try again."}
+    except NETWORK_ERRORS:
+        return None
+
+
 def pay_page(theme_id):
     """The website page for buying a theme: the parent logs in there, then pays with Razorpay or PayPal."""
     return f"{SERVER_URL.rstrip('/')}/pay?theme={urllib.parse.quote(theme_id)}"

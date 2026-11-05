@@ -91,6 +91,24 @@ export class PaymentsService {
     return (await this.licences.findOne({ where: { userId: user.id, courseId: course.id } }))?.licence || null;
   }
 
+  /** The app's "I have a licence": the parent types the code from the website or the email.
+   *  The code must belong to the account logged in to the app (codes can't be passed to another family).
+   *  Returns the theme it unlocks, or says plainly what is wrong. */
+  async redeem(user: User, typed: string, themeSlug?: string): Promise<{ ok: true; theme: string; name: string }> {
+    const raw = String(typed || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const tidy = raw.length === 15 && raw.startsWith('ADA') ? `ADA-${raw.slice(3, 7)}-${raw.slice(7, 11)}-${raw.slice(11)}` : String(typed || '').trim().toUpperCase();
+    if (raw.length < 6) throw new BadRequestException('Please type the whole licence. It looks like ADA-XXXX-XXXX-XXXX.');
+    const found = await this.licences.findOne({ where: { licence: tidy }, relations: { course: true } });
+    if (!found || !found.course) throw new NotFoundException("That licence wasn't found. Check it on your account page on the website and try again.");
+    if (found.userId !== user.id) {
+      throw new BadRequestException('That licence belongs to another account. Log in to the app with the email address that paid for it.');
+    }
+    if (themeSlug && found.course.slug !== themeSlug) {
+      throw new BadRequestException(`That licence is for ${found.course.name}, not this theme. It has unlocked ${found.course.name} for you.`);
+    }
+    return { ok: true, theme: found.course.slug, name: found.course.name };
+  }
+
   /** The licence is given once; paying twice by mistake keeps the first code. */
   private async grant(payment: Payment, providerPaymentId: string): Promise<string> {
     if (payment.status !== 'paid') {

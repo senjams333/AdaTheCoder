@@ -573,6 +573,7 @@ window.appRunCode = code => host && host.runCode(code);
 window.appSubmitInput = v => host && host.submitInput(v);
 window.appEmptyInput = () => host && host.emptyInput();
 window.appUpgrade = id => host && host.upgrade(id);
+window.appRedeem = (id, code) => host && host.redeemLicence(id, code);
 
 /* ---------- log-in: before the home screen ---------- */
 let loginMode = "login";
@@ -638,6 +639,7 @@ if (window.qt && window.QWebChannel) new QWebChannel(qt.webChannelTransport, ch 
   host.lessonCall.connect((fn, args) => { try { K().__lessonCall(fn, JSON.parse(args)); } catch (e) { console.warn(e); } });
   host.themeUpdate.connect(j => { try { K().__updateApp(JSON.parse(j)); } catch (e) {} });
   host.themeUnlock.connect(() => { try { K().__unlockAll(); } catch (e) {} });
+  host.licenceResult.connect(j => { try { K().__licenceResult(JSON.parse(j)); } catch (e) {} });
   host.message.connect(t => toast(t));
 });
 

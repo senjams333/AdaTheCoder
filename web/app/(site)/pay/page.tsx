@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
+import PaidCard from '@/components/PaidCard';
 import { useAppSelector } from '@/lib/hooks';
 import { loadRazorpay, Paid, payCall, PayPage } from '@/lib/pay';
 
@@ -26,6 +27,9 @@ function PayInner() {
   const [paid, setPaid] = useState<Paid | null>(null);
   const wanted = params.get('method');      // the app's Upgrade card: "razorpay" or "paypal" starts that one straight away
   const started = useRef(false);
+  // Razorpay's Payment Button (or its redirect back here with ?paid=1): the webhook unlocks the theme, so this page
+  // asks again every 5 seconds and turns into the "Payment successful" page as soon as the licence is there
+  const [confirming, setConfirming] = useState(params.get('paid') === '1');
 
   const load = useCallback(async () => {
     if (!slug) return setErrors(['Choose a theme to unlock on your account page.']);
@@ -91,6 +95,25 @@ function PayInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
+  const watching = !!page && !page.licence && !paid && (confirming || !!page.methods.razorpay?.button);
+  useEffect(() => {
+    if (!watching) return;
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries += 1;
+      try {
+        const fresh = await payCall<PayPage>(encodeURIComponent(slug), token);
+        if (fresh.licence) {
+          clearInterval(timer);
+          setPaid({ ok: true, licence: fresh.licence, theme: fresh.theme.slug, name: fresh.theme.name, message: '' });
+          setConfirming(false);
+        }
+      } catch { /* try again next time */ }
+      if (tries > 180) { clearInterval(timer); if (confirming) { setConfirming(false); setErrors(["We haven't heard from Razorpay yet. If money left your account, your licence will appear on your account page and in your email soon, or write to us."]); } }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [watching, slug, token, confirming]);
+
   const here = `/pay?theme=${encodeURIComponent(slug)}`;
   return (
     <div className="auth-page">
@@ -98,13 +121,7 @@ function PayInner() {
         <div className="auth-card has-peek pay-card">
           <img className="peek" src="/img/byte.webp" alt="" />
           {paid ? (
-            <>
-              <h1>Unlocked! 🎉</h1>
-              <p className="sub">{paid.message}</p>
-              <div className="pay-licence"><span>Your licence</span><b>{paid.licence}</b></div>
-              <p className="sub">Keep this code. It is also on your <Link href={`/account?theme=${encodeURIComponent(paid.theme)}`}>account page</Link>.
-                You can close this page and go back to Ada The Coder.</p>
-            </>
+            <PaidCard licence={paid.licence} themeName={paid.name || page?.theme.name || ''} themeSlug={paid.theme || slug} email={page?.user.email} />
           ) : needLogin ? (
             <>
               <h1>Log in to pay</h1>
@@ -118,10 +135,12 @@ function PayInner() {
               {!errors.length && <p className="sub">Loading…</p>}
             </>
           ) : page.licence ? (
+            <PaidCard licence={page.licence} themeName={page.theme.name} themeSlug={page.theme.slug} email={page.user.email} already />
+          ) : confirming ? (
             <>
-              <h1>{page.theme.name} is yours ✓</h1>
-              <div className="pay-licence"><span>Your licence</span><b>{page.licence}</b></div>
-              <p className="sub">Every lesson is already unlocked in the app.</p>
+              <div className="pay-wait" aria-hidden="true" />
+              <h1>Confirming your payment…</h1>
+              <p className="sub">Razorpay is telling us about your payment. This usually takes a few seconds. Please don&apos;t close this page.</p>
             </>
           ) : (
             <>
