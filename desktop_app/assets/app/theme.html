@@ -76,6 +76,11 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 .qbtn { font: 700 18px var(--font-kid); border: none; cursor: pointer; background: rgba(255,255,255,.85); color: #0f172a; }
 .qbtn:disabled { opacity: .55; cursor: default; }
 .home { border-radius: 25px; width: 208px; height: 48px; }
+/* on the coding page: watch the lesson's video again */
+.seevid { border-radius: 25px; height: 48px; padding: 0 22px; margin-right: 10px; background: #ffd166 !important; color: #0f172a !important;
+  border: 3px solid #f59e0b !important; box-shadow: 0 3px 10px rgba(245, 158, 11, .35); }
+.seevid:hover { background: #38bdf8 !important; color: #fff !important; border-color: #0284c7 !important; }
+.seevid[hidden] { display: none; }
 .round { width: 48px; height: 48px; border-radius: 24px; font-size: 18px; }
 .avatar { width: 52px; height: 52px; border-radius: 26px; border: 3px solid #ffd166; background: transparent; padding: 0; cursor: pointer; display: grid; place-items: center; }
 .avatar:hover:not(:disabled) { border-color: #38bdf8; }
@@ -303,6 +308,7 @@ button:focus { outline: none !important; }
       <div class="scene" id="scene" aria-hidden="true"></div>
       <div class="top">
         <div class="grow"></div>
+        <button class="qbtn seevid" id="seeVidBtn" hidden title="Watch this lesson's video again">🎬 See video</button>
         <button class="qbtn home" id="homeBtn" disabled>🏠 Home Screen 🌟</button>
         <button class="qbtn round" id="themeBtn" disabled style="color:#f59e0b">☀️</button>
         <button class="qbtn round" id="musicBtn" disabled>🔈</button>
@@ -329,7 +335,7 @@ button:focus { outline: none !important; }
               <input type="range" id="vVol" min="0" max="100" value="100" aria-label="Volume">
               <button type="button" class="vfull" id="vFull" title="Full screen">⛶ Full screen</button>
             </div>
-            <button type="button" class="vstop" id="vStop">Stop video 🛑</button>
+            <button type="button" class="vstop" id="vStop">Skip video ⏭️</button>
           </div>
         </div>
         <div class="side" id="side" hidden>
@@ -539,6 +545,8 @@ function show(v) {
   if (v === "intro") setTimeout(sizeVideo, 0);
   if (v !== "intro") $("introVid").pause();
   if (v !== "intro" && videoIsFull()) setVideoFull(false);
+  const L = A && A.topics && A.topics[cur] ? A.lessons[A.topics[cur].id] : null;
+  $("seeVidBtn").hidden = !(v === "lesson" && L && L.video);
   refreshTopics();
 }
 function openLesson(i) {
@@ -767,6 +775,7 @@ function playIntro() {
 }
 function endIntro() { clearTimeout(missingTimer); show("lesson"); pushLesson(); }
 $("vStop").onclick = endIntro;
+$("seeVidBtn").onclick = () => playIntro();
 $("introVid").addEventListener("ended", endIntro);
 // the video keeps its own shape (no stretching): as big as fits, bigger when the lesson list is hidden
 function sizeVideo() {
