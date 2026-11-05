@@ -174,7 +174,7 @@ body.vfull-body .sidetoggle, body.vfull-body #sideToggle, body.vfull-body #logou
 .vstop { height: 50px; padding: 0 35px; font: 700 19px var(--font-kid); background: #38bdf8; color: #0f172a; border: 3px solid #bae6fd;
   border-radius: 25px; cursor: pointer; }
 .vstop:hover { background: #0284c7; color: #fff; }
-.seevid { position: absolute; z-index: 6; left: 50%; bottom: 8px; transform: translateX(-50%); white-space: nowrap; }
+.seevid { position: absolute; z-index: 6; left: calc(50% + 70px); bottom: 2px; transform: translateX(-50%); white-space: nowrap; }
 .seevid[hidden] { display: none; }
 /* intro */
 .intro { background: #000; z-index: 30; }
@@ -319,7 +319,7 @@ button:focus { outline: none !important; }
             <div class="chars" id="chars"></div>
           </div>
           <div class="lesson" id="lesson" hidden></div>
-          <button type="button" class="vstop seevid" id="seeVidBtn" hidden title="Watch this lesson's video again">🎬 See video</button>
+          <button type="button" class="vstop seevid" id="seeVidBtn" hidden title="Watch this lesson's video again">See video</button>
           <div class="vstage" id="vstage" hidden>
             <div class="vbox"><video id="introVid" playsinline preload="auto" src="__INTRO__"></video><div class="vbigplay" aria-hidden="true">▶</div>
               <div class="vmissing" id="vMissing" hidden></div>
@@ -333,7 +333,7 @@ button:focus { outline: none !important; }
               <input type="range" id="vVol" min="0" max="100" value="100" aria-label="Volume">
               <button type="button" class="vfull" id="vFull" title="Full screen">⛶ Full screen</button>
             </div>
-            <button type="button" class="vstop" id="vStop">Skip video ⏭️</button>
+            <button type="button" class="vstop" id="vStop">Skip video</button>
           </div>
         </div>
         <div class="side" id="side" hidden>
@@ -480,7 +480,14 @@ function buildFrame() {
   frame = document.createElement("iframe");
   frame.title = "Lesson";
   // the title and the three panels sit a little higher, so "See video" fits below them
-  const lift = `<style>.header{margin-top:-4px!important}.coding-box{margin-top:2px!important;height:calc(100vh - 152px)!important}</style>`;
+  // the next example's yellow glow follows the button's round corners (an outline is drawn square in the app);
+  // the examples' scroll bar stays inside the panel's rounded corners
+  const lift = `<style>.header{margin-top:-4px!important}.coding-box{margin-top:2px!important;height:calc(100vh - 166px)!important}` +
+    `.topic-btn.next-glow{outline:none!important;animation:nextGlowRound 1.1s ease-in-out infinite!important}` +
+    `@keyframes nextGlowRound{0%,100%{box-shadow:0 0 0 4px #facc15,0 0 14px 4px rgba(250,204,21,.55)}50%{box-shadow:0 0 0 5px #fbbf24,0 0 28px 10px rgba(251,191,36,.8)}}` +
+    `.example-panel::-webkit-scrollbar{width:10px}.example-panel::-webkit-scrollbar-button{display:none;height:0}` +
+    `.example-panel::-webkit-scrollbar-track{margin:34px 0;background:rgba(255,255,255,.35);border-radius:8px}` +
+    `.example-panel::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:8px;border:2px solid rgba(255,255,255,.7)}</style>`;
   const shim = lift + `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
   frame.srcdoc = A.template.replace("</head>", shim + "</head>");
   frame.addEventListener("load", () => { frameReady = true; if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
