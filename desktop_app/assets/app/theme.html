@@ -166,9 +166,9 @@ body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !imp
   font: 700 14px var(--font-kid); cursor: pointer; white-space: nowrap; }
 .vfull:hover { background: #0284c7; color: #fff; }
 /* full screen: just the video and its controls on black */
-#vstage:fullscreen { background: #000; padding: 18px; box-sizing: border-box; }
-#vstage:-webkit-full-screen { background: #000; padding: 18px; box-sizing: border-box; }
-#vstage:fullscreen .vstop, #vstage:-webkit-full-screen .vstop { display: none; }
+#vstage.vfull-on { position: fixed; inset: 0; z-index: 900; background: #000; padding: 18px !important; box-sizing: border-box; }
+#vstage.vfull-on .vstop { display: none; }
+body.vfull-body .sidetoggle, body.vfull-body #sideToggle, body.vfull-body #logoutBtn { visibility: hidden !important; }
 .vmute { width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255, 255, 255, .9); cursor: pointer; }
 .vstop { height: 50px; padding: 0 35px; font: 700 19px var(--font-kid); background: #38bdf8; color: #0f172a; border: 3px solid #bae6fd;
   border-radius: 25px; cursor: pointer; }
@@ -538,7 +538,7 @@ function show(v) {
   $("vstage").hidden = v !== "intro";
   if (v === "intro") setTimeout(sizeVideo, 0);
   if (v !== "intro") $("introVid").pause();
-  if (v !== "intro" && videoIsFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  if (v !== "intro" && videoIsFull()) setVideoFull(false);
   refreshTopics();
 }
 function openLesson(i) {
@@ -790,22 +790,25 @@ function sizeVideo() {
   box.style.flex = "none"; box.style.width = (iw + b) + "px"; box.style.height = (ih + b) + "px";
   if (c) c.style.width = (iw + b) + "px";
 }
-addEventListener("resize", () => setTimeout(sizeVideo, 0));
+let sizeFrame = 0;   // once per frame while the window changes size
+addEventListener("resize", () => { cancelAnimationFrame(sizeFrame); sizeFrame = requestAnimationFrame(sizeVideo); });
 $("introVid").addEventListener("loadedmetadata", sizeVideo);
-function videoIsFull() { const f = document.fullscreenElement || document.webkitFullscreenElement; return !!f && f === $("vstage"); }
-function videoFull() {
-  const st = $("vstage");
-  if (videoIsFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-  else (st.requestFullscreen || st.webkitRequestFullscreen).call(st);
-}
-$("vFull").onclick = videoFull;
-$("introVid").addEventListener("dblclick", videoFull);
-["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
-  const on = videoIsFull();
+// ⛶ Full screen: the video and its controls cover the whole window, and the app window goes full screen
+// (one calm change, no flicker). Esc, the button again, or leaving the video ends it.
+function videoIsFull() { return $("vstage").classList.contains("vfull-on"); }
+function setVideoFull(on) {
+  if (on === videoIsFull()) return;
+  $("vstage").classList.toggle("vfull-on", on);
+  document.body.classList.toggle("vfull-body", on);
   $("vFull").textContent = on ? "🗗 Exit full screen" : "⛶ Full screen";
   $("vFull").title = on ? "Exit full screen (Esc)" : "Full screen";
-  setTimeout(sizeVideo, 50);
-}));
+  sizeVideo();
+  try { if (parent !== window && parent.appVideoFull) parent.appVideoFull(on); } catch (e) {}
+}
+function videoFull() { setVideoFull(!videoIsFull()); }
+$("vFull").onclick = videoFull;
+$("introVid").addEventListener("dblclick", videoFull);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && videoIsFull()) { e.preventDefault(); setVideoFull(false); } });
 function videoPlayPause() { const v = $("introVid"); v.paused ? v.play().catch(() => {}) : v.pause(); }
 $("introVid").addEventListener("click", videoPlayPause);
 document.addEventListener("keydown", e => {

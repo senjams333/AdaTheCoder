@@ -18,7 +18,7 @@ import tempfile
 import threading
 
 from PyQt5.QtCore import QObject, QProcess, QTimer, QUrl, Qt, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtGui import QColor, QDesktopServices
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEngineView
 from PyQt5.QtWidgets import QMainWindow
@@ -276,6 +276,10 @@ class Host(QObject):
     def redeemLicence(self, course_id, code):
         self.window.redeem_licence(course_id, code)
 
+    @pyqtSlot(bool)
+    def setVideoFull(self, on):
+        self.window.set_video_full(on)
+
     @pyqtSlot(str)
     def openUrl(self, url):
         if url.startswith("http"):
@@ -308,10 +312,10 @@ class WebMainWindow(QMainWindow):
         s = self.view.settings()
         for attr in (QWebEngineSettings.LocalContentCanAccessFileUrls, QWebEngineSettings.LocalContentCanAccessRemoteUrls):
             s.setAttribute(attr, True)
-        self.view.page().setBackgroundColor(Qt.transparent)
-        # the lesson video's ⛶ Full screen button: the window goes full screen while the video is
-        s.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
-        self.view.page().fullScreenRequested.connect(self._full_screen_request)
+        # a solid sky colour behind the page (a see-through one flashes black while the window changes size)
+        self.view.page().setBackgroundColor(QColor("#bae6fd"))
+        # the lesson video's ⛶ Full screen: the page fills the window with the video, and the window goes full
+        # screen (Host.setVideoFull). Chromium's own full screen isn't used: it re-lays the page out twice and flickers.
         self._was_maximized = False
         self.host = Host(self)
         self.runner = LessonRunner(lambda fn, args: self.host.lessonCall.emit(fn, json.dumps(args, ensure_ascii=False)))
@@ -382,13 +386,17 @@ class WebMainWindow(QMainWindow):
             self.courses = courses
         self._push()
 
-    def _full_screen_request(self, request):
-        request.accept()
-        if request.toggleOn():
+    def set_video_full(self, on):
+        """Full screen for the lesson video, without flicker: no repaint while the window changes size."""
+        if bool(on) == self.isFullScreen():
+            return
+        self.setUpdatesEnabled(False)
+        if on:
             self._was_maximized = self.isMaximized()
             self.showFullScreen()
-        elif self.isFullScreen():
+        else:
             self.showMaximized() if self._was_maximized else self.showNormal()
+        QTimer.singleShot(120, lambda: self.setUpdatesEnabled(True))
 
     def apply_theme(self):
         self._push()

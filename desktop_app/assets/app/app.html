@@ -573,6 +573,7 @@ window.appRunCode = code => host && host.runCode(code);
 window.appSubmitInput = v => host && host.submitInput(v);
 window.appEmptyInput = () => host && host.emptyInput();
 window.appUpgrade = id => host && host.upgrade(id);
+window.appVideoFull = on => host && host.setVideoFull(!!on);
 window.appRedeem = (id, code) => host && host.redeemLicence(id, code);
 
 /* ---------- log-in: before the home screen ---------- */
