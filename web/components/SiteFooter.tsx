@@ -11,8 +11,7 @@ export default function SiteFooter() {
       <div className="wrap">
         <span>© Ada The Coder. Made for curious kids and the grown-ups who help them.</span>
         <span>
-          <Link href="/privacy">Policies</Link> &nbsp; <Link href="/terms">Terms</Link> &nbsp; <Link href="/contact">Contact</Link> &nbsp; <Link href="/login">Parent log in</Link> &nbsp;{' '}
-          <Link href="/admin/login">Admin</Link> &nbsp;{' '}
+          <Link href="/privacy">Policies</Link> &nbsp; <Link href="/terms">Terms</Link> &nbsp; <Link href="/contact">Contact</Link> &nbsp;{' '}
           <a href={`mailto:${email}`}>{email}</a>
         </span>
       </div>
