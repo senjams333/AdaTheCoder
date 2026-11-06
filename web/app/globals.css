@@ -156,14 +156,14 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 
 /* The stage, left to right: Twinkle, the code tablet, Ada (Ada stands on the bottom edge) */
 .stage { position: relative; height: 600px; display: flex; align-items: center; justify-content: flex-end; gap: 22px; padding-bottom: 56px; }
-@media (min-width: 1241px) { .stage { height: auto; padding-block: 24px 48px; } }   /* only as tall as the three, so no empty band under them */
+@media (min-width: 1101px) { .stage { height: auto; padding-block: 24px 48px; } }   /* only as tall as the three, so no empty band under them */
 /* Twinkle floats on the left of the code tablet and Ada on the right: big, the same size, with clear space
    between them and the tablet */
 .stage .tablet { flex: 0 1 540px; min-width: 360px; transform: rotate(-2deg); z-index: 2; }
 .stage .twinkle, .stage .ada { flex: none; height: clamp(300px, 27vw, 520px); width: auto; z-index: 3; object-fit: contain; }
 /* wide screens: the three grow with the space next to the welcome text and never reach into it.
    Sizes are shares of the stage's width (cqw). */
-@media (min-width: 1241px) {
+@media (min-width: 1101px) {
   .stage { container-type: inline-size; gap: 0; }
   .stage .tablet { flex: 0 1 38cqw; min-width: 0; container-type: inline-size; }
   /* the code follows the tablet's size, so a line never runs past its edge and big screens get big code */
@@ -208,11 +208,9 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 }
 
 @media (max-width: 1240px) {
-  .stage { height: 470px; gap: 16px; }
-  .stage .tablet { min-width: 300px; }
-  .stage .twinkle, .stage .ada { height: clamp(200px, 20vw, 260px); }
+  /* (sizes come from the stage's width above, so Twinkle never reaches into the welcome text) */
 }
-@media (max-width: 880px) {
+@media (max-width: 1100px) {   /* tablets and phones: the words first, then the pictures under them */
   .hero { padding-top: 32px; }
   .hero .wrap { grid-template-columns: 1fr; }
   .hero-text { padding-bottom: 0; }
@@ -315,7 +313,8 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .parents .byte-tip { display: flex; align-items: flex-end; gap: 14px; margin-top: 18px; }
 .parents .byte-tip img { width: 230px; flex: none; }
 .parents .byte-tip p { background: var(--sky-soft); border-radius: 24px; padding: 22px 26px; margin: 0 0 34px; font-weight: 700; font-size: 1.25rem; line-height: 1.45; }
-@media (max-width: 820px) { .parents { grid-template-columns: 1fr; gap: 24px; } }
+@media (max-width: 820px) { .parents { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+@media (max-width: 600px) { .parents .byte-tip img { width: 120px; } .parents .byte-tip p { font-size: 1.05rem; padding: 14px 16px; margin-bottom: 20px; } }
 
 /* FAQ */
 .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; align-items: start; }
