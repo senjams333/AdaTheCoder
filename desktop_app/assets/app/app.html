@@ -37,6 +37,20 @@
 @keyframes kload { to { width: 100%; } }
 body { margin: 0; background: var(--page); color: var(--ink); font: 14px var(--ui); }
 /* the twinkling sound's volume: an upright slider under the sound button while it plays */
+/* every 30 minutes: the 4-step break routine ("The Quick Reset"), over everything, themes included */
+.brk { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; background: rgba(12, 74, 110, .45); backdrop-filter: blur(4px); font-family: var(--font-kid); }
+.brk[hidden] { display: none; }
+.brk-card { width: min(760px, 92%); background: linear-gradient(180deg, #fffdf2, #f0f9ff); border: 5px solid #facc15; border-radius: 34px; padding: 24px 30px 22px;
+  box-shadow: 0 0 50px rgba(250, 204, 21, .55); text-align: center; color: #0c4a6e; }
+.brk-card h2 { margin: 0; font-size: 30px; color: #7b4dff; }
+.brk-card .brk-sub { margin: 4px 0 16px; font-size: 16px; color: #0369a1; font-weight: 700; }
+.brk-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; text-align: left; }
+.brk-step { display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 3px solid #bae6fd; border-radius: 20px; padding: 12px 14px; }
+.brk-step .n { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; background: #e0f2fe; }
+.brk-step b { display: block; font-size: 17px; color: #0c4a6e; margin-bottom: 2px; }
+.brk-step span { font-size: 14px; line-height: 1.35; color: #334155; }
+.brk-go { margin-top: 18px; font: 700 19px var(--font-kid); background: #22c997; color: #fff; border: 0; border-bottom: 4px solid #0e9f74; border-radius: 24px; padding: 12px 34px; cursor: pointer; }
+.brk-go:hover { filter: brightness(1.06); }
 .musicwrap { position: relative; display: inline-flex; }
 .bgvol { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column;
   align-items: center; gap: 6px; padding: 12px 8px 8px; background: rgba(255, 255, 255, .95); border: 2px solid #7dd3fc; border-radius: 22px;
@@ -253,6 +267,19 @@ body.night { background: #070b24; }
 </div>
 <div class="stagewrap"><div class="stage" id="stage">
 <div class="win" id="win">
+  <div class="brk" id="breakBox" hidden role="dialog" aria-modal="true" aria-labelledby="breakTitle">
+    <div class="brk-card">
+      <h2 id="breakTitle">⏰ Time for The Quick Reset!</h2>
+      <p class="brk-sub">You've been coding for 30 minutes. Super work! Let's give your eyes, body and brain a little break. 🌟</p>
+      <div class="brk-steps">
+        <div class="brk-step"><span class="n">👀</span><div><b>1. Block (Eyes)</b><span>Look at something 20 feet away. Stop looking at the screen to rest your eye muscles.</span></div></div>
+        <div class="brk-step"><span class="n">🤸</span><div><b>2. Stretch &amp; Jump (Body)</b><span>Do 5 star-jumps or reach for the sky! It wakes up your body and gets your blood moving.</span></div></div>
+        <div class="brk-step"><span class="n">🎈</span><div><b>3. Breathe (Mind)</b><span>Take 3 balloon breaths: breathe in deep to fill your belly, then blow it out slowly.</span></div></div>
+        <div class="brk-step"><span class="n">💧</span><div><b>4. Drink (Hydration)</b><span>Take 3 big sips of water. It keeps your brain happy and running smoothly.</span></div></div>
+      </div>
+      <button class="brk-go" id="breakDone" type="button">I did it! Back to coding 🚀</button>
+    </div>
+  </div>
   <iframe class="kids" id="kids" title="The theme opened in the Python Adventure app" tabindex="-1" allow="fullscreen" allowfullscreen></iframe>
   <div class="titlebar"><img id="tbIcon" alt=""><span>Ada The Coder 🐍</span><span class="ctl">— ☐ ✕</span></div>
   <div class="central day" id="central">
@@ -524,6 +551,24 @@ function setMusic(on) {
   homeSound();
 }
 window.appMusicState = () => music;
+// ---- every 30 minutes of using the app: "The Quick Reset" break (counts only while the app is open and in use)
+const BREAK_EVERY = 30 * 60;           // seconds
+let usedSeconds = 0;
+setInterval(() => {
+  if (document.hidden || !$("breakBox").hidden || !$("login").hidden) return;
+  usedSeconds += 5;
+  if (usedSeconds >= BREAK_EVERY) showBreak();
+}, 5000);
+function showBreak() {
+  usedSeconds = 0;
+  try { const k = $("kids").contentDocument, v = k && k.getElementById("introVid"); if (v && !v.paused) v.pause(); } catch (e) {}   // the lesson video waits
+  $("breakBox").hidden = false;
+  $("breakDone").focus();
+}
+$("breakDone").onclick = () => { $("breakBox").hidden = true; usedSeconds = 0; };
+window.appShowBreak = showBreak;       // (for testing: appShowBreak() in the page)
+document.body.appendChild($("breakBox"));     // above the open theme too
+
 window.appSetMusic = on => { setMusic(on); $("bgVolBox").hidden = true; };
 window.appSetBgVolume = v => { $("bgVol").value = v; bgVolLabel(); try { localStorage.setItem("ada-bg-volume", String(v)); } catch (e) {} homeSound(); };
 try { music = localStorage.getItem("ada-bg-music") === "1"; $("musicBtn").textContent = music ? "🔊" : "🔈"; } catch (e) {}
