@@ -42,12 +42,12 @@ export default function HomePage() {
             <div className="tablet" aria-label="Example of a short Python program a child can write, and what it shows">
               <div className="tablet-frame">
                 <div className="screen animate">
-                  <div className="bar"><span>rocket.py</span><span className="run">▶ Run</span></div>
-                  <div className="line"><span className="kw">for</span> n <span className="kw">in</span> <span className="fn">range</span>(<span className="num">3</span>, <span className="num">0</span>, <span className="num">-1</span>):</div>
-                  <div className="line">{'    '}<span className="fn">print</span>(n)</div>
-                  <div className="line"><span className="fn">print</span>(<span className="str">&quot;Blast off! 🚀&quot;</span>)</div>
+                  <div className="bar"><span>stars.py</span><span className="run">▶ Run</span></div>
+                  <div className="line"><span className="kw">for</span> n <span className="kw">in</span> <span className="fn">range</span>(<span className="num">3</span>):</div>
+                  <div className="line">{'    '}<span className="fn">print</span>(<span className="str">&quot;Golden star ⭐&quot;</span>)</div>
                   <div className="line"> </div>
-                  <div className="out"><div className="out-label">What it shows</div>3<br />2<br />1<br />Blast off! 🚀</div>
+                  <div className="line"> </div>
+                  <div className="out"><div className="out-label">What it shows</div>Golden star ⭐<br />Golden star ⭐<br />Golden star ⭐</div>
                 </div>
               </div>
             </div>
