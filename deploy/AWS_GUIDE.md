@@ -29,7 +29,7 @@ Keep `AdaTheCoder-APP-vNN.zip` private: it contains `api/.env` with your keys.
 
 ```
 chmod 400 ~/Downloads/ada-key.pem
-scp -i ~/Downloads/ada-key.pem ~/Downloads/AdaTheCoder-APP-v73.zip ubuntu@YOUR-ELASTIC-IP:~
+scp -i ~/Downloads/ada-key.pem ~/Downloads/AdaTheCoder-APP-v74.zip ubuntu@YOUR-ELASTIC-IP:~
 ssh -i ~/Downloads/ada-key.pem ubuntu@YOUR-ELASTIC-IP
 ```
 
@@ -39,7 +39,7 @@ ssh -i ~/Downloads/ada-key.pem ubuntu@YOUR-ELASTIC-IP
 
 ```
 sudo apt-get update && sudo apt-get install -y unzip
-unzip -q AdaTheCoder-APP-v73.zip && mv AdaTheCoder Ada && cd Ada
+unzip -q AdaTheCoder-APP-v74.zip && mv AdaTheCoder Ada && cd Ada
 bash deploy/aws_server_setup.sh YOUR-ELASTIC-IP
 ```
 
