@@ -13,8 +13,8 @@ export default function SiteFooter() {
   // (download them from each company's brand resources page). Until a file is there, the button shows its name.
   const socials = [
     { key: 'youtube', label: 'YouTube', icon: '▶', url: s.social_youtube, cls: 'social yt' },
-    { key: 'x', label: 'X', icon: '', url: s.social_x, cls: 'social' },
-    { key: 'facebook', label: 'Facebook', icon: '', url: s.social_facebook, cls: 'social' },
+    { key: 'x', label: 'X', icon: '', url: s.social_x, cls: 'social xb' },
+    { key: 'facebook', label: 'Facebook', icon: '', url: s.social_facebook, cls: 'social fb' },
   ];
   const [noIcon, setNoIcon] = useState<Record<string, boolean>>({});
   return (

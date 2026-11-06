@@ -378,6 +378,11 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .site-footer .social.yt { border-color: #FF0000; color: #CC0000; }
 .site-footer .social.yt span { color: #FF0000; }
 .site-footer .social.yt:hover { background: #FFF1F1; color: #CC0000; border-color: #CC0000; }
+/* X: black with white text; Facebook: blue with white text */
+.site-footer .social.xb { background: #000; border-color: #000; color: #fff; }
+.site-footer .social.xb:hover { background: #222; border-color: #222; color: #fff; }
+.site-footer .social.fb { background: #1877F2; border-color: #1877F2; color: #fff; }
+.site-footer .social.fb:hover { background: #0F65D6; border-color: #0F65D6; color: #fff; }
 /* an official icon file, when one is in web/public/img/social/ */
 .site-footer .social-img { display: inline-flex; align-items: center; padding: 4px; border-radius: 10px; }
 .site-footer .social-img:hover { background: var(--lilac-soft); }
