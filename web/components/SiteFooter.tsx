@@ -9,9 +9,9 @@ export default function SiteFooter() {
   const s = data?.settings || {};
   // set in the admin (Website text); until then the buttons show but go nowhere
   const socials = [
-    { label: 'YouTube', icon: '▶', url: s.social_youtube },
-    { label: 'X', icon: '', url: s.social_x },
-    { label: 'Facebook', icon: '', url: s.social_facebook },
+    { label: 'YouTube', icon: '▶', url: s.social_youtube, cls: 'social yt' },
+    { label: 'X', icon: '', url: s.social_x, cls: 'social' },
+    { label: 'Facebook', icon: '', url: s.social_facebook, cls: 'social' },
   ];
   return (
     <footer className="site-footer">
@@ -19,7 +19,7 @@ export default function SiteFooter() {
         <span>© Ada The Coder. Made for curious kids and the grown-ups who help them.</span>
         <span className="socials" aria-label="Follow Ada The Coder">
           {socials.map((x) => (
-            <a key={x.label} className="social" href={x.url || '#'} target={x.url ? '_blank' : undefined} rel="noopener noreferrer">
+            <a key={x.label} className={x.cls} href={x.url || '#'} target={x.url ? '_blank' : undefined} rel="noopener noreferrer">
               {x.icon && <span aria-hidden="true">{x.icon}</span>}{x.label}
             </a>
           ))}
