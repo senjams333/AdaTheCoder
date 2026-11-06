@@ -1,6 +1,7 @@
 #!/bin/bash
 # Builds dist/AdaTheCoder-<version>-Mac.dmg on a Mac with Python 3.10-3.12 from python.org.
-# Put the lesson videos in the "vid" folder first (see vid/README.txt).
+#   bash build_mac.sh                      uses DEFAULT_SERVER_URL in ada_coder/config.py
+#   bash build_mac.sh http://your-server   this build talks to that website (for example a test server on AWS)
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -17,6 +18,10 @@ done
 iconutil -c icns build/AdaTheCoder.iconset -o build/AdaTheCoder.icns
 
 python3 -m PyInstaller --noconfirm --clean AdaTheCoder.spec
+if [ -n "${1:-}" ]; then
+  echo "$1" > "dist/Ada The Coder.app/Contents/MacOS/server_url.txt"
+  echo "This build uses the website at $1"
+fi
 
 # A disk image parents drag into Applications
 rm -rf build/dmg && mkdir -p build/dmg

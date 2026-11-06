@@ -1,9 +1,10 @@
 # Ada The Coder on AWS: step by step
 
-Two AWS machines:
+Three AWS machines:
 
 - **The server** (Ubuntu, always on): the website, the admin, the API and the database. Families' apps talk to it.
 - **A Windows machine** (only while you build): makes the `.exe` installer. Stop it afterwards so it costs nothing.
+- **A Mac** (only while you build, at least 24 hours): makes the `.dmg` installer for Mac computers.
 
 Keep `AdaTheCoder-APP-vNN.zip` private: it contains `api/.env` with your keys.
 
@@ -110,6 +111,57 @@ Setup `.exe` as version **1.2.0** and make it the current download. Parents now 
 A stopped machine costs only for its disk.
 
 ---
+
+## Part C. The Mac installer (.dmg)
+
+A Mac installer can only be built on a Mac. AWS rents real Macs ("EC2 Mac"), always for **at least 24 hours**
+(about US$1 an hour, so roughly US$25 for one build day). Build both installers on the same day if you can.
+(iPhones and iPads can't run this app: it is for Mac and Windows computers.)
+
+### C1. Get a Mac on AWS (console)
+
+1. **EC2 → Dedicated Hosts → Allocate Dedicated Host**: Name `ada-mac`, Instance family **mac1**,
+   Instance type **mac1.metal** (Intel: the app's video player is most reliable there and it also runs on new
+   Apple-chip Macs), any Availability Zone → **Allocate**. (If your region has no mac1, try another region or
+   **mac2.metal**.)
+2. **EC2 → Launch instances**: Name `ada-mac-build`, Image **macOS Sonoma** (Quick Start → macOS), type
+   **mac1.metal**, key pair **ada-key**, storage 100 GB. Under **Advanced details → Tenancy: Dedicated host**,
+   pick `ada-mac` → **Launch**. It takes 10 to 20 minutes to start.
+
+### C2. Build (from your Ubuntu computer, everything over SSH)
+
+```
+scp -i ~/Downloads/ada-key.pem ~/Downloads/AdaTheCoder-DesktopApp-1.2.0.zip ec2-user@MAC-PUBLIC-IP:~
+ssh -i ~/Downloads/ada-key.pem ec2-user@MAC-PUBLIC-IP
+```
+
+Then on the Mac:
+
+```
+curl -sO https://www.python.org/ftp/python/3.11.9/python-3.11.9-macos11.pkg
+sudo installer -pkg python-3.11.9-macos11.pkg -target /
+unzip -q AdaTheCoder-DesktopApp-1.2.0.zip && cd AdaTheCoder-DesktopApp/desktop_app
+bash build_mac.sh http://YOUR-ELASTIC-IP
+exit
+```
+
+Back on your Ubuntu computer, fetch the installer:
+
+```
+scp -i ~/Downloads/ada-key.pem "ec2-user@MAC-PUBLIC-IP:~/AdaTheCoder-DesktopApp/desktop_app/dist/AdaTheCoder-1.2.0-Mac.dmg" ~/Downloads/
+```
+
+### C3. Put it on the website, then stop paying
+
+1. `http://YOUR-ELASTIC-IP/admin/login` → **App versions** → upload `AdaTheCoder-1.2.0-Mac.dmg` as version **1.2.0**
+   (Mac) and make it the current Mac download.
+2. **Terminate** the `ada-mac-build` instance, then **Dedicated Hosts → ada-mac → Actions → Release host**
+   (allowed once 24 hours have passed). Until it is released, it keeps costing money.
+
+### Good to know about Mac
+
+Without an Apple Developer ID (US$99 a year) the Mac says the app "can't be checked for malicious software".
+Testers: right-click the app → **Open** → **Open**. For real families, sign and notarize it with a Developer ID.
 
 ## What updates by itself
 
