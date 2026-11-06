@@ -26,7 +26,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
   const [form, setForm] = useState({
     name: theme?.name || '', slug: theme?.slug || '', tagline: theme?.tagline || '', description: theme?.description || '',
     features: theme?.features || '', pack: theme?.pack || 'friends', price: theme?.price || '', priceInr: theme?.priceInr || '', razorpayButton: theme?.razorpayButton || '', premium: theme?.premium ?? false,
-    freeLessons: String(theme?.freeLessons ?? 3), position: String(theme?.position ?? nextPosition),
+    freeLessons: String(theme?.freeLessons ?? 1), position: String(theme?.position ?? nextPosition),
     published: theme?.published ?? true, removeImage: false, copyFrom: '',
   });
   const [names, setNames] = useState<string[]>(Array.from({ length: SLOTS }, (_, i) => theme?.characters[i]?.name || ''));
@@ -139,7 +139,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
             <div className="field"><label htmlFor="price">Price</label><input id="price" type="text" value={form.price} onChange={set('price')} placeholder="$3.69" /><span className="help">Shown on the cards, and what PayPal charges.</span></div>
             <div className="field"><label htmlFor="price_inr">Price in rupees <span className="muted">(Razorpay, India)</span></label><input id="price_inr" type="text" inputMode="decimal" value={form.priceInr} onChange={set('priceInr')} placeholder="299" /><span className="help">Empty: Razorpay isn&apos;t offered for this theme.</span></div>
             <div className="field"><label htmlFor="razorpay_button">Razorpay payment button ID <span className="muted">(optional)</span></label><input id="razorpay_button" type="text" value={form.razorpayButton} onChange={set('razorpayButton')} placeholder="pl_XXXXXXXXXXXX" /><span className="help">From Razorpay → Payment Button. Shows Razorpay&apos;s own Pay button for this theme; its price must match the price in rupees.</span></div>
-            <div className="field"><label htmlFor="free_lessons">Free lessons to try</label><input id="free_lessons" type="number" min={0} value={form.freeLessons} onChange={set('freeLessons')} /><span className="help">The rest show 🔒 and an Upgrade button.</span></div>
+            <div className="field"><label htmlFor="free_lessons">Free lessons to try</label><input id="free_lessons" type="number" min={0} value={form.freeLessons} onChange={set('freeLessons')} /><span className="help">The rest show 🔒 and an Upgrade button, and the app downloads them only after the theme is bought (at least 1 is always free).</span></div>
             <div className="field"><label htmlFor="position">Order</label><input id="position" type="number" value={form.position} onChange={set('position')} /><span className="help">Lowest number comes first in the app.</span></div>
           </div>
           {theme?.imageUrl ? (

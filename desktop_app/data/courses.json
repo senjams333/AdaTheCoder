@@ -1,49 +1,49 @@
 {
- "_note": "The themes inside the app, each using the lessons in lessons.json. Themes made in the website admin replace these once the app has been online. Paid themes let children try free_lessons lessons before a licence is needed.",
- "courses": [
-  {
-   "id": "friends",
-   "name": "Friends Adventure",
-   "tagline": "Code, explore and learn together with fun friends and exciting challenges.",
-   "pack": "friends",
-   "position": 1,
-   "premium": true,
-   "price": "$3.69",
-   "free_lessons": 3,
-   "description": "Tom, Penny and Teddy explore Python together, solving playful puzzles and cheering every single program."
-  },
-  {
-   "id": "fairies",
-   "name": "Fairies & Angels",
-   "tagline": "Enter a magical world where imagination and coding grow together.",
-   "pack": "fairies",
-   "position": 2,
-   "premium": true,
-   "price": "$3.69",
-   "free_lessons": 3,
-   "description": "Twinkle, Fairy and Sparkle turn coding into magic with sparkling spells of loops and variables."
-  },
-  {
-   "id": "coding_club",
-   "name": "Ada's Coding Club",
-   "tagline": "Code along with Ada and Byte the owl.",
-   "pack": "coding_club",
-   "position": 3,
-   "premium": false,
-   "price": "",
-   "free_lessons": null,
-   "description": "Join Ada and Byte the owl for friendly Python lessons, from hello to fun games."
-  },
-  {
-   "id": "python_adventure",
-   "name": "Python Adventure For Kids",
-   "tagline": "Fun coding lessons for little learners, with Tom, Penny & Teddy.",
-   "pack": "python_adventure",
-   "position": 4,
-   "premium": true,
-   "price": "$4.99",
-   "free_lessons": 1,
-   "description": "Learn Python step by step with Tom, Penny and Teddy, from printing to computer vision."
-  }
- ]
+  "_note": "The themes inside the app, each using the lessons in lessons.json. Themes made in the website admin replace these once the app has been online. Paid themes let children try free_lessons lessons before a licence is needed.",
+  "courses": [
+    {
+      "id": "friends",
+      "name": "Friends Adventure",
+      "tagline": "Code, explore and learn together with fun friends and exciting challenges.",
+      "pack": "friends",
+      "position": 1,
+      "premium": true,
+      "price": "$3.69",
+      "free_lessons": 1,
+      "description": "Tom, Penny and Teddy explore Python together, solving playful puzzles and cheering every single program."
+    },
+    {
+      "id": "fairies",
+      "name": "Fairies & Angels",
+      "tagline": "Enter a magical world where imagination and coding grow together.",
+      "pack": "fairies",
+      "position": 2,
+      "premium": true,
+      "price": "$3.69",
+      "free_lessons": 1,
+      "description": "Twinkle, Fairy and Sparkle turn coding into magic with sparkling spells of loops and variables."
+    },
+    {
+      "id": "coding_club",
+      "name": "Ada's Coding Club",
+      "tagline": "Code along with Ada and Byte the owl.",
+      "pack": "coding_club",
+      "position": 3,
+      "premium": false,
+      "price": "",
+      "free_lessons": null,
+      "description": "Join Ada and Byte the owl for friendly Python lessons, from hello to fun games."
+    },
+    {
+      "id": "python_adventure",
+      "name": "Python Adventure For Kids",
+      "tagline": "Fun coding lessons for little learners, with Tom, Penny & Teddy.",
+      "pack": "python_adventure",
+      "position": 4,
+      "premium": true,
+      "price": "$4.99",
+      "free_lessons": 1,
+      "description": "Learn Python step by step with Tom, Penny and Teddy, from printing to computer vision."
+    }
+  ]
 }

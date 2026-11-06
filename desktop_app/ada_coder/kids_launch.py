@@ -83,8 +83,13 @@ def write_app_folder(c, licences):
         json.dump(app, f, ensure_ascii=False, indent=1)
 
     data, topics = {}, []
+    shut = set(locked)
     for i, lesson in enumerate(lessons, start=1):
         key = "lesson%d" % i
+        if i in shut or lesson.get("locked"):
+            # not bought yet: only its name in the list (its lesson and video arrive once the theme is bought)
+            lesson = {"title": lesson.get("title", ""), "subtitle": lesson.get("subtitle", ""), "emoji": lesson.get("emoji"),
+                      "name": lesson.get("name"), "examples": [], "default_code": "", "video": {}}
         data[key] = {
             "title": lesson.get("title", ""),
             "subtitle": lesson.get("subtitle", ""),

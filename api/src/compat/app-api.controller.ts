@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpException, Ip, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, Ip, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -6,7 +6,7 @@ import type { Response } from 'express';
 import { Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { RegisterDto } from '../auth/dto/register.dto';
-import { AppTokenGuard, CurrentUser } from '../auth/guards';
+import { AppTokenGuard, CurrentUser, OptionalAppTokenGuard } from '../auth/guards';
 import { CatalogService } from '../catalog/catalog.service';
 import { PLATFORMS } from '../common/constants';
 import { SettingsService } from '../common/settings.service';
@@ -28,9 +28,13 @@ export class AppApiController {
     private readonly payments: PaymentsService,
   ) {}
 
+  /** The themes and lessons. With the app's token, the themes the family bought come in full; otherwise a paid theme
+   *  has only its free lessons in full (the rest download after it is bought). */
   @Get('v3/courses')
-  async courses(@Query('since') since?: string) {
-    const courses = await this.catalog.appCourses();
+  @UseGuards(OptionalAppTokenGuard)
+  async courses(@Req() req: { user?: User }, @Query('since') since?: string) {
+    const owned = new Set(req.user ? await this.catalog.licencedSlugs(req.user.id) : []);
+    const courses = await this.catalog.appCourses(owned);
     const revision = revisionOf(courses);
     if (since === revision) return { revision, unchanged: true };
     return { revision, unchanged: false, courses };
@@ -41,7 +45,9 @@ export class AppApiController {
     const courses = await this.catalog.allCourses(true);
     const course = slug ? courses.find((c) => c.slug === slug) : courses[0];
     if (slug && !course) return res.status(404).json({ error: 'no such course' });
-    const lessons = course ? (await this.catalog.courseLessons(course.id, true)).map((l) => this.catalog.lessonPayload(l)) : [];
+    // the old address (apps before 1.1): a paid theme's free lessons only
+    const free = course && course.premium ? Math.max(1, Number(course.freeLessons ?? 1)) : Infinity;
+    const lessons = course ? (await this.catalog.courseLessons(course.id, true)).map((l, i) => (i < free ? this.catalog.lessonPayload(l) : this.catalog.lockedLessonPayload(l))) : [];
     const revision = revisionOf(lessons);
     return res.json(since === revision ? { revision, unchanged: true } : { revision, unchanged: false, lessons });
   }

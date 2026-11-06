@@ -73,16 +73,28 @@ export class CatalogService implements OnApplicationBootstrap {
     };
   }
 
-  /** Every published theme with its published lessons: GET /api/v3/courses for the desktop app. */
-  async appCourses() {
+  /** A lesson the family hasn't unlocked: its name for the lesson list, but no examples, code or video.
+   *  The app downloads the rest only after the theme is bought. */
+  lockedLessonPayload(l: Lesson) {
+    return { id: l.slug, position: l.position, emoji: l.emoji, name: l.name, title: l.title, subtitle: l.subtitle,
+      locked: true, video: { bundled: '' }, default_code: '', examples: [] };
+  }
+
+  /** Every published theme with its published lessons: GET /api/v3/courses for the desktop app.
+   *  A paid theme the family hasn't bought comes with only its free lessons in full; the others are names only.
+   *  owned: the theme slugs this family bought (from the app's log-in token). */
+  async appCourses(owned: Set<string> = new Set()) {
     const out = [];
     for (const c of await this.allCourses(true)) {
+      const full = !c.premium || owned.has(c.slug);
+      const free = Math.max(1, Number(c.freeLessons ?? 1));        // the app always opens the first lesson
       out.push({
         id: c.slug, name: c.name, tagline: c.tagline, description: c.description || '', pack: c.pack, position: c.position, premium: c.premium,
         price: c.price, free_lessons: c.premium ? c.freeLessons : null,
         buy_url: c.premium ? `${siteUrl()}/account?theme=${encodeURIComponent(c.slug)}` : '',
         characters: this.characters(c),
-        lessons: (await this.courseLessons(c.id, true)).map((l) => this.lessonPayload(l)),
+        lessons: (await this.courseLessons(c.id, true)).map((l, i) => (full || i < free ? this.lessonPayload(l) : this.lockedLessonPayload(l))),
+        full,
       });
     }
     return out;

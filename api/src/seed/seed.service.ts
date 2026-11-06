@@ -30,7 +30,7 @@ export class SeedService implements OnApplicationBootstrap {
     const seed = this.seedLessons();
     for (const [i, c] of DEFAULT_COURSES.entries()) {
       const course = await this.courses.save(this.courses.create({
-        ...c, position: i + 1, published: true, imageFile: '', freeLessons: 3, characters: [],
+        ...c, position: i + 1, published: true, imageFile: '', freeLessons: 1, characters: [],
       }));
       await this.lessons.save(seed.map((l) => this.lessons.create({
         courseId: course.id, slug: l.slug, position: l.position, emoji: l.emoji, name: l.name, title: l.title,

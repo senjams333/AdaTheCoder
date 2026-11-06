@@ -138,6 +138,14 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
   `bash desktop_app/install_linux.sh http://127.0.0.1:5000` makes it use your test website. Uninstall:
   `bash ~/.local/share/ada-the-coder/uninstall.sh`.
 
+### Paid themes download only the free lessons
+
+The app downloads a paid theme's **free lessons** (1 by default: admin → theme → Settings → *Free lessons to try*) in
+full. The other lessons come as names only (🔒), with no examples, code or video. When the family buys the theme (payment
+on the website, or *I have a licence 🔑* in the app), the app shows **"Loading the full chapters…"** while it downloads
+every lesson and video, then unlocks them. The app sends its log-in token with `GET /api/v3/courses`, so a bought theme
+always comes in full; after logging out, the computer keeps only the free lessons again.
+
 ### Lesson videos and ffmpeg
 
 The app's window plays **WebM** videos, not MP4. When the admin uploads a lesson video (or imports a theme pack), the API

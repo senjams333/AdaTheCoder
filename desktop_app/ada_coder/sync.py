@@ -88,11 +88,23 @@ def _open(req, timeout):
     return urllib.request.urlopen(req, timeout=timeout)
 
 
+# the app's log-in token (web_app.py sets it): with it, the website sends the themes the family bought in full
+_app_token = ""
+
+
+def set_app_token(token):
+    global _app_token
+    _app_token = token or ""
+
+
 def _get_json(path, params=None):
     url = SERVER_URL.rstrip("/") + path
     if params:
         url += "?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
+    if _app_token:
+        headers["Authorization"] = "Bearer " + _app_token
+    req = urllib.request.Request(url, headers=headers)
     with _open(req, TIMEOUT) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
@@ -105,11 +117,13 @@ def _download(url, dest):
     os.replace(tmp, dest)
 
 
-def sync_courses():
-    """Downloads the courses (with their lessons and any new videos). Returns True if anything changed."""
+def sync_courses(force=False):
+    """Downloads the courses (with their lessons and any new videos). Returns True if anything changed.
+    A paid theme the family hasn't bought comes with only its free lessons; the rest arrive once it's bought
+    (force=True right after buying: everything is asked for again)."""
     cache = _read_json(_cache_path(), {})
     try:
-        data = _get_json("/api/v3/courses", {"since": cache.get("revision", "")})
+        data = _get_json("/api/v3/courses", {"since": "" if force else cache.get("revision", "")})
     except NETWORK_ERRORS:
         return False
     if data.get("unchanged") or not data.get("courses"):

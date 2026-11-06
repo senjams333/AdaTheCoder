@@ -704,6 +704,7 @@ if (window.qt && window.QWebChannel) new QWebChannel(qt.webChannelTransport, ch 
   host.themeUpdate.connect(j => { try { K().__updateApp(JSON.parse(j)); } catch (e) {} });
   host.themeUnlock.connect(() => { try { K().__unlockAll(); } catch (e) {} });
   host.licenceResult.connect(j => { try { K().__licenceResult(JSON.parse(j)); } catch (e) {} });
+  host.fullLoading.connect(on => { try { K().__fullLoading(on); } catch (e) {} });
   host.message.connect(t => toast(t));
 });
 

@@ -74,9 +74,9 @@ def free_count(course):
     if not course.get("premium"):
         return None
     try:
-        return max(0, int(course.get("free_lessons", 3) if course.get("free_lessons") is not None else 3))
+        return max(1, int(course.get("free_lessons", 1) if course.get("free_lessons") is not None else 1))
     except (TypeError, ValueError):
-        return 3
+        return 1
 
 
 def is_unlocked(course, index, licences):

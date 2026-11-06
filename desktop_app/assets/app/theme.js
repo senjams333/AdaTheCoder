@@ -59,7 +59,7 @@
     parent.appRedeem(A.id, String(k).trim());
   }
   window.__licenceResult = function (r) {
-    if (r.ok) { if (!S().key) window.__unlockAll(); return; }
+    if (r.ok) { showFullLoading(true); return; }     // the app now downloads every lesson, then unlocks them
     msg("Licence 🔑", esc(r.error || "That licence didn't work. Check it and try again."));
   };
   // ---- Profile: the parent's real account (from the app), and Change password on the website
@@ -119,7 +119,10 @@
     await p;
   };
   function fallbackCopy(t) { var x = document.createElement("textarea"); x.value = t; document.body.appendChild(x); x.select(); try { document.execCommand("copy"); } catch (e) {} x.remove(); }
+  // ---- after paying or entering a licence: the app downloads the theme's other lessons (web_app.py load_full_chapters)
+  window.__fullLoading = function (on) { showFullLoading(!!on); };
   window.__unlockAll = function () {
+    showFullLoading(false);
     S().key = true; refreshTopics();
     sunsetMsg("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀");
   };

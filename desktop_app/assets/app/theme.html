@@ -192,6 +192,17 @@ body.vfull-body .top, body.vfull-body .menu, body.vfull-body .side { visibility:
 .vstop:hover { background: #0284c7; color: #fff; }
 .seevid { position: absolute; z-index: 6; left: calc(50% + 70px); bottom: 2px; transform: translateX(-50%); white-space: nowrap; }
 .seevid[hidden] { display: none; }
+#fullLoad { position: absolute; inset: 0; z-index: 950; display: grid; place-items: center; background: rgba(12, 74, 110, .35); backdrop-filter: blur(3px); }
+#fullLoad[hidden] { display: none; }
+.fl-card { width: 420px; text-align: center; background: #fff; border: 4px solid #facc15; border-radius: 30px; padding: 26px 30px 22px;
+  box-shadow: 0 0 40px rgba(250, 204, 21, .6); font-family: var(--font-kid); color: #0c4a6e; }
+.fl-card h3 { margin: 12px 0 6px; font-size: 24px; color: #0369a1; }
+.fl-card p { margin: 0 0 14px; font-size: 15px; color: #475569; }
+.fl-spin { width: 54px; height: 54px; margin: 0 auto; border-radius: 50%; border: 6px solid #e0f2fe; border-top-color: #38bdf8; animation: flspin 1s linear infinite; }
+.fl-bar { height: 12px; border-radius: 999px; background: #e0f2fe; overflow: hidden; position: relative; }
+.fl-bar i { position: absolute; top: 0; bottom: 0; width: 35%; border-radius: 999px; background: linear-gradient(90deg, #38bdf8, #facc15); animation: flbar 1.2s ease-in-out infinite; }
+@keyframes flspin { to { transform: rotate(360deg); } }
+@keyframes flbar { from { left: -35%; } to { left: 100%; } }
 /* intro */
 .intro { background: #000; z-index: 30; }
 .intro video { width: 100%; height: 100%; object-fit: contain; background: #000; }
@@ -753,6 +764,18 @@ async function lockedDialog(i) {
   });
   if (r === "up") buyFlow();
 }
+// "Loading the full chapters…": after paying or entering a licence, while the theme's other lessons download
+function showFullLoading(on) {
+  let o = document.getElementById("fullLoad");
+  if (!o) {
+    o = document.createElement("div");
+    o.id = "fullLoad";
+    o.innerHTML = '<div class="fl-card"><div class="fl-spin"></div><h3>Loading the full chapters…</h3>' +
+      '<p>Every lesson of this theme is on its way. This takes a moment. ✨</p><div class="fl-bar"><i></i></div></div>';
+    $("win").appendChild(o);
+  }
+  o.hidden = !on;
+}
 function sunsetMsg(title, heading, text) {
   return dialog({ title, kind: "sunset", body: `<div class="suntitle">${heading}</div><p>${text}</p>`,
     buttons: [{ label: "Close", primary: true, value: () => null }] });
@@ -787,6 +810,10 @@ async function embedBuyFlow() {
     // the real app checks the licence with the website; this preview takes any code in the right shape
     if (!/^ADA[A-Z0-9]{12}$/.test(String(k).toUpperCase().replace(/[^A-Z0-9]/g, ""))) { msg("Licence 🔑", "That licence wasn't found. Check it on your account page on the website and try again."); return; }
   } else if (r !== "paid") return;
+  // the app downloads the theme's other lessons now; the preview just shows the same message for a moment
+  showFullLoading(true);
+  await new Promise(ok => setTimeout(ok, 1800));
+  showFullLoading(false);
   S().key = true; refreshTopics();
   try { parent.postMessage({ kind: "kids-paid", theme: window.EMBED_THEME }, "*"); } catch (e) {}
   sunsetMsg("Unlocked! 🎉", "🎉 Unlocked!", "Thank you! Every lesson is open now. Have fun coding! 🚀");

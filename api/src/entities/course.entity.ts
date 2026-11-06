@@ -52,7 +52,7 @@ export class Course {
   @Column({ name: 'image_file', length: 190, default: '' })
   imageFile!: string;
 
-  @Column({ name: 'free_lessons', type: 'int', default: 3 })
+  @Column({ name: 'free_lessons', type: 'int', default: 1 })
   freeLessons!: number;
 
   /** pack "custom": the uploaded characters */

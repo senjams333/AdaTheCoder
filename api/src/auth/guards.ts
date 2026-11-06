@@ -75,6 +75,18 @@ export class AppTokenGuard implements CanActivate {
   }
 }
 
+/** The app's theme list: works without a log-in; with the app's token, the themes the family bought come in full. */
+@Injectable()
+export class OptionalAppTokenGuard implements CanActivate {
+  constructor(private readonly jwt: JwtService, @InjectRepository(User) private readonly users: Repository<User>) {}
+
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const req = ctx.switchToHttp().getRequest();
+    if (req.headers.authorization) await userFrom(this.jwt, this.users, req, (p) => p === 'app').catch(() => undefined);
+    return true;
+  }
+}
+
 /** Paying for a theme: a website log-in, or the pay link the app opened. */
 @Injectable()
 export class PayGuard implements CanActivate {

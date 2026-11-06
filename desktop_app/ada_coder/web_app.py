@@ -234,6 +234,7 @@ class Host(QObject):
     themeUnlock = pyqtSignal()             # the open theme was paid for
     lessonCall = pyqtSignal(str, str)      # (js function, JSON arguments) for the open lesson page
     licenceResult = pyqtSignal(str)        # the answer to "I have a licence 🔑" (JSON)
+    fullLoading = pyqtSignal(bool)         # "Loading the full chapters…" while a bought theme's lessons download
 
     def __init__(self, window):
         super().__init__(window)
@@ -309,6 +310,7 @@ class WebMainWindow(QMainWindow):
         self.resize(1280, 800)
         self.settings = Settings()
         self.courses = course.load_courses()
+        sync.set_app_token(self.settings["app_token"])
         self.kids_proc = None
         self.open_theme_id = None
         self._checking = False
@@ -435,13 +437,43 @@ class WebMainWindow(QMainWindow):
                 gained = [c["name"] for c in self.courses if c["id"] in set(new) - set(self.settings["licences"] or [])]
                 self.settings["licences"] = list(new)
                 self._push()
-                if self.open_theme_id and self.open_theme_id in set(new) - set(old):
-                    self.host.themeUnlock.emit()
+                if set(new) - set(old):
+                    self.load_full_chapters()        # the bought theme's other lessons download now
                 if gained and not quiet:
                     self.host.message.emit("🎉 Unlocked: " + ", ".join(gained))
         timer.timeout.connect(done)
         timer.start(300)
         self._licence_timer = timer
+
+    def load_full_chapters(self):
+        """After a theme is bought (payment or licence): its other lessons and videos download now. The open theme
+        shows "Loading the full chapters…" until they're here, then every lesson opens."""
+        if getattr(self, "_full_loading", False):
+            return
+        self._full_loading = True
+        sync.set_app_token(self.settings["app_token"])
+        if self.open_theme_id:
+            self.host.fullLoading.emit(True)
+        else:
+            self.host.message.emit("📚 Loading the full chapters…")
+        result = {}
+        worker = threading.Thread(target=lambda: result.update(changed=sync.sync_courses(force=True)), daemon=True)
+        worker.start()
+        timer = QTimer(self)
+
+        def done():
+            if worker.is_alive():
+                return
+            timer.stop()
+            self._full_loading = False
+            self.reload_courses()                    # the open theme gets its full lessons in place
+            if self.open_theme_id:
+                self.host.fullLoading.emit(False)
+                if self.open_theme_id in (self.settings["licences"] or []):
+                    self.host.themeUnlock.emit()
+        timer.timeout.connect(done)
+        timer.start(300)
+        self._full_timer = timer
 
     def redeem_licence(self, course_id, code):
         """"I have a licence 🔑": the website checks the code; a good one unlocks the theme straight away."""
@@ -466,8 +498,8 @@ class WebMainWindow(QMainWindow):
             if new is not None and sorted(new) != sorted(self.settings["licences"] or []):
                 self.settings["licences"] = list(new)
                 self._push()
-            if answer.get("ok") and self.open_theme_id and self.open_theme_id in (new or []):
-                self.host.themeUnlock.emit()
+            if answer.get("ok"):
+                self.load_full_chapters()            # the theme's other lessons download now (if not here yet)
             self.host.licenceResult.emit(json.dumps({"ok": bool(answer.get("ok")), "error": answer.get("error", ""),
                                                      "theme": answer.get("theme", "")}))
         timer.timeout.connect(done)
@@ -501,10 +533,13 @@ class WebMainWindow(QMainWindow):
                 self.settings["licence_codes"] = dict(answer.get("licence_codes") or {})
                 self.settings["app_licence"] = answer.get("app_licence") or ""
                 self.settings["app_token"] = answer.get("app_token") or ""
+                sync.set_app_token(self.settings["app_token"])
                 self.settings["remember_me"] = True
                 out = {"ok": True, "user": user, "licences": self.settings["licences"],
                        "licenceCodes": self.settings["licence_codes"] or {}, "appLicence": self.settings["app_licence"] or ""}
             self.host.loginDone.emit(json.dumps(out, ensure_ascii=False))
+            if out.get("ok") and self._needs_full():
+                self.load_full_chapters()            # themes this family bought: their full lessons
         timer.timeout.connect(done)
         timer.start(150)
         self._login_timer = timer
@@ -516,6 +551,24 @@ class WebMainWindow(QMainWindow):
         self.settings["licence_codes"] = {}
         self.settings["app_licence"] = ""
         self.settings["remember_me"] = False
+        # logged out: bought themes go back to their free lessons on this computer
+        sync.set_app_token("")
+        worker = threading.Thread(target=lambda: sync.sync_courses(force=True), daemon=True)
+        worker.start()
+        timer = QTimer(self)
+
+        def done():
+            if not worker.is_alive():
+                timer.stop()
+                self.reload_courses()
+        timer.timeout.connect(done)
+        timer.start(500)
+        self._logout_timer = timer
+
+    def _needs_full(self):
+        """A theme this family bought whose other lessons aren't on this computer yet."""
+        owned = set(self.settings["licences"] or [])
+        return any(c["id"] in owned and any(l.get("locked") for l in c.get("lessons") or []) for c in self.courses)
 
     # ------------------------------------------------------------------ a theme, as the next page of this window
     def open_theme(self, course_id):
