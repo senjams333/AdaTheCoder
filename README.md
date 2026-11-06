@@ -140,9 +140,14 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
 
 ### Paid themes download only the free lessons
 
+**The app itself carries only lesson 1** (its content and video, desktop_app/vid/video1.*). Every other lesson and its
+video lives on the server: the built-in lessons' videos are in `api/seed/videos` and the API serves them as each lesson's
+video (at every start it links any lesson that still points at a video inside the app). A free theme downloads all its
+lessons when the app first connects; until then a lesson says it is downloading.
+
 The app downloads a paid theme's **free lessons** (1 by default: admin → theme → Settings → *Free lessons to try*) in
 full. The other lessons come as names only (🔒), with no examples, code or video. When the family buys the theme (payment
-on the website, or *I have a licence 🔑* in the app), the app shows **"Loading the full chapters…"** while it downloads
+on the website, or *I have a licence 🔑* in the app), the app shows **"Downloading the full lessons…"** (at least 3.5 seconds) while it downloads
 every lesson and video, then unlocks them. The app sends its log-in token with `GET /api/v3/courses`, so a bought theme
 always comes in full; after logging out, the computer keeps only the free lessons again.
 

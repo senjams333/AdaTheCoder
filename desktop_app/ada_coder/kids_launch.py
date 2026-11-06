@@ -86,6 +86,7 @@ def write_app_folder(c, licences):
     shut = set(locked)
     for i, lesson in enumerate(lessons, start=1):
         key = "lesson%d" % i
+        missing = bool(lesson.get("locked")) and i not in shut    # free to play, but not downloaded yet
         if i in shut or lesson.get("locked"):
             # not bought yet: only its name in the list (its lesson and video arrive once the theme is bought)
             lesson = {"title": lesson.get("title", ""), "subtitle": lesson.get("subtitle", ""), "emoji": lesson.get("emoji"),
@@ -98,6 +99,7 @@ def write_app_folder(c, licences):
                                       "output": e.get("output", ""), "code": e.get("code", "")}
                          for k, e in enumerate(lesson.get("examples", []), start=1)},
             "default_code": lesson.get("default_code", ""),
+            "missing": missing,
         }
         topics.append({"emoji": lesson.get("emoji", "⭐"), "name": lesson.get("name") or lesson.get("title", ""), "id": key})
     with open(os.path.join(folder, "lessons.py"), "w", encoding="utf-8") as f:

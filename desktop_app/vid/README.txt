@@ -1,9 +1,4 @@
-Put the lesson videos here, with these names:
+Only the first lesson's video is inside the app (video1.webm, and video1.mp4 if you have it).
 
-video1.mp4  video2.mp4  comment.mp4  video4.mp4  video5.mp4  math-operators.mp4
-string1.mp4  video6.mp4  video7.mp4  video8.mp4  video9.mp4  function1.mp4
-video10.mp4  video11.mp4  video12.mp4  error-handling.mp4  opencv.mp4
-
-(Which lesson uses which video is in data/lessons.json, under "video".)
-A lesson whose video is missing simply opens straight on its examples.
-Videos uploaded in the website admin are downloaded by the app and used instead.
+Every other lesson's video lives on the website's server (api/seed/videos, and videos uploaded in the admin).
+The app downloads a lesson's video together with the lesson: for a paid theme, only after the theme is bought.

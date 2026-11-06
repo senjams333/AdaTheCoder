@@ -16,6 +16,7 @@ import re
 import sys
 import tempfile
 import threading
+import time
 
 from PyQt5.QtCore import QObject, QProcess, QTimer, QUrl, Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor, QDesktopServices
@@ -455,8 +456,9 @@ class WebMainWindow(QMainWindow):
         if self.open_theme_id:
             self.host.fullLoading.emit(True)
         else:
-            self.host.message.emit("📚 Loading the full chapters…")
+            self.host.message.emit("📚 Downloading the full lessons…")
         result = {}
+        started = time.monotonic()
         worker = threading.Thread(target=lambda: result.update(changed=sync.sync_courses(force=True)), daemon=True)
         worker.start()
         timer = QTimer(self)
@@ -465,6 +467,14 @@ class WebMainWindow(QMainWindow):
             if worker.is_alive():
                 return
             timer.stop()
+            # the child sees "Downloading the full lessons…" for at least 3.5 seconds, however fast the download was
+            left = 3.5 - (time.monotonic() - started)
+            if left > 0:
+                QTimer.singleShot(int(left * 1000), finish)
+            else:
+                finish()
+
+        def finish():
             self._full_loading = False
             self.reload_courses()                    # the open theme gets its full lessons in place
             if self.open_theme_id:

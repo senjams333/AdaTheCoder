@@ -96,7 +96,8 @@ def theme_data(c, licences):
         "lessons": {t["id"]: {"title": lessons[t["id"]]["title"], "subtitle": lessons[t["id"]]["subtitle"],
                               "video": lessons[t["id"]].get("video", ""),
                               "examples": lessons[t["id"]]["examples"],
-                              "default_code": lessons[t["id"]]["default_code"]} for t in topics},
+                              "default_code": lessons[t["id"]]["default_code"],
+                              "missing": bool(lessons[t["id"]].get("missing"))} for t in topics},
         "template": _template(cfg, folder),
         "videos": {os.path.basename(lessons[t["id"]].get("video") or ""): _webm(lessons[t["id"]].get("video"))
                    for t in topics if lessons[t["id"]].get("video")},

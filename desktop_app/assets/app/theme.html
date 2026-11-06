@@ -636,6 +636,10 @@ function show(v) {
 }
 function openLesson(i) {
   if (isLocked(i + 1)) return lockedDialog(i);
+  const Lm = A.lessons[A.topics[i].id];
+  if (Lm && Lm.missing) {          // free to play, but this computer hasn't downloaded it from the website yet
+    return msg("Downloading lessons 📚", "This lesson comes from the website. Connect to the internet and wait a moment: Ada The Coder downloads it by itself, then it opens here.");
+  }
   cur = i; try { localStorage.setItem(learnKey(), String(i)); } catch (e) {}
   playIntro();          // the lesson's video first, then the coding page
 }
@@ -764,14 +768,14 @@ async function lockedDialog(i) {
   });
   if (r === "up") buyFlow();
 }
-// "Loading the full chapters…": after paying or entering a licence, while the theme's other lessons download
+// "Downloading the full lessons…": after paying or entering a licence, while the theme's other lessons download
 function showFullLoading(on) {
   let o = document.getElementById("fullLoad");
   if (!o) {
     o = document.createElement("div");
     o.id = "fullLoad";
-    o.innerHTML = '<div class="fl-card"><div class="fl-spin"></div><h3>Loading the full chapters…</h3>' +
-      '<p>Every lesson of this theme is on its way. This takes a moment. ✨</p><div class="fl-bar"><i></i></div></div>';
+    o.innerHTML = '<div class="fl-card"><div class="fl-spin"></div><h3>Downloading the full lessons…</h3>' +
+      '<p>Please wait: every lesson of this theme is being downloaded. ✨</p><div class="fl-bar"><i></i></div></div>';
     $("win").appendChild(o);
   }
   o.hidden = !on;
@@ -812,7 +816,7 @@ async function embedBuyFlow() {
   } else if (r !== "paid") return;
   // the app downloads the theme's other lessons now; the preview just shows the same message for a moment
   showFullLoading(true);
-  await new Promise(ok => setTimeout(ok, 1800));
+  await new Promise(ok => setTimeout(ok, 3500));
   showFullLoading(false);
   S().key = true; refreshTopics();
   try { parent.postMessage({ kind: "kids-paid", theme: window.EMBED_THEME }, "*"); } catch (e) {}
