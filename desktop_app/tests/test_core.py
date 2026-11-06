@@ -38,7 +38,9 @@ class LessonTests(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         for lesson in course:
             self.assertTrue(lesson["title"] and lesson["name"])
-            self.assertTrue(lesson["examples"], lesson["id"])
+            # the package carries lesson 1 in full; the others arrive from the website (locked until then)
+            if not lesson.get("locked"):
+                self.assertTrue(lesson["examples"], lesson["id"])
             for ex in lesson["examples"]:
                 self.assertEqual(set(ex), {"label", "explain", "output", "code"})
 

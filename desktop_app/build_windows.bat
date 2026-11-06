@@ -1,13 +1,20 @@
 @echo off
 REM Builds the Windows installer for Ada The Coder.
 REM Needs: Python 3.10-3.12 (python.org), and Inno Setup 6 (free, https://jrsoftware.org/isdl.php) for the installer.
-REM Put the lesson videos in the "vid" folder first (see vid\README.txt).
+REM Usage: build_windows.bat                     (uses DEFAULT_SERVER_URL in ada_coder\config.py)
+REM        build_windows.bat http://your-server  (for example your AWS address, for testing)
 setlocal
 cd /d "%~dp0"
 
 python -m pip install --upgrade pip pyinstaller -r requirements.txt || goto :error
 python -m unittest discover tests || goto :error
 python -m PyInstaller --noconfirm --clean AdaTheCoder.spec || goto :error
+
+REM Optional: build_windows.bat http://your-server  -> this build talks to that website (for example a test server on AWS)
+if not "%~1"=="" (
+  > "dist\AdaTheCoder\server_url.txt" echo %~1
+  echo This build uses the website at %~1
+)
 
 for /f "delims=" %%v in ('python -c "from ada_coder.config import APP_VERSION; print(APP_VERSION)"') do set VERSION=%%v
 

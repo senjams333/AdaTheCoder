@@ -1,6 +1,8 @@
 """Settings baked into each build of the app.
 
 Before building a new version:
+  (For a test build pointed at another server, e.g. on AWS, run "build_windows.bat http://your-server" instead:
+   it writes server_url.txt next to AdaTheCoder.exe and that address is used.)
   1. Set DEFAULT_SERVER_URL to the website's address, without a slash at the end, for example
      https://www.adathecoder.com. The same address must answer the API (<that>/api/v3/courses and so on;
      nginx passes /api and /media to the API) and the website pages the app opens (/register, /pay ...).
@@ -18,14 +20,22 @@ def _server_url():
     "python run.py --server http://127.0.0.1:5000" (remembered in server_url.txt in the app's data
     folder until you run "--server default")."""
     import os
+    import sys
     url = os.environ.get("ADA_SERVER_URL", "").strip()
     if not url:
         from .paths import data_dir
-        try:
-            with open(os.path.join(data_dir(), "server_url.txt"), encoding="utf-8") as f:
-                url = f.read().strip()
-        except OSError:
-            url = ""
+        # 1. the app's data folder (set by --server while testing)
+        # 2. server_url.txt beside the installed app: "build_windows.bat http://your-server" writes it, so one
+        #    build can point at a test server (for example on AWS) without changing any code
+        here = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        for path in (os.path.join(data_dir(), "server_url.txt"), os.path.join(here, "server_url.txt")):
+            try:
+                with open(path, encoding="utf-8") as f:
+                    url = f.read().strip()
+            except OSError:
+                url = ""
+            if url:
+                break
     return (url or DEFAULT_SERVER_URL).rstrip("/")
 
 

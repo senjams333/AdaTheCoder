@@ -5,3 +5,4 @@ dist/
 *.spec.bak
 .venv/
 vid/*.mp4
+server_url.txt
