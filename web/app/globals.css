@@ -374,7 +374,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
   background: #fff; color: var(--ink); font: 700 .92rem var(--font-body); text-decoration: none; }
 .site-footer .social:hover { border-color: var(--grape); color: var(--grape); }
 .site-footer .social span { color: var(--pink-dark); font-size: .8rem; }
-.byte-bubble a { color: var(--grape-dark); }
+.byte-bubble a { color: var(--pink-dark); }
 
 /* ---------- auth & account ---------- */
 .auth { padding-block: 56px 88px; }

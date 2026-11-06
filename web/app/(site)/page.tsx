@@ -131,8 +131,8 @@ export default function HomePage() {
               <p>A grown-up sets things up once, which takes about five minutes. After that, your child can open the app and carry on by themselves, at their own pace, whenever they like.</p>
             </div>
             <div className="byte-helper">
-              <p className="byte-bubble">Hoo! Setting up takes just a few minutes. Watch our step-by-step{' '}
-                <a href={s.install_video_url || '#'} target={s.install_video_url ? '_blank' : undefined} rel="noopener noreferrer">installation tutorial on YouTube ▶</a></p>
+              <p className="byte-bubble">Hoo! Setting up takes just a few minutes. Watch our step-by-step installation tutorial{' '}
+                <a href={s.install_video_url || '#'} target={s.install_video_url ? '_blank' : undefined} rel="noopener noreferrer">here</a>.</p>
               <img src="/img/byte.webp" alt="Byte the owl waving" />
             </div>
           </div>
