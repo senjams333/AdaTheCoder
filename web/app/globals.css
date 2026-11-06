@@ -161,13 +161,12 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .stage .tablet { flex: 0 1 540px; min-width: 360px; transform: rotate(-2deg); z-index: 2; }
 .stage .twinkle, .stage .ada { flex: none; height: clamp(300px, 27vw, 520px); width: auto; z-index: 3; object-fit: contain; }
 /* wide screens: the three grow with the space next to the welcome text and never reach into it.
-   Twinkle flies in just in front of the tablet's corner; sizes are shares of the stage's width (cqw). */
+   Sizes are shares of the stage's width (cqw). */
 @media (min-width: 1241px) {
   .stage { container-type: inline-size; gap: 0; }
-  .stage .tablet { flex: 0 1 40cqw; min-width: 0; }
-  .stage .twinkle, .stage .ada { height: min(520px, 40cqw); }
-  .stage .twinkle { margin-right: -3cqw; }
-  .stage .ada { margin-left: -2cqw; }
+  .stage .tablet { flex: 0 1 38cqw; min-width: 0; }
+  .stage .twinkle { height: min(500px, 38cqw); margin-right: 2.5cqw; }   /* a little space between Twinkle and the tablet */
+  .stage .ada { height: min(430px, 33cqw); margin-left: 2.5cqw; }        /* Ada a little smaller, with space before her too */
 }
 .stage .twinkle { margin-left: 0; }
 /* Ada's picture ends at her waist: it fades out softly instead of a hard edge */
