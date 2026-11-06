@@ -137,8 +137,8 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
   padding-top: 48px;
 }
 /* two columns: the words and the Download button on the left, the stage (Twinkle, the code tablet, Ada) on the right */
-.hero .wrap { display: grid; grid-template-columns: minmax(330px, .62fr) minmax(0, 1.6fr); gap: 24px 36px; align-items: end; }
-.hero-text { padding-bottom: 72px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(330px, .62fr) minmax(0, 1.6fr); gap: 24px 36px; align-items: center; }   /* the stage floats level with the welcome text */
+.hero-text { padding-bottom: 56px; }
 .hero h1 { max-width: 13ch; font-size: clamp(2.4rem, 3.9vw, 4rem); margin: 0 0 18px; }
 .hero .lede { font-size: 1.2rem; color: var(--ink-soft); max-width: 46ch; }
 .hero .actions { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 26px; }
@@ -155,11 +155,20 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .hero .small-print { margin: 20px 0 0; font-size: .95rem; color: var(--ink-soft); }
 
 /* The stage, left to right: Twinkle, the code tablet, Ada (Ada stands on the bottom edge) */
-.stage { position: relative; height: 560px; display: flex; align-items: center; justify-content: flex-end; gap: 34px; padding-bottom: 40px; }
+.stage { position: relative; height: 600px; display: flex; align-items: center; justify-content: flex-end; gap: 22px; padding-bottom: 56px; }
 /* Twinkle floats on the left of the code tablet and Ada on the right: big, the same size, with clear space
    between them and the tablet */
-.stage .tablet { flex: 0 1 470px; min-width: 380px; transform: rotate(-2deg); z-index: 2; }
-.stage .twinkle, .stage .ada { flex: none; height: clamp(280px, 24vw, 460px); width: auto; z-index: 3; object-fit: contain; }
+.stage .tablet { flex: 0 1 540px; min-width: 360px; transform: rotate(-2deg); z-index: 2; }
+.stage .twinkle, .stage .ada { flex: none; height: clamp(300px, 27vw, 520px); width: auto; z-index: 3; object-fit: contain; }
+/* wide screens: the three grow with the space next to the welcome text and never reach into it.
+   Twinkle flies in just in front of the tablet's corner; sizes are shares of the stage's width (cqw). */
+@media (min-width: 1241px) {
+  .stage { container-type: inline-size; gap: 0; }
+  .stage .tablet { flex: 0 1 40cqw; min-width: 0; }
+  .stage .twinkle, .stage .ada { height: min(520px, 40cqw); }
+  .stage .twinkle { margin-right: -3cqw; }
+  .stage .ada { margin-left: -2cqw; }
+}
 .stage .twinkle { margin-left: 0; }
 /* Ada's picture ends at her waist: it fades out softly instead of a hard edge */
 .stage .ada { -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 99%); mask-image: linear-gradient(to bottom, #000 78%, transparent 99%); }
