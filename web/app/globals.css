@@ -51,7 +51,7 @@ a:hover { color: var(--grape-dark); }
 :focus-visible { outline: 4px solid var(--sun-dark); outline-offset: 3px; border-radius: 8px; }
 code, pre { font-family: var(--font-code); }
 
-.wrap { width: min(1600px, 100% - 48px); margin-inline: auto; }
+.wrap { width: min(2400px, 100% - clamp(32px, 6vw, 160px)); margin-inline: auto; }   /* wide screens use their width: small even margins, no big empty sides */
 .skip { position: absolute; left: -999px; }
 .skip:focus { left: 16px; top: 16px; background: var(--sun); padding: 8px 12px; z-index: 10; }
 
@@ -137,10 +137,10 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
   padding-top: 48px;
 }
 /* two columns: the words and the Download button on the left, the stage (Twinkle, the code tablet, Ada) on the right */
-.hero .wrap { display: grid; grid-template-columns: minmax(330px, .5fr) minmax(0, 1.6fr); gap: 24px 24px; align-items: center; }   /* the stage floats level with the welcome text */
-.hero-text { padding-bottom: 56px; }
-.hero h1 { max-width: 13ch; font-size: clamp(2.4rem, 3.9vw, 4rem); margin: 0 0 18px; }
-.hero .lede { font-size: 1.2rem; color: var(--ink-soft); max-width: 46ch; }
+.hero .wrap { display: grid; grid-template-columns: minmax(360px, .55fr) minmax(0, 1.6fr); gap: 24px 24px; align-items: center; }   /* the stage floats level with the welcome text */
+.hero-text { padding-bottom: 40px; }
+.hero h1 { max-width: 13ch; font-size: clamp(2.4rem, 3.9vw, 5rem); margin: 0 0 18px; }
+.hero .lede { font-size: clamp(1.2rem, .95vw, 1.45rem); color: var(--ink-soft); max-width: 46ch; }
 .hero .actions { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 26px; }
 /* The one big call to action: download icon, white border, lifts on hover */
 .btn-hero { width: min(100%, 460px); padding: 20px 32px; font-size: 1.6rem; gap: 12px;
@@ -156,6 +156,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 
 /* The stage, left to right: Twinkle, the code tablet, Ada (Ada stands on the bottom edge) */
 .stage { position: relative; height: 600px; display: flex; align-items: center; justify-content: flex-end; gap: 22px; padding-bottom: 56px; }
+@media (min-width: 1241px) { .stage { height: auto; padding-block: 24px 48px; } }   /* only as tall as the three, so no empty band under them */
 /* Twinkle floats on the left of the code tablet and Ada on the right: big, the same size, with clear space
    between them and the tablet */
 .stage .tablet { flex: 0 1 540px; min-width: 360px; transform: rotate(-2deg); z-index: 2; }
@@ -164,7 +165,10 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
    Sizes are shares of the stage's width (cqw). */
 @media (min-width: 1241px) {
   .stage { container-type: inline-size; gap: 0; }
-  .stage .tablet { flex: 0 1 38cqw; min-width: 0; }
+  .stage .tablet { flex: 0 1 38cqw; min-width: 0; container-type: inline-size; }
+  /* the code follows the tablet's size, so a line never runs past its edge and big screens get big code */
+  .stage .screen { font-size: clamp(10px, 4.1cqw, 19px); }
+  .stage .screen .bar { font-size: max(.75rem, 3.4cqw); }
   .stage .twinkle { height: min(560px, 38cqw); margin-right: 2.5cqw; }   /* a little space between Twinkle and the tablet */
   .stage .ada { height: min(490px, 33cqw); margin-left: 2.5cqw; }        /* Ada a little smaller, with space before her too */
 }
