@@ -47,7 +47,7 @@ export default function HomePage() {
                   <div className="line">{'    '}<span className="fn">print</span>(<span className="str">&quot;Golden star ⭐&quot;</span>)</div>
                   <div className="line"> </div>
                   <div className="line"> </div>
-                  <div className="out"><div className="out-label">What it shows</div>Golden star ⭐<br />Golden star ⭐<br />Golden star ⭐</div>
+                  <div className="out"><div className="out-label">What it shows</div>Golden star ⭐<br />Golden star ⭐<br />Golden star ⭐<br /><span className="cursor" aria-hidden="true" /></div>
                 </div>
               </div>
             </div>

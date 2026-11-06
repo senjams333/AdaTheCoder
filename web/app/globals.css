@@ -181,6 +181,10 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .screen .kw { color: #FF9F43; } .screen .fn { color: #7FD8FF; } .screen .str { color: #FFE27A; } .screen .num { color: #FF9ED0; }
 .screen .out { margin-top: 12px; border-top: 2px dashed #4A3F86; padding-top: 10px; color: #8FF0C8; }
 .screen .out-label { color: #C9C0FF; font: 600 .82rem var(--font-head); }
+/* a blinking cursor under the output, as if the program is waiting */
+.screen .cursor { display: inline-block; width: .6em; height: 1.15em; margin-top: 2px; vertical-align: -0.2em; background: #8FF0C8; border-radius: 2px; animation: cursor-blink 1s steps(1) infinite; }
+@keyframes cursor-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .screen .cursor { animation: none; } }
 
 @media (prefers-reduced-motion: no-preference) {
   .screen.animate .line { width: 0; animation: type .7s steps(28, end) forwards; }
