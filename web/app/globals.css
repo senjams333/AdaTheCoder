@@ -378,6 +378,10 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .site-footer .social.yt { border-color: #FF0000; color: #CC0000; }
 .site-footer .social.yt span { color: #FF0000; }
 .site-footer .social.yt:hover { background: #FFF1F1; color: #CC0000; border-color: #CC0000; }
+/* an official icon file, when one is in web/public/img/social/ */
+.site-footer .social-img { display: inline-flex; align-items: center; padding: 4px; border-radius: 10px; }
+.site-footer .social-img:hover { background: var(--lilac-soft); }
+.social-icon { height: 30px; width: auto; display: block; }
 .byte-bubble a { color: var(--pink-dark); }
 
 /* ---------- auth & account ---------- */
