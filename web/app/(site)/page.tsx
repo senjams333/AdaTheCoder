@@ -41,7 +41,7 @@ export default function HomePage() {
             <img className="twinkle" src="/img/twinkle.webp" alt="Twinkle the fairy waving her star wand" />
             <div className="tablet" aria-label="Example of a short Python program a child can write, and what it shows">
               <div className="tablet-frame">
-                <div className="screen animate">
+                <div className="screen">
                   <div className="bar"><span>stars.py</span><span className="run">▶ Run</span></div>
                   <div className="line"><span className="kw">for</span> count_star <span className="kw">in</span> <span className="fn">range</span>(<span className="num">3</span>):</div>
                   <div className="line">{'    '}<span className="fn">print</span>(<span className="str">&quot;Golden star ⭐&quot;</span>)</div>
