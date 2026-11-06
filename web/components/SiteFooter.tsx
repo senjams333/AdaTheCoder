@@ -9,8 +9,8 @@ export default function SiteFooter() {
   const email = data?.settings.contact_email || 'ada@adathecoder.com';
   const s = data?.settings || {};
   // set in the admin (Website text); until then the buttons show but go nowhere
-  // Official icons: put the brands' own icon files in web/public/img/social/ as youtube.svg, x.svg and facebook.svg
-  // (download them from each company's brand resources page). Until a file is there, the button shows its name.
+  // The icons are web/public/img/social/youtube.png, x.png and facebook.png (replace them to change the look).
+  // If a file is missing, that button shows its name instead.
   const socials = [
     { key: 'youtube', label: 'YouTube', icon: '▶', url: s.social_youtube, cls: 'social yt' },
     { key: 'x', label: 'X', icon: '', url: s.social_x, cls: 'social xb' },
@@ -26,7 +26,7 @@ export default function SiteFooter() {
             <a key={x.label} className={noIcon[x.key] ? x.cls : 'social-img'} aria-label={x.label} href={x.url || '#'} target={x.url ? '_blank' : undefined} rel="noopener noreferrer">
               {noIcon[x.key]
                 ? <>{x.icon && <span aria-hidden="true">{x.icon}</span>}{x.label}</>
-                : <img className="social-icon" src={`/img/social/${x.key}.svg`} alt={x.label}
+                : <img className="social-icon" src={`/img/social/${x.key}.png`} alt={x.label}
                     onError={() => setNoIcon((n) => ({ ...n, [x.key]: true }))} />}
             </a>
           ))}

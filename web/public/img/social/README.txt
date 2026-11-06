@@ -1,4 +1,2 @@
-Put the official icons here, named exactly:
-  youtube.svg   x.svg   facebook.svg
-Download them from each company's brand resources page (YouTube, X, Meta/Facebook).
-Until a file is here, the website footer shows a named button instead.
+The footer's YouTube, X and Facebook icons: youtube.png, x.png, facebook.png (round, 128 x 128).
+Replace a file to change its icon. If a file is missing, the footer shows a named button instead.
