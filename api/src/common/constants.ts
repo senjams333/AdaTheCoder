@@ -18,6 +18,7 @@ export const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 export const SETTING_FIELDS = [
   'hero_title', 'hero_subtitle', 'site_banner', 'app_message', 'parents_note', 'contact_email', 'author_name', 'author_note',
   'app_welcome', 'app_home_theme', 'business_details',
+  'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button',
 ] as const;
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
@@ -30,6 +31,17 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   // the Ada The Coder app's home screen: the greeting, and the theme whose characters stand on it ('' = Tom, Ada and Unicorn)
   app_welcome: 'Welcome to Ada The Coder',
   app_home_theme: '',
+  // the app's break reminder ("The Quick Reset"): every N minutes of use (0 = off). {minutes} in the text is replaced.
+  // break_steps: one step per line, "emoji | title | what to do"
+  break_minutes: '30',
+  break_title: '⏰ Time for The Quick Reset!',
+  break_intro: "You've been coding for {minutes} minutes. Super work! Let's give your eyes, body and brain a little break. 🌟",
+  break_steps:
+    '👀 | 1. Block (Eyes) | Look at something 20 feet away. Stop looking at the screen to rest your eye muscles.\n' +
+    '🤸 | 2. Stretch & Jump (Body) | Do 5 star-jumps or reach for the sky! It wakes up your body and gets your blood moving.\n' +
+    '🎈 | 3. Breathe (Mind) | Take 3 balloon breaths: breathe in deep to fill your belly, then blow it out slowly.\n' +
+    '💧 | 4. Drink (Hydration) | Take 3 big sips of water. It keeps your brain happy and running smoothly.',
+  break_button: 'I did it! Back to coding 🚀',
   // on the Terms, Refunds and Privacy pages (payment providers ask for a legal name and address)
   business_details: 'Ada The Coder\n(Your legal name)\n(Your address, city, PIN code, India)\nPhone: (your phone number)',
   parents_note:

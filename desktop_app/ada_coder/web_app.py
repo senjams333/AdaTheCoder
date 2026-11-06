@@ -363,7 +363,7 @@ class WebMainWindow(QMainWindow):
         chars = course.characters(chosen)["hero"] if chosen else HOME_CHARACTERS
         return {
             "courses": courses, "packs": packs, "images": images, "lessons": lessons, "version": APP_VERSION,
-            "home": {"welcome": home["welcome"], "chars": [[n, _url(p), e] for n, p, e in chars]},
+            "home": {"welcome": home["welcome"], "chars": [[n, _url(p), e] for n, p, e in chars], "break": home.get("break")},
             "user": self._user(), "licences": list(self.settings["licences"] or []),
             "licenceCodes": dict(self.settings["licence_codes"] or {}), "appLicence": self.settings["app_licence"] or "",
             "site": SERVER_URL.rstrip("/"),

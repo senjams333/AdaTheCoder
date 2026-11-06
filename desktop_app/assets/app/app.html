@@ -270,8 +270,8 @@ body.night { background: #070b24; }
   <div class="brk" id="breakBox" hidden role="dialog" aria-modal="true" aria-labelledby="breakTitle">
     <div class="brk-card">
       <h2 id="breakTitle">⏰ Time for The Quick Reset!</h2>
-      <p class="brk-sub">You've been coding for 30 minutes. Super work! Let's give your eyes, body and brain a little break. 🌟</p>
-      <div class="brk-steps">
+      <p class="brk-sub" id="breakIntro">You've been coding for 30 minutes. Super work! Let's give your eyes, body and brain a little break. 🌟</p>
+      <div class="brk-steps" id="breakSteps">
         <div class="brk-step"><span class="n">👀</span><div><b>1. Block (Eyes)</b><span>Look at something 20 feet away. Stop looking at the screen to rest your eye muscles.</span></div></div>
         <div class="brk-step"><span class="n">🤸</span><div><b>2. Stretch &amp; Jump (Body)</b><span>Do 5 star-jumps or reach for the sky! It wakes up your body and gets your blood moving.</span></div></div>
         <div class="brk-step"><span class="n">🎈</span><div><b>3. Breathe (Mind)</b><span>Take 3 balloon breaths: breathe in deep to fill your belly, then blow it out slowly.</span></div></div>
@@ -552,12 +552,30 @@ function setMusic(on) {
 }
 window.appMusicState = () => music;
 // ---- every 30 minutes of using the app: "The Quick Reset" break (counts only while the app is open and in use)
-const BREAK_EVERY = 30 * 60;           // seconds
+// how often and what it says are set by the admin (website admin → Website text → Break reminder); 30 minutes if not
+function breakEvery() {
+  const b = D.home && D.home.break;
+  const m = b && b.minutes !== undefined && b.minutes !== null ? Number(b.minutes) : 30;
+  return Math.max(0, m) * 60;          // seconds; 0 = no break reminder
+}
+function renderBreak() {
+  const b = D.home && D.home.break;
+  if (!b) return;                      // the app's own words (as written above)
+  if (b.title) $("breakTitle").textContent = b.title;
+  if (b.intro) $("breakIntro").textContent = b.intro;
+  if (b.button) $("breakDone").textContent = b.button;
+  if (Array.isArray(b.steps) && b.steps.length) {
+    $("breakSteps").innerHTML = b.steps.map(s => `<div class="brk-step"><span class="n">${esc(s.emoji || "⭐")}</span><div><b>${esc(s.title || "")}</b><span>${esc(s.text || "")}</span></div></div>`).join("");
+  }
+}
+renderBreak();
 let usedSeconds = 0;
 setInterval(() => {
   if (document.hidden || !$("breakBox").hidden || !$("login").hidden) return;
+  const every = breakEvery();
+  if (!every) return;
   usedSeconds += 5;
-  if (usedSeconds >= BREAK_EVERY) showBreak();
+  if (usedSeconds >= every) showBreak();
 }, 5000);
 function showBreak() {
   usedSeconds = 0;
@@ -733,6 +751,7 @@ function dataChanged(fresh) {
   ["courses", "packs", "home", "licences", "licenceCodes", "appLicence", "site"].forEach(k => { if (fresh[k] !== undefined) D[k] = fresh[k]; });
   if (fresh.licences) LICENCES = fresh.licences.slice();
   course = D.courses.find(c => c.id === course.id) || D.courses[0];
+  renderBreak();
   renderAll();
   if ($("login").hidden) loggedOutLook(false); else loggedOutLook(true);
 }

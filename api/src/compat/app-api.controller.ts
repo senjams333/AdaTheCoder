@@ -143,7 +143,14 @@ export class AppApiController {
   async announcement() {
     // also the app's home screen, which the admin sets on the Website text page
     const s = await this.settings.all();
-    return { message: s.app_message || '', welcome: s.app_welcome || '', home_theme: s.app_home_theme || '' };
+    const n = Number.parseInt(s.break_minutes ?? '30', 10);
+    const minutes = Number.isNaN(n) ? 30 : Math.max(0, Math.min(240, n));     // 0 = no break reminder
+    const steps = (s.break_steps || '').split('\n').map((line) => line.split('|').map((x) => x.trim()))
+      .filter((p) => p.some(Boolean)).slice(0, 8)
+      .map((p) => (p.length >= 3 ? { emoji: p[0], title: p[1], text: p.slice(2).join(' | ') } : { emoji: '⭐', title: p[0] || '', text: p[1] || '' }));
+    return { message: s.app_message || '', welcome: s.app_welcome || '', home_theme: s.app_home_theme || '',
+      // the break reminder, as the admin set it (minutes 0 = no reminder)
+      break: { minutes, title: s.break_title || '', intro: (s.break_intro || '').replace(/\{minutes\}/g, String(minutes)), steps, button: s.break_button || '' } };
   }
 
   private text(err: unknown): string {

@@ -880,3 +880,10 @@ a.course-pic img { transition: transform .2s; }
 .tp-list li small { grid-column: 1; color: var(--ink-soft); }
 .tp-list li a { grid-column: 2; grid-row: 1 / span 2; font-weight: 800; }
 @media (max-width: 860px) { .tp-cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* admin: preview of the app's break reminder */
+.brk-admin-preview { border: 3px solid #facc15; border-radius: 20px; padding: 14px 18px; background: #fffdf2; margin: 4px 0 20px; }
+.brk-admin-preview > b { font-size: 1.15rem; color: #7b4dff; }
+.brk-admin-preview p { margin: 4px 0 8px; color: #0369a1; font-weight: 700; }
+.brk-admin-preview ul { margin: 0 0 10px; padding-left: 0; list-style: none; display: grid; gap: 4px; }
+.brk-admin-btn { display: inline-block; background: #22c997; color: #fff; font-weight: 800; border-radius: 999px; padding: 8px 18px; }

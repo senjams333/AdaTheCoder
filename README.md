@@ -138,6 +138,13 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
   `bash desktop_app/install_linux.sh http://127.0.0.1:5000` makes it use your test website. Uninstall:
   `bash ~/.local/share/ada-the-coder/uninstall.sh`.
 
+### Break reminder ("The Quick Reset")
+
+Every 30 minutes of use (only while the app is open and logged in), the app shows a short break: eyes, stretch & jump,
+balloon breaths, water. Change it in the admin: **Website text → Ada The Coder app: break reminder**: how many minutes
+(0 = off), the title, the message (`{minutes}` is replaced), the steps (one per line: `emoji | title | what to do`) and the
+button. Installed apps pick up changes within a minute.
+
 ### Drafts and preview (admin)
 
 New **themes** and new **lessons** start as **drafts**: hidden from the app. Each form has **Save as draft**,

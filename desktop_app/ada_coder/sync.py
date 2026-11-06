@@ -292,7 +292,8 @@ def new_announcement():
 def _save_home(answer):
     """Keeps the home screen the admin set on the website. Returns True if it changed."""
     state = _read_json(_state_path(), {})
-    home = {"welcome": (answer.get("welcome") or "").strip(), "theme": (answer.get("home_theme") or "").strip()}
+    home = {"welcome": (answer.get("welcome") or "").strip(), "theme": (answer.get("home_theme") or "").strip(),
+            "break": answer.get("break") if isinstance(answer.get("break"), dict) else None}
     if home == state.get("home"):
         return False
     state["home"] = home
@@ -311,7 +312,8 @@ def refresh_home():
 def home_screen():
     """The greeting and the theme whose characters stand on the home screen, as the admin last set them."""
     home = _read_json(_state_path(), {}).get("home") or {}
-    return {"welcome": home.get("welcome") or "Welcome to Ada The Coder", "theme": home.get("theme") or ""}
+    return {"welcome": home.get("welcome") or "Welcome to Ada The Coder", "theme": home.get("theme") or "",
+            "break": home.get("break")}       # the break reminder the admin set (None: the app's own, every 30 minutes)
 
 
 def run_checks():

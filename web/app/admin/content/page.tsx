@@ -63,6 +63,37 @@ export default function AdminContent() {
           </select>
           <span className="help">Pick a theme to show its characters instead. New themes are added on the Themes page: tick &quot;Show this theme in the app&quot; and give it at least one live lesson, and it appears in every installed app the next time the app checks the website (at start, then every few minutes).</span>
         </div>
+        <h2 style={{ marginTop: 26 }}>Ada The Coder app: break reminder</h2>
+        <p className="muted">After this many minutes of using the app, children see a short break (&quot;The Quick Reset&quot;). Installed apps pick up changes within a minute.</p>
+        <div className="field">
+          <label htmlFor="break_minutes">Show a break every (minutes)</label>
+          <input id="break_minutes" type="number" min={0} max={240} value={form.break_minutes ?? '30'} onChange={set('break_minutes')} />
+          <span className="help">30 is the default. 0 turns the break reminder off.</span>
+        </div>
+        <div className="field"><label htmlFor="break_title">Title</label><input id="break_title" type="text" value={form.break_title || ''} onChange={set('break_title')} /></div>
+        <div className="field">
+          <label htmlFor="break_intro">Message under the title</label>
+          <textarea id="break_intro" rows={2} value={form.break_intro || ''} onChange={set('break_intro')} />
+          <span className="help">{'{minutes}'} is replaced with the number of minutes.</span>
+        </div>
+        <div className="field">
+          <label htmlFor="break_steps">Steps (one per line)</label>
+          <textarea id="break_steps" className="code" rows={6} spellCheck={false} value={form.break_steps || ''} onChange={set('break_steps')} />
+          <span className="help">Each line: <code>emoji | title | what to do</code>, for example <code>💧 | 4. Drink (Hydration) | Take 3 big sips of water.</code> Up to 8 steps.</span>
+        </div>
+        <div className="field"><label htmlFor="break_button">Button</label><input id="break_button" type="text" value={form.break_button || ''} onChange={set('break_button')} /></div>
+        {(() => {
+          const steps = (form.break_steps || '').split('\n').map((l) => l.split('|').map((x) => x.trim())).filter((p) => p.some(Boolean)).slice(0, 8);
+          return (
+            <div className="brk-admin-preview" aria-label="Preview of the break">
+              <b>{form.break_title}</b>
+              <p>{(form.break_intro || '').replace(/\{minutes\}/g, form.break_minutes || '30')}</p>
+              <ul>{steps.map((p, i) => <li key={i}><span>{p.length >= 3 ? p[0] : '⭐'}</span> <b>{p.length >= 3 ? p[1] : p[0]}</b> {p.length >= 3 ? p.slice(2).join(' | ') : p[1] || ''}</li>)}</ul>
+              <span className="brk-admin-btn">{form.break_button}</span>
+            </div>
+          );
+        })()}
+
         <h2 style={{ marginTop: 26 }}>Website</h2>
         <div className="field">
           <label htmlFor="parents_note">Note for parents</label>
