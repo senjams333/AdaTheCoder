@@ -15,6 +15,9 @@ export default function HomePage() {
   const user = useAppSelector((s) => s.auth.user);
   const s = data?.settings || {};
   const paragraphs = (s.author_note || '').split('\n\n').map((p) => p.trim()).filter(Boolean);
+  // the app's break reminder, as the admin set it (0 = off); parents are told about it below
+  const breakN = Number.parseInt(s.break_minutes ?? '30', 10);
+  const breakMinutes = Number.isNaN(breakN) ? 30 : Math.max(0, breakN);
 
   return (
     <>
@@ -164,6 +167,9 @@ export default function HomePage() {
             <li><span className="tick" aria-hidden="true">✓</span><span><b>Real Python, not blocks.</b> Children type the same language professional programmers use, one small step at a time.</span></li>
             <li><span className="tick" aria-hidden="true">✓</span><span><b>Friendly error messages.</b> When code breaks, Byte explains what went wrong in words a child understands.</span></li>
             <li><span className="tick" aria-hidden="true">✓</span><span><b>Works offline.</b> After installing, the app works without the internet. It checks for new lessons when it can.</span></li>
+            {breakMinutes > 0 && (
+              <li><span className="tick" aria-hidden="true">✓</span><span><b>Healthy screen breaks.</b> After {breakMinutes} minutes of active coding, the app pauses for &quot;The Quick Reset&quot;: rest the eyes, stretch, breathe and drink some water. Only real use counts, so time away from the screen doesn&apos;t.</span></li>
+            )}
             <li><span className="tick" aria-hidden="true">✓</span><span><b>Nothing to manage.</b> New lessons and updates are delivered to the app you&apos;ve already installed.</span></li>
           </ul>
         </div>
@@ -208,6 +214,13 @@ export default function HomePage() {
                 <summary>What information do you keep about my child?</summary>
                 <p>Only what you choose to tell us when signing up: an optional first name and age. Your child&apos;s code and progress stay on your computer. Read the <Link href="/privacy">privacy page</Link> for details.</p>
               </details>
+              {breakMinutes > 0 && (
+                <details>
+                  <summary>Will my child stay on the screen too long?</summary>
+                  <p>The app looks after this for you. After {breakMinutes} minutes of active use, it pauses the lesson and shows &quot;The Quick Reset&quot;, a short break in four steps: look at something far away to rest the eyes, do a few star-jumps or stretches, take three slow balloon breaths, and drink some water.</p>
+                  <p>Only real use counts: typing code, clicking, moving the mouse or watching a lesson video. If your child leaves the computer, the count pauses, and after 10 minutes away it starts again from zero, because that was already a break.</p>
+                </details>
+              )}
               <details>
                 <summary>How do updates work?</summary>
                 <p>New lessons and videos download into the app by themselves. When a new version of the app is ready, the app shows a message and a grown-up can download it from this website.</p>
