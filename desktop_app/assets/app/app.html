@@ -569,11 +569,41 @@ function renderBreak() {
   }
 }
 renderBreak();
-let usedSeconds = 0;
+// Only time the kid is really using the app counts. Mouse moves, clicks, keys, scrolling and touches anywhere
+// (home screen, theme, lesson page, code editor) mark the kid as here. Each 5 seconds counts when there was
+// activity in the last minute (time to read or think between clicks) or a lesson video is playing. With
+// nothing for a minute the count waits; after 10 minutes away the kid has had a break already, so it starts over.
+const ACTIVE_WINDOW = 60 * 1000, AWAY_RESET = 10 * 60 * 1000;
+let usedSeconds = 0, lastActive = Date.now();
+const markActive = () => { lastActive = Date.now(); };
+const ACTIVITY = ["mousemove", "mousedown", "keydown", "wheel", "touchstart", "input"];
+function watchActivity(doc) {
+  if (!doc) return;
+  try {
+    if (!doc.__adaActive) {
+      doc.__adaActive = true;
+      ACTIVITY.forEach(e => doc.addEventListener(e, markActive, { capture: true, passive: true }));
+    }
+    doc.querySelectorAll("iframe").forEach(f => { try { watchActivity(f.contentDocument); } catch (e) {} });   // the theme and its lesson page
+  } catch (e) {}
+}
+function videoPlaying(doc) {
+  try {
+    if ([...doc.querySelectorAll("video")].some(v => !v.paused && !v.ended)) return true;
+    return [...doc.querySelectorAll("iframe")].some(f => { try { return videoPlaying(f.contentDocument); } catch (e) { return false; } });
+  } catch (e) { return false; }
+}
+watchActivity(document);
 setInterval(() => {
+  watchActivity(document);             // picks up a theme or lesson page opened since the last check
   if (document.hidden || !$("breakBox").hidden || !$("login").hidden) return;
   const every = breakEvery();
   if (!every) return;
+  const playing = videoPlaying(document);
+  if (playing) markActive();
+  const away = Date.now() - lastActive;
+  if (away >= AWAY_RESET) { usedSeconds = 0; return; }
+  if (away > ACTIVE_WINDOW) return;    // not using the app right now: the count waits
   usedSeconds += 5;
   if (usedSeconds >= every) showBreak();
 }, 5000);
