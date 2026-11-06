@@ -18,7 +18,7 @@ export const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 export const SETTING_FIELDS = [
   'hero_title', 'hero_subtitle', 'site_banner', 'app_message', 'parents_note', 'contact_email', 'author_name', 'author_note',
   'app_welcome', 'app_home_theme', 'business_details',
-  'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button',
+  'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button', 'policy_purchases',
 ] as const;
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
@@ -42,6 +42,10 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
     '🎈 | 3. Breathe (Mind) | Take 3 balloon breaths: breathe in deep to fill your belly, then blow it out slowly.\n' +
     '💧 | 4. Drink (Hydration) | Take 3 big sips of water. It keeps your brain happy and running smoothly.',
   break_button: 'I did it! Back to coding 🚀',
+  // "Purchases and cancellation" on the Policies page: an empty line between paragraphs, "- " starts a bullet,
+  // "Title: text" in a bullet makes the title bold, {email} becomes the contact email
+  policy_purchases:
+    "We keep our themes affordable, and every paid theme opens its first lessons free, so your child can explore it fully before you decide.\n\nBecause a theme is yours to keep the moment it is unlocked, we are not able to offer refunds once its licence has been issued. We hope the free lessons make it easy to be sure the theme is the right fit first.\n\nIf anything ever goes wrong with a payment, we will always make it right. Write to {email} with your account's email and the payment reference from Razorpay or PayPal:\n- Charged twice for the same theme: the extra payment is returned to you.\n- Charged, but the theme didn't unlock: we unlock it for you straight away, and if we can't, your payment is returned.\n\nAny money returned goes back the way you paid (card, UPI, bank or PayPal) within 2 working days of us confirming it; your bank or PayPal usually shows it within 5 to 7 working days.\n\nThere is nothing to cancel: licences are one-time payments, not subscriptions, so you will never be charged again. You can close your account at any time from your account page.",
   // on the Terms and Policies pages (payment providers ask for a legal name and address)
   business_details: 'Ada The Coder\n(Your legal name)\n(Your address, city, PIN code, India)\nPhone: (your phone number)',
   parents_note:

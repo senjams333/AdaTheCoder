@@ -27,7 +27,7 @@ export default function TermsPage() {
       <p>When a payment goes through you get a licence code straight away, shown on screen and on your account page, and the app unlocks the theme by itself.</p>
 
       <h2>6. Purchases</h2>
-      <p>Every theme opens its first lessons free, so you can try it before buying, and each purchase is complete once the licence is issued. Payment mistakes (charged twice, or a theme that didn&apos;t unlock) are always put right. See <Link href="/privacy#purchases">purchases and cancellation</Link> in our policies.</p>
+      <p>Every theme opens its first lessons free, so you can try it before buying. Because a theme is yours to keep once it is unlocked, we are not able to offer refunds after its licence has been issued. Payment mistakes (charged twice, or a theme that didn&apos;t unlock) are always put right. See <Link href="/privacy#purchases">purchases and cancellation</Link> in our policies.</p>
 
       <h2>7. Using the app and the lessons</h2>
       <p>The app, lessons, videos, characters and pictures belong to us or to the people who licensed them to us. You may use them to learn, and children may keep and share the programs they write themselves. Please don&apos;t copy, resell or publish our lessons, videos or characters, or try to get round the licence checks.</p>

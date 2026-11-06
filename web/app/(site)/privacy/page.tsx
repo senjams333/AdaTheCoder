@@ -1,9 +1,42 @@
 'use client';
 
+import { Fragment, ReactNode } from 'react';
 import BusinessDetails, { useContact } from '@/components/BusinessDetails';
+import { useGetSiteQuery } from '@/lib/api';
+
+/** The admin's text (Website text → Purchases and cancellation): empty line = new paragraph, "- " = bullet,
+ *  "Title: text" in a bullet = bold title, {email} = the contact email as a link. */
+function PolicyText({ text, email }: { text: string; email: string }) {
+  const inline = (t: string): ReactNode[] => t.split('{email}').flatMap((part, i) =>
+    i === 0 ? [part] : [<a key={i} href={`mailto:${email}`}>{email}</a>, part]);
+  return (
+    <>
+      {text.split(/\n\s*\n/).map((block, b) => {
+        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+        const bullets = lines.filter((l) => l.startsWith('- '));
+        const plain = lines.filter((l) => !l.startsWith('- '));
+        return (
+          <Fragment key={b}>
+            {plain.length > 0 && <p>{inline(plain.join(' '))}</p>}
+            {bullets.length > 0 && (
+              <ul>
+                {bullets.map((l, k) => {
+                  const t = l.slice(2); const c = t.indexOf(':');
+                  return <li key={k}>{c > 0 && c < 60 ? <><b>{t.slice(0, c + 1)}</b>{inline(t.slice(c + 1))}</> : inline(t)}</li>;
+                })}
+              </ul>
+            )}
+          </Fragment>
+        );
+      })}
+    </>
+  );
+}
 
 export default function PrivacyPage() {
   const { email } = useContact();
+  const { data } = useGetSiteQuery();
+  const purchases = data?.settings.policy_purchases || '';
   return (
     <article className="prose wrap">
       <h1>Our policies</h1>
@@ -27,14 +60,7 @@ export default function PrivacyPage() {
       <h2>Deleting your data</h2>
       <p>You can delete your account at any time from your account page. That removes your details from our records, apart from the purchase records the law asks us to keep.</p>
       <h2 id="purchases" style={{ fontSize: '1.7rem', marginTop: '2.2em' }}>Purchases and cancellation</h2>
-      <p>We keep our themes affordable, and every paid theme opens its first lessons free, so your child can explore it fully before you decide. Because a theme is yours to keep the moment it is unlocked, each purchase is complete once the licence is issued.</p>
-      <p>If anything ever goes wrong with a payment, we will always make it right. Write to <a href={`mailto:${email}`}>{email}</a> with your account&apos;s email and the payment reference from Razorpay or PayPal:</p>
-      <ul>
-        <li><b>Charged twice for the same theme:</b> the extra payment is returned to you.</li>
-        <li><b>Charged, but the theme didn&apos;t unlock:</b> we unlock it for you straight away, and if we can&apos;t, your payment is returned.</li>
-      </ul>
-      <p>Any money returned goes back the way you paid (card, UPI, bank or PayPal) within 2 working days of us confirming it; your bank or PayPal usually shows it within 5 to 7 working days.</p>
-      <p>There is nothing to cancel: licences are one-time payments, not subscriptions, so you will never be charged again. You can close your account at any time from your account page.</p>
+      <PolicyText text={purchases} email={email} />
       <h2>Contact</h2>
       <p>Questions about your data or a purchase? Email <a href={`mailto:${email}`}>{email}</a>.</p>
       <BusinessDetails />

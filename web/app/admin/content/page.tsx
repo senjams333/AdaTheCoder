@@ -115,6 +115,11 @@ export default function AdminContent() {
           <textarea id="business_details" rows={4} value={form.business_details || ''} onChange={set('business_details')} />
           <span className="help">Your legal name, postal address and phone, one per line. Shown on the Terms and Policies pages (Razorpay and PayPal ask for these).</span>
         </div>
+        <div className="field">
+          <label htmlFor="policy_purchases">Purchases and cancellation (Policies page)</label>
+          <textarea id="policy_purchases" rows={12} value={form.policy_purchases || ''} onChange={set('policy_purchases')} />
+          <span className="help">Leave an empty line between paragraphs. Start a line with &quot;- &quot; for a bullet point; &quot;Title: text&quot; in a bullet makes the title bold. Write {'{email}'} where the contact email should go.</span>
+        </div>
         <div className="field"><label htmlFor="contact_email">Contact email</label><input id="contact_email" type="email" value={form.contact_email || ''} onChange={set('contact_email')} /></div>
         <button className="btn" disabled={isLoading}>{isLoading ? 'Saving…' : 'Save website text'}</button>
       </form>
