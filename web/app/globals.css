@@ -249,14 +249,14 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .steps-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 48px; align-items: end; margin-bottom: 44px; }
 .steps-head .section-head { margin-bottom: 0; }
 .byte-helper { display: flex; align-items: flex-end; gap: 12px; }
-.byte-helper img { width: 220px; flex: none; }
+.byte-helper img { width: 280px; flex: none; }
 .byte-bubble { position: relative; max-width: 240px; margin: 0 0 70px; padding: 14px 18px; border-radius: 20px;
   background: var(--sky-soft); color: var(--ink); font: 600 1.02rem/1.35 var(--font-head); }
 .byte-bubble::after { content: ""; position: absolute; right: -14px; bottom: 18px;
   border: 9px solid transparent; border-left: 15px solid var(--sky-soft); }
 @media (max-width: 760px) {
   .steps-head { grid-template-columns: 1fr; }
-  .byte-helper img { width: 120px; }
+  .byte-helper img { width: 150px; }
   .byte-bubble { margin-bottom: 40px; }
 }
 
