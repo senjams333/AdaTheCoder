@@ -120,6 +120,17 @@ export default function AdminContent() {
           <textarea id="policy_purchases" rows={12} value={form.policy_purchases || ''} onChange={set('policy_purchases')} />
           <span className="help">Leave an empty line between paragraphs. Start a line with &quot;- &quot; for a bullet point; &quot;Title: text&quot; in a bullet makes the title bold. Write {'{email}'} where the contact email should go.</span>
         </div>
+        <div className="field">
+          <label htmlFor="install_video_url">Installation tutorial video (YouTube link)</label>
+          <input id="install_video_url" type="url" placeholder="https://www.youtube.com/watch?v=…" value={form.install_video_url || ''} onChange={set('install_video_url')} />
+          <span className="help">Linked from Byte&apos;s bubble next to &quot;Up and coding in three steps&quot; on the home page.</span>
+        </div>
+        <div className="row-3" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+          <div className="field"><label htmlFor="social_youtube">YouTube channel link</label><input id="social_youtube" type="url" value={form.social_youtube || ''} onChange={set('social_youtube')} /></div>
+          <div className="field"><label htmlFor="social_x">X (Twitter) link</label><input id="social_x" type="url" value={form.social_x || ''} onChange={set('social_x')} /></div>
+          <div className="field"><label htmlFor="social_facebook">Facebook page link</label><input id="social_facebook" type="url" value={form.social_facebook || ''} onChange={set('social_facebook')} /></div>
+        </div>
+        <p className="help muted" style={{ marginTop: -8 }}>The footer shows YouTube, X and Facebook buttons; empty links stay on the page until you add them.</p>
         <div className="field"><label htmlFor="contact_email">Contact email</label><input id="contact_email" type="email" value={form.contact_email || ''} onChange={set('contact_email')} /></div>
         <button className="btn" disabled={isLoading}>{isLoading ? 'Saving…' : 'Save website text'}</button>
       </form>

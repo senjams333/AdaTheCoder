@@ -367,6 +367,14 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .site-footer { padding-block: 40px 56px; color: var(--ink-soft); font-size: .95rem; background: var(--paper); }
 .site-footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .site-footer a { color: var(--ink-soft); }
+.site-footer .wrap { align-items: center; }
+/* YouTube, X and Facebook: plain named buttons (links set in the admin) */
+.socials { display: flex; gap: 10px; flex-wrap: wrap; }
+.site-footer .social { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 999px; border: 2px solid var(--line);
+  background: #fff; color: var(--ink); font: 700 .92rem var(--font-body); text-decoration: none; }
+.site-footer .social:hover { border-color: var(--grape); color: var(--grape); }
+.site-footer .social span { color: var(--pink-dark); font-size: .8rem; }
+.byte-bubble a { color: var(--grape-dark); }
 
 /* ---------- auth & account ---------- */
 .auth { padding-block: 56px 88px; }
