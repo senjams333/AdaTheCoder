@@ -204,6 +204,10 @@ export default function HomePage() {
                 <summary>How long does a lesson take?</summary>
                 <p>Each lesson is short: a video and a handful of small examples. Most children can finish one in a single sitting, and they can always stop and pick up where they left off.</p>
               </details>
+              <details>
+                <summary>What if my child gets stuck?</summary>
+                <p>Every lesson has six worked examples to try before writing their own code. When something goes wrong, Byte the owl explains what happened and how to fix it in simple words, and the lesson video can be watched again at any time with the See video button.</p>
+              </details>
             </div>
             <div className="faq-col">
               <details>
