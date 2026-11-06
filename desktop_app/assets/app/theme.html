@@ -578,7 +578,9 @@ function cartoonOver(kind, pic, emoji, text, ms) {
   // over the lesson list; with the list hidden, up in the free space by the title (never over the code or its output)
   // right beside the output window (never over it), over the lesson list; with the list hidden there's no room
   // beside it, so the friend goes up by the title instead
-  const spot = !sideCollapsed && besideOutput();
+  // with the lesson list hidden: still right of the editor, the same size, kept inside the window, for 2.5 seconds
+  const spot = besideOutput(sideCollapsed);
+  if (sideCollapsed && spot) ms = 2500;
   c.className = "cartoon " + kind + (spot ? " beside" : " top");
   c.style.left = spot ? spot.left + "px" : "";
   c.style.bottom = spot ? spot.bottom + "px" : "";
@@ -589,15 +591,16 @@ function cartoonOver(kind, pic, emoji, text, ms) {
   cartoonTimer = setTimeout(() => { c.hidden = true; }, ms);
 }
 // where "beside the output window" is, in the window's own units: just right of the editor, level with the output
-function besideOutput() {
+function besideOutput(fit) {
   try {
     const d = frame.contentDocument, ed = d.getElementById("editorSection"), out = d.getElementById("output");
     if (!ed || !out) return null;
     const win = $("win"), w = win.getBoundingClientRect(), f = frame.getBoundingClientRect(), sc = w.width / win.offsetWidth || 1;
     const left = (f.left - w.left) / sc + out.getBoundingClientRect().right - 36;   // just touching the output's right edge
     const outBottom = (f.top - w.top) / sc + out.getBoundingClientRect().bottom;
-    if (win.clientWidth - left < 200) return null;
-    return { left: Math.round(left), bottom: Math.max(8, Math.round(win.clientHeight - outBottom + 30)) };
+    if (!fit && win.clientWidth - left < 200) return null;
+    const x = fit ? Math.min(left, win.clientWidth - 350) : left;    // 330px wide, never past the window's edge
+    return { left: Math.round(x), bottom: Math.max(8, Math.round(win.clientHeight - outBottom + 30)) };
   } catch (e) { return null; }
 }
 function patchCartoons() {
