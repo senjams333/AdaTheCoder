@@ -95,25 +95,25 @@ export default function HomePage() {
             <div className="level">
               <span className="lv">Level 1</span>
               <h3>First steps</h3>
-              <p>Meet Python and make the computer say hello, print fun messages and leave secret notes in code.</p>
+              <p>Meet Python, make the computer say hello, print fun messages with emojis and leave secret notes that only coders can read.</p>
               <p className="makes"><b>They&apos;ll make:</b> A hello card for friends</p>
             </div>
             <div className="level">
               <span className="lv">Level 2</span>
               <h3>Boxes and data</h3>
-              <p>Store names and numbers in variables, do quick maths and play with words.</p>
+              <p>Store names and numbers in variables like labelled boxes, do quick maths, and join words together to build fun sentences.</p>
               <p className="makes"><b>They&apos;ll make:</b> A pocket calculator</p>
             </div>
             <div className="level">
               <span className="lv">Level 3</span>
               <h3>Choices and loops</h3>
-              <p>Ask questions, make decisions, and let loops repeat things all by themselves.</p>
+              <p>Ask the player questions, let the program make decisions with if and else, and use loops to repeat things automatically.</p>
               <p className="makes"><b>They&apos;ll make:</b> A quiz and a rocket countdown</p>
             </div>
             <div className="level">
               <span className="lv">Level 4</span>
               <h3>Bigger adventures</h3>
-              <p>Create your own commands, keep lists of things and give the computer robot eyes.</p>
+              <p>Create your own commands with functions, keep lists of favourite things, fix errors calmly and even give the computer robot eyes.</p>
               <p className="makes"><b>They&apos;ll make:</b> A photo flipper</p>
             </div>
           </div>
