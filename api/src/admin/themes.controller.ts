@@ -67,6 +67,20 @@ export class AdminThemesController {
     return { ok: true, message: `Theme '${c.name}' and its lessons were deleted.` };
   }
 
+  /** Publish a draft theme (installed apps show it within a minute), or hide it again while you work on it. */
+  @Post(':id/publish')
+  @HttpCode(200)
+  async publish(@Param('id', ParseIntPipe) id: number, @Body() body: { published?: boolean | string }) {
+    const c = await this.find(id);
+    c.published = body.published === true || body.published === 'true';
+    await this.catalog.courses.save(c);
+    const live = (await this.catalog.courseLessons(id)).filter((l) => l.published).length;
+    return { ok: true, id: c.id, published: c.published,
+      message: c.published
+        ? (live ? `Theme '${c.name}' is published. Installed apps show it within a minute.` : `Theme '${c.name}' is published, but it has no published lessons yet, so the app can't show it.`)
+        : `Theme '${c.name}' is a draft again: it's hidden from the app.` };
+  }
+
   /** Copies another theme's lessons in (lessons this theme already has with the same ID are kept). */
   @Post(':id/copy')
   @HttpCode(200)
@@ -90,7 +104,10 @@ export class AdminThemesController {
     const source = (await this.catalog.courseLessons(fromId)).filter((l) => !have.has(l.slug));
     await this.catalog.lessons.save(source.map((l) => this.catalog.lessons.create({
       courseId: toId, slug: l.slug, position: start + l.position, emoji: l.emoji, name: l.name, title: l.title,
-      subtitle: l.subtitle, videoBundled: l.videoBundled, videoFile: '', videoSize: 0, defaultCode: l.defaultCode,
+      subtitle: l.subtitle, videoBundled: l.videoBundled,
+      // the built-in videos on the server are shared, so the copy plays them too (other uploads stay with their theme)
+      videoFile: l.videoFile && l.videoFile.startsWith('default-') ? l.videoFile : '',
+      videoSize: l.videoFile && l.videoFile.startsWith('default-') ? l.videoSize : 0, defaultCode: l.defaultCode,
       examples: l.examples, published: l.published,
     })));
     return source.length;
@@ -105,7 +122,7 @@ export class AdminThemesController {
       description: String(body.description || '').replace(/\r\n/g, '\n').trim(),
       features: String(body.features || '').replace(/\r\n/g, '\n').trim(),
       pack: trimmed(body.pack, 30), price: trimmed(body.price, 30), priceInr: trimmed(body.priceInr, 30).replace(/^₹\s*/, ''), razorpayButton: trimmed(body.razorpayButton, 40), premium: truthy(body.premium),
-      position: trimmed(body.position || '0'), freeLessons: trimmed(body.freeLessons ?? '3') || '0', published: truthy(body.published),
+      position: trimmed(body.position || '0'), freeLessons: trimmed(body.freeLessons ?? '1') || '1', published: truthy(body.published),
     };
     const errors: string[] = [];
     if (!data.name) errors.push('Give the theme a name, like Learn Coding in Space.');

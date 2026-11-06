@@ -77,6 +77,10 @@ export const api = createApi({
       query: ({ id, form }) => ({ url: `admin/themes/${id}`, method: 'PUT', body: form }),
       invalidatesTags: (_r, _e, { id }) => ['Themes', 'Site', 'Dashboard', 'Parents', { type: 'Theme', id }],
     }),
+    publishTheme: b.mutation<Done & { published: boolean }, { id: number; published: boolean }>({
+      query: ({ id, published }) => ({ url: `admin/themes/${id}/publish`, method: 'POST', body: { published } }),
+      invalidatesTags: (_r, _e, { id }) => ['Themes', 'Site', 'Dashboard', { type: 'Theme', id }],
+    }),
     deleteTheme: b.mutation<Done, number>({
       query: (id) => ({ url: `admin/themes/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Themes', 'Site', 'Dashboard', 'Parents'],
@@ -143,7 +147,7 @@ export const {
   useGetSiteQuery, useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useForgotPasswordMutation, useResetPasswordMutation, useMeQuery, useSetupStatusQuery, useSetupAdminMutation,
   useGetAccountQuery, useUpdateAccountMutation, useChangePasswordMutation, useDeleteAccountMutation, useDownloadLinkMutation,
   useDashboardQuery, useAdminSettingsQuery, useSaveSettingsMutation,
-  useThemesQuery, useThemeQuery, useCreateThemeMutation, useUpdateThemeMutation, useDeleteThemeMutation, useCopyLessonsMutation,
+  useThemesQuery, useThemeQuery, useCreateThemeMutation, useUpdateThemeMutation, useDeleteThemeMutation, useCopyLessonsMutation, usePublishThemeMutation,
   useLessonQuery, useBlankLessonQuery, useCreateLessonMutation, useUpdateLessonMutation, useDeleteLessonMutation, useMoveLessonMutation, usePublishLessonMutation,
   useReleasesQuery, useUploadReleaseMutation, useMakeLatestMutation, useDeleteReleaseMutation,
   useParentsQuery, useToggleParentMutation, useSaveParentPlanMutation, useDeleteParentMutation,

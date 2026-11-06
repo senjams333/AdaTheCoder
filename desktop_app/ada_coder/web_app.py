@@ -456,7 +456,7 @@ class WebMainWindow(QMainWindow):
         if self.open_theme_id:
             self.host.fullLoading.emit(True)
         else:
-            self.host.message.emit("📚 Downloading the full lessons…")
+            self.host.message.emit("📚 Making the full lessons available…")
         result = {}
         started = time.monotonic()
         worker = threading.Thread(target=lambda: result.update(changed=sync.sync_courses(force=True)), daemon=True)
@@ -467,7 +467,7 @@ class WebMainWindow(QMainWindow):
             if worker.is_alive():
                 return
             timer.stop()
-            # the child sees "Downloading the full lessons…" for at least 3.5 seconds, however fast the download was
+            # the child sees "Making the full lessons available…" for at least 3.5 seconds, however fast the download was
             left = 3.5 - (time.monotonic() - started)
             if left > 0:
                 QTimer.singleShot(int(left * 1000), finish)

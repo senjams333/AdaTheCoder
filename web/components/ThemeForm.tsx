@@ -27,7 +27,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
     name: theme?.name || '', slug: theme?.slug || '', tagline: theme?.tagline || '', description: theme?.description || '',
     features: theme?.features || '', pack: theme?.pack || 'friends', price: theme?.price || '', priceInr: theme?.priceInr || '', razorpayButton: theme?.razorpayButton || '', premium: theme?.premium ?? false,
     freeLessons: String(theme?.freeLessons ?? 1), position: String(theme?.position ?? nextPosition),
-    published: theme?.published ?? true, removeImage: false, copyFrom: '',
+    published: theme?.published ?? false, removeImage: false, copyFrom: '',
   });
   const [names, setNames] = useState<string[]>(Array.from({ length: SLOTS }, (_, i) => theme?.characters[i]?.name || ''));
   const [charFiles, setCharFiles] = useState<(File | null)[]>(Array(SLOTS).fill(null));
@@ -40,12 +40,15 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
   const set = (k: keyof typeof form) => (e: { target: { value: string; checked?: boolean; type?: string } }) =>
     setForm({ ...form, [k]: e.target.type === 'checkbox' ? Boolean(e.target.checked) : e.target.value });
 
+  // what the button pressed means: keep it as a draft, open the preview, or publish it to the app
+  const [intent, setIntent] = useState<'draft' | 'preview' | 'publish'>('draft');
   async function submit(e: FormEvent) {
     e.preventDefault();
+    const publish = intent === 'publish' || (intent === 'preview' && !!theme?.published);
     const fd = new FormData();
     for (const k of ['name', 'slug', 'tagline', 'description', 'features', 'pack', 'price', 'priceInr', 'razorpayButton', 'freeLessons', 'position'] as const) fd.append(k, String(form[k]));
     fd.append('premium', String(form.premium));
-    fd.append('published', String(form.published));
+    fd.append('published', String(publish));
     fd.append('removeImage', String(form.removeImage));
     if (!theme && copyFrom !== 'none') fd.append('copyFrom', copyFrom);
     names.forEach((n, i) => fd.append(`charName${i}`, n));
@@ -53,8 +56,14 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
     if (image) fd.append('image', image);
     try {
       const res = theme ? await update({ id: theme.id, form: fd }).unwrap() : await create(fd).unwrap();
-      dispatch(flash('success', res.message || 'Saved.'));
-      router.push(`/admin/themes/${res.id ?? theme?.id}`);
+      const id = res.id ?? theme?.id;
+      if (intent === 'preview') {
+        dispatch(flash('info', publish ? 'Saved. This is how the theme looks in the app.' : 'Saved as a draft. This is how the theme will look in the app.'));
+        router.push(`/admin/themes/${id}/preview`);
+        return;
+      }
+      dispatch(flash('success', publish ? `${res.message || 'Saved.'} It is published in the app.` : 'Saved as a draft: the app doesn\'t show it until you publish it.'));
+      router.push(`/admin/themes/${id}`);
     } catch (err) {
       setErrors(errorList(err));
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -166,9 +175,17 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
         ) : null}
 
         <div className="card">
-          <div className="field"><label className="check"><input type="checkbox" checked={form.published} onChange={set('published')} /><span>Show this theme in the app</span></label>
-            <span className="help">Untick to hide it while you work on it. Children only see themes with this ticked and at least one live lesson.</span></div>
-          <button className="btn" disabled={creating || updating}>{creating || updating ? 'Saving…' : theme ? 'Save theme' : 'Add theme'}</button>
+          <p className={`lesson-state ${theme?.published ? 'live' : 'draft'}`}>
+            {!theme ? '📝 New theme: save it as a draft, preview it, then publish it to the app.'
+              : theme.published ? '✅ Published: children see this theme in the app.' : '📝 Draft: hidden from the app until you publish it.'}
+          </p>
+          {creating || updating ? <p className="muted"><b>Saving…</b></p> : null}
+          <div className="lesson-actions">
+            <button className="btn btn-ghost" disabled={creating || updating} onClick={() => setIntent('draft')}>{theme?.published ? 'Unpublish (back to draft)' : 'Save as draft'}</button>
+            <button className="btn btn-ghost" disabled={creating || updating} onClick={() => setIntent('preview')}>Save &amp; preview 👀</button>
+            <button className="btn" disabled={creating || updating} onClick={() => setIntent('publish')}>{theme?.published ? 'Save changes' : 'Publish to the app 🚀'}</button>
+          </div>
+          <span className="help">Children see a theme once it is published and has at least one published lesson.</span>
         </div>
       </form>
       {theme ? <button className="btn btn-small btn-danger" onClick={del}>Delete this theme</button> : null}

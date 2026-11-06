@@ -172,6 +172,7 @@ export class CatalogService implements OnApplicationBootstrap {
 
   async removeUpload(kind: 'videos' | 'courses' | 'releases', file: string | null | undefined) {
     if (!file) return;
+    if (kind === 'videos' && file.startsWith('default-')) return;   // a built-in lesson video, shared by every theme
     if (kind === 'videos') await unlink(join(uploadDir(kind), file.replace(/\.[^.]+$/, '') + '.webm')).catch(() => undefined);
     try {
       await unlink(join(uploadDir(kind), file));

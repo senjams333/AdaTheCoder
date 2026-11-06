@@ -138,6 +138,14 @@ All under `/api`. JSON in and out. `Bearer` = the `token` from log-in in an `Aut
   `bash desktop_app/install_linux.sh http://127.0.0.1:5000` makes it use your test website. Uninstall:
   `bash ~/.local/share/ada-the-coder/uninstall.sh`.
 
+### Drafts and preview (admin)
+
+New **themes** and new **lessons** start as **drafts**: hidden from the app. Each form has **Save as draft**,
+**Save & preview 👀** and **Publish to the app 🚀**. The theme preview shows the theme's card on the app's home screen and
+its lesson list as children see it: which lessons are free (they download with the app) and which are 🔒 (they download
+after the theme is bought). The lesson preview shows the lesson laid out like the app's coding page. Children see a theme
+once it is published and has at least one published lesson.
+
 ### Paid themes download only the free lessons
 
 **The app itself carries only lesson 1** (its content and video, desktop_app/vid/video1.*). Every other lesson and its
@@ -147,7 +155,7 @@ lessons when the app first connects; until then a lesson says it is downloading.
 
 The app downloads a paid theme's **free lessons** (1 by default: admin → theme → Settings → *Free lessons to try*) in
 full. The other lessons come as names only (🔒), with no examples, code or video. When the family buys the theme (payment
-on the website, or *I have a licence 🔑* in the app), the app shows **"Downloading the full lessons…"** (at least 3.5 seconds) while it downloads
+on the website, or *I have a licence 🔑* in the app), the app shows **"Making the full lessons available…"** (at least 3.5 seconds) while it downloads
 every lesson and video, then unlocks them. The app sends its log-in token with `GET /api/v3/courses`, so a bought theme
 always comes in full; after logging out, the computer keeps only the free lessons again.
 

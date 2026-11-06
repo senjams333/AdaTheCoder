@@ -768,13 +768,13 @@ async function lockedDialog(i) {
   });
   if (r === "up") buyFlow();
 }
-// "Downloading the full lessons…": after paying or entering a licence, while the theme's other lessons download
+// "Making the full lessons available…": after paying or entering a licence, while the theme's other lessons download
 function showFullLoading(on) {
   let o = document.getElementById("fullLoad");
   if (!o) {
     o = document.createElement("div");
     o.id = "fullLoad";
-    o.innerHTML = '<div class="fl-card"><div class="fl-spin"></div><h3>Downloading the full lessons…</h3>' +
+    o.innerHTML = '<div class="fl-card"><div class="fl-spin"></div><h3>Making the full lessons available…</h3>' +
       '<p>Please wait: every lesson of this theme is being downloaded. ✨</p><div class="fl-bar"><i></i></div></div>';
     $("win").appendChild(o);
   }

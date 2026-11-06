@@ -44,11 +44,12 @@ export default function AdminThemePage() {
           <p className="course-meta">
             <span className="pill">{c.packLabel}</span>
             {c.premium ? <span className="pill pill-sun">{c.price} · first {c.freeLessons} lessons free</span> : <span className="pill pill-sun">Free</span>}
-            {c.published ? <span className="pill pill-green">In the app</span> : <span className="pill pill-grey">Hidden from the app</span>}
+            {c.published ? <span className="pill pill-green">Published</span> : <span className="pill pill-sun">Draft</span>}
           </p>
         </div>
         <div className="theme-head-actions">
           <Link className="btn btn-small" href={`/admin/lessons/new?theme=${c.id}`}>+ Add a lesson</Link>
+          <Link className="btn btn-small btn-ghost" href={`/admin/themes/${c.id}/preview`}>Preview 👀</Link>
           <Link className="btn btn-small btn-ghost" href={`/admin/themes/${c.id}/settings`}>Theme settings</Link>
         </div>
       </div>
@@ -56,8 +57,8 @@ export default function AdminThemePage() {
       {!c.published || !live ? (
         <div className="app-warning">
           <b>⚠️ The app doesn&apos;t show this theme yet</b>
-          {!c.published ? <span>It&apos;s hidden. Open <Link href={`/admin/themes/${c.id}/settings`}>Theme settings</Link> and tick <i>Show this theme in the app</i>.</span> : null}
-          {!live ? <span>It has no live lessons. <Link href={`/admin/lessons/new?theme=${c.id}`}>Add a lesson</Link> (with <i>Show in the app</i> ticked), or copy lessons below.</span> : null}
+          {!c.published ? <span>It&apos;s a draft. <Link href={`/admin/themes/${c.id}/preview`}>Preview it</Link>, then press <i>Publish to the app</i>.</span> : null}
+          {!live ? <span>It has no live lessons. <Link href={`/admin/lessons/new?theme=${c.id}`}>Add a lesson</Link> and publish it, or copy lessons below.</span> : null}
         </div>
       ) : (
         <div className="app-ok">✅ In the app: children see this theme the next time the app checks (within 3 minutes, or 🔄 Check for new lessons in the app&apos;s menu).</div>
