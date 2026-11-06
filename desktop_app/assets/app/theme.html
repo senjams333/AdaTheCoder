@@ -816,7 +816,7 @@ async function embedBuyFlow() {
   } else if (r !== "paid") return;
   // the app downloads the theme's other lessons now; the preview just shows the same message for a moment
   showFullLoading(true);
-  await new Promise(ok => setTimeout(ok, 3500));
+  await new Promise(ok => setTimeout(ok, 4000));
   showFullLoading(false);
   S().key = true; refreshTopics();
   try { parent.postMessage({ kind: "kids-paid", theme: window.EMBED_THEME }, "*"); } catch (e) {}

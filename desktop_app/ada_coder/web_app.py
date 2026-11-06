@@ -467,8 +467,8 @@ class WebMainWindow(QMainWindow):
             if worker.is_alive():
                 return
             timer.stop()
-            # the child sees "Making the full lessons available…" for at least 3.5 seconds, however fast the download was
-            left = 3.5 - (time.monotonic() - started)
+            # the child sees "Making the full lessons available…" for 4 seconds (3 to 5), or until the download is done if it takes longer
+            left = 4.0 - (time.monotonic() - started)
             if left > 0:
                 QTimer.singleShot(int(left * 1000), finish)
             else:

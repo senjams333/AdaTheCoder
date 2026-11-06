@@ -155,7 +155,7 @@ lessons when the app first connects; until then a lesson says it is downloading.
 
 The app downloads a paid theme's **free lessons** (1 by default: admin → theme → Settings → *Free lessons to try*) in
 full. The other lessons come as names only (🔒), with no examples, code or video. When the family buys the theme (payment
-on the website, or *I have a licence 🔑* in the app), the app shows **"Making the full lessons available…"** (at least 3.5 seconds) while it downloads
+on the website, or *I have a licence 🔑* in the app), the app shows **"Making the full lessons available…"** (4 seconds, or longer if the download needs it) while it downloads
 every lesson and video, then unlocks them. The app sends its log-in token with `GET /api/v3/courses`, so a bought theme
 always comes in full; after logging out, the computer keeps only the free lessons again.
 
