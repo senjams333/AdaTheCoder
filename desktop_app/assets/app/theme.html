@@ -192,6 +192,22 @@ body.vfull-body .top, body.vfull-body .menu, body.vfull-body .side { visibility:
 .vstop:hover { background: #0284c7; color: #fff; }
 .seevid { position: absolute; z-index: 6; left: calc(50% + 70px); bottom: 2px; transform: translateX(-50%); white-space: nowrap; }
 .seevid[hidden] { display: none; }
+/* the success / oops cartoon: over the lesson list on the right, inside the window */
+.cartoon { position: absolute; right: 18px; bottom: 26px; width: 262px; z-index: 940; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  pointer-events: none; animation: ctPop .35s ease-out, ctBob 1.4s ease-in-out .35s infinite alternate; }
+.cartoon[hidden] { display: none; }
+.cartoon .ct-say { max-width: 100%; text-align: center; background: #fff; border-radius: 22px; padding: 10px 16px; font: 700 18px var(--font-kid);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .25); word-wrap: break-word; }
+.cartoon.yay .ct-say { color: #059669; border: 4px solid #34d399; }
+.cartoon.oops .ct-say { color: #b45309; border: 4px solid #facc15; font-size: 16px; }
+.cartoon .ct-pic img { width: 200px; height: 200px; object-fit: contain; filter: drop-shadow(0 12px 22px rgba(0, 0, 0, .45)); }
+.cartoon .ct-emoji { font-size: 140px; line-height: 1; }
+.cartoon.top { top: 72px; bottom: auto; right: 28px; width: 320px; flex-direction: row-reverse; align-items: center; }
+.cartoon.top .ct-pic img { width: 110px; height: 110px; }
+.cartoon.top .ct-emoji { font-size: 90px; }
+.cartoon.top .ct-say { flex: 1; }
+@keyframes ctPop { from { transform: scale(.4) translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ctBob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 #fullLoad { position: absolute; inset: 0; z-index: 950; display: grid; place-items: center; background: rgba(12, 74, 110, .35); backdrop-filter: blur(3px); }
 #fullLoad[hidden] { display: none; }
 .fl-card { width: 420px; text-align: center; background: #fff; border: 4px solid #facc15; border-radius: 30px; padding: 26px 30px 22px;
@@ -526,12 +542,11 @@ function buildFrame() {
     `.example-panel::-webkit-scrollbar-track{margin:34px 0;background:rgba(255,255,255,.35);border-radius:8px}` +
     `.example-panel::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:8px;border:2px solid rgba(255,255,255,.7)}` +
     // the cheering teddy after a right answer: smaller, top right, no dark cover, so the output stays readable
-    `.giant-teddy-overlay{background:transparent!important;align-items:flex-start!important;padding:14px 10px 0 0!important}` +
-    `.giant-teddy-card{gap:10px!important}.giant-teddy-card img{width:230px!important;height:230px!important}` +
-    `.giant-teddy-card h2{font-size:22px!important;padding:10px 20px!important;border-width:3px!important}</style>`;
+    // the cheering teddy and the "oops" friend appear over the lesson list on the right (cartoonOver below), not here
+    `.giant-teddy-overlay,.giant-tom-overlay{display:none!important}</style>`;
   const shim = lift + `<script>window.pyqtBridge={executePython:function(c){parent.__runCode(c)},notifyEmptyInput:function(){parent.__emptyInput&&parent.__emptyInput()},submitInput:function(v){parent.__submitInput&&parent.__submitInput(v)}};<\/script>`;
   frame.srcdoc = A.template.replace("</head>", shim + "</head>");
-  frame.addEventListener("load", () => { frameReady = true; patchTutorial(); addBgVolume(); if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
+  frame.addEventListener("load", () => { frameReady = true; patchTutorial(); patchCartoons(); addBgVolume(); if (view === "lesson") pushLesson(); setTimeout(placeSeeVideo, 0); });
   $("lesson").appendChild(frame);
 }
 // "🎬 See video" on the coding page, in the same place and colours as "Skip video" on the video page
@@ -547,6 +562,42 @@ function placeSeeVideo() {
 addEventListener("resize", () => requestAnimationFrame(placeSeeVideo));
 $("seeVidBtn").onclick = () => playIntro();
 // "Click the examples here to start!" with Ada: covers the whole examples panel, for 2.5 seconds
+// the success teddy and the "oops" friend: over the lesson list on the right, so they never cover the code or its
+// output, and always inside the window. The lesson page still plays its sounds, voice and confetti.
+let cartoonTimer = 0;
+function cartoonOver(kind, pic, emoji, text, ms) {
+  let c = document.getElementById("cartoon");
+  if (!c) {
+    c = document.createElement("div"); c.id = "cartoon";
+    c.innerHTML = '<div class="ct-say"></div><div class="ct-pic"></div>';
+    $("win").appendChild(c);
+  }
+  // over the lesson list; with the list hidden, up in the free space by the title (never over the code or its output)
+  c.className = "cartoon " + kind + (sideCollapsed ? " top" : "");
+  c.querySelector(".ct-say").textContent = text;
+  c.querySelector(".ct-pic").innerHTML = pic ? '<img alt="" src="' + esc(pic) + '">' : '<span class="ct-emoji">' + esc(emoji) + '</span>';
+  c.hidden = false;
+  clearTimeout(cartoonTimer);
+  cartoonTimer = setTimeout(() => { c.hidden = true; }, ms);
+}
+function patchCartoons() {
+  try {
+    const w = frame.contentWindow, d = frame.contentDocument;
+    const picOf = id => { const im = d.querySelector("#" + id + " img"); return im && im.getAttribute("src") && !/^(teddy|tom)\.png$/.test(im.getAttribute("src")) ? im.src : ""; };
+    w.showGiantTeddy = function (muteSound) {
+      try { if (!muteSound) w.playSuccessSound(); } catch (e) {}
+      try { w.speakWithKidVoice("Fantastic job! Code ran correctly!"); } catch (e) {}
+      try { w.createConfetti(); } catch (e) {}
+      cartoonOver("yay", picOf("giantTeddyOverlay") || A.chars[A.chars.length - 1].img, "🧸", "🎉 Fantastic Job! 🌟", 3000);
+      setTimeout(() => { try { w.nudgeNextExample(); } catch (e) {} }, 1200);
+    };
+    w.showGiantTom = function (msg) {
+      try { w.playErrorSound(); } catch (e) {}
+      try { w.speakWithKidVoice(msg); } catch (e) {}
+      cartoonOver("oops", picOf("giantTomOverlay") || A.chars[0].img, "👦", msg || "Oopsie! 🙈", 6000);
+    };
+  } catch (e) {}
+}
 function patchTutorial() {
   try {
     const w = frame.contentWindow, d = frame.contentDocument;
