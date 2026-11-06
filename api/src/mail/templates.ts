@@ -180,10 +180,10 @@ export function licenceEmail(p: Purchase, siteUrl: string): Email {
 <p style="margin:0 0 8px;">Your licence:</p>${box}
 <p style="margin:0 0 18px;font-size:14px;color:#6B6890;">Payment: ${esc(p.provider)} · reference ${esc(p.reference)}. Keep this email; the licence is also on your account page.</p>
 <p style="margin:0 0 18px;">${button(`${site}/account`, 'Open my account')}</p>
-<p style="margin:0;font-size:13px;color:#6B6890;">All sales are final (<a href="${esc(site)}/refunds" style="color:#7B4DFF;">no refunds</a>). Charged twice or the theme didn't unlock? Just reply to this email.</p>`,
+<p style="margin:0;font-size:13px;color:#6B6890;">Charged twice or the theme didn't unlock? Just reply to this email and we'll make it right (<a href="${esc(site)}/privacy#purchases" style="color:#7B4DFF;">our policies</a>).</p>`,
     siteUrl,
   );
-  const text = `Thank you! ${p.theme} is unlocked.\n\nPayment: ${p.amount} (${p.provider}, reference ${p.reference})\nYour licence: ${p.licence}\n\nEvery lesson is open in the Ada The Coder app. Your account: ${site}/account\nAll sales are final (no refunds): ${site}/refunds`;
+  const text = `Thank you! ${p.theme} is unlocked.\n\nPayment: ${p.amount} (${p.provider}, reference ${p.reference})\nYour licence: ${p.licence}\n\nEvery lesson is open in the Ada The Coder app. Your account: ${site}/account\nCharged twice or the theme didn't unlock? Reply to this email and we'll make it right. Our policies: ${site}/privacy#purchases`;
   return { subject: `Your Ada The Coder licence for ${p.theme}`, html, text };
 }
 

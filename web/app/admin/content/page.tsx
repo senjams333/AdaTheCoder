@@ -113,7 +113,7 @@ export default function AdminContent() {
         <div className="field">
           <label htmlFor="business_details">Business details</label>
           <textarea id="business_details" rows={4} value={form.business_details || ''} onChange={set('business_details')} />
-          <span className="help">Your legal name, postal address and phone, one per line. Shown on the Terms, Refunds and Privacy pages (Razorpay and PayPal ask for these).</span>
+          <span className="help">Your legal name, postal address and phone, one per line. Shown on the Terms and Policies pages (Razorpay and PayPal ask for these).</span>
         </div>
         <div className="field"><label htmlFor="contact_email">Contact email</label><input id="contact_email" type="email" value={form.contact_email || ''} onChange={set('contact_email')} /></div>
         <button className="btn" disabled={isLoading}>{isLoading ? 'Saving…' : 'Save website text'}</button>

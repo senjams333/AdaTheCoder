@@ -42,7 +42,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
     '🎈 | 3. Breathe (Mind) | Take 3 balloon breaths: breathe in deep to fill your belly, then blow it out slowly.\n' +
     '💧 | 4. Drink (Hydration) | Take 3 big sips of water. It keeps your brain happy and running smoothly.',
   break_button: 'I did it! Back to coding 🚀',
-  // on the Terms, Refunds and Privacy pages (payment providers ask for a legal name and address)
+  // on the Terms and Policies pages (payment providers ask for a legal name and address)
   business_details: 'Ada The Coder\n(Your legal name)\n(Your address, city, PIN code, India)\nPhone: (your phone number)',
   parents_note:
     'There are no ads, no chat and no strangers in Ada The Coder. Your child never needs an account, and their ' +

@@ -175,7 +175,7 @@ function PayInner() {
                 </button>
               </div>
               <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.<br />
-                By paying you agree to the <Link href="/terms">terms</Link>. All sales are final: <Link href="/refunds">no refunds</Link> (try the free lessons first).</p>
+                By paying you agree to our <Link href="/terms">terms</Link> and <Link href="/privacy#purchases">policies</Link>. The free lessons are there so your child can try the theme first.</p>
             </>
           )}
         </div>
