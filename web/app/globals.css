@@ -28,16 +28,18 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; font-size: 112.5%; }   /* bigger, easier-to-read text across the website */
+html:has(.admin) { font-size: 100%; }                   /* the admin pages keep their size */
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 18px/1.6 var(--font-body);
+  font: 20px/1.6 var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
+.admin { font-size: 18px; }
 
 h1, h2, h3 { font-family: var(--font-head); font-weight: 600; line-height: 1.1; margin: 0 0 .5em; text-wrap: balance; }
 h1 { font-size: clamp(2.5rem, 5.8vw, 4.4rem); letter-spacing: -0.01em; }
