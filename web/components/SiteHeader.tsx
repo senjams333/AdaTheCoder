@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { api, useGetSiteQuery } from '@/lib/api';
 import { loggedOut } from '@/lib/authSlice';
 import { flash } from '@/lib/flashSlice';
@@ -13,6 +13,7 @@ export default function SiteHeader() {
   const { data } = useGetSiteQuery();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const onAccount = usePathname() === '/account';   // the account page: no Contact link
 
   function logout() {
     dispatch(loggedOut());
@@ -35,7 +36,7 @@ export default function SiteHeader() {
             <Link href="/">Home</Link>
             <Link href="/#lessons">Lessons</Link>
             <Link href="/#parents">For Parents</Link>
-            <Link href="/contact">Contact</Link>
+            {!onAccount && <Link href="/contact">Contact</Link>}
             {user ? (
               <>
                 <Link className="btn btn-small" href="/account">My account</Link>
