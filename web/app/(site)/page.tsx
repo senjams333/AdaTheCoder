@@ -30,7 +30,7 @@ export default function HomePage() {
               <div className="actions">
                 <Link className="btn btn-sun btn-hero" href={user ? '/account' : '/register'}>
                   <DownloadIcon />
-                  {user ? 'Download the app' : 'Download'}
+                  {user ? 'Download the app' : 'Try Free!'}
                 </Link>
               </div>
               <p className="small-print">For Windows 10 or newer and macOS 11 or newer.</p>
