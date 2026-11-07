@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { CurrentUser, PayGuard } from '../auth/guards';
@@ -14,9 +14,10 @@ export class PaymentsController {
   /** What the pay page shows: the theme, whether the family has it, and how it can be paid for. */
   @Get(':slug')
   @UseGuards(PayGuard)
-  async page(@CurrentUser() user: User, @Param('slug') slug: string) {
+  async page(@CurrentUser() user: User, @Param('slug') slug: string, @Query('payment_id') paymentId?: string) {
     const course = await this.pay.theme(slug);
-    if (!(await this.pay.owns(user, course))) await this.pay.checkButtonPayment(user, course);
+    // payment_id: Razorpay's Payment Button sends the family back with it, so that exact payment is checked
+    if (!(await this.pay.owns(user, course))) await this.pay.checkButtonPayment(user, course, paymentId);
     return {
       theme: this.catalog.card(course), licence: await this.pay.owns(user, course),
       methods: this.pay.methods(course), user: { name: user.name, email: user.email },

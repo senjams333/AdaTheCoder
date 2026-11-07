@@ -30,13 +30,18 @@ function PayInner() {
   const started = useRef(false);
   // Razorpay's Payment Button (or its redirect back here with ?paid=1): the webhook unlocks the theme, so this page
   // asks again every 5 seconds and turns into the "Payment successful" page as soon as the licence is there
-  const [confirming, setConfirming] = useState(params.get('paid') === '1');
+  // Razorpay adds "?payment_id=pay_..." to the return address, even after ?paid=1 (giving "paid=1?payment_id=..."),
+  // so both are read here; the payment id lets the server check that exact payment
+  const paidParam = params.get('paid') || '';
+  const paymentId = params.get('payment_id') || params.get('razorpay_payment_id') || (paidParam.match(/payment_id=(pay_[A-Za-z0-9]+)/) || [])[1] || '';
+  const [confirming, setConfirming] = useState(paidParam.startsWith('1') || !!paymentId);
+  const pagePath = encodeURIComponent(slug) + (paymentId ? `?payment_id=${encodeURIComponent(paymentId)}` : '');
 
   const load = useCallback(async () => {
     if (!slug) return setErrors(['Choose a theme to unlock on your account page.']);
     if (!token) return setNeedLogin(true);
     try {
-      setPage(await payCall<PayPageData>(encodeURIComponent(slug), token));
+      setPage(await payCall<PayPageData>(pagePath, token));
     } catch (err) {
       if ((err as { status?: number }).status === 401) setNeedLogin(true);
       else setErrors([(err as Error).message]);
@@ -103,7 +108,7 @@ function PayInner() {
     const timer = setInterval(async () => {
       tries += 1;
       try {
-        const fresh = await payCall<PayPageData>(encodeURIComponent(slug), token);
+        const fresh = await payCall<PayPageData>(pagePath, token);
         if (fresh.licence) {
           clearInterval(timer);
           setPaid({ ok: true, licence: fresh.licence, theme: fresh.theme.slug, name: fresh.theme.name, message: '' });
