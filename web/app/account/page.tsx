@@ -112,9 +112,8 @@ function AccountInner() {
               <div className="acct-actions">
                 <button type="button" className="acct-btn" onClick={() => setModal('details')}>Edit Details</button>
                 <button type="button" className="acct-btn acct-btn-ghost" onClick={() => setModal('password')}>Change Password</button>
-                <button type="button" className="acct-link" onClick={() => setModal('delete')}>Delete account</button>
                 {u.role === 'admin' ? <Link className="acct-link acct-admin-link" href="/admin">Go to admin</Link> : null}
-                <div className="acct-logout"><button className="acct-btn acct-btn-ghost acct-btn-block" onClick={logout}>Log out</button></div>
+                <div className="acct-logout"><button type="button" className="acct-btn acct-btn-danger acct-btn-block" onClick={() => setModal('delete')}>Delete account</button></div>
               </div>
 
               <Modal open={modal === 'details'} onClose={() => setModal(null)} title="Edit your details" id="det-title">
