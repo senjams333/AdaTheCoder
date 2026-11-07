@@ -6,7 +6,8 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
 import PaidCard from '@/components/PaidCard';
 import { useAppSelector } from '@/lib/hooks';
-import { loadRazorpay, Paid, payCall, PayPage } from '@/lib/pay';
+import { loadRazorpay, payCall } from '@/lib/pay';
+import type { Paid, PayPage as PayPageData } from '@/lib/pay';
 
 type RazorpayOrder = { key: string; order_id: string; amount: number; currency: string; name: string; description: string;
   prefill: { name: string; email: string } };
@@ -20,7 +21,7 @@ function PayInner() {
   const passToken = params.get('t');
   const { token: siteToken, ready } = useAppSelector((s) => s.auth);
   const token = passToken || siteToken;
-  const [page, setPage] = useState<PayPage | null>(null);
+  const [page, setPage] = useState<PayPageData | null>(null);
   const [errors, setErrors] = useState<string[]>(params.get('cancelled') ? ['The PayPal payment was cancelled. Nothing was charged.'] : []);
   const [needLogin, setNeedLogin] = useState(false);
   const [busy, setBusy] = useState<'' | 'razorpay' | 'paypal'>('');
@@ -35,7 +36,7 @@ function PayInner() {
     if (!slug) return setErrors(['Choose a theme to unlock on your account page.']);
     if (!token) return setNeedLogin(true);
     try {
-      setPage(await payCall<PayPage>(encodeURIComponent(slug), token));
+      setPage(await payCall<PayPageData>(encodeURIComponent(slug), token));
     } catch (err) {
       if ((err as { status?: number }).status === 401) setNeedLogin(true);
       else setErrors([(err as Error).message]);
@@ -102,7 +103,7 @@ function PayInner() {
     const timer = setInterval(async () => {
       tries += 1;
       try {
-        const fresh = await payCall<PayPage>(encodeURIComponent(slug), token);
+        const fresh = await payCall<PayPageData>(encodeURIComponent(slug), token);
         if (fresh.licence) {
           clearInterval(timer);
           setPaid({ ok: true, licence: fresh.licence, theme: fresh.theme.slug, name: fresh.theme.name, message: '' });
