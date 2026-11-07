@@ -184,8 +184,10 @@ function AccountInner() {
                 <InstallHelp contact={contact} onDone={() => setModal(null)} />
               </Modal>
               <footer className="acct-footer">
-                <span>© Ada The Coder</span>
-                <Link href="/privacy">Privacy</Link>
+                <span>© Ada The Coder. Made for curious kids and the grown-ups who help them.</span>
+                <Link href="/privacy">Policies</Link>
+                <Link href="/terms">Terms &amp; Conditions</Link>
+                <Link href="/contact">Contact</Link>
                 <a href={`mailto:${contact}`}>{contact}</a>
               </footer>
             </main>
