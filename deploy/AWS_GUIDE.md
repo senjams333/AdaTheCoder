@@ -173,3 +173,17 @@ in `desktop_app/ada_coder/config.py`, build, upload in **App versions**; install
 
 The server (t3.small) is about US$15–20 a month plus a little for disk and data. The Windows build machine
 costs about US$0.10 an hour only while running.
+
+---
+
+## Forgot the admin password
+
+1. First try **https://www.adathecoder.com/forgot-password** with the admin email (a reset email arrives).
+2. Or set a new one on the server (replace `MyNewPass2026`; avoid the characters ' " ! $):
+
+```
+cd ~/Ada/api && node -e "console.log(require('bcryptjs').hashSync('MyNewPass2026', 12))" > /tmp/h.txt
+U=$(grep -E "^DB_USER=" .env | cut -d= -f2-); P=$(grep -E "^DB_PASSWORD=" .env | cut -d= -f2-); D=$(grep -E "^DB_NAME=" .env | cut -d= -f2-); mysql -h 127.0.0.1 -u "$U" -p"$P" "$D" -e "UPDATE users SET password_hash='$(cat /tmp/h.txt)' WHERE role='admin'; SELECT email, ROW_COUNT() AS changed FROM users WHERE role='admin';"; rm -f /tmp/h.txt; pm2 restart ada-api
+```
+
+"Too many tries" on the log-in page clears with `pm2 restart ada-api`.
