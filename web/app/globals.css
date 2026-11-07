@@ -934,3 +934,5 @@ a.course-pic img { transition: transform .2s; }
 
 /* "What your child will learn" and "Up and coding in three steps" intros: straight left and right edges */
 #lessons .section-head p, .steps-head .section-head p { text-align: justify; hyphens: auto; }
+/* "A note from the author" letter: straight left and right edges (not the signature) */
+.author-letter p:not(.author-sign):not(.author-role) { text-align: justify; hyphens: auto; }
