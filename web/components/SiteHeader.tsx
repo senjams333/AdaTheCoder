@@ -42,7 +42,7 @@ export default function SiteHeader() {
               </>
             ) : (
               <>
-                <Link className="btn btn-small" href="/register">Sign up free</Link>
+                <Link className="btn btn-small" href="/login">Sign in</Link>
               </>
             )}
           </nav>
