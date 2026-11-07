@@ -103,7 +103,8 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
         res = await sendWithProgress(isNew ? 'POST' : 'PUT', `${API_URL}/admin/lessons${isNew ? '' : `/${lesson.id}`}`, fd, token, setSent);
         dispatch(api.util.invalidateTags(['Themes', 'Theme', 'Dashboard', 'Site', ...(lesson.id ? [{ type: 'Lesson' as const, id: lesson.id }] : [])]));
       } else {
-        res = isNew ? await create(fd).unwrap() : await update({ id: lesson.id as number, form: fd }).unwrap();
+        const d = isNew ? await create(fd).unwrap() : await update({ id: lesson.id as number, form: fd }).unwrap();
+        res = { ok: d.ok, id: d.id ?? (lesson.id as number), courseId: d.courseId ?? Number(form.courseId), message: d.message };
       }
       setSent(null);
       if (intent === 'preview') {
