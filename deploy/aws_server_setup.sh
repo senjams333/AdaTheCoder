@@ -96,9 +96,11 @@ if [ "$SCHEME" = https ]; then
 fi
 
 step "8/8  Check"
-for _ in $(seq 1 60); do curl -s "$URL/api/health" | grep -q '"ok":true' && break; sleep 2; done
-if curl -s "$URL/api/health" | grep -q '"ok":true'; then echo "API: OK"; else echo "API didn't answer yet. See: pm2 logs ada-api"; fi
-if curl -s -o /dev/null -w '%{http_code}' "$URL/" | grep -qE '^(200|30)'; then echo "Website: OK"; else echo "Website didn't answer yet. See: pm2 logs ada-web"; fi
+# checked through nginx on this machine, each try limited to 5 seconds (so a closed port can't make it hang)
+for _ in $(seq 1 30); do curl -s -m 5 http://127.0.0.1/api/health | grep -q '"ok":true' && break; sleep 2; done
+if curl -s -m 5 http://127.0.0.1/api/health | grep -q '"ok":true'; then echo "API: OK"; else echo "API didn't answer yet. See: pm2 logs ada-api"; fi
+if curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1/ | grep -qE '^(200|30)'; then echo "Website: OK"; else echo "Website didn't answer yet. See: pm2 logs ada-web"; fi
+echo "(If the address doesn't open in a browser, allow HTTP and HTTPS in the server's AWS security group.)"
 
 cat <<DONE
 
