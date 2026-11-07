@@ -259,6 +259,21 @@ export class PaymentsService {
     if (now - (this.lastCheck.get(user.id) || 0) < 8000) return;
     this.lastCheck.set(user.id, now);
     const auth = { Authorization: 'Basic ' + Buffer.from(`${this.razorpayKey}:${this.razorpaySecret}`).toString('base64') };
+    // A Payment Button payment says nothing about which theme it was for, apart from (sometimes) its button. If another
+    // paid theme uses the same button for the same price, the payment can't be told apart, so it is never guessed.
+    const mine = this.buttonFor(course);
+    const twins = (await this.catalog.courses.find({ where: { premium: true } }))
+      .filter((c) => c.id !== course.id && this.buttonFor(c) === mine && minorUnits(c.priceInr) === price);
+    if (twins.length) {
+      this.warnOnce(`twins-${course.id}`, `Razorpay check: ${course.name} and ${twins.map((c) => c.name).join(', ')} use the same `
+        + `Payment Button and the same price, so a payment can't be matched to one of them. Give each theme its own button, `
+        + `or leave the button empty (admin → theme → Settings, and RAZORPAY_PAYMENT_BUTTON_ID in api/.env) to use Checkout.`);
+      return;
+    }
+    const otherButton = (p: Record<string, any>) => {
+      const b = String(p.payment_button_id || p.notes?.payment_button_id || '');
+      return !!b && b !== mine;
+    };
     const email = user.email.trim().toLowerCase();
     // 1. Razorpay sent the family back with the payment's id: check that exact payment (whatever email was typed in
     //    Razorpay's form). It must be paid, for this theme's price, and not already used by another family or theme.
@@ -266,6 +281,10 @@ export class PaymentsService {
       try {
         const p: Record<string, any> = await this.provider(`https://api.razorpay.com/v1/payments/${paymentId}`, { headers: auth },
           'Razorpay payment check (check the key ID and secret, and that they are the same mode, Test or Live, as the button)');
+        if (otherButton(p)) {
+          this.log.warn(`Razorpay check: payment ${p.id} was made with another theme's button, not ${course.name}'s`);
+          return;
+        }
         if (['captured', 'authorized'].includes(p.status) && Number(p.amount) === price) {
           const used = await this.payments.findOne({ where: { orderId: String(p.id) } });
           if (used && (used.userId !== user.id || used.courseId !== course.id)) {
@@ -296,7 +315,8 @@ export class PaymentsService {
     }
     const items: Record<string, any>[] = list.items || [];
     const mailOf = (p: Record<string, any>) => String(p.email || p.notes?.email || '').trim().toLowerCase();
-    const found = items.find((p) => ['captured', 'authorized'].includes(p.status) && Number(p.amount) === price && mailOf(p) === email);
+    const found = items.find((p) => ['captured', 'authorized'].includes(p.status) && Number(p.amount) === price && mailOf(p) === email
+      && !otherButton(p));
     if (!found) {
       const seen = items.slice(0, 5).map((p) => `${p.id} ${p.status} ${p.amount} ${mailOf(p) || 'no email'}`).join('; ');
       this.log.warn(`Razorpay check for ${email}, ${course.name} (${price} paise): no matching payment in the last 24 hours. `
