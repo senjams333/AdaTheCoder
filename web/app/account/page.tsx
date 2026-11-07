@@ -8,7 +8,7 @@ import InstallHelp from '@/components/InstallHelp';
 import SiteHeader from '@/components/SiteHeader';
 import Modal from '@/components/Modal';
 import {
-  api, useChangePasswordMutation, useDeleteAccountMutation, useDownloadLinkMutation, useGetAccountQuery, useGetSiteQuery,
+  api, useDeleteAccountMutation, useForgotPasswordMutation, useDownloadLinkMutation, useGetAccountQuery, useGetSiteQuery,
   useUpdateAccountMutation,
 } from '@/lib/api';
 import { loggedOut, userUpdated } from '@/lib/authSlice';
@@ -121,7 +121,7 @@ function AccountInner() {
                 <DetailsForm user={u} countries={site?.countries || []} onDone={() => setModal(null)} />
               </Modal>
               <Modal open={modal === 'password'} onClose={() => setModal(null)} title="Change your password" id="pw-title">
-                <PasswordForm onDone={() => setModal(null)} />
+                <PasswordLink email={u.email} onDone={() => setModal(null)} />
               </Modal>
               <Modal open={modal === 'delete'} onClose={() => setModal(null)} title="Delete your account?" id="del-title">
                 <DeleteForm onDone={() => setModal(null)} />
@@ -263,33 +263,42 @@ function DetailsForm({ user, countries, onDone }: { user: { name: string; city: 
   );
 }
 
-function PasswordForm({ onDone }: { onDone: () => void }) {
-  const [current, setCurrent] = useState('');
-  const [next, setNext] = useState('');
+/** Change password: a reset link is emailed to the account's address (the same link as "Forgot password"),
+ *  so a password is only changed by someone who can read that inbox. */
+function PasswordLink({ email, onDone }: { email: string; onDone: () => void }) {
+  const [send, { isLoading }] = useForgotPasswordMutation();
+  const [sent, setSent] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [change, { isLoading }] = useChangePasswordMutation();
-  const dispatch = useAppDispatch();
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    if (next.length < 8) return setErrors(['Choose a new password with at least 8 characters.']);
+  const asked = useRef(false);
+  async function go() {
+    setErrors([]);
     try {
-      await change({ current, new: next }).unwrap();
-      dispatch(flash('success', 'Password changed.'));
-      onDone();
+      await send({ email }).unwrap();
+      setSent(true);
     } catch (err) {
       setErrors(errorList(err));
     }
   }
+  useEffect(() => {
+    if (asked.current) return;
+    asked.current = true;
+    go();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
-    <form onSubmit={submit}>
+    <div>
       <FormErrors errors={errors} />
-      <div className="field"><label htmlFor="current">Current password</label><input id="current" type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} /></div>
-      <div className="field"><label htmlFor="new">New password</label><input id="new" type="password" autoComplete="new-password" minLength={8} required value={next} onChange={(e) => setNext(e.target.value)} /><span className="help">At least 8 characters.</span></div>
+      {sent ? (
+        <>
+          <p className="acct-text"><b>📧 We&apos;ve sent a password reset link to {email}.</b></p>
+          <p className="acct-text">Please check your email and click the password reset link to change your password. If you don&apos;t see it within a few minutes, look in your Spam folder.</p>
+        </>
+      ) : !errors.length && <p className="acct-text">{isLoading ? 'Sending a password reset link…' : ''}</p>}
       <div className="acct-modal-buttons">
-        <button className="acct-btn" disabled={isLoading}>Save new password</button>
-        <button type="button" className="acct-btn acct-btn-ghost" onClick={onDone}>Close</button>
+        {errors.length > 0 && <button type="button" className="acct-btn" onClick={go} disabled={isLoading}>Try again</button>}
+        <button type="button" className="acct-btn acct-btn-ghost" onClick={onDone}>OK</button>
       </div>
-    </form>
+    </div>
   );
 }
 
