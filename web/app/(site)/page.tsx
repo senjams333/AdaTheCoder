@@ -58,7 +58,7 @@ export default function HomePage() {
 
       <section className="section">
         <div className="wrap">
-          <div className="section-head">
+          <div className="section-head wide">
             <h2>Meet your coding friends</h2>
             <p>Three friends keep your child company in every lesson, so learning to code never feels lonely or scary.</p>
           </div>

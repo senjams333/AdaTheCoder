@@ -227,6 +227,8 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .section-mint { background: var(--mint-soft); }
 .section-head { max-width: 760px; margin-bottom: 44px; }
 .section-head p { color: var(--ink-soft); font-size: 1.12rem; }
+/* a section intro kept on one line on wider screens (it still wraps on phones) */
+.section-head.wide, .section-head.wide p { max-width: none; }
 
 /* Meet the friends */
 .friends { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
