@@ -140,7 +140,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .hero .wrap { display: grid; grid-template-columns: minmax(360px, .55fr) minmax(0, 1.6fr); gap: 24px 24px; align-items: center; }   /* the stage floats level with the welcome text */
 .hero-text { padding-bottom: 40px; }
 .hero h1 { max-width: 13ch; font-size: clamp(2.4rem, 3.9vw, 5rem); margin: 0 0 18px; }
-.hero .lede { font-size: clamp(1.2rem, .95vw, 1.45rem); color: var(--ink-soft); max-width: 46ch; }
+.hero .lede { font-size: clamp(1.2rem, .95vw, 1.45rem); color: var(--ink-soft); max-width: 46ch; text-align: justify; hyphens: auto; }   /* straight left and right edges */
 .hero .actions { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 26px; }
 /* The one big call to action: download icon, white border, lifts on hover */
 .btn-hero { width: min(100%, 460px); padding: 20px 32px; font-size: 1.6rem; gap: 12px;
