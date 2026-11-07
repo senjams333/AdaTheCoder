@@ -188,7 +188,6 @@ function AccountInner() {
                 <Link href="/privacy">Policies</Link>
                 <Link href="/terms">Terms &amp; Conditions</Link>
                 <Link href="/contact">Contact</Link>
-                <a href={`mailto:${contact}`}>{contact}</a>
               </footer>
             </main>
           </div>
