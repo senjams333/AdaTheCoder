@@ -38,6 +38,7 @@ export default function SiteHeader() {
             <Link href="/contact">Contact</Link>
             {user ? (
               <>
+                <Link className="btn btn-small" href="/account">My account</Link>
                 <button className="link-btn" onClick={logout}>Log out</button>
               </>
             ) : (
