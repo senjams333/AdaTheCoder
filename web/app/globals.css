@@ -931,3 +931,6 @@ a.course-pic img { transition: transform .2s; }
 .brk-admin-preview p { margin: 4px 0 8px; color: #0369a1; font-weight: 700; }
 .brk-admin-preview ul { margin: 0 0 10px; padding-left: 0; list-style: none; display: grid; gap: 4px; }
 .brk-admin-btn { display: inline-block; background: #22c997; color: #fff; font-weight: 800; border-radius: 999px; padding: 8px 18px; }
+
+/* "What your child will learn" and "Up and coding in three steps" intros: straight left and right edges */
+#lessons .section-head p, .steps-head .section-head p { text-align: justify; hyphens: auto; }
