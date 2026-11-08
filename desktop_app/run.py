@@ -1,4 +1,5 @@
 """Start Ada The Coder:  python run.py"""
+import os
 import sys
 
 
@@ -41,6 +42,31 @@ def use_light_look(app):
     app.setPalette(pal)
 
 
+def setup_log():
+    """The installed app has no console window, so what it prints, its errors and Qt's own messages go to
+    app.log in its data folder (Windows: %APPDATA%\\AdaTheCoder\\app.log). Kept small: started fresh each launch."""
+    import os
+    import time
+    import traceback
+    from ada_coder.paths import data_dir
+    path = os.path.join(data_dir(), "app.log")
+    try:
+        log = open(path, "w", encoding="utf-8", buffering=1)
+    except OSError:
+        return
+    sys.stdout = sys.stderr = log
+    print(f"Ada The Coder started {time.strftime('%Y-%m-%d %H:%M:%S')} on {sys.platform}", flush=True)
+
+    def hook(kind, value, tb):
+        print("[error] " + "".join(traceback.format_exception(kind, value, tb)), flush=True)
+    sys.excepthook = hook
+    try:
+        from PyQt5.QtCore import qInstallMessageHandler
+        qInstallMessageHandler(lambda mode, ctx, msg: print(f"[qt] {msg}", flush=True))
+    except Exception:
+        pass
+
+
 def main():
     # The packaged app also runs the children's programs: "AdaTheCoder --ada-run my_code.py".
     # This keeps working on computers that don't have Python installed.
@@ -67,6 +93,8 @@ def main():
         return
 
     choose_server(sys.argv)
+    if getattr(sys, "frozen", False) or __import__("os").environ.get("ADA_LOG") == "1":
+        setup_log()
 
     if "--check" in sys.argv:
         from ada_coder import sync

@@ -21,7 +21,7 @@ import time
 from PyQt5.QtCore import QObject, QProcess, QTimer, QUrl, Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor, QDesktopServices
 from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEngineView
+from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineSettings, QWebEngineView
 from PyQt5.QtWidgets import QMainWindow
 
 from . import lessons as course
@@ -304,6 +304,13 @@ class Host(QObject):
         self.message.emit("🔄 Checking the website for new lessons…")
 
 
+class LoggingPage(QWebEnginePage):
+    """The page's own messages (JavaScript errors) go to the app's log file (see run.py: setup_log)."""
+    def javaScriptConsoleMessage(self, level, message, line, source):
+        if level >= QWebEnginePage.WarningMessageLevel:
+            print(f"[page] {message} ({os.path.basename(source or '')}:{line})", flush=True)
+
+
 class WebMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -318,6 +325,11 @@ class WebMainWindow(QMainWindow):
         self._reload_waiting = False
 
         self.view = QWebEngineView(self)
+        self.view.setPage(LoggingPage(self.view))
+        # in the log: whether the page loaded, and if the part that draws it stopped (a blank sky-blue window)
+        self.view.loadFinished.connect(lambda ok: print(f"[app] page loaded: {ok}", flush=True))
+        self.view.page().renderProcessTerminated.connect(
+            lambda status, code: print(f"[app] the page's drawing process stopped: status {int(status)}, code {code}", flush=True))
         s = self.view.settings()
         for attr in (QWebEngineSettings.LocalContentCanAccessFileUrls, QWebEngineSettings.LocalContentCanAccessRemoteUrls):
             s.setAttribute(attr, True)
@@ -371,6 +383,14 @@ class WebMainWindow(QMainWindow):
         }
 
     def _load_page(self):
+        try:
+            self._load_page_now()
+        except Exception:
+            import traceback
+            print("[app] the page couldn't be made:\n" + traceback.format_exc(), flush=True)
+            raise
+
+    def _load_page_now(self):
         data = dict(self._data(), lessonPage=_lesson_page())
         blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
         html = open(asset("app", "app.html"), encoding="utf-8").read().replace("__DATA__", blob)
