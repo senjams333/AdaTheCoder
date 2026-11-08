@@ -15,7 +15,7 @@
 :root[data-theme="dark"] { --page: #0c141c; --ink: #e6eef5; --muted: #93a4b5; --line: #24323f; --chip: #15212c; --accent: #38bdf8; color-scheme: dark }
 [hidden] { display: none !important; }
 body { background: var(--page); color: var(--ink); font-family: var(--font-ui); }
-.wrap { max-width: 1320px; margin: 0 auto; padding-block: 18px 28px;
+.wrap { max-width: 1320px; margin: 0 auto; padding-top: 18px; padding-bottom: 28px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .strip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
 .strip h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: .01em; }
@@ -40,7 +40,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 .central { position: absolute; top: 30px; left: 0; right: 0; bottom: 0; padding: 15px; display: flex; flex-direction: column; gap: 6px; transition: background .3s; }
 /* the whole window's sky: day (sun, clouds, meadow, flowers) or night (moon, stars) */
 .central > *:not(.scene) { position: relative; z-index: 1; }
-.scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.scene { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .central.day { background: linear-gradient(180deg, #5ec4ff 0%, #a5dcff 45%, #dff4ff 80%, #e9fbe3 100%) !important; }
 .central.night { background: radial-gradient(ellipse at 50% 0%, #2c3285 0%, #161c52 45%, #070b24 100%) !important; }
 .sc-sun, .sc-moon { position: absolute; left: 178px; top: 28px; width: 104px; height: 104px; border-radius: 50%; }
@@ -94,7 +94,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 .avatar img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
 .body { flex: 1; display: flex; gap: 18px; min-height: 0; }
 .center { flex: 1; min-width: 0; position: relative; }
-.hero { position: absolute; inset: 0; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; transition: background .3s; }
+.hero { position: absolute; top: 0; right: 0; bottom: 0; left: 0; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; transition: background .3s; }
 .hero h2 { font: 700 47px/1.1 var(--font-kid); margin: 0; text-align: center; }
 .hero p { font: 700 22px var(--font-kid); margin: 0; text-align: center; }
 .chars { display: flex; gap: 30px; align-items: flex-end; justify-content: center; }
@@ -105,7 +105,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 .char:nth-child(2) img { animation-delay: -.8s; } .char:nth-child(3) img { animation-delay: -1.6s; }
 @keyframes bob { 50% { transform: translateY(-20px); } }
 @media (prefers-reduced-motion: reduce) { .char img { animation: none; } }
-.lesson { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 8px; }
+.lesson { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; gap: 8px; }
 .lesson iframe { flex: 1; width: 100%; border: 0; background: transparent; }
 /* The app window is always drawn in its own light scheme. Without this, a viewer whose browser is in dark
    mode gets the lesson frame painted solid white (browsers fill a frame whose colour scheme differs). */
@@ -151,7 +151,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 .link { text-align: center; display: block; background: transparent; border: none; color: #0284c7; text-decoration: underline; font: 700 15px var(--font-kid); cursor: pointer; padding: 4px; }
 
 /* intro video after log-in: the same player as the lessons' videos */
-.vstage { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.vstage { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
 /* the big ▶ in the middle while the video is paused (click the video, or press Tab, to play or pause) */
 .vbigplay { position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%;
   background: rgba(15, 23, 42, .55); color: #fff; font: 44px/96px Arial, sans-serif; text-align: center; padding-left: 6px; box-sizing: border-box;
@@ -162,7 +162,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !important; }
 .vbox video { width: 100%; height: 100%; object-fit: contain; cursor: pointer; background: #000; border: 6px solid #ffea79; border-radius: 35px;
   box-shadow: 0 0 30px rgba(255, 230, 100, .86); box-sizing: border-box; display: block; }
-.vmissing { position: absolute; inset: 0; border: 6px solid #ffea79; border-radius: 35px; box-sizing: border-box;
+.vmissing { position: absolute; top: 0; right: 0; bottom: 0; left: 0; border: 6px solid #ffea79; border-radius: 35px; box-sizing: border-box;
   background: radial-gradient(circle at 50% 40%, #1e3a8a, #0b1026); color: #fff; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 10px; text-align: center; font: 700 22px var(--font-kid); padding: 20px; }
 .vmissing .big { font-size: 64px; }
@@ -181,7 +181,7 @@ body.vplaying .scene, body.vplaying .scene * { animation-play-state: paused !imp
   font: 700 14px var(--font-kid); cursor: pointer; white-space: nowrap; }
 .vfull:hover { background: #0284c7; color: #fff; }
 /* full screen: just the video and its controls on black */
-#vstage.vfull-on { position: fixed; inset: 0; z-index: 900; background: #000; padding: 18px !important; box-sizing: border-box; }
+#vstage.vfull-on { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 900; background: #000; padding: 18px !important; box-sizing: border-box; }
 #vstage.vfull-on .vstop { display: none; }
 body.vfull-body .sidetoggle, body.vfull-body #sideToggle, body.vfull-body #logoutBtn { visibility: hidden !important; }
 /* full screen: only the video and its controls (Exit full screen); Home, day/night, sound, profile and the menu stay hidden */
@@ -211,7 +211,7 @@ body.vfull-body .top, body.vfull-body .menu, body.vfull-body .side { visibility:
 .cartoon.top .ct-say { flex: 1; }
 @keyframes ctPop { from { transform: scale(.4) translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes ctBob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-#fullLoad { position: absolute; inset: 0; z-index: 950; display: grid; place-items: center; background: rgba(12, 74, 110, .35); backdrop-filter: blur(3px); }
+#fullLoad { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 950; display: grid; place-items: center; background: rgba(12, 74, 110, .35); backdrop-filter: blur(3px); }
 #fullLoad[hidden] { display: none; }
 .fl-card { width: 420px; text-align: center; background: #fff; border: 4px solid #facc15; border-radius: 30px; padding: 26px 30px 22px;
   box-shadow: 0 0 40px rgba(250, 204, 21, .6); font-family: var(--font-kid); color: #0c4a6e; }
@@ -238,7 +238,7 @@ body.vfull-body .top, body.vfull-body .menu, body.vfull-body .side { visibility:
 .menu hr { border: 0; height: 2px; background: #e2e8f0; margin: 4px 8px; }
 
 /* Qt dialogs */
-.modal { position: absolute; inset: 30px 0 0 0; background: rgba(15,23,42,.18); display: grid; place-items: center; z-index: 40; }
+.modal { position: absolute; top: 30px; right: 0; bottom: 0; left: 0; background: rgba(15,23,42,.18); display: grid; place-items: center; z-index: 40; }
 .dlg { background: #fff; border: 1px solid #94a3b8; border-radius: 8px; box-shadow: 0 16px 40px rgba(0,0,0,.3); min-width: 420px; max-width: 620px; overflow: hidden; }
 .dlg .dt { background: #e2e8f0; font: 13px var(--font-ui); color: #334155; padding: 7px 12px; display: flex; }
 .dlg .dt span:nth-child(2) { margin-left: auto; color: #64748b; cursor: pointer; padding: 0 4px; }
@@ -1104,4 +1104,55 @@ $("app0").onclick = () => pick(0);
 $("app1").onclick = () => pick(1);
 
 buildScene(); renderApp(); fit(); logout();
+</script>
+<script>
+/* Windows' built-in web engine (Qt 5.15.2, Chromium 83) ignores "gap" in flex layouts. There, the items get the same
+   space as margins instead. Newer engines (Ubuntu, Mac) support gap, so this does nothing there. */
+(function () {
+  function supported() {
+    try {
+      var t = document.createElement("div");
+      t.style.cssText = "display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden";
+      t.appendChild(document.createElement("div")); t.appendChild(document.createElement("div"));
+      document.body.appendChild(t);
+      var ok = t.scrollHeight === 1;
+      document.body.removeChild(t);
+      return ok;
+    } catch (e) { return true; }
+  }
+  function fix() {
+    var all = document.body.getElementsByTagName("*");
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i], cs = getComputedStyle(el);
+      if (cs.display !== "flex" && cs.display !== "inline-flex") continue;
+      var dir = cs.flexDirection, col = dir.indexOf("column") === 0, rev = dir.indexOf("reverse") > 0;
+      var g = parseFloat(col ? cs.rowGap : cs.columnGap) || 0;
+      if (!g) continue;
+      var prop = col ? (rev ? "marginBottom" : "marginTop") : (rev ? "marginRight" : "marginLeft");
+      var css = prop.replace(/[A-Z]/g, function (m) { return "-" + m.toLowerCase(); });
+      var first = true;
+      for (var c = el.firstElementChild; c; c = c.nextElementSibling) {
+        var ccs = getComputedStyle(c);
+        if (ccs.display === "none" || ccs.position === "absolute" || ccs.position === "fixed") continue;
+        var mine = c.getAttribute("data-gapfix") === prop;
+        if (first) {
+          if (mine) { c.style[prop] = ""; c.removeAttribute("data-gapfix"); }
+          first = false;
+        } else if (mine || (parseFloat(ccs.getPropertyValue(css)) || 0) === 0) {
+          if (c.style[prop] !== g + "px") c.style[prop] = g + "px";
+          c.setAttribute("data-gapfix", prop);
+        }
+      }
+    }
+  }
+  function start() {
+    if (supported()) return;
+    var busy = 0;
+    var later = function () { clearTimeout(busy); busy = setTimeout(fix, 60); };
+    fix();
+    new MutationObserver(later).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
+    window.addEventListener("resize", later);
+  }
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+})();
 </script>

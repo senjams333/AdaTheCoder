@@ -356,7 +356,7 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 
 .tutorial-overlay {
     position: absolute;
-    inset: 0;
+    top: 0; right: 0; bottom: 0; left: 0;
     background: rgba(15, 23, 42, 0.82);
     border-radius: 35px;
     padding: 18px;
@@ -420,7 +420,7 @@ body.dark-mode .output { background:#0f172a; color:#86efac; }
 }
 
 .giant-teddy-overlay, .giant-tom-overlay {
-    position: fixed; inset: 0; display: flex; justify-content: flex-end; align-items: center;
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0; display: flex; justify-content: flex-end; align-items: center;
     background: rgba(0, 0, 0, 0.4); z-index: 999999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding-right: 60px;}
 .giant-teddy-overlay.show, .giant-tom-overlay.show { opacity: 1; pointer-events: auto; }
 .giant-teddy-card, .giant-tom-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 25px; animation: bounceCard 1.5s ease-in-out infinite alternate; }
@@ -813,6 +813,60 @@ function handleCodeOutput(resultText, isError, kidMsg, highlight) {
 </script>
 """
 
+# Windows (Qt 5.15.2 / Chromium 83) ignores "gap" in flex layouts: the same space as margins there
+FLEXGAP_FIX = """<script>
+/* Windows' built-in web engine (Qt 5.15.2, Chromium 83) ignores "gap" in flex layouts. There, the items get the same
+   space as margins instead. Newer engines (Ubuntu, Mac) support gap, so this does nothing there. */
+(function () {
+  function supported() {
+    try {
+      var t = document.createElement("div");
+      t.style.cssText = "display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden";
+      t.appendChild(document.createElement("div")); t.appendChild(document.createElement("div"));
+      document.body.appendChild(t);
+      var ok = t.scrollHeight === 1;
+      document.body.removeChild(t);
+      return ok;
+    } catch (e) { return true; }
+  }
+  function fix() {
+    var all = document.body.getElementsByTagName("*");
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i], cs = getComputedStyle(el);
+      if (cs.display !== "flex" && cs.display !== "inline-flex") continue;
+      var dir = cs.flexDirection, col = dir.indexOf("column") === 0, rev = dir.indexOf("reverse") > 0;
+      var g = parseFloat(col ? cs.rowGap : cs.columnGap) || 0;
+      if (!g) continue;
+      var prop = col ? (rev ? "marginBottom" : "marginTop") : (rev ? "marginRight" : "marginLeft");
+      var css = prop.replace(/[A-Z]/g, function (m) { return "-" + m.toLowerCase(); });
+      var first = true;
+      for (var c = el.firstElementChild; c; c = c.nextElementSibling) {
+        var ccs = getComputedStyle(c);
+        if (ccs.display === "none" || ccs.position === "absolute" || ccs.position === "fixed") continue;
+        var mine = c.getAttribute("data-gapfix") === prop;
+        if (first) {
+          if (mine) { c.style[prop] = ""; c.removeAttribute("data-gapfix"); }
+          first = false;
+        } else if (mine || (parseFloat(ccs.getPropertyValue(css)) || 0) === 0) {
+          if (c.style[prop] !== g + "px") c.style[prop] = g + "px";
+          c.setAttribute("data-gapfix", prop);
+        }
+      }
+    }
+  }
+  function start() {
+    if (supported()) return;
+    var busy = 0;
+    var later = function () { clearTimeout(busy); busy = setTimeout(fix, 60); };
+    fix();
+    new MutationObserver(later).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
+    window.addEventListener("resize", later);
+  }
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+})();
+</script>
+"""
+
 MASTER_HTML_TEMPLATE = """<!DOCTYPE html><html><head>""" + BASE_CSS + """</head><body>
     <div class="sun"></div>
     <div class="moon"></div>
@@ -859,7 +913,7 @@ MASTER_HTML_TEMPLATE = """<!DOCTYPE html><html><head>""" + BASE_CSS + """</head>
             <div class="output" id="output">Your output will be displayed here 😊 .</div>
         </div>
     </div>
-    """ + COMMON_JS + """</body></html>"""
+    """ + COMMON_JS + FLEXGAP_FIX + """</body></html>"""
 
 MASTER_HTML_TEMPLATE = (
     MASTER_HTML_TEMPLATE

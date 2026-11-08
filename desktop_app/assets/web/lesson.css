@@ -49,7 +49,7 @@ kbd { font-family: var(--mono); font-size: .85em; background: rgba(123, 77, 255,
 
 /* ---------- sky: the app window paints the sky behind this page now (sun, clouds, meadow; moon, stars) ---------- */
 .sky { display: none !important; }
-.sky { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.sky { position: fixed; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 0; }
 .sun, .moon { position: absolute; top: 10px; left: 22px; width: 64px; height: 64px; border-radius: 50%; transition: opacity .5s; }
 .sun { background: radial-gradient(circle, #fff7b0, #ffb703); box-shadow: 0 0 40px #ffcf33, 0 0 90px rgba(255, 170, 0, .55); }
 .moon { opacity: 0; background: radial-gradient(circle at 30% 30%, #fff, #fde68a); box-shadow: 0 0 40px rgba(255, 255, 255, .8); }
@@ -122,7 +122,7 @@ body.dark-mode .example-body h3 { color: var(--sky); }
   padding: 10px 14px; white-space: pre-wrap; word-break: break-word; }
 
 /* ---------- guide pop-up over the examples ---------- */
-.tutorial-overlay { position: absolute; inset: 0; border-radius: 26px; background: rgba(30, 27, 75, .78); display: flex; flex-direction: column;
+.tutorial-overlay { position: absolute; top: 0; right: 0; bottom: 0; left: 0; border-radius: 26px; background: rgba(30, 27, 75, .78); display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 14px; opacity: 0; pointer-events: none; transition: opacity .35s; z-index: 5; }
 .tutorial-overlay.show { opacity: 1; pointer-events: auto; }
 .guide { position: relative; }
@@ -173,7 +173,7 @@ textarea { flex: 1; border: 0; outline: 0; resize: none; background: transparent
 .error-hint { font-size: 16px; line-height: 1.45; margin-top: 2px; }
 
 /* ---------- celebration ---------- */
-.celebrate { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: flex-end; padding-right: 6vw;
+.celebrate { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 50; display: flex; align-items: center; justify-content: flex-end; padding-right: 6vw;
   background: rgba(30, 27, 75, .35); opacity: 0; pointer-events: none; transition: opacity .3s; }
 .celebrate.show { opacity: 1; pointer-events: auto; }
 .celebrate-card { display: flex; flex-direction: column; align-items: center; gap: 16px; animation: bob 1.2s ease-in-out infinite alternate; }

@@ -48,7 +48,7 @@ def _template(cfg, app_dir):
     if _TEMPLATE_NODES is None:
         with open(kids_launch.engine_path(), encoding="utf-8") as f:
             tree = ast.parse(f.read())
-        wanted = {"BASE_CSS", "COMMON_JS", "MASTER_HTML_TEMPLATE"}
+        wanted = {"BASE_CSS", "COMMON_JS", "FLEXGAP_FIX", "MASTER_HTML_TEMPLATE"}
         _TEMPLATE_NODES = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1
                            and getattr(n.targets[0], "id", None) in wanted]
     cfg = json.loads(json.dumps(cfg))
