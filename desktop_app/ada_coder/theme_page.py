@@ -125,7 +125,7 @@ def theme_page(c, licences):
             '.wrap { padding: 0 !important; max-width: none !important; margin: 0 !important; height: 100%%; } '
             '.stage { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; box-shadow: none !important; } '
             '.titlebar { display: none !important; } .central { top: 0 !important; } '
-            '.overlay, .modal { top: 0 !important; inset: 0 !important; } #logoutBtn { top: 18px !important; } '
+            '.overlay, .modal { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; } #logoutBtn { top: 18px !important; } '
             '%s</style>\n'
             % (json.dumps(c["id"]), json.dumps(data["videos"]), json.dumps(c.get("price", "")), SCROLLBARS))
     return head + page, data
