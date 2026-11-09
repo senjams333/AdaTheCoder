@@ -88,6 +88,11 @@ def main():
     # The packaged app also runs the Python Adventure app's programs: "--ada-run-script runner.py code.py"
     if len(sys.argv) >= 4 and sys.argv[1] == "--ada-run-script":
         import runpy
+        for stream in (sys.stdout, sys.stderr, sys.stdin):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")   # Windows: emojis in children's programs
+            except Exception:
+                pass
         sys.argv = sys.argv[2:]
         runpy.run_path(sys.argv[0], run_name="__main__")
         return

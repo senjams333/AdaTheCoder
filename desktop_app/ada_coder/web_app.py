@@ -18,7 +18,7 @@ import tempfile
 import threading
 import time
 
-from PyQt5.QtCore import QObject, QProcess, QTimer, QUrl, Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QProcess, QProcessEnvironment, QTimer, QUrl, Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor, QDesktopServices
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineSettings, QWebEngineView
@@ -55,6 +55,11 @@ def _lesson_page():
 
 
 RUNNER = """import sys, os, builtins, runpy
+for _s in (sys.stdout, sys.stderr, sys.stdin):
+    try:
+        _s.reconfigure(encoding='utf-8', errors='replace')   # Windows: emojis in print() and input()
+    except Exception:
+        pass
 real = sys.stdout
 
 class Out:
@@ -139,6 +144,10 @@ class LessonRunner(QObject):
         self.output, self.waiting, self.used_input = "", False, False
         self.process = QProcess(self)
         self.process.setWorkingDirectory(playground_dir())
+        env = QProcessEnvironment.systemEnvironment()
+        env.insert("PYTHONIOENCODING", "utf-8")
+        env.insert("PYTHONUTF8", "1")
+        self.process.setProcessEnvironment(env)
         self.process.readyReadStandardOutput.connect(self._read_out)
         self.process.readyReadStandardError.connect(self._read_err)
         self.process.finished.connect(self._done)

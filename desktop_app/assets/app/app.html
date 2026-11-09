@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <title>Ada The Coder</title>
 <style>
-:root { --font-kid: "Comic Sans MS", "Chalkboard SE", "Comic Neue", "Segoe UI", sans-serif; --ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+:root { --font-kid: "Segoe UI", -apple-system, BlinkMacSystemFont, "Segoe UI Emoji", "Apple Color Emoji", sans-serif; --ui: system-ui, -apple-system, "Segoe UI", sans-serif;
   --page: #eef2f7; --ink: #1e293b; --muted: #64748b; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --page: #0b1020; --ink: #e2e8f0; --muted: #94a3b8; } }
 :root[data-theme="dark"] { --page: #0b1020; --ink: #e2e8f0; --muted: #94a3b8; }
@@ -29,7 +29,7 @@
 .kids { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 50; width: 100%; height: 100%; border: 0; background: transparent; color-scheme: light;
   opacity: 0; pointer-events: none; visibility: hidden; }
 .kids.on { opacity: 1; pointer-events: auto; visibility: visible; transition: opacity .25s; }
-.kload { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 45; display: grid; place-items: center; background: rgba(255, 255, 255, .35); backdrop-filter: blur(3px); font-family: var(--font-kid); }
+.kload { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 45; display: grid; place-items: center; background: rgba(224, 242, 254, .9); font-family: var(--font-kid); }
 .kload-card { background: #fff; border-radius: 26px; padding: 22px 30px; text-align: center; box-shadow: 0 14px 34px rgba(43, 34, 87, .2); font-weight: 700; color: #2b2257; min-width: 300px; font-size: 18px; }
 .kload-card img { height: 120px; animation: bob 1s ease-in-out infinite alternate; }
 .kbar { height: 10px; border-radius: 6px; background: #e0f2fe; overflow: hidden; margin-top: 12px; }

@@ -152,7 +152,7 @@ ensure_tom_image()
 BASE_CSS = """
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; overflow-x:hidden; overflow-y:auto; font-family:'Comic Sans MS', 'Fredoka', cursive, sans-serif; background: transparent; transition:0.5s; }
+html, body { width:100%; height:100%; overflow-x:hidden; overflow-y:auto; font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, 'Fredoka', 'Segoe UI Emoji', 'Apple Color Emoji', cursive, sans-serif; background: transparent; transition:0.5s; }
 
 .sun { 
     position:fixed; 
@@ -1017,6 +1017,11 @@ class CodeBridge(QObject):
         base_dir_escaped = get_base_dir().replace("\\", "/")
         runner_content = """import sys, os, builtins, runpy, traceback
 os.chdir('''""" + base_dir_escaped + """''')
+for _s in (sys.stdout, sys.stderr, sys.stdin):
+    try:
+        _s.reconfigure(encoding='utf-8', errors='replace')   # Windows: emojis in print() and input()
+    except Exception:
+        pass
 real = sys.stdout
 
 class Out:
@@ -1061,6 +1066,11 @@ except Exception as e:
         
         self.process = QProcess(self)
         self.process.setWorkingDirectory(get_base_dir())
+        from PyQt5.QtCore import QProcessEnvironment
+        env = QProcessEnvironment.systemEnvironment()
+        env.insert("PYTHONIOENCODING", "utf-8")
+        env.insert("PYTHONUTF8", "1")
+        self.process.setProcessEnvironment(env)
         self.process.readyReadStandardOutput.connect(self._read_out)
         self.process.readyReadStandardError.connect(self._read_err)
         self.process.finished.connect(self._done)
@@ -1117,7 +1127,7 @@ except Exception as e:
             self.waiting = False
             self.last_prompt = ""
             self._interactive()
-            self.process.write((value + "\n").encode())
+            self.process.write((value + "\n").encode("utf-8"))
 
     def _done(self, *args):
         if self.process:
