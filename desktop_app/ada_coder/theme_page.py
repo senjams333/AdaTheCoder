@@ -14,6 +14,7 @@ import sys
 from PyQt5.QtCore import QUrl
 
 from . import kids_launch
+from .emoji_img import add_to as with_emoji
 from .paths import asset
 
 _TEMPLATE_NODES = None
@@ -57,7 +58,7 @@ def _template(cfg, app_dir):
     ns = {"html": html, "json": json, "CONFIG": cfg, "LOGO": cfg["logo"]}
     for node in _TEMPLATE_NODES:
         exec(compile(ast.Module([node], []), "kids_app", "exec"), ns)
-    page = ns["MASTER_HTML_TEMPLATE"].replace("</head>", "<style>" + SCROLLBARS + NO_FOCUS_BOX + "</style></head>", 1)
+    page = with_emoji(ns["MASTER_HTML_TEMPLATE"].replace("</head>", "<style>" + SCROLLBARS + NO_FOCUS_BOX + "</style></head>", 1))
     for pic in {cfg["logo"], cfg["success_picture"], cfg["oops_picture"]}:
         if pic:
             page = page.replace('src="%s"' % pic, 'src="%s"' % _url(os.path.join(app_dir, pic)))
@@ -128,4 +129,4 @@ def theme_page(c, licences):
             '.overlay, .modal { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; } #logoutBtn { top: 18px !important; } '
             '%s</style>\n'
             % (json.dumps(c["id"]), json.dumps(data["videos"]), json.dumps(c.get("price", "")), SCROLLBARS))
-    return head + page, data
+    return with_emoji(head + page), data

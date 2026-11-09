@@ -27,6 +27,7 @@ from PyQt5.QtWidgets import QMainWindow
 from . import lessons as course
 from . import sync
 from .config import APP_NAME, APP_VERSION, SERVER_URL
+from .emoji_img import add_to as with_emoji
 from .paths import FROZEN, asset, data_dir, image, playground_dir
 from .settings import Settings
 from .themes import THEMES
@@ -51,7 +52,7 @@ def _lesson_page():
     page = page.replace('<link rel="stylesheet" href="lesson.css">', "<style>" + css + "</style>")
     page = re.sub(r'<script src="qrc:[^"]*"></script>', "", page)
     page = page.replace('<script src="lesson.js"></script>', "<script>" + js + "</script>")
-    return re.sub(r'src="\.\./images/([^"]+)"', lambda m: 'src="%s"' % _url(m.group(1)), page)
+    return with_emoji(re.sub(r'src="\.\./images/([^"]+)"', lambda m: 'src="%s"' % _url(m.group(1)), page))
 
 
 RUNNER = """import sys, os, builtins, runpy
@@ -402,7 +403,7 @@ class WebMainWindow(QMainWindow):
     def _load_page_now(self):
         data = dict(self._data(), lessonPage=_lesson_page())
         blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-        html = open(asset("app", "app.html"), encoding="utf-8").read().replace("__DATA__", blob)
+        html = with_emoji(open(asset("app", "app.html"), encoding="utf-8").read().replace("__DATA__", blob))
         path = os.path.join(data_dir(), "app_page.html")
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
