@@ -14,7 +14,7 @@
   var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, INPUT: 1, OPTION: 1, SELECT: 1, TITLE: 1, NOSCRIPT: 1, CANVAS: 1, CODE: 1 };
 
   var css = document.createElement("style");
-  css.textContent = "img.emj { height: 1.15em; width: auto; vertical-align: -0.22em; margin: 0 .04em; display: inline-block; "
+  css.textContent = "img.emj { height: 1.15em; width: 1.15em; object-fit: contain; vertical-align: -0.22em; margin: 0 .04em; display: inline-block; "
     + "pointer-events: none; -webkit-user-drag: none; user-select: none; }";
   (document.head || document.documentElement).appendChild(css);
 
@@ -41,7 +41,7 @@
       any = true;
       if (m.index > last) frag.appendChild(document.createTextNode(t.slice(last, m.index)));
       var img = document.createElement("img");
-      img.className = "emj"; img.alt = m[0]; img.draggable = false; img.src = E.base + n + ".webp";
+      img.className = "emj"; img.alt = m[0]; img.draggable = false; img.decoding = "sync"; img.src = E.base + n + ".webp";
       frag.appendChild(img);
       last = m.index + m[0].length;
     }

@@ -211,7 +211,7 @@ body.vfull-body .top, body.vfull-body .menu, body.vfull-body .side { visibility:
 .cartoon.top .ct-say { flex: 1; }
 @keyframes ctPop { from { transform: scale(.4) translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes ctBob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-#fullLoad { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 950; display: grid; place-items: center; background: rgba(12, 74, 110, .35); backdrop-filter: blur(3px); }
+#fullLoad { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 950; display: grid; place-items: center; background: rgba(12, 74, 110, .35); }
 #fullLoad[hidden] { display: none; }
 .fl-card { width: 420px; text-align: center; background: #fff; border: 4px solid #facc15; border-radius: 30px; padding: 26px 30px 22px;
   box-shadow: 0 0 40px rgba(250, 204, 21, .6); font-family: var(--font-kid); color: #0c4a6e; }
@@ -1158,36 +1158,54 @@ buildScene(); renderApp(); fit(); logout();
 })();
 </script>
 <style>
-/* polished, glossy buttons: day/night, sound, Home, account (all computers) */
+/* Pixar-style 3D candy buttons: day/night, sound, Home (drawn the same on every computer) */
 .round, .pill, .qbtn {
-  background: radial-gradient(120% 100% at 30% 18%, #ffffff 0%, #f3faff 42%, #d6edff 100%) !important;
-  border: 2px solid #ffffff !important; color: #0c4a6e;
-  box-shadow: 0 6px 14px rgba(2, 132, 199, .28), inset 0 -4px 8px rgba(56, 189, 248, .22), inset 0 2px 4px rgba(255, 255, 255, .95) !important;
-  transition: transform .15s ease, box-shadow .15s ease;
+  --c1: #86efac; --c2: #22c55e; --deep: #15803d;
+  background: radial-gradient(ellipse 72% 42% at 50% 16%, rgba(255, 255, 255, .78) 0%, rgba(255, 255, 255, 0) 100%),
+              linear-gradient(180deg, var(--c1) 0%, var(--c2) 100%) !important;
+  border: 3px solid #ffffff !important; color: #ffffff !important; font-weight: 800 !important;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .2);
+  box-shadow: 0 5px 0 var(--deep), 0 10px 16px rgba(15, 23, 42, .28), inset 0 -5px 0 rgba(0, 0, 0, .1) !important;
+  transition: transform .12s ease, box-shadow .12s ease;
 }
-.round:hover, .pill:hover, .qbtn:hover:not(:disabled) { transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 10px 20px rgba(2, 132, 199, .34), inset 0 -4px 8px rgba(56, 189, 248, .25), inset 0 2px 4px #ffffff !important; }
-.round:active, .pill:active, .qbtn:active:not(:disabled) { transform: translateY(1px) scale(.96); }
-.round img.emj { height: 1.5em; vertical-align: -0.34em; margin: 0; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .22)); }
-.pill img.emj, .qbtn img.emj { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .18)); }
-.central.night .round, .central.night .pill, .central.night .qbtn {
-  background: radial-gradient(120% 100% at 30% 18%, #5b58c4 0%, #33309a 48%, #1d1a5c 100%) !important;
-  border-color: #8b88f0 !important; color: #f5f3ff !important;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, .45), inset 0 -4px 8px rgba(0, 0, 0, .25), inset 0 2px 4px rgba(255, 255, 255, .28) !important;
-}
-/* the twinkle sound's volume: a soft glossy panel with a smooth slider (drawn the same on every computer) */
-.bgvol { width: 52px !important; height: 176px !important; padding: 0 !important; display: block !important; border-radius: 26px !important;
-  background: linear-gradient(180deg, #ffffff, #e9f6ff) !important; border: 2px solid #ffffff !important;
-  box-shadow: 0 10px 22px rgba(2, 132, 199, .3), inset 0 2px 4px #ffffff !important; }
+.round:hover, .pill:hover:not(:disabled), .qbtn:hover:not(:disabled) { transform: translateY(-2px);
+  box-shadow: 0 7px 0 var(--deep), 0 14px 20px rgba(15, 23, 42, .3), inset 0 -5px 0 rgba(0, 0, 0, .1) !important; }
+.round:active, .pill:active:not(:disabled), .qbtn:active:not(:disabled) { transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--deep), 0 3px 6px rgba(15, 23, 42, .25), inset 0 -3px 0 rgba(0, 0, 0, .1) !important; }
+#homeBtn { --c1: #fdba74; --c2: #f97316; --deep: #c2410c; }
+#themeBtn { --c1: #7dd3fc; --c2: #0ea5e9; --deep: #0369a1; }
+#musicBtn { --c1: #d8b4fe; --c2: #9333ea; --deep: #6b21a8; }
+.central.night #themeBtn, body.night #themeBtn { --c1: #a5b4fc; --c2: #6366f1; --deep: #3730a3; }
+.round { width: 50px !important; height: 50px !important; border-radius: 50% !important; padding: 0 !important; }
+.pill img.emj, .qbtn img.emj { width: 1.3em; height: 1.3em; vertical-align: -0.3em; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .22)); }
+.round img.emj, .pill.round img.emj, .qbtn.round img.emj { width: 34px; height: 34px; vertical-align: middle; margin: 0; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .35)); }
+/* the twinkle sound's volume: a puffy 3D panel, a candy track that fills up, and a shiny gold ball to drag */
+.bgvol { width: 58px !important; height: 188px !important; padding: 0 !important; display: block !important; border-radius: 29px !important;
+  background: radial-gradient(ellipse 80% 22% at 50% 8%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0)), linear-gradient(180deg, #ffffff, #f3e8ff) !important;
+  border: 3px solid #ffffff !important; box-shadow: 0 5px 0 #d8b4fe, 0 14px 24px rgba(107, 33, 168, .28) !important; }
 .bgvol[hidden] { display: none !important; }
-.bgvol input { -webkit-appearance: none !important; appearance: none !important; writing-mode: horizontal-tb !important; direction: ltr !important;
-  position: absolute; width: 128px !important; height: 28px !important; left: -38px; top: 62px; margin: 0 !important;
+.bgvol input { --v: 50%; -webkit-appearance: none !important; appearance: none !important; writing-mode: horizontal-tb !important; direction: ltr !important;
+  position: absolute; width: 134px !important; height: 34px !important; left: -41px; top: 64px; margin: 0 !important;
   transform: rotate(-90deg); background: transparent; cursor: pointer; }
 .bgvol input:focus { outline: none; }
-.bgvol input::-webkit-slider-runnable-track { height: 10px; border-radius: 6px;
-  background: linear-gradient(90deg, #7dd3fc, #38bdf8 60%, #0ea5e9); box-shadow: inset 0 1px 3px rgba(3, 105, 161, .45); }
-.bgvol input::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -8px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #fde68a 45%, #f59e0b 100%); border: 2px solid #ffffff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, .3); }
-.bgvol small { position: absolute; left: 0; right: 0; bottom: 9px; text-align: center; font-weight: 800 !important; }
+.bgvol input::-webkit-slider-runnable-track { height: 16px; border-radius: 9px;
+  background: linear-gradient(90deg, #c084fc 0%, #9333ea var(--v), #ede9fe var(--v), #ede9fe 100%);
+  box-shadow: inset 2px 0 3px rgba(0, 0, 0, .22), -1px 0 0 #ffffff; }
+.bgvol input::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -8px; border-radius: 50%;
+  background: radial-gradient(circle at 62% 34%, #ffffff 0%, #fff7c2 14%, #fde047 38%, #f59e0b 100%); border: 3px solid #ffffff;
+  box-shadow: -3px 0 0 #b45309, -6px 0 10px rgba(0, 0, 0, .28); }
+.bgvol small { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-weight: 800 !important; color: #6b21a8 !important; }
 </style>
+<script>
+/* the volume track fills up to the ball */
+(function () {
+  function fill() { var s = document.getElementById("bgVol"); if (s) s.style.setProperty("--v", (+s.value || 0) + "%"); }
+  function start() {
+    var s = document.getElementById("bgVol"), p = document.getElementById("bgVolPct");
+    if (!s) return;
+    s.addEventListener("input", fill); fill();
+    if (p) new MutationObserver(fill).observe(p, { childList: true, characterData: true, subtree: true });
+  }
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+})();
+</script>
