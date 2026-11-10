@@ -58,6 +58,24 @@ SHORT = {
     "unpack": "The number of boxes doesn't match",
     "recursion": "The function never stops",
     "file": "That file can't be found",
+    "one_line": "One command per line",
+    "def_name": "The function's name has a mistake",
+    "def_brackets": "def needs brackets",
+    "no_if": "else needs an if before it",
+    "no_try": "except needs a try before it",
+    "other_lang": "That's not how Python writes it",
+    "apostrophe": "A quote is inside the words",
+    "multiply": "Use * to multiply",
+    "too_early": "Used before it was made",
+    "empty_input": "Nothing was typed",
+    "whole_number": "A whole number is needed",
+    "index_type": "Use a whole number in [ ]",
+    "change_str": "Words can't be changed like that",
+    "not_in_list": "That is not in the list",
+    "empty_list": "The list is empty",
+    "too_big": "That number is too big",
+    "print_kw": "print can't use = inside",
+    "module_name": "Check the helper's name",
     "other": "Oops! Something went wrong",
 }
 
@@ -68,6 +86,8 @@ BLOCK_WORDS = ("if", "elif", "else", "for", "while", "def", "class", "try", "exc
 LINE_WORDS = ("if", "elif", "else", "for", "while", "def", "class", "return", "import", "from", "try", "except",
               "finally", "with", "print", "input", "break", "continue", "pass", "global", "lambda")
 
+COMMON_MODULES = ("random", "math", "time", "turtle", "datetime", "os", "sys", "string", "statistics", "calendar",
+                  "json", "csv", "tkinter", "pygame", "cv2")
 PIP_NAMES = {"cv2": "opencv-python", "PIL": "pillow", "sklearn": "scikit-learn", "yaml": "pyyaml"}
 KNOWN_WORDS = sorted(set(dir(builtins)) | set(keyword.kwlist))
 
@@ -168,6 +188,9 @@ def _syntax(error, n, line=""):
         return ("quote", 'Text that starts with three quotes """ must also end with three quotes """.',
                 'Add """ at the end of the text.')
     if "unterminated string" in msg or "eol while scanning" in msg or "eof while scanning" in msg:
+        if re.search(r"'[^'\"]*\w'\w", line):
+            return ("apostrophe", "The words have an apostrophe ' (like it's) inside ' quotes, so Python thinks the words end there.",
+                    f"Put the words between double quotes instead, like print(\"it's fun\"){at}.")
         if '"' in line and "'" in line:
             return ("quote", "The words start with one kind of quote and end with the other. Both ends must use the same quote.",
                     f"Use \" at both ends, like \"hello\", or ' at both ends{at}.")
@@ -238,7 +261,7 @@ def _syntax(error, n, line=""):
                 f"Write {low} instead of {word}{at}.")
     if "invalid decimal literal" in msg or "invalid syntax" in msg and re.search(r"(^|[^\w.])\d+[A-Za-z_]", line):
         return ("digit_name", "A name can't start with a number, and a number can't have letters stuck to it.",
-                f'Write the name like age1 instead of 1age, or put words in quotes, like "5 apples"{at}.')
+                f'Write the name like age1 instead of 1age, put words in quotes, like "5 apples", or use * to multiply, like 2 * x{at}.')
     m = re.match(r"\s*([A-Za-z_]\w*)((?:\s+[A-Za-z_]\w*)+)\s*=(?!=)", line)
     if m and m.group(1) not in keyword.kwlist and not any(w in keyword.kwlist for w in m.group(2).split()):
         joined = "_".join([m.group(1)] + m.group(2).split())
@@ -250,7 +273,60 @@ def _syntax(error, n, line=""):
             return ("spelling", f"{word} looks like the Python word {close[0]}, spelled a little differently.",
                     f"Did you mean {close[0]}? Check the spelling{at}.")
 
+    # functions
+    if re.match(r"\s*def\s+\w+\s+\w+", line):
+        name = "_".join(re.match(r"\s*def\s+([\w\s]+?)\s*[(:]", line + ":").group(1).split())
+        return ("def_name", "A function's name can't have spaces in it.",
+                f"Join the words with _ , like def {name}():{at}.")
+    if re.match(r"\s*def\s+\w+\s*:", line) or ("expected '('" in msg and low == "def"):
+        m = re.match(r"\s*def\s+(\w+)", line)
+        return ("def_brackets", "A function needs round brackets after its name, even when they are empty.",
+                f"Write def {m.group(1) if m else 'hello'}():{at}.")
+    if re.match(r"\s*def\s+(" + "|".join(k for k in keyword.kwlist if k.islower()) + r")\s*\(", line):
+        w = re.match(r"\s*def\s+(\w+)", line).group(1)
+        return ("reserved", f"{w} is a special Python word, so it can't be the name of a function.",
+                f"Choose another name, like def my_{w}():{at}.")
+
+    # else / elif / except with nothing before them
+    if "invalid syntax" in msg and low in ("else", "elif") and line.rstrip().endswith(":"):
+        return ("no_if", f"{low} must come right after an if block, and start with the same number of spaces as that if.",
+                f"Check there's an if just above, and line up {low} with it{at}.")
+    if "invalid syntax" in msg and low in ("except", "finally") and line.rstrip().endswith(":"):
+        return ("no_try", f"{low} must come right after a try: block, with the same number of spaces as try.",
+                f"Put a try: block above, or line {low} up with it{at}.")
+
+    # habits from other languages or from maths
+    code_part = line.split("#")[0]
+    if re.search(r"\w\s*(\+\+|--)\s*$", code_part) or re.search(r"^\s*(\+\+|--)\w", code_part):
+        return ("other_lang", "Python doesn't have ++ or --.",
+                f"To add 1, write x = x + 1 (or x += 1){at}.")
+    if "&&" in code_part or "||" in code_part:
+        return ("other_lang", "Python uses the words and / or instead of && and ||.",
+                f"Write and instead of &&, and or instead of ||{at}.")
+    if re.search(r"(^|[\s(])!\s*[A-Za-z_(]", code_part) and "!=" not in code_part:
+        return ("other_lang", "Python uses the word not instead of !.",
+                f"Write not instead of !, like if not done:{at}")
+    if "=!" in code_part or "<>" in code_part:
+        return ("other_lang", "In Python, \"is not equal to\" is written !=",
+                f"Write != {at.strip() and at}.".replace(" .", "."))
+    if "÷" in line or "×" in line or re.search(r"\d\s*[xX]\s*\d", code_part):
+        return ("multiply", "Python uses * to multiply and / to divide.",
+                f"Write 3 * 4 instead of 3 x 4, and 8 / 2 instead of 8 ÷ 2{at}.")
+    if re.search(r"\)\s+[A-Za-z_]\w*\s*\(", code_part) and "invalid syntax" in msg:
+        return ("one_line", "Two commands are on the same line.",
+                f"Put each command on its own line{at}.")
+
+    # quotes inside quotes
+    if re.search(r'"[^"]*"\w+"[^"]*"', line):
+        return ("apostrophe", 'There are " quotes inside words that are already between " quotes.',
+                f"Use ' inside and \" outside, like print(\"He said 'hi'\"){at}.")
+
     # commas, quotes and brackets that the message doesn't name
+    if "forgot a comma" in msg and re.search(r"\bprint\s*\(", line) and '"' not in line and "'" not in line:
+        inside = re.search(r"\bprint\s*\((.*)\)", line)
+        words = inside.group(1).strip() if inside else "Hello World"
+        return ("quote", "Words to show must go between quotes. Without quotes Python thinks they are names.",
+                f'If these are words to show, write print("{words}"). If they are variables, put a comma between them{at}.')
     if "forgot a comma" in msg:
         return ("comma", "Things inside brackets are separated by commas, like print(\"Hi\", name).",
                 f"Add a comma between the things{at}.")
@@ -281,7 +357,7 @@ def _syntax(error, n, line=""):
             "Check the brackets ( ), the quotes \" \" and the colons : on this line.")
 
 
-def _runtime(error, code):
+def _runtime(error, code, line_no=None):
     name = type(error).__name__
     text = str(error)
     if isinstance(error, UnboundLocalError):
@@ -293,7 +369,16 @@ def _runtime(error, code):
         m = re.search(r"name '(\w+)' is not defined", text)
         word = m.group(1) if m else "that word"
         why = f"Python doesn't know the word {word}."
+        later = None
+        for i, l in enumerate(code.splitlines(), 1):
+            if re.match(rf"(def\s+{re.escape(word)}\s*\(|{re.escape(word)}\s*=(?!=))", l):   # at the left edge only
+                later = i
+                break
         close = difflib.get_close_matches(word, KNOWN_WORDS + sorted(_names_in(code)), n=1, cutoff=0.75)
+        if later and (line_no is None or later > line_no):
+            made = f"def {word}():" if code.splitlines()[later - 1].lstrip().startswith("def") else f"{word} = ..."
+            return ("too_early", f"{word} is used before the line that makes it ({made} on line {later}). Python reads from the top down.",
+                    f"Move line {later} (and the lines that belong to it) above the line that uses {word}.")
         if close and close[0] != word:
             fix = f"Did you mean {close[0]}? Check the spelling."
         elif word[:1].isupper() or len(word) > 2:
@@ -308,6 +393,10 @@ def _runtime(error, code):
     if isinstance(error, (ModuleNotFoundError, ImportError)):
         m = re.search(r"No module named '([\w.]+)'", text)
         mod = (m.group(1) if m else "it").split(".")[0]
+        close = difflib.get_close_matches(mod.lower(), COMMON_MODULES, n=1, cutoff=0.7)
+        if close and close[0] != mod:
+            return ("module_name", f"There's no helper called {mod}. Helper names use small letters and exact spelling.",
+                    f"Did you mean import {close[0]}?")
         return ("module", f"Your code uses import {mod}, but {mod} isn't on this computer.",
                 f"Ask a grown-up to type this in the Command Prompt: pip install {PIP_NAMES.get(mod, mod)}")
     if isinstance(error, RecursionError):
@@ -318,7 +407,35 @@ def _runtime(error, code):
     if "NoneType" in text:
         return ("none", "Something has no value (None). Often a function didn't give back a value with return.",
                 "Add return to the function, or check that the variable got a value.")
+    if isinstance(error, OverflowError):
+        return ("too_big", "The number got too big for Python to work with.", "Use smaller numbers.")
     if isinstance(error, TypeError):
+        m = re.search(r"(\w+)\(\) missing (\d+) required positional arguments?: (.+)", text)
+        if m:
+            fn, names = m.group(1), m.group(3).replace("'", "")
+            return ("args", f"{fn}() needs {names} between its brackets.",
+                    f"Give it a value for each, like {fn}(\"Tom\").")
+        m = re.search(r"(\w+)\(\) takes (\d+) positional arguments? but (\d+) (?:was|were) given", text)
+        if m:
+            fn, want, got = m.group(1), m.group(2), m.group(3)
+            how = f"{fn}()" if want == "0" else f"exactly {want} thing{'s' if want != '1' else ''}"
+            return ("args", f"{fn}() takes {want} thing{'s' if want != '1' else ''} in its brackets, but got {got}.",
+                    f"Write {how} with nothing inside." if want == "0" else f"Give it {how} between the brackets.")
+        if "invalid keyword argument for print" in text or re.search(r"print\(\) got an unexpected keyword", text):
+            return ("print_kw", "print( ) shows things; it can't make a variable with = inside its brackets.",
+                    "Make the variable on its own line first, like x = 5, then print(x).")
+        if "cannot be interpreted as an integer" in text:
+            if "'str'" in text:
+                return ("whole_number", "This needs a number, but it got words. Remember: input() always gives words.",
+                        "Turn the words into a number with int(), like n = int(input(\"How many? \")).")
+            return ("whole_number", "This needs a whole number, like 3, not a number with a dot like 3.5.",
+                    "Use a whole number, or round it with int(), like range(int(n)).")
+        if "indices must be integers" in text:
+            return ("index_type", "The number inside [ ] must be a whole number, like [0] or [2].",
+                    "Use a whole number, or int() to turn it into one, like items[int(n)].")
+        if "does not support item assignment" in text:
+            return ("change_str", "You can't change one letter inside words with [ ] =.",
+                    'Make new words instead, like word = "H" + word[1:].')
         if "not supported between instances of" in text:
             return ("compare_mix", "You compared words with a number. Remember: input() always gives words, even \"8\".",
                     "Turn the words into a number first, like age = int(input(\"Age? \")).")
@@ -349,11 +466,23 @@ def _runtime(error, code):
         if "values to unpack" in text:
             return ("unpack", "The number of names on the left of = is different from the number of values on the right.",
                     "Use as many names as values, like a, b = 1, 2.")
+        if re.search(r"invalid literal for int\(\) with base 10: ''", text) or "could not convert string to float: ''" in text:
+            return ("empty_input", "Enter was pressed without typing a number first.",
+                    "Type a number, like 8, and then press Enter.")
+        if "not in list" in text:
+            return ("not_in_list", "You asked the list for something that isn't in it.",
+                    "Check the spelling, or check with if thing in my_list: before using it.")
+        if "empty sequence" in text or "empty range" in text or "argument is empty" in text:
+            return ("empty_list", "max(), min() or random.choice() got an empty list, with nothing to pick from.",
+                    "Put some items in the list first.")
         if "invalid literal for int()" in text or "could not convert" in text:
             return ("not_number", "int() and float() turn words like \"8\" into numbers, but this wasn't a number.",
                     "Use digits only, like 8 or 3.5.")
         return "type", "The value isn't the right kind for this.", "Check the value you gave."
     if isinstance(error, IndexError):
+        if "empty" in text:
+            return ("empty_list", "The list is empty, so there's nothing to take or choose from it.",
+                    "Put some items in the list first, like items = [\"a\", \"b\"].")
         what = "These words don't have a letter" if "string" in text else "The list doesn't have an item"
         return ("index", f"{what} at that place. Remember: counting starts at 0, so the first one is [0]!",
                 "Use a smaller number inside [ ].")
@@ -368,6 +497,15 @@ def _runtime(error, code):
             close = difflib.get_close_matches(m.group(2), [a for a in dir(kind) if not a.startswith("_")], n=1, cutoff=0.6) if kind else []
             fix = f"Did you mean .{close[0]}()? Check the spelling after the dot." if close else "Check the spelling of the word after the dot."
             return ("attribute", f"{kind_name.capitalize()} can't use .{m.group(2)}.", fix)
+        m = re.search(r"module '(\w+)' has no attribute '(\w+)'", text)
+        if m:
+            import sys as _sys
+            mod = _sys.modules.get(m.group(1))
+            names = {a.lower(): a for a in dir(mod) if not a.startswith("_")} if mod else {}
+            close = [names[c] for c in difflib.get_close_matches(m.group(2).lower(), list(names), n=1, cutoff=0.6)]
+            fix = f"Did you mean {m.group(1)}.{close[0]}? Spelling and small or capital letters must match." if close \
+                else "Check the spelling of the word after the dot."
+            return ("attribute", f"The {m.group(1)} helper has nothing called {m.group(2)}.", fix)
         return ("attribute", f"{text}.", "Check the spelling of the word after the dot.")
     if isinstance(error, EOFError):
         return "eof", "The program asked you to type something, but nothing was typed.", "Type your answer and press Enter."
@@ -380,7 +518,7 @@ def explain(error, code, filename="<string>"):
         kind, why, fix = _syntax(error, n, line)
         said = f"{type(error).__name__}: {error.msg}"
     else:
-        kind, why, fix = _runtime(error, code)
+        kind, why, fix = _runtime(error, code, n)
         said = f"{type(error).__name__}: {error}"
     short = SHORT[kind]
     parts = [f"❌ {short}"]

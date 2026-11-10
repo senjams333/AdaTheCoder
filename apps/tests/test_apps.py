@@ -206,6 +206,40 @@ class ExplainMistakes(unittest.TestCase):
         for code, expected in cases.items():
             self.assertIn(expected, self.run_code(code)[0], code)
 
+    def test_habits_order_and_helpers(self):
+        cases = {
+            'print("Hi") print("Bye")': "One command per line",
+            'def my function():\n    pass': "def my_function()",
+            'def hello:\n    pass': "def hello():",
+            'else:\n    pass': "else must come right after an if",
+            'except:\n    pass': "except must come right after a try",
+            'x = 5\nx++': "x = x + 1",
+            'if 1 && 2:\n    pass': "and instead of &&",
+            'if !True:\n    pass': "not instead of !",
+            "print('it's fun')": "double quotes",
+            'print("He said "hi"")': "' inside",
+            'print(Hello World)': 'print("Hello World")',
+            'x = 3 x 4': "Use * to multiply",
+            'x = 5 ÷ 2': "/ to divide",
+            'greet()\ndef greet():\n    print("Hi")': "Move line 2",
+            'print(score)\nscore = 5': "Move line 2",
+            'import Random': "import random",
+            'import random\nrandom.randInt(1, 5)': "random.randint",
+            'import math\nprint(math.PI)': "math.pi",
+            'def greet(name):\n    print(name)\ngreet()': "greet() needs name",
+            'def hi():\n    pass\nhi(5)': "with nothing inside",
+            'print(x = 5)': "print can't use = inside",
+            'for i in range("5"):\n    pass': "int(input",
+            'x = [1, 2]\nprint(x[1.0])': "Use a whole number in [ ]",
+            'w = "cat"\nw[0] = "b"': "Make new words",
+            'x = [1]\nx.remove(5)': "That is not in the list",
+            'print(max([]))': "The list is empty",
+            'x = []\nx.pop()': "The list is empty",
+            "n = int('')": "Nothing was typed",
+        }
+        for code, expected in cases.items():
+            self.assertIn(expected, self.run_code(code)[0], code)
+
     def test_the_input_program_runner_explains_too(self):
         import subprocess
         src = open(os.path.join(APPS, "engine", "explain.py"), encoding="utf-8").read()
