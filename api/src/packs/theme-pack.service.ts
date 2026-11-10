@@ -157,7 +157,7 @@ export class ThemePackService {
     const values: Partial<Course> = {
       slug: pack.slug, name: pack.name, tagline: pack.tagline || '', description: pack.description || '',
       features: (pack.features || []).join('\n'), pack: kind, price: pack.price || '', premium: Boolean(pack.premium),
-      freeLessons: pack.freeLessons ?? 3, position, published: pack.published ?? true, imageFile, characters,
+      freeLessons: pack.freeLessons ?? 1, position, published: pack.published ?? true, imageFile, characters,
     };
     course = course ? Object.assign(course, values) : this.catalog.courses.create(values);
     course = await this.catalog.courses.save(course);

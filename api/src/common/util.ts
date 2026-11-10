@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 import { mkdirSync } from 'fs';
 import { extname, join, resolve } from 'path';
 
@@ -57,7 +57,16 @@ export function siteUrl(): string {
 }
 
 export function mediaUrl(kind: 'videos' | 'courses', file: string): string {
-  return `${apiOrigin()}/media/${kind}/${encodeURIComponent(file)}`;
+  const url = `${apiOrigin()}/media/${kind}/${encodeURIComponent(file)}`;
+  return kind === 'videos' ? `${url}?k=${videoKey(file)}` : url;
+}
+
+/** Lesson videos stay on the server until a family may have them: a video downloads only with its key, and the key
+ *  is only in the lesson details the website sends for a free lesson, a bought theme, or the admin. A locked lesson
+ *  has no video address at all, so its video can't be downloaded before the theme is paid for. */
+export function videoKey(file: string): string {
+  const secret = process.env.VIDEO_KEY_SECRET || process.env.JWT_SECRET || process.env.DB_PASSWORD || 'ada-the-coder';
+  return createHmac('sha256', secret).update('video:' + file).digest('hex').slice(0, 32);
 }
 
 export function trimmed(v: unknown, max = 255): string {

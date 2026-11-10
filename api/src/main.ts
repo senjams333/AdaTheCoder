@@ -3,7 +3,9 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import { uploadDir } from './common/util';
+import { timingSafeEqual } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
+import { uploadDir, videoKey } from './common/util';
 import { validationErrors } from './common/validation';
 
 async function bootstrap() {
@@ -14,6 +16,18 @@ async function bootstrap() {
   app.enableCors({ origin: origins.includes('*') ? true : origins });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, exceptionFactory: validationErrors }));
   // Uploaded lesson videos and theme pictures are public, so installed apps can download them.
+  // Lesson videos only download with their key (see videoKey): no key, no video, so a paid theme's locked videos stay
+  // on the server until the family buys the theme.
+  app.use('/media/videos', (req: Request, res: Response, next: NextFunction) => {
+    let file = '';
+    try { file = decodeURIComponent(req.path.replace(/^\/+/, '')); } catch { /* a broken address: refused below */ }
+    const k = typeof req.query.k === 'string' ? req.query.k : '';
+    if (!file || file.includes('/') || k.length !== 32 || !timingSafeEqual(Buffer.from(k), Buffer.from(videoKey(file)))) {
+      res.status(403).type('text/plain').send('This video is locked.');
+      return;
+    }
+    next();
+  });
   app.useStaticAssets(uploadDir('videos'), { prefix: '/media/videos/' });
   app.useStaticAssets(uploadDir('courses'), { prefix: '/media/courses/' });
   const port = Number(process.env.PORT || 3000);

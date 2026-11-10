@@ -25,7 +25,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
   const nextPosition = Math.max(0, ...(themes || []).map((t) => t.position)) + 1;
   const [form, setForm] = useState({
     name: theme?.name || '', slug: theme?.slug || '', tagline: theme?.tagline || '', description: theme?.description || '',
-    features: theme?.features || '', pack: theme?.pack || 'friends', price: theme?.price || '', priceInr: theme?.priceInr || '', razorpayButton: theme?.razorpayButton || '', premium: theme?.premium ?? false,
+    features: theme?.features || '', pack: theme?.pack || 'friends', price: theme?.price || '', priceInr: theme?.priceInr || '', razorpayButton: theme?.razorpayButton || '', premium: theme?.premium ?? true,
     freeLessons: String(theme?.freeLessons ?? 1), position: String(theme?.position ?? nextPosition),
     published: theme?.published ?? false, removeImage: false, copyFrom: '',
   });
