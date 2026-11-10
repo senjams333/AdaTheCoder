@@ -11,6 +11,7 @@ import { mb } from '@/lib/format';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import type { Example, LessonDetail } from '@/lib/types';
 import { FormErrors } from './Flashes';
+import FilePick from './FilePick';
 
 const EMPTY_EXAMPLE: Example = { label: '', explain: '', output: '', code: '' };
 // any common video file: the website makes the WebM copy the app plays (with ffmpeg)
@@ -185,8 +186,8 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
           ) : null}
           <div className="field">
             <label htmlFor="video">{lesson.videoFile ? 'Replace with a new video' : 'Upload a video'} <span className="muted">(optional: .mp4, .mov, .webm, .mkv…)</span></label>
-            <input id="video" type="file" accept={VIDEO_ACCEPT} onChange={(e) => setVideo(e.target.files?.[0] || null)} />
-            <span className="help">Use this for new lessons, or to swap a video without releasing a new version of the app. It uploads when you press {isNew ? 'Add lesson' : 'Save lesson'}.{video ? ` Chosen: ${video.name} (${mb(video.size)}).` : ''}</span>
+            <FilePick id="video" accept={VIDEO_ACCEPT} file={video} onFile={setVideo} button="📁 Choose video" />
+            <span className="help">Use this for new lessons, or to swap a video without releasing a new version of the app. It uploads when you press {isNew ? 'Add lesson' : 'Save lesson'}.</span>
             {preview ? (
               <>
                 <video key={preview} className="video-preview" style={{ marginTop: 10 }} src={preview} controls preload="metadata"

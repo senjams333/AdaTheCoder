@@ -936,3 +936,13 @@ a.course-pic img { transition: transform .2s; }
 #lessons .section-head p, .steps-head .section-head p { text-align: justify; hyphens: auto; }
 /* "A note from the author" letter: straight left and right edges (not the signature) */
 .author-letter p:not(.author-sign):not(.author-role) { text-align: justify; hyphens: auto; }
+
+/* the file chooser (components/FilePick.tsx): a Choose button and the chosen file's name */
+.filepick { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.filepick-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.filepick-btn { cursor: pointer; margin: 0; }
+.filepick-input:focus-visible + .filepick-btn { outline: 3px solid var(--sky); outline-offset: 2px; }
+.filepick-name { color: var(--ink-soft); font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+.filepick-name.chosen { color: var(--ink); font-weight: 800; }
+.filepick-clear { border: 0; background: none; color: var(--ink-soft); font-size: 1.1rem; cursor: pointer; padding: 2px 6px; border-radius: 8px; }
+.filepick-clear:hover { color: var(--ink); background: var(--lilac-soft); }
