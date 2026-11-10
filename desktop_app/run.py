@@ -110,6 +110,18 @@ def main():
     if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY") and not os.environ.get("QT_QPA_PLATFORM"):
         os.environ["QT_QPA_PLATFORM"] = "xcb"
 
+    # A Windows remote desktop (like a cloud Windows server reached through Remote Desktop) has no real graphics
+    # card: the page is drawn by the processor instead, or the window stays blank / the app closes. Ordinary
+    # computers keep their graphics card. ADA_SOFTWARE_GL=1 forces the processor drawing anywhere.
+    remote = sys.platform.startswith("win") and os.environ.get("SESSIONNAME", "").upper().startswith("RDP")
+    software_gl = remote or os.environ.get("ADA_SOFTWARE_GL") == "1"
+    if software_gl:
+        os.environ.setdefault("QT_OPENGL", "software")
+        flags = os.environ.get("QTWEBENGINE_CHROMIUM_FLAGS", "")
+        if "--disable-gpu" not in flags:
+            os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = (flags + " --disable-gpu").strip()
+        print("[app] drawing without a graphics card (remote desktop)", flush=True)
+
     from PyQt5.QtCore import QCoreApplication, Qt
     from PyQt5.QtGui import QIcon
     from PyQt5.QtWidgets import QApplication
@@ -118,6 +130,8 @@ def main():
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
     QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts, True)
+    if software_gl:
+        QCoreApplication.setAttribute(Qt.AA_UseSoftwareOpenGL, True)
 
     from ada_coder.config import APP_NAME, APP_VERSION
     from ada_coder.paths import image

@@ -1194,7 +1194,36 @@ buildScene(); renderApp(); fit(); logout();
 #themeBtn > * { display: none !important; }
 .central.night #themeBtn, body.night #themeBtn { background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Cdefs%3E%3CradialGradient id=%22m%22 cx=%2235%25%22 cy=%2230%25%22 r=%2275%25%22%3E%3Cstop offset=%220%22 stop-color=%22%23fffbe6%22/%3E%3Cstop offset=%22.6%22 stop-color=%22%23fde68a%22/%3E%3Cstop offset=%221%22 stop-color=%22%23f6c453%22/%3E%3C/radialGradient%3E%3ClinearGradient id=%22c%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23ffffff%22/%3E%3Cstop offset=%221%22 stop-color=%22%23e3eefa%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d=%22M26 5.5 a14 14 0 1 0 10 22 a11 11 0 0 1 -10 -22 z%22 fill=%22url%28%23m%29%22/%3E%3Cpath d=%22M38 7 l1 2.6 2.6 1 -2.6 1 -1 2.6 -1 -2.6 -2.6 -1 2.6 -1 z%22 fill=%22%23fde68a%22/%3E%3Cg%3E%3Cpath d=%22M19 38 a6 6 0 0 1 3-11 a8 8 0 0 1 15-2 a6.5 6.5 0 0 1 4 13 z%22 fill=%22url%28%23c%29%22/%3E%3C/g%3E%3C/svg%3E") center / 32px 32px no-repeat, rgba(255,255,255,.10) !important; }
 .central.night #themeBtn:hover, body.night #themeBtn:hover { background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Cdefs%3E%3CradialGradient id=%22m%22 cx=%2235%25%22 cy=%2230%25%22 r=%2275%25%22%3E%3Cstop offset=%220%22 stop-color=%22%23fffbe6%22/%3E%3Cstop offset=%22.6%22 stop-color=%22%23fde68a%22/%3E%3Cstop offset=%221%22 stop-color=%22%23f6c453%22/%3E%3C/radialGradient%3E%3ClinearGradient id=%22c%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23ffffff%22/%3E%3Cstop offset=%221%22 stop-color=%22%23e3eefa%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d=%22M26 5.5 a14 14 0 1 0 10 22 a11 11 0 0 1 -10 -22 z%22 fill=%22url%28%23m%29%22/%3E%3Cpath d=%22M38 7 l1 2.6 2.6 1 -2.6 1 -1 2.6 -1 -2.6 -2.6 -1 2.6 -1 z%22 fill=%22%23fde68a%22/%3E%3Cg%3E%3Cpath d=%22M19 38 a6 6 0 0 1 3-11 a8 8 0 0 1 15-2 a6.5 6.5 0 0 1 4 13 z%22 fill=%22url%28%23c%29%22/%3E%3C/g%3E%3C/svg%3E") center / 32px 32px no-repeat, rgba(255,255,255,.18) !important; }
+
+/* emoji pictures in the name labels stay still and small (the big character pictures keep their gentle bob) */
+.char img.emj, .char .nm img.emj, .bubble img.emj { animation: none !important; width: 1.15em !important; height: 1.15em !important; max-width: none !important; }
+
+/* the video's position and volume sliders: a rounded track that fills up, and a round handle (the same on every computer) */
+#vSeek, #vVol { -webkit-appearance: none; appearance: none; height: 24px; margin: 0; background: transparent; cursor: pointer; --v: 0%; }
+#vSeek:focus, #vVol:focus { outline: none; }
+#vSeek::-webkit-slider-runnable-track, #vVol::-webkit-slider-runnable-track { height: 8px; border-radius: 4px;
+  background: linear-gradient(90deg, #38bdf8 0%, #38bdf8 var(--v), rgba(209, 250, 229, .22) var(--v), rgba(209, 250, 229, .22) 100%); }
+#vSeek::-webkit-slider-thumb, #vVol::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -5px; border-radius: 50%;
+  background: #ffffff; border: 3px solid #38bdf8; box-shadow: 0 1px 4px rgba(0, 0, 0, .35); }
 </style>
+<script>
+/* the video sliders fill up to their round handle; they also move by themselves while the video plays */
+(function () {
+  function fill() {
+    ["vSeek", "vVol"].forEach(function (id) {
+      var s = document.getElementById(id);
+      if (s) { var p = (s.value - (s.min || 0)) / ((s.max || 100) - (s.min || 0)) * 100; s.style.setProperty("--v", (p || 0) + "%"); }
+    });
+  }
+  function start() {
+    ["vSeek", "vVol"].forEach(function (id) { var s = document.getElementById(id); if (s) s.addEventListener("input", fill); });
+    var v = document.getElementById("introVid");
+    if (v) ["timeupdate", "volumechange", "loadedmetadata", "seeked", "emptied"].forEach(function (e) { v.addEventListener(e, function () { setTimeout(fill, 0); }); });
+    fill();
+  }
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+})();
+</script>
 <script>
 /* the volume track fills up to the ball */
 (function () {
