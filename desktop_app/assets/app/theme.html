@@ -548,10 +548,10 @@ function buildFrame() {
   // the next example's yellow glow follows the button's round corners (an outline is drawn square in the app);
   // the examples' scroll bar stays inside the panel's rounded corners
   const lift = `<style>.header{margin-top:-6px!important}.coding-box{margin-top:6px!important;height:calc(100vh - 140px)!important}` +
-    // RUN CODE: big and glowing, at the top right of the code panel, in its own row above the code (so it never
-    // hides any code); the panel's top padding is smaller to keep the code box tall
-    `.editor-section{padding-top:12px!important}` +
-    `.run-btn{order:-1;align-self:flex-end;margin:0 0 10px 0!important;padding:0 30px!important;height:54px;font-size:23px!important;` +
+    // RUN CODE: big and glowing, resting on the top right corner of the code panel (half above its edge), so it
+    // takes no room from the code; the panel and the row around it let it show outside their edge
+    `.coding-box{overflow:visible!important}.editor-section{position:relative;overflow:visible!important}` +
+    `.run-btn{position:absolute;top:-25px;right:12px;z-index:5;margin:0!important;padding:0 24px!important;height:54px;font-size:23px!important;` +
     `border:3px solid #fff7d6!important;border-radius:27px!important;background:linear-gradient(180deg,#ffe28a,#ffc53d)!important;` +
     `color:#1e1b4b!important;animation:runGlowBright 1.6s ease-in-out infinite alternate!important}` +
     `.run-btn:hover{transform:scale(1.05)}` +
