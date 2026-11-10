@@ -574,7 +574,7 @@ function updateLessonData(title, subtitle, examplesObj, defaultCode) {
         outputEl.innerText = "Your output will be displayed here 😊 .";
     }
     
-    playTwinkleChime();
+    // no chime here: the background sound starts straight away with its gentle twinkling
     showTutorialOverlay();
 }
 
@@ -2875,7 +2875,7 @@ class MainWindow(QMainWindow):
         if state == QMediaPlayer.StoppedState and self.lesson_stack.currentIndex() == 0:
             self.lesson_stack.setCurrentIndex(1)
             self.push_active_lesson_to_ui()
-            self.lesson_viewer.page().runJavaScript("playTwinkleChime(); showTutorialOverlay();")
+            self.lesson_viewer.page().runJavaScript("showTutorialOverlay();")
 
     def _format_time(self, ms):
         total_sec = max(int(ms / 1000), 0)
@@ -3153,7 +3153,7 @@ class MainWindow(QMainWindow):
             self.media_player.stop()
             self.lesson_stack.setCurrentIndex(1)
             self.push_active_lesson_to_ui()
-            self.lesson_viewer.page().runJavaScript("playTwinkleChime(); showTutorialOverlay();")
+            self.lesson_viewer.page().runJavaScript("showTutorialOverlay();")
         else:
             self.lesson_stack.setCurrentIndex(0)
             self.media_player.setPosition(0)

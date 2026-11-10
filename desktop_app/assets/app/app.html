@@ -519,7 +519,7 @@ function playVideo() {
 function stopVideo() { clearInterval(videoTimer); videoTimer = null; }
 function showCode() {
   stopVideo();
-  if (!$("vstage").hidden) { $("vstage").hidden = true; if (frameReady) { F().playTwinkleChime(); F().showTutorialOverlay(); } }
+  if (!$("vstage").hidden) { $("vstage").hidden = true; if (frameReady) { F().showTutorialOverlay(); } }
   $("videoBtn").textContent = "🎬  Watch the video";
 }
 $("videoBtn").onclick = () => $("vstage").hidden ? playVideo() : showCode();
