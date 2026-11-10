@@ -246,45 +246,33 @@ function updateLessonData(info) {
 
 function setDarkMode(on) { document.body.classList.toggle("dark-mode", !!on); }
 
-// the background sound: happy music-box sparkles. Little runs of 3 or 4 notes (rising or falling, on a five-note
-// scale that always sounds right), then a pause of 2 to 3 seconds. Each run is made just before it plays, and
-// switching the sound off stops a run that is still waiting, so nothing ever piles up into a burst.
-const MUSIC_BOX = [1046.5, 1174.7, 1318.5, 1568.0, 1760.0, 2093.0, 2349.3, 2637.0];
-let twinkleTimer = 0, lastTwinkle = 0, phraseOscs = [];
-function musicBoxNote(freq, delay) {
+// the background sound: the original soft twinkles, 8 gentle notes spread over 4 seconds, every 5 seconds.
+// Asking for it again while it plays changes nothing (no second set of twinkles on top), and switching it off
+// silences the twinkles that were still waiting.
+let twinkleTimer = 0, phraseOscs = [];
+function twinkleBatch() {
+  if (!musicOn || bgLevel <= 0) return;
+  phraseOscs = [];
   const ctx = ensureAudio();
   if (!ctx) return;
-  const t = ctx.currentTime + delay;
-  [[1, 0.022, 1.4], [2, 0.008, 0.5], [3, 0.0026, 0.35]].forEach(([m, v, len]) => {   // a soft music-box bell
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = "sine"; o.frequency.value = freq * m; o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, v * bgLevel), t + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-    o.start(t); o.stop(t + len + 0.05); phraseOscs.push(o);
-  });
-}
-function twinkleNext() {
-  twinkleTimer = 0;
-  if (!musicOn || bgLevel <= 0) return;
-  const wait = 1500 - (Date.now() - lastTwinkle);   // never two runs close together
-  if (wait > 0) { twinkleTimer = setTimeout(twinkleNext, wait); return; }
-  lastTwinkle = Date.now(); phraseOscs = [];
-  const start = Math.floor(Math.random() * 4);
-  let run = MUSIC_BOX.slice(start, start + 4);
-  if (Math.random() >= 0.6) run.reverse();
-  run = run.slice(0, Math.random() < 0.5 ? 3 : 4);
-  run.forEach((f, j) => musicBoxNote(f, 0.05 + j * 0.22));
-  twinkleTimer = setTimeout(twinkleNext, 2200 + Math.random() * 800);
+  for (let i = 0; i < 8; i++) {
+    const f = NOTES[Math.floor(Math.random() * NOTES.length)], t = ctx.currentTime + Math.random() * 4;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = "sine"; osc.frequency.value = f; osc.connect(gain); gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.0001, t); gain.gain.exponentialRampToValueAtTime(0.02 * bgLevel, t + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+    osc.start(t); osc.stop(t + 1.65); phraseOscs.push(osc);
+  }
 }
 function toggleAudioEngine(on) {
   musicOn = !!on;
   clearInterval(musicTimer);
   if (!musicOn) {
-    clearTimeout(twinkleTimer); twinkleTimer = 0;
-    phraseOscs.forEach(o => { try { o.stop(); } catch (e) {} }); phraseOscs = [];   // a run still waiting stays silent
+    clearInterval(twinkleTimer); twinkleTimer = 0;
+    phraseOscs.forEach(o => { try { o.stop(); } catch (e) {} }); phraseOscs = [];   // twinkles still waiting stay silent
     return;
   }
-  if (!twinkleTimer) twinkleNext();
+  if (!twinkleTimer) { twinkleBatch(); twinkleTimer = setInterval(twinkleBatch, 5000); }
 }
 
 function setVoiceEnabled(on) { state.voice = !!on; if (!on && "speechSynthesis" in window) speechSynthesis.cancel(); }

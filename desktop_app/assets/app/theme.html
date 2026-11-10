@@ -113,7 +113,7 @@ body { background: var(--page); color: var(--ink); font-family: var(--font-ui); 
 /* The app window is always drawn in its own light scheme. Without this, a viewer whose browser is in dark
    mode gets the lesson frame painted solid white (browsers fill a frame whose colour scheme differs). */
 .win, .lesson iframe { color-scheme: light; }
-.side { width: 256px; border-radius: 40px; padding: 15px 14px; display: flex; flex-direction: column; gap: 8px; transition: background .3s;
+.side { width: 290px; border-radius: 40px; padding: 15px 14px; display: flex; flex-direction: column; gap: 8px; transition: background .3s;
   border: 3px solid #fff; box-sizing: border-box; box-shadow: 0 0 22px rgba(56, 189, 248, .35); }
 .side h3 { font: 700 19px var(--font-kid); text-align: center; margin: 2px 0 4px; }
 .topics { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 2px; }
@@ -566,10 +566,10 @@ function buildFrame() {
     `@keyframes runGlowBright{0%{box-shadow:0 0 14px 2px rgba(255,214,102,.85),0 0 30px rgba(255,190,0,.55),inset 0 0 6px rgba(255,255,255,.7)}` +
     `100%{box-shadow:0 0 22px 6px rgba(255,224,120,1),0 0 52px 12px rgba(255,176,0,.85),inset 0 0 12px rgba(255,255,255,.95)}}` +
     `@media (prefers-reduced-motion: reduce){.run-btn{animation:none!important;box-shadow:0 0 22px 6px rgba(255,214,102,.95)!important}}` +
-    `#code{height:46%!important;max-height:none!important}.output{margin-top:12px!important}` +
+    `#code{height:54%!important;max-height:none!important}.output{margin-top:12px!important}` +
     // wider code and output: the panels use the space at their sides (still clear of the lesson list's >> button),
     // the gap between the panels is set the same on every computer, and the code panel's inner padding is smaller
-    `.coding-box{width:calc(100% - 12px)!important;gap:0!important}.example-panel{width:345px!important;flex:none}` +
+    `.coding-box{width:calc(100% - 12px)!important;gap:0!important}.example-panel{width:375px!important;flex:none}` +
     `.editor-section{margin-left:12px!important;padding-left:10px!important;padding-right:10px!important}` +
     // buttons (RUN CODE, the examples) use the lesson's font, not the browser's plain one; the code box keeps its own
     `button,input,select{font-family:inherit}` +
@@ -802,6 +802,7 @@ function addBgVolume() {
       playSoftTinkle = function (freq, delay = 0) {
         ensureAudioContext(); if (!bgAudioContext) return;
         const osc = bgAudioContext.createOscillator(), gain = bgAudioContext.createGain();
+        try { phraseOscs.push(osc); } catch (e) {}
         osc.type = "sine"; osc.frequency.value = freq; osc.connect(gain); gain.connect(bgVolNode());
         const t = bgAudioContext.currentTime + delay;
         gain.gain.setValueAtTime(0.0001, t); gain.gain.exponentialRampToValueAtTime(0.02, t + 0.08); gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
@@ -817,7 +818,7 @@ function placeToggle() {
   const t = $("sideToggle"), W = $("win").clientWidth, H = $("win").clientHeight;
   const top = $("central").offsetTop;
   t.style.top = (top + (H - top - 92) / 2) + "px";
-  t.style.left = (sideCollapsed ? W - 46 - 4 : W - 15 - 256 - 26) + "px";
+  t.style.left = (sideCollapsed ? W - 46 - 4 : W - 15 - 290 - 26) + "px";
 }
 addEventListener("resize", () => placeToggle());
 $("sideToggle").onclick = () => {

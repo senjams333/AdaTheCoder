@@ -685,6 +685,7 @@ function playSoftTinkle(freq, delay = 0){
     ensureAudioContext();
     if(!bgAudioContext) return;
     const osc = bgAudioContext.createOscillator();
+    phraseOscs.push(osc);
     const gain = bgAudioContext.createGain();
     osc.type = "sine";
     osc.frequency.value = freq;
@@ -714,36 +715,16 @@ function playMagicalTinkles(){
     }
 }
 
-// the background sound: happy music-box sparkles. Little runs of 3 or 4 notes (rising or falling, on a five-note
-// scale that always sounds right), then a pause of 2 to 3 seconds. Each run is made just before it plays, and
-// switching the sound off stops a run that is still waiting, so nothing ever piles up into a burst.
-const musicBoxNotes = [1046.5, 1174.7, 1318.5, 1568.0, 1760.0, 2093.0, 2349.3, 2637.0];
-let twinkleTimer = 0, lastTwinkle = 0, phraseOscs = [];
-function playMusicBoxNote(freq, delay) {
-    ensureAudioContext();
-    if (!bgAudioContext) return;
-    const ctx = bgAudioContext, t = ctx.currentTime + delay;
-    const dest = (typeof bgVolNode === "function") ? bgVolNode() : ctx.destination;   // the app's volume knob
-    // a soft bell: the note and two quieter overtones that fade sooner, like a music box
-    [[1, 0.022, 1.4], [2, 0.008, 0.5], [3, 0.0026, 0.35]].forEach(([m, v, len]) => {
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = "sine"; o.frequency.value = freq * m; o.connect(g); g.connect(dest);
-        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-        o.start(t); o.stop(t + len + 0.05); phraseOscs.push(o);
-    });
-}
-function twinkleNext() {
-    twinkleTimer = 0;
+// the background sound: the original soft twinkles, 8 gentle notes spread over 4 seconds, every 5 seconds.
+// Asking for it again while it plays changes nothing (no second set of twinkles on top), and switching it off
+// silences the twinkles that were still waiting, so switching on again never lets a pile of notes out at once.
+let twinkleTimer = 0, phraseOscs = [];
+function twinkleBatch() {
     if (!musicPlaying) return;
-    const wait = 1500 - (Date.now() - lastTwinkle);   // never two runs close together
-    if (wait > 0) { twinkleTimer = setTimeout(twinkleNext, wait); return; }
-    lastTwinkle = Date.now(); phraseOscs = [];
-    const start = Math.floor(Math.random() * 4);
-    let run = musicBoxNotes.slice(start, start + 4);
-    if (Math.random() >= 0.6) run.reverse();
-    run = run.slice(0, Math.random() < 0.5 ? 3 : 4);
-    run.forEach((f, j) => playMusicBoxNote(f, 0.05 + j * 0.22));
-    twinkleTimer = setTimeout(twinkleNext, 2200 + Math.random() * 800);
+    phraseOscs = [];
+    for (let i = 0; i < 8; i++) {
+        playSoftTinkle(magicalNotes[Math.floor(Math.random() * magicalNotes.length)], Math.random() * 4);
+    }
 }
 
 function toggleAudioEngine(enableAudio) {
@@ -751,14 +732,14 @@ function toggleAudioEngine(enableAudio) {
     if(!enableAudio){
         musicPlaying = false;
         clearInterval(musicLoop);
-        clearTimeout(twinkleTimer); twinkleTimer = 0;
-        phraseOscs.forEach(o => { try { o.stop(); } catch (e) {} }); phraseOscs = [];   // a run still waiting stays silent
-        lastTwinkle = Date.now();   // the next run comes a moment after switching on again
+        clearInterval(twinkleTimer); twinkleTimer = 0;
+        phraseOscs.forEach(o => { try { o.stop(); } catch (e) {} }); phraseOscs = [];   // twinkles still waiting stay silent
         if(bgAudioContext) bgAudioContext.suspend();
     } else {
         if(!musicPlaying) {
             musicPlaying = true;
-            if (!twinkleTimer) twinkleNext();
+            twinkleBatch();
+            twinkleTimer = setInterval(twinkleBatch, 5000);
         }
     }
 }
