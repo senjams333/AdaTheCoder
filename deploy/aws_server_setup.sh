@@ -82,7 +82,8 @@ server {
   listen 80;
   server_name $HOST;
   client_max_body_size 600m;
-  location /api/   { proxy_pass http://127.0.0.1:3000; proxy_set_header Host \$host; proxy_set_header X-Forwarded-For \$remote_addr; proxy_read_timeout 600s; }
+  client_body_timeout 600s;   # big lesson videos on slow connections
+  location /api/   { proxy_pass http://127.0.0.1:3000; proxy_set_header Host \$host; proxy_set_header X-Forwarded-For \$remote_addr; proxy_read_timeout 600s; proxy_send_timeout 600s; }
   location /media/ { proxy_pass http://127.0.0.1:3000; }
   location /       { proxy_pass http://127.0.0.1:5000; proxy_set_header Host \$host; }
 }

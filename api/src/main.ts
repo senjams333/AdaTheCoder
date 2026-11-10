@@ -19,6 +19,12 @@ async function bootstrap() {
   const port = Number(process.env.PORT || 3000);
   const host = process.env.HOST || '127.0.0.1';
   await app.listen(port, host);
+  // Lesson videos can take a long time to upload on a home connection. Node ends a request after 5 minutes by
+  // default (requestTimeout), which cut big uploads off half way: allow up to an hour instead.
+  const server = app.getHttpServer();
+  server.requestTimeout = 60 * 60 * 1000;
+  server.headersTimeout = 2 * 60 * 1000;
+  server.timeout = 0;
   Logger.log(`Ada The Coder API on http://${host}:${port}/api`, 'Bootstrap');
 }
 bootstrap();
