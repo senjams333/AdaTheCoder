@@ -155,7 +155,8 @@ function AccountInner() {
                   {data.themes.map((c) => (
                     <article key={c.id} className={`acct-card theme-${c.pack}${wanted === c.slug ? ' acct-card-wanted' : ''}`} id={`theme-${c.slug}`}>
                       <div className={`acct-card-image${c.images.length > 1 ? ' many' : ''}`}>
-                        {c.licence ? <span className="acct-tag acct-tag-owned">✓ OWNED</span> : <span className="acct-tag">UPGRADE</span>}
+                        {!c.premium ? <span className="acct-tag acct-tag-free">FREE</span>
+                          : c.licence ? <span className="acct-tag acct-tag-owned">✓ OWNED</span> : <span className="acct-tag">UPGRADE</span>}
                         {c.images.map((img) => <img key={img} src={img} alt="" />)}
                       </div>
                       <div className="acct-card-body">
@@ -163,7 +164,9 @@ function AccountInner() {
                         <p>{c.tagline}</p>
                         <ul className="acct-features">{c.featureList.map((f) => <li key={f}>{f}</li>)}</ul>
                         <div className="acct-card-actions">
-                          {c.licence ? (
+                          {!c.premium ? (
+                            <p className="acct-free-note">Free in the app: open Ada The Coder and choose this theme.</p>
+                          ) : c.licence ? (
                             <LicenceBox code={c.licence} />
                           ) : (
                             <>

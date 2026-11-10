@@ -950,3 +950,4 @@ a.course-pic img { transition: transform .2s; }
 .upload-msg { margin: 8px 0 0; font-weight: 700; }
 .upload-msg.ok { color: #0b6e4f; }
 .upload-msg.bad { color: #b42318; }
+.acct-free-note { margin: 0; font-weight: 700; color: var(--ink-soft); }

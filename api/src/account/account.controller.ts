@@ -28,7 +28,8 @@ export class AccountController {
   @UseGuards(AuthGuard)
   async account(@CurrentUser() user: User) {
     const owned = new Map((await this.catalog.licences.find({ where: { userId: user.id } })).map((l) => [l.courseId, l.licence]));
-    const themes = (await this.catalog.allCourses(true)).filter((c) => c.premium)
+    // every published theme: the paid ones to buy (or already owned), and the free ones that come with the app
+    const themes = (await this.catalog.allCourses(true))
       .map((c) => ({ ...this.catalog.card(c), licence: owned.get(c.id) || null }));
     const latest = await this.releases.find({ where: { isLatest: true } });
     return {
