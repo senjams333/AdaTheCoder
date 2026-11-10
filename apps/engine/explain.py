@@ -91,6 +91,47 @@ COMMON_MODULES = ("random", "math", "time", "turtle", "datetime", "os", "sys", "
                   "json", "csv", "tkinter", "pygame", "cv2")
 PIP_NAMES = {"cv2": "opencv-python", "PIL": "pillow", "sklearn": "scikit-learn", "yaml": "pyyaml"}
 KNOWN_WORDS = sorted(set(dir(builtins)) | set(keyword.kwlist))
+_SWAP = []   # [wrong word, right word] found while explaining; explain() shows the line with it corrected
+
+
+def _swap(wrong, right):
+    _SWAP[:] = [wrong, right]
+
+
+def _replace_word(line, wrong, right):
+    """line with the first whole-word wrong (outside quotes) changed to right."""
+    out, q, i = [], "", 0
+    while i < len(line):
+        ch = line[i]
+        if q:
+            out.append(ch)
+            if ch == q:
+                q = ""
+            i += 1
+            continue
+        if ch in "\"'":
+            q = ch
+            out.append(ch)
+            i += 1
+            continue
+        if line.startswith(wrong, i) and (i == 0 or not (line[i - 1].isalnum() or line[i - 1] == "_")) and \
+                (i + len(wrong) == len(line) or not (line[i + len(wrong)].isalnum() or line[i + len(wrong)] == "_")):
+            return "".join(out) + right + line[i + len(wrong):]
+        out.append(ch)
+        i += 1
+    return line
+
+
+def _close_word(word, choices, cutoff):
+    """The word meant: the same word in small or capital letters first, then the closest spelling."""
+    by_low = {}
+    for c in choices:
+        by_low.setdefault(c.lower(), c)
+    if word.lower() in by_low and by_low[word.lower()] != word:
+        return by_low[word.lower()]
+    close = difflib.get_close_matches(word, choices, n=1, cutoff=cutoff) or \
+        [by_low[c] for c in difflib.get_close_matches(word.lower(), list(by_low), n=1, cutoff=cutoff)]
+    return close[0] if close and close[0] != word else None
 
 
 def _line_of(error, code, filename):
@@ -167,7 +208,7 @@ def _compiles(code_lines, index, new_line):
 
 def _clean(new_line):
     """A fix that looks like what a child meant (not two strings glued together, or a string used as a function)."""
-    return not re.search(r"[\"']\s*[\"']|[\"']\s*\(|\)\s*\(|\(\s*\)\s*[\"'\w]", new_line)
+    return not re.search(r"[\"']\s*[\"']|[\"']\s*\(|\)\s*\(|\(\s*\)\s*[\"'\w]|\)\s*,", new_line)
 
 
 def _extra_chars(code, n):
@@ -236,8 +277,28 @@ def _extra_chars(code, n):
                 break
     if not found:
         return None
-    extra = " ".join(body[i] for i in sorted(found))
+    found = set(found)
     fixed = "".join(ch for j, ch in enumerate(body) if j not in found).rstrip()
+    # a ; or , left at the very end isn't needed either
+    while fixed and fixed[-1] in ";," and _compiles(lines, idx, full(fixed[:-1].rstrip())):
+        cut = max(j for j in range(len(body)) if j not in found and not body[j].isspace())
+        found.add(cut)
+        fixed = "".join(ch for j, ch in enumerate(body) if j not in found).rstrip()
+    # no spaces left in front of a closing bracket by the removal (outside quotes)
+    out, q = [], ""
+    for ch in fixed:
+        if q:
+            q = "" if ch == q else q
+        elif ch in "\"'":
+            q = ch
+        elif ch in ")]}":
+            while out and out[-1] == " ":
+                out.pop()
+        out.append(ch)
+    tidy = "".join(out)
+    if _compiles(lines, idx, full(tidy)):
+        fixed = tidy
+    extra = " ".join(body[i] for i in sorted(found))
     return extra, fixed
 
 
@@ -344,7 +405,12 @@ def _syntax(error, n, line=""):
                 f"Move {w} inside {inside} (with spaces in front), or remove it{at}.")
 
     # names and Python words
+    if low in ("elseif", "elsif", "elif_", "elsefi"):
+        _swap(word, "elif")
+        return ("elif", "In Python, 'else if' is written as one word: elif.",
+                f"Write elif instead of {word}{at}.")
     if word and word != low and low in keyword.kwlist:
+        _swap(word, low)
         return ("capital", f"Python's special words use small letters. {word} should be {low}.",
                 f"Write {low} instead of {word}{at}.")
     if "invalid decimal literal" in msg or "invalid syntax" in msg and re.search(r"(^|[^\w.])\d+[A-Za-z_]", line):
@@ -356,8 +422,15 @@ def _syntax(error, n, line=""):
         return ("space_name", "A variable's name can't have spaces in it.",
                 f"Join the words with _ , like {joined}{at}.")
     if word and low not in keyword.kwlist and low not in dir(builtins) and "invalid syntax" in msg:
-        close = difflib.get_close_matches(low, LINE_WORDS, n=1, cutoff=0.6)
+        close = difflib.get_close_matches(low, LINE_WORDS, n=4, cutoff=0.6)
+        if close and line.rstrip().endswith(":"):
+            block = [c for c in close if c in BLOCK_WORDS]
+            if re.search(r"\bin\b", line) and "for" in close + block:
+                close = ["for"]
+            elif block:
+                close = block
         if close:
+            _swap(word, close[0])
             return ("spelling", f"{word} looks like the Python word {close[0]}, spelled a little differently.",
                     f"Did you mean {close[0]}? Check the spelling{at}.")
 
@@ -465,13 +538,16 @@ def _runtime(error, code, line_no=None):
             if re.match(rf"(def\s+{re.escape(word)}\s*\(|{re.escape(word)}\s*=(?!=))", l):   # at the left edge only
                 later = i
                 break
-        close = difflib.get_close_matches(word, KNOWN_WORDS + sorted(_names_in(code)), n=1, cutoff=0.75)
+        right = _close_word(word, KNOWN_WORDS + sorted(_names_in(code)), 0.75)
+        close = [right] if right else []
         if later and (line_no is None or later > line_no):
             made = f"def {word}():" if code.splitlines()[later - 1].lstrip().startswith("def") else f"{word} = ..."
             return ("too_early", f"{word} is used before the line that makes it ({made} on line {later}). Python reads from the top down.",
                     f"Move line {later} (and the lines that belong to it) above the line that uses {word}.")
         if close and close[0] != word:
-            fix = f"Did you mean {close[0]}? Check the spelling."
+            _swap(word, close[0])
+            how = "small and capital letters" if close[0].lower() == word.lower() else "the spelling"
+            fix = f"Did you mean {close[0]}? Check {how}."
         elif word[:1].isupper() or len(word) > 2:
             fix = f'If {word} is words to show, put it in quotes: print("{word}"). ' \
                   f"If it's a variable, give it a value first, like {word} = 5."
@@ -486,6 +562,7 @@ def _runtime(error, code, line_no=None):
         mod = (m.group(1) if m else "it").split(".")[0]
         close = difflib.get_close_matches(mod.lower(), COMMON_MODULES, n=1, cutoff=0.7)
         if close and close[0] != mod:
+            _swap(mod, close[0])
             return ("module_name", f"There's no helper called {mod}. Helper names use small letters and exact spelling.",
                     f"Did you mean import {close[0]}?")
         return ("module", f"Your code uses import {mod}, but {mod} isn't on this computer.",
@@ -586,6 +663,8 @@ def _runtime(error, code, line_no=None):
                      "int": ("a number", int), "float": ("a number", float)}
             kind_name, kind = kinds.get(m.group(1), (m.group(1), None))
             close = difflib.get_close_matches(m.group(2), [a for a in dir(kind) if not a.startswith("_")], n=1, cutoff=0.6) if kind else []
+            if close:
+                _swap(m.group(2), close[0])
             fix = f"Did you mean .{close[0]}()? Check the spelling after the dot." if close else "Check the spelling of the word after the dot."
             return ("attribute", f"{kind_name.capitalize()} can't use .{m.group(2)}.", fix)
         m = re.search(r"module '(\w+)' has no attribute '(\w+)'", text)
@@ -594,6 +673,8 @@ def _runtime(error, code, line_no=None):
             mod = _sys.modules.get(m.group(1))
             names = {a.lower(): a for a in dir(mod) if not a.startswith("_")} if mod else {}
             close = [names[c] for c in difflib.get_close_matches(m.group(2).lower(), list(names), n=1, cutoff=0.6)]
+            if close:
+                _swap(m.group(2), close[0])
             fix = f"Did you mean {m.group(1)}.{close[0]}? Spelling and small or capital letters must match." if close \
                 else "Check the spelling of the word after the dot."
             return ("attribute", f"The {m.group(1)} helper has nothing called {m.group(2)}.", fix)
@@ -604,6 +685,7 @@ def _runtime(error, code, line_no=None):
 
 
 def explain(error, code, filename="<string>"):
+    _SWAP[:] = []
     n, line = _line_of(error, code, filename)
     if isinstance(error, SyntaxError):
         kind, why, fix = _syntax(error, n, line)
@@ -621,6 +703,10 @@ def explain(error, code, filename="<string>"):
     else:
         kind, why, fix = _runtime(error, code, n)
         said = f"{type(error).__name__}: {error}"
+    if _SWAP and line and "so the line reads" not in fix:
+        fixed = _replace_word(line, _SWAP[0], _SWAP[1])
+        if fixed != line:
+            fix += f"  The line should be:  {fixed}"
     short = SHORT[kind]
     parts = [f"❌ {short}"]
     if n:

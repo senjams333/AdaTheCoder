@@ -260,6 +260,26 @@ class ExplainMistakes(unittest.TestCase):
         self.assertIn("Something is missing here", self.run_code('x = 5 +')[0])
         self.assertIn("A bracket is not closed", self.run_code('print("Hi"')[0])
 
+    def test_the_corrected_line_is_shown(self):
+        cases = {
+            'printy("hell0")': 'The line should be:  print("hell0")',
+            'PRINT("Hello")': 'The line should be:  print("Hello")',
+            'name = "Tom"\nprint(nmae)': "The line should be:  print(name)",
+            'fro i in range(3):\n    print(i)': "The line should be:  for i in range(3):",
+            'def f():\n    retrun 5': "The line should be:  return 5",
+            'improt random': "The line should be:  import random",
+            'x = 1\nif x:\n    pass\nelseif x:\n    pass': "The line should be:  elif x:",
+            'x = TRUE': "The line should be:  x = True",
+            'import random\nprint(random.randInt(1, 6))': "The line should be:  print(random.randint(1, 6))",
+            'print("Hi");;': 'so the line reads:  print("Hi")',
+            'print("Hi"):': 'so the line reads:  print("Hi")',
+            'print(,"Hi")': 'so the line reads:  print("Hi")',
+            'print("Hi")"!"': 'so the line reads:  print("Hi")',
+            'print("a",, "b")': 'so the line reads:  print("a", "b")',
+        }
+        for code, expected in cases.items():
+            self.assertIn(expected, self.run_code(code)[0], code)
+
     def test_the_input_program_runner_explains_too(self):
         import subprocess
         src = open(os.path.join(APPS, "engine", "explain.py"), encoding="utf-8").read()

@@ -428,16 +428,18 @@ class WebMainWindow(QMainWindow):
         self._push()
 
     def set_video_full(self, on):
-        """Full screen for the lesson video, without flicker: no repaint while the window changes size."""
+        """Full screen for the lesson video, in one window change (not normal size first and then maximized, which
+        flickers on Windows). The page keeps the video filling the window until the size has settled."""
         if bool(on) == self.isFullScreen():
             return
-        self.setUpdatesEnabled(False)
+        state = self.windowState()
         if on:
-            self._was_maximized = self.isMaximized()
-            self.showFullScreen()
+            self._was_maximized = bool(state & Qt.WindowMaximized)
+            self.setWindowState((state & ~Qt.WindowMinimized) | Qt.WindowFullScreen)
         else:
-            self.showMaximized() if self._was_maximized else self.showNormal()
-        QTimer.singleShot(120, lambda: self.setUpdatesEnabled(True))
+            state &= ~Qt.WindowFullScreen
+            state = (state | Qt.WindowMaximized) if self._was_maximized else (state & ~Qt.WindowMaximized)
+            self.setWindowState(state)
 
     def apply_theme(self):
         self._push()
