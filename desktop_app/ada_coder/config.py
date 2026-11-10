@@ -11,7 +11,7 @@ Before building a new version:
      with exactly the same version number.
 """
 APP_NAME = "Ada The Coder"
-APP_VERSION = "1.3.9"
+APP_VERSION = "1.4.0"
 DEFAULT_SERVER_URL = "https://www.adathecoder.com"
 
 

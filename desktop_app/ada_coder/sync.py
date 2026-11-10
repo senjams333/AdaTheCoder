@@ -117,6 +117,32 @@ def _download(url, dest):
     os.replace(tmp, dest)
 
 
+def _fetch_videos(courses):
+    """Downloads the lesson videos that aren't on this computer yet: the MP4, and the WebM copy the app's window
+    plays (the website makes it with ffmpeg). Returns (every video file name the lessons use, whether any arrived).
+    A download that fails or is cut off is simply tried again at the next check."""
+    videos = videos_dir()
+    wanted, got = set(), False
+    for course in courses:
+        for lesson in course.get("lessons") or []:
+            video = lesson.get("video") or {}
+            for file_key, url_key in (("file", "url"), ("webm_file", "webm_url")):
+                if video.get(file_key) and video.get(url_key):
+                    name = os.path.basename(video[file_key])
+                    wanted.add(name)
+                    dest = os.path.join(videos, name)
+                    if not os.path.exists(dest):
+                        try:
+                            _download(video[url_key], dest)
+                            got = True
+                        except NETWORK_ERRORS:
+                            try:
+                                os.remove(dest + ".part")      # a half-finished download is started again next time
+                            except OSError:
+                                pass
+    return wanted, got
+
+
 def sync_courses(force=False):
     """Downloads the courses (with their lessons and any new videos). Returns True if anything changed.
     A paid theme the family hasn't bought comes with only its free lessons; the rest arrive once it's bought
@@ -127,23 +153,10 @@ def sync_courses(force=False):
     except NETWORK_ERRORS:
         return False
     if data.get("unchanged") or not data.get("courses"):
-        return False
+        # nothing new on the website, but a video that didn't finish downloading last time is fetched now
+        return bool(cache.get("courses")) and _fetch_videos(cache["courses"])[1]
     videos = videos_dir()
-    wanted = set()
-    for course in data["courses"]:
-        for lesson in course.get("lessons") or []:
-            video = lesson.get("video") or {}
-            # the MP4, and the WebM copy the app's window plays (the website makes it when it has ffmpeg)
-            for file_key, url_key in (("file", "url"), ("webm_file", "webm_url")):
-                if video.get(file_key) and video.get(url_key):
-                    name = os.path.basename(video[file_key])
-                    wanted.add(name)
-                    dest = os.path.join(videos, name)
-                    if not os.path.exists(dest):
-                        try:
-                            _download(video[url_key], dest)
-                        except NETWORK_ERRORS:
-                            pass  # the bundled video plays until the download works next time
+    wanted, _ = _fetch_videos(data["courses"])
     pictures = characters_dir()
     for course in data["courses"]:
         for char in course.get("characters") or []:
