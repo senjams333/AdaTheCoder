@@ -76,6 +76,7 @@ SHORT = {
     "too_big": "That number is too big",
     "print_kw": "print can't use = inside",
     "module_name": "Check the helper's name",
+    "extra_chars": "Something extra was typed",
     "other": "Oops! Something went wrong",
 }
 
@@ -151,6 +152,93 @@ def _bracket_balance(line):
             elif not extra:
                 extra = ch
     return (stack[0] if stack else ""), extra
+
+
+def _compiles(code_lines, index, new_line):
+    """Does the program compile with line number index+1 changed to new_line?"""
+    lines = list(code_lines)
+    lines[index] = new_line
+    try:
+        compile("\n".join(lines) + "\n", "<check>", "exec")
+        return True
+    except (SyntaxError, ValueError):
+        return False
+
+
+def _clean(new_line):
+    """A fix that looks like what a child meant (not two strings glued together, or a string used as a function)."""
+    return not re.search(r"[\"']\s*[\"']|[\"']\s*\(|\)\s*\(|\(\s*\)\s*[\"'\w]", new_line)
+
+
+def _extra_chars(code, n):
+    """Characters typed by accident on line n: (what to delete, the line without them), or None.
+    It tries removing up to 3 stray characters (4 on short lines); it stays quiet when adding one missing character is the better fix."""
+    lines = code.splitlines()
+    if not n or not 1 <= n <= len(lines):
+        return None
+    raw = lines[n - 1]
+    if len(raw) > 120:
+        return None
+    idx = n - 1
+    indent = raw[:len(raw) - len(raw.lstrip())]
+    body = raw.strip()
+    full = lambda s: indent + s  # noqa: E731
+    # is the mistake rather something missing? (one character added in the right place fixes it neatly)
+    for i in range(len(body) + 1):
+        for ch in "\"')]}:,":
+            fixed = body[:i] + ch + body[i:]
+            if _clean(fixed) and _compiles(lines, idx, full(fixed)):
+                missing_fix = True
+                break
+        else:
+            continue
+        break
+    else:
+        missing_fix = False
+    last = len(body) - 1
+    quoted_words = re.search(r"[\"'][^\"']*[A-Za-z]", body)
+
+    def sensible(fixed, removed):
+        """The fix keeps the words in quotes, keeps every =, and doesn't leave a sign waiting for something."""
+        if quoted_words and not re.search(r"\"[^\"]*[A-Za-z][^\"]*\"|'[^']*[A-Za-z][^']*'", fixed):
+            return False
+        for i in removed:
+            ch = body[i]
+            if ch == "=" and not ((i > 0 and body[i - 1] == "=") or (i < last and body[i + 1] == "=")):
+                return False
+            if ch in "+-*/%,<>":
+                after = body[i + 1:].strip()
+                before = "".join(body[j] for j in range(i) if j not in removed).rstrip()
+                if (not after or after[0] in ")]}") and not before.endswith((")", "]", "}")):
+                    return False
+        return True
+
+    marks = [i for i, ch in enumerate(body) if not ch.isspace() and not ch.isalnum() and ch != "_"]
+    found = None
+    # one character: a sign anywhere, or anything at the very end of the line
+    for i in sorted(set(marks + [last]), reverse=True):
+        fixed = body[:i] + body[i + 1:]
+        if fixed.strip() and _clean(fixed) and sensible(fixed, [i]) and _compiles(lines, idx, full(fixed.rstrip())):
+            doubled = (i > 0 and body[i - 1] == body[i]) or (i < last and body[i + 1] == body[i])
+            if not missing_fix or doubled or i == last:
+                found = [i]
+                break
+    if found is None and not missing_fix and len(marks) <= 16:
+        from itertools import combinations
+        for k in ((2, 3, 4) if len(marks) <= 12 else (2, 3)):
+            # prefer removing signs at the end of the line, then doubled ones
+            for combo in sorted(combinations(marks, k), key=lambda c: (-sum(c), c)):
+                fixed = "".join(ch for j, ch in enumerate(body) if j not in combo)
+                if fixed.strip() and _clean(fixed) and sensible(fixed, combo) and _compiles(lines, idx, full(fixed.rstrip())):
+                    found = list(combo)
+                    break
+            if found:
+                break
+    if not found:
+        return None
+    extra = " ".join(body[i] for i in sorted(found))
+    fixed = "".join(ch for j, ch in enumerate(body) if j not in found).rstrip()
+    return extra, fixed
 
 
 def _syntax(error, n, line=""):
@@ -519,6 +607,16 @@ def explain(error, code, filename="<string>"):
     n, line = _line_of(error, code, filename)
     if isinstance(error, SyntaxError):
         kind, why, fix = _syntax(error, n, line)
+        if kind in ("syntax", "bracket", "quote", "empty", "extra_bracket", "operator", "comma", "strange") \
+                and not isinstance(error, IndentationError) and not any(c in line for c in "“”‘’"):
+            extra = _extra_chars(code, n)
+            if extra:
+                what, fixed = extra
+                many = len(what.split()) > 1
+                kind = "extra_bracket" if what in (")", "]", "}") else "extra_chars"
+                why = (f"There {'are' if many else 'is an'} extra {'characters' if many else 'character'} on this line "
+                       f"that Python doesn't expect: {what}")
+                fix = f"Delete {'them' if many else 'it'}, so the line reads:  {fixed}"
         said = f"{type(error).__name__}: {error.msg}"
     else:
         kind, why, fix = _runtime(error, code, n)

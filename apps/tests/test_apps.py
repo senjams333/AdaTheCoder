@@ -241,6 +241,25 @@ class ExplainMistakes(unittest.TestCase):
         for code, expected in cases.items():
             self.assertIn(expected, self.run_code(code)[0], code)
 
+    def test_extra_characters_typed_by_accident(self):
+        cases = {
+            'print("Hello"")"*': 'print("Hello")',
+            'print("Hello"")': 'print("Hello")',
+            'print("Hello")x': 'print("Hello")',
+            'x = 5$': "x = 5",
+            'print(("Hello")': 'print("Hello")',
+            'print"("Hello")': 'print("Hello")',
+            'x = 5 +* 2': "x = 5 + 2",
+            'name = "Tom"\nprint("Hi " + name"")"*\nprint("Bye")': 'print("Hi " + name)',
+        }
+        for code, fixed in cases.items():
+            text = self.run_code(code)[0]
+            self.assertIn("so the line reads:  " + fixed, text, code)
+        # something missing is still told as missing, not as extra
+        self.assertIn("A quote is missing", self.run_code('print("Hi)')[0])
+        self.assertIn("Something is missing here", self.run_code('x = 5 +')[0])
+        self.assertIn("A bracket is not closed", self.run_code('print("Hi"')[0])
+
     def test_the_input_program_runner_explains_too(self):
         import subprocess
         src = open(os.path.join(APPS, "engine", "explain.py"), encoding="utf-8").read()
