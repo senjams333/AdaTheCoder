@@ -611,12 +611,12 @@ td form { margin: 0; }
 .plan-edit { position: relative; }
 .pill-pink { background: var(--pink-soft); color: var(--pink-dark); }
 
-/* Account page: the app shelf (one row of cards that grows as new themes are added) */
+/* Account page: the app shelf (rows of cards; a new theme starts a new row when one is full) */
 .acct-shelf-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 18px; }
 .acct-shelf-head h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .acct-shelf-head p { margin: 0; color: var(--ink-soft); font-size: .92rem; }
-.acct-shelf { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  align-content: start; gap: 18px; }
+.acct-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+  align-content: start; gap: 18px; }   /* cards keep a good width; when a row is full, a new theme starts the next row */
 .acct-shelf:focus-visible { outline: 3px solid var(--grape); border-radius: 12px; }
 .acct-card { scroll-snap-align: start; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; background: #fff;
   border: 1px solid #ECE6F8; box-shadow: 0 6px 18px rgba(43,34,87,.08); transition: transform .15s ease, box-shadow .15s ease; }
