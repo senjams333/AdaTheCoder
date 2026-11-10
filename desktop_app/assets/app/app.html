@@ -51,7 +51,9 @@ body { margin: 0; background: var(--page); color: var(--ink); font: 14px var(--u
 .brk-step span { font-size: 14px; line-height: 1.35; color: #334155; }
 .brk-go { margin-top: 18px; font: 700 19px var(--font-kid); background: #22c997; color: #fff; border: 0; border-bottom: 4px solid #0e9f74; border-radius: 24px; padding: 12px 34px; cursor: pointer; }
 .brk-go:hover { filter: brightness(1.06); }
-.brk-go.brk-wait, .brk-go:disabled { background: #94a3b8; border-bottom-color: #64748b; cursor: default; filter: none; font-variant-numeric: tabular-nums; }
+.brk-clock { margin-top: 18px; display: inline-flex; align-items: center; gap: 10px; font: 800 26px var(--font-kid); color: #0369a1;
+  background: #e0f2fe; border: 3px solid #7dd3fc; border-radius: 24px; padding: 10px 28px; font-variant-numeric: tabular-nums; }
+.brk-clock[hidden] { display: none; }
 .musicwrap { position: relative; display: inline-flex; }
 .bgvol { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column;
   align-items: center; gap: 6px; padding: 12px 8px 8px; background: rgba(255, 255, 255, .95); border: 2px solid #7dd3fc; border-radius: 22px;
@@ -280,6 +282,7 @@ body.night { background: #070b24; }
         <div class="brk-step"><span class="n">🎈</span><div><b>3. Breathe (Mind)</b><span>Take 3 balloon breaths: breathe in deep to fill your belly, then blow it out slowly.</span></div></div>
         <div class="brk-step"><span class="n">💧</span><div><b>4. Drink (Hydration)</b><span>Take 3 big sips of water. It keeps your brain happy and running smoothly.</span></div></div>
       </div>
+      <div class="brk-clock" id="breakClock" hidden aria-live="polite"></div>
       <button class="brk-go" id="breakDone" type="button">I did it! Back to coding 🚀</button>
     </div>
   </div>
@@ -569,7 +572,7 @@ function renderBreak() {
   if (!b) return;                      // the app's own words (as written above)
   if (b.title) $("breakTitle").textContent = b.title;
   if (b.intro) $("breakIntro").textContent = b.intro;
-  if (b.button && !(Date.now() < breakUntil)) $("breakDone").textContent = b.button;
+  if (b.button) $("breakDone").textContent = b.button;
   if (Array.isArray(b.steps) && b.steps.length) {
     setHTML($("breakSteps"), b.steps.map(s => `<div class="brk-step"><span class="n">${esc(s.emoji || "⭐")}</span><div><b>${esc(s.title || "")}</b><span>${esc(s.text || "")}</span></div></div>`).join(""));
   }
@@ -613,39 +616,42 @@ setInterval(() => {
   usedSeconds += 5;
   if (usedSeconds >= every) showBreak();
 }, 5000);
-// The admin can lock the break (website admin → Website text → Break reminder): then the button can't be pressed for
-// lock_minutes and counts down, so children really rest their eyes and body. Unlocked, it closes at once.
-// The countdown follows the clock, so it keeps going even if the app is minimised.
+// The admin can lock the break (website admin → Website text → Break reminder): then there is no button, only a
+// countdown, and the break closes by itself when the time is up, so children really rest their eyes and body.
+// Not locked: the button closes it at once. The countdown follows the clock (it keeps going if the app is minimised).
 function breakLockSeconds() {
   const b = D.home && D.home.break;
   if (b && b.lock === false) return 0;
   const m = b && b.lock_minutes ? Number(b.lock_minutes) : 5;
   return Math.max(1, Math.min(30, m || 5)) * 60;
 }
-function breakButtonText() { const b = D.home && D.home.break; return (b && b.button) || "I did it! Back to coding 🚀"; }
+function closeBreak() {
+  clearInterval(breakTick); breakTick = 0; breakUntil = 0;
+  $("breakBox").hidden = true; usedSeconds = 0;
+}
 function breakCountdown() {
-  const left = Math.ceil((breakUntil - Date.now()) / 1000), go = $("breakDone");
-  if (left > 0) {
-    go.disabled = true; go.classList.add("brk-wait");
-    go.textContent = `⏳ Break time: ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
-    return;
-  }
-  clearInterval(breakTick); breakTick = 0;
-  go.disabled = false; go.classList.remove("brk-wait");
-  go.textContent = breakButtonText();
-  go.focus();
+  const left = Math.ceil((breakUntil - Date.now()) / 1000);
+  if (left <= 0) { closeBreak(); return; }          // the break is over: back to coding
+  $("breakClock").textContent = `⏳ Break ends in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
 }
 function showBreak() {
   usedSeconds = 0;
   try { const k = $("kids").contentDocument, v = k && k.getElementById("introVid"); if (v && !v.paused) v.pause(); } catch (e) {}   // the lesson video waits
+  const lock = breakLockSeconds();
   $("breakBox").hidden = false;
-  breakUntil = Date.now() + breakLockSeconds() * 1000;
-  clearInterval(breakTick);
-  breakCountdown();
-  if (breakUntil > Date.now()) breakTick = setInterval(breakCountdown, 1000);
-  else $("breakDone").focus();
+  $("breakDone").hidden = lock > 0;                 // locked: no button at all
+  $("breakClock").hidden = lock === 0;
+  clearInterval(breakTick); breakTick = 0;
+  if (lock > 0) {
+    breakUntil = Date.now() + lock * 1000;
+    breakCountdown();
+    breakTick = setInterval(breakCountdown, 1000);
+  } else {
+    breakUntil = 0;
+    $("breakDone").focus();
+  }
 }
-$("breakDone").onclick = () => { if (Date.now() < breakUntil) return; $("breakBox").hidden = true; usedSeconds = 0; };
+$("breakDone").onclick = () => { if (Date.now() < breakUntil) return; closeBreak(); };
 // while the break is locked, keys can't reach the app behind it
 document.addEventListener("keydown", e => { if (!$("breakBox").hidden && Date.now() < breakUntil) { e.preventDefault(); e.stopPropagation(); } }, true);
 window.appShowBreak = showBreak;       // (for testing: appShowBreak() in the page)

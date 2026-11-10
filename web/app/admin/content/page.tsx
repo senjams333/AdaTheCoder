@@ -85,14 +85,14 @@ export default function AdminContent() {
         <div className="field">
           <label className="check"><input type="checkbox" checked={(form.break_lock ?? '1') === '1'}
             onChange={(e) => setForm({ ...form, break_lock: e.target.checked ? '1' : '0' })} />
-            <span>Lock the app during the break: children can&apos;t close it until the break time is over (good for their eyes and health)</span></label>
-          <span className="help">Untick to let children close the break at once and carry on coding.</span>
+            <span>Lock the app during the break: no close button, only a countdown; the break ends by itself when the time is up (good for their eyes and health)</span></label>
+          <span className="help">Untick to show the button instead, so children can close the break at once and carry on coding.</span>
         </div>
         {(form.break_lock ?? '1') === '1' ? (
           <div className="field">
             <label htmlFor="break_lock_minutes">Break length (minutes)</label>
             <input id="break_lock_minutes" type="number" min={1} max={30} value={form.break_lock_minutes ?? '5'} onChange={set('break_lock_minutes')} />
-            <span className="help">5 is the default. The button shows a countdown and works when it reaches 0.</span>
+            <span className="help">For example 2 or 5 (the default). Children see &quot;⏳ Break ends in 4:59&quot;, and the app opens again by itself at 0.</span>
           </div>
         ) : null}
         {(() => {
