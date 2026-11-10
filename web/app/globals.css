@@ -938,7 +938,8 @@ a.course-pic img { transition: transform .2s; }
 .author-letter p:not(.author-sign):not(.author-role) { text-align: justify; hyphens: auto; }
 
 /* the file chooser (components/FilePick.tsx): a Choose button and the chosen file's name */
-.filepick { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.filepick { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px; border: 2px dashed var(--line); border-radius: 14px; }
+.filepick.over { border-color: var(--grape); background: var(--lilac-soft); }
 .filepick-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
 .filepick-btn { cursor: pointer; margin: 0; }
 .filepick-input:focus-visible + .filepick-btn { outline: 3px solid var(--sky); outline-offset: 2px; }

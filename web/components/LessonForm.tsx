@@ -14,8 +14,6 @@ import { FormErrors } from './Flashes';
 import FilePick from './FilePick';
 
 const EMPTY_EXAMPLE: Example = { label: '', explain: '', output: '', code: '' };
-// any common video file: the website makes the WebM copy the app plays (with ffmpeg)
-const VIDEO_ACCEPT = 'video/*,.mp4,.m4v,.mov,.webm,.mkv,.avi';
 
 type Saved = { ok: boolean; id: number; courseId: number; message?: string };
 
@@ -216,7 +214,7 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
           ) : null}
           <div className="field">
             <label htmlFor="video">{onSite.file ? 'Replace with a new video' : 'Upload a video'} <span className="muted">(optional: .mp4, .mov, .webm, .mkv…)</span></label>
-            <FilePick id="video" accept={VIDEO_ACCEPT} file={video} onFile={chooseVideo} button="📁 Choose video" />
+            <FilePick id="video" file={video} onFile={chooseVideo} button="📁 Choose video" dropHint="or drag the video file here" />
             <span className="help">{isNew ? 'The video uploads right after you press Add lesson.' : 'The video uploads as soon as you choose it; you don\'t need to press Save for the video.'}</span>
             {upMsg ? <p className={upMsg.ok ? 'upload-msg ok' : 'upload-msg bad'} role="status">{upMsg.text}</p> : null}
             {preview && (isNew || sent !== null) ? (
