@@ -246,10 +246,24 @@ function updateLessonData(info) {
 
 function setDarkMode(on) { document.body.classList.toggle("dark-mode", !!on); }
 
+// the twinkling: one soft note at a time, evenly spaced (never a burst of notes together); each note is made only
+// just before it plays, so stopping and starting again never lets a pile of waiting notes out at once.
+// Asking again while it already plays changes nothing.
+let twinkleTimer = 0, lastTwinkle = 0;
+function twinkleNext() {
+  twinkleTimer = 0;
+  if (!musicOn || bgLevel <= 0) return;
+  const wait = 500 - (Date.now() - lastTwinkle);   // never two notes closer than half a second
+  if (wait > 0) { twinkleTimer = setTimeout(twinkleNext, wait); return; }
+  lastTwinkle = Date.now();
+  tone(NOTES[Math.floor(Math.random() * NOTES.length)], 0.02, 1.6, "sine", 0.02 * bgLevel);
+  twinkleTimer = setTimeout(twinkleNext, 550 + Math.random() * 350);
+}
 function toggleAudioEngine(on) {
   musicOn = !!on;
   clearInterval(musicTimer);
-  if (musicOn) { musicTick(); musicTimer = setInterval(musicTick, 5000); }   // soft magical tinkles, as before
+  if (!musicOn) { clearTimeout(twinkleTimer); twinkleTimer = 0; return; }
+  if (!twinkleTimer) twinkleNext();
 }
 
 function setVoiceEnabled(on) { state.voice = !!on; if (!on && "speechSynthesis" in window) speechSynthesis.cancel(); }

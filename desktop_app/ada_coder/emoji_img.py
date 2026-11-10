@@ -1,7 +1,7 @@
 """What every page the app shows gets, so every computer shows the same thing:
 - pictures for emojis (assets/emoji: Microsoft Fluent Emoji 3D, MIT License, and Noto Color Emoji, SIL Open Font
   License, for the few Fluent doesn't have); assets/app/emoji.js does the work;
-- the app's font, Quicksand (assets/fonts, SIL Open Font License), built into the page so it is there from the
+- the app's font, Nunito (assets/fonts, SIL Open Font License), built into the page so it is there from the
   first moment (no flash of another font while it loads)."""
 import base64
 import json
@@ -20,8 +20,8 @@ def font_style():
     global _FONT
     if _FONT is None:
         try:
-            data = base64.b64encode(open(asset("fonts", "quicksand.woff"), "rb").read()).decode("ascii")
-            _FONT = ("<style>@font-face { font-family: 'Quicksand'; font-weight: 300 700; font-style: normal; "
+            data = base64.b64encode(open(asset("fonts", "nunito.woff"), "rb").read()).decode("ascii")
+            _FONT = ("<style>@font-face { font-family: 'Nunito'; font-weight: 200 1000; font-style: normal; "
                      "font-display: block; src: url(data:font/woff;base64,%s) format('woff'); }</style>\n" % data)
         except OSError:
             _FONT = ""

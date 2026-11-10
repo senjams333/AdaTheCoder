@@ -152,7 +152,7 @@ ensure_tom_image()
 BASE_CSS = """
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; overflow-x:hidden; overflow-y:auto; font-family:'Quicksand', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Segoe UI Emoji', 'Apple Color Emoji', cursive, sans-serif; background: transparent; transition:0.5s; }
+html, body { width:100%; height:100%; overflow-x:hidden; overflow-y:auto; font-family:'Nunito', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Segoe UI Emoji', 'Apple Color Emoji', cursive, sans-serif; background: transparent; transition:0.5s; }
 
 .sun { 
     position:fixed; 
@@ -714,17 +714,31 @@ function playMagicalTinkles(){
     }
 }
 
+// the twinkling: one soft note at a time, evenly spaced (never a burst of notes together); each note is made only
+// just before it plays, so pausing and starting again never lets a pile of waiting notes out at once
+let twinkleTimer = 0, lastTwinkle = 0;
+function twinkleNext() {
+    twinkleTimer = 0;
+    if (!musicPlaying) return;
+    const wait = 500 - (Date.now() - lastTwinkle);   // never two notes closer than half a second
+    if (wait > 0) { twinkleTimer = setTimeout(twinkleNext, wait); return; }
+    lastTwinkle = Date.now();
+    playSoftTinkle(magicalNotes[Math.floor(Math.random() * magicalNotes.length)], 0.02);
+    twinkleTimer = setTimeout(twinkleNext, 550 + Math.random() * 350);
+}
+
 function toggleAudioEngine(enableAudio) {
     ensureAudioContext();
     if(!enableAudio){
         musicPlaying = false;
         clearInterval(musicLoop);
+        clearTimeout(twinkleTimer); twinkleTimer = 0;
+        lastTwinkle = Date.now();   // the next note comes at least half a second after switching on again
         if(bgAudioContext) bgAudioContext.suspend();
     } else {
         if(!musicPlaying) {
             musicPlaying = true;
-            playMagicalTinkles();
-            musicLoop = setInterval(playMagicalTinkles, 5000);
+            if (!twinkleTimer) twinkleNext();
         }
     }
 }
