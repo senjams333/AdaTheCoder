@@ -866,43 +866,32 @@ else loggedOutLook(true);                                        // the log-in c
 })();
 </script>
 <style>
-/* Pixar-style 3D candy buttons: day/night, sound, Home (drawn the same on every computer) */
-.round, .pill, .qbtn {
-  --c1: #86efac; --c2: #22c55e; --deep: #15803d;
-  background: radial-gradient(ellipse 72% 42% at 50% 16%, rgba(255, 255, 255, .78) 0%, rgba(255, 255, 255, 0) 100%),
-              linear-gradient(180deg, var(--c1) 0%, var(--c2) 100%) !important;
-  border: 3px solid #ffffff !important; color: #ffffff !important; font-weight: 800 !important;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, .2);
-  box-shadow: 0 5px 0 var(--deep), 0 10px 16px rgba(15, 23, 42, .28), inset 0 -5px 0 rgba(0, 0, 0, .1) !important;
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.round:hover, .pill:hover:not(:disabled), .qbtn:hover:not(:disabled) { transform: translateY(-2px);
-  box-shadow: 0 7px 0 var(--deep), 0 14px 20px rgba(15, 23, 42, .3), inset 0 -5px 0 rgba(0, 0, 0, .1) !important; }
-.round:active, .pill:active:not(:disabled), .qbtn:active:not(:disabled) { transform: translateY(4px);
-  box-shadow: 0 1px 0 var(--deep), 0 3px 6px rgba(15, 23, 42, .25), inset 0 -3px 0 rgba(0, 0, 0, .1) !important; }
-#homeBtn { --c1: #fdba74; --c2: #f97316; --deep: #c2410c; }
-#themeBtn { --c1: #7dd3fc; --c2: #0ea5e9; --deep: #0369a1; }
-#musicBtn { --c1: #d8b4fe; --c2: #9333ea; --deep: #6b21a8; }
-.central.night #themeBtn, body.night #themeBtn { --c1: #a5b4fc; --c2: #6366f1; --deep: #3730a3; }
-.round { width: 50px !important; height: 50px !important; border-radius: 50% !important; padding: 0 !important; }
-.pill img.emj, .qbtn img.emj { width: 1.3em; height: 1.3em; vertical-align: -0.3em; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .22)); }
-.round img.emj, .pill.round img.emj, .qbtn.round img.emj { width: 34px; height: 34px; vertical-align: middle; margin: 0; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .35)); }
-/* the twinkle sound's volume: a puffy 3D panel, a candy track that fills up, and a shiny gold ball to drag */
-.bgvol { width: 58px !important; height: 188px !important; padding: 0 !important; display: block !important; border-radius: 29px !important;
-  background: radial-gradient(ellipse 80% 22% at 50% 8%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0)), linear-gradient(180deg, #ffffff, #f3e8ff) !important;
-  border: 3px solid #ffffff !important; box-shadow: 0 5px 0 #d8b4fe, 0 14px 24px rgba(107, 33, 168, .28) !important; }
+/* soft glass buttons: day/night, sound, Home, and the volume control; they blend with the sky (the same on every computer) */
+.round img.emj, .pill.round img.emj, .qbtn.round img.emj { width: 28px; height: 28px; vertical-align: middle; margin: 0; }
+.pill img.emj, .qbtn img.emj { width: 1.2em; height: 1.2em; vertical-align: -0.25em; }
+.round { width: 46px !important; height: 46px !important; border-radius: 50% !important; padding: 0 !important; }
+.round, .pill, .qbtn { transition: transform .15s ease, background .15s ease, box-shadow .15s ease; font-weight: 700 !important; text-shadow: none !important; }
+.round:hover, .pill:hover:not(:disabled), .qbtn:hover:not(:disabled) { transform: translateY(-1px); }
+.round:active, .pill:active:not(:disabled), .qbtn:active:not(:disabled) { transform: translateY(1px); }
 .bgvol[hidden] { display: none !important; }
+.bgvol { width: 46px !important; height: 170px !important; padding: 0 !important; display: block !important; border-radius: 23px !important; }
 .bgvol input { --v: 50%; -webkit-appearance: none !important; appearance: none !important; writing-mode: horizontal-tb !important; direction: ltr !important;
-  position: absolute; width: 134px !important; height: 34px !important; left: -41px; top: 64px; margin: 0 !important;
-  transform: rotate(-90deg); background: transparent; cursor: pointer; }
+  position: absolute; width: 120px !important; height: 26px !important; left: -37px; top: 60px; margin: 0 !important; transform: rotate(-90deg); background: transparent; cursor: pointer; }
 .bgvol input:focus { outline: none; }
-.bgvol input::-webkit-slider-runnable-track { height: 16px; border-radius: 9px;
-  background: linear-gradient(90deg, #c084fc 0%, #9333ea var(--v), #ede9fe var(--v), #ede9fe 100%);
-  box-shadow: inset 2px 0 3px rgba(0, 0, 0, .22), -1px 0 0 #ffffff; }
-.bgvol input::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -8px; border-radius: 50%;
-  background: radial-gradient(circle at 62% 34%, #ffffff 0%, #fff7c2 14%, #fde047 38%, #f59e0b 100%); border: 3px solid #ffffff;
-  box-shadow: -3px 0 0 #b45309, -6px 0 10px rgba(0, 0, 0, .28); }
-.bgvol small { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-weight: 800 !important; color: #6b21a8 !important; }
+.bgvol input::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--fill) 0%, var(--fill) var(--v), var(--rail) var(--v), var(--rail) 100%); }
+.bgvol input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%; background: var(--knob); border: 2px solid var(--knobEdge); box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+.bgvol small { position: absolute; left: 0; right: 0; bottom: 9px; text-align: center; font-weight: 700 !important; font-size: 11px !important; color: var(--txt) !important; }
+
+.round, .pill, .qbtn, .bgvol { background: rgba(255,255,255,.55) !important; border: 1.5px solid rgba(255,255,255,.85) !important; color: #0c4a6e !important;
+  box-shadow: 0 4px 14px rgba(2,132,199,.16) !important; --txt:#0c4a6e; --fill:#0ea5e9; --rail:rgba(12,74,110,.15); --knob:#ffffff; --knobEdge:#0ea5e9; }
+.round:hover, .pill:hover:not(:disabled), .qbtn:hover:not(:disabled) { background: rgba(255,255,255,.75) !important; }
+.central.night .round, .central.night .pill, .central.night .qbtn, .central.night .bgvol, body.night .round, body.night .pill, body.night .qbtn, body.night .bgvol {
+  background: rgba(255,255,255,.10) !important; border-color: rgba(199,210,254,.35) !important; color: #e0e7ff !important; box-shadow: 0 4px 14px rgba(0,0,0,.3) !important;
+  --txt:#e0e7ff; --fill:#a5b4fc; --rail:rgba(224,231,255,.2); --knob:#e0e7ff; --knobEdge:#818cf8; }
+
+/* the open volume panel sits over other things: a little less see-through so it stays easy to read */
+.bgvol { background: rgba(255,255,255,.95) !important; }
+.central.night .bgvol, body.night .bgvol { background: rgba(30,27,75,.95) !important; }
 </style>
 <script>
 /* the volume track fills up to the ball */
