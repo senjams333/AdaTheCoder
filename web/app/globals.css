@@ -946,3 +946,6 @@ a.course-pic img { transition: transform .2s; }
 .filepick-name.chosen { color: var(--ink); font-weight: 800; }
 .filepick-clear { border: 0; background: none; color: var(--ink-soft); font-size: 1.1rem; cursor: pointer; padding: 2px 6px; border-radius: 8px; }
 .filepick-clear:hover { color: var(--ink); background: var(--lilac-soft); }
+.upload-msg { margin: 8px 0 0; font-weight: 700; }
+.upload-msg.ok { color: #0b6e4f; }
+.upload-msg.bad { color: #b42318; }

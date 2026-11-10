@@ -70,6 +70,29 @@ export class AdminLessonsController {
     return this.save(id, body, video);
   }
 
+  /** Uploads (or replaces) a lesson's video on its own, straight away, without saving the rest of the form. */
+  @Post(':id/video')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('video', uploadOptions))
+  async uploadVideo(@Param('id', ParseIntPipe) id: number, @File() video?: UploadedFile) {
+    const l = await this.find(id).catch(async (e) => { await discard(video); throw e; });
+    if (!video) throw new BadRequestException(['No video arrived. Choose the video file again.']);
+    if (!VIDEO_EXTENSIONS.includes(ext(video.originalname))) {
+      await discard(video);
+      throw new BadRequestException(['Lesson videos must be video files: .mp4, .mov, .webm, .mkv or .avi.']);
+    }
+    const name = await keep(video, 'videos', l.slug);
+    await this.catalog.removeUpload('videos', l.videoFile);
+    l.videoFile = name;
+    l.videoSize = video.size;
+    await this.catalog.lessons.save(l);
+    this.catalog.webmCopy(name);
+    return {
+      ok: true, videoFile: name, videoSize: video.size, videoUrl: mediaUrl('videos', name),
+      message: `Video uploaded (${(video.size / 1048576).toFixed(1)} MB). The app's copy is being made now; installed apps get it within a few minutes.`,
+    };
+  }
+
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     const l = await this.find(id);

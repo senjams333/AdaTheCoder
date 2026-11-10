@@ -20,7 +20,7 @@ const VIDEO_ACCEPT = 'video/*,.mp4,.m4v,.mov,.webm,.mkv,.avi';
 type Saved = { ok: boolean; id: number; courseId: number; message?: string };
 
 /** Sends the lesson with its video and reports how much has gone up (fetch can't show upload progress). */
-function sendWithProgress(method: 'POST' | 'PUT', url: string, body: FormData, token: string | null, progress: (done: number) => void): Promise<Saved> {
+function sendWithProgress<T = Saved>(method: 'POST' | 'PUT', url: string, body: FormData, token: string | null, progress: (done: number) => void): Promise<T> {
   return new Promise((resolve, reject) => {
     const x = new XMLHttpRequest();
     x.open(method, url);
@@ -29,7 +29,7 @@ function sendWithProgress(method: 'POST' | 'PUT', url: string, body: FormData, t
     x.onload = () => {
       let data: { message?: string | string[] } & Partial<Saved> = {};
       try { data = JSON.parse(x.responseText || '{}'); } catch { /* not JSON */ }
-      if (x.status >= 200 && x.status < 300) return resolve(data as Saved);
+      if (x.status >= 200 && x.status < 300) return resolve(data as unknown as T);
       const m = data.message;
       const text = x.status === 413
         ? 'That video is too big. Make it smaller (under 500 MB), or raise MAX_UPLOAD_MB in api/.env.'
@@ -87,6 +87,38 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
   const [intent, setIntent] = useState<'draft' | 'preview' | 'publish'>('draft');
   const [chosenBad, setChosenBad] = useState(false);
   const [savedBad, setSavedBad] = useState(false);
+  // the video on the website right now (after an upload on this page it's the new one), and the upload's status
+  const [onSite, setOnSite] = useState({ file: lesson.videoFile, size: Number(lesson.videoSize), url: lesson.videoUrl, webm: lesson.webmUrl });
+  const [upMsg, setUpMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  type VideoAnswer = { ok: boolean; videoFile: string; videoSize: number; videoUrl: string; message?: string };
+
+  /** Sends the chosen video to the website straight away (its own request, with a progress bar). */
+  async function uploadVideo(id: number, file: File): Promise<boolean> {
+    const fd = new FormData();
+    fd.append('video', file);
+    setUpMsg(null);
+    setSent(0);
+    try {
+      const r = await sendWithProgress<VideoAnswer>('POST', `${API_URL}/admin/lessons/${id}/video`, fd, token, setSent);
+      setOnSite({ file: r.videoFile, size: Number(r.videoSize), url: r.videoUrl, webm: null });
+      setSavedBad(false);
+      setVideo(null);
+      setUpMsg({ ok: true, text: `✓ ${r.message || 'Video uploaded.'}` });
+      dispatch(api.util.invalidateTags(['Themes', 'Theme', 'Dashboard', 'Site', { type: 'Lesson' as const, id }]));
+      return true;
+    } catch (err) {
+      setUpMsg({ ok: false, text: `✗ ${err instanceof Error ? err.message : 'The video could not be uploaded.'} Choose the video again to retry.` });
+      return false;
+    } finally {
+      setSent(null);
+    }
+  }
+  /** Choosing a video: an existing lesson uploads it at once; a new lesson uploads it right after Add lesson. */
+  function chooseVideo(f: File | null) {
+    setVideo(f);
+    setUpMsg(null);
+    if (f && !isNew && lesson.id) void uploadVideo(lesson.id, f);
+  }
   async function submit(e: FormEvent) {
     e.preventDefault();
     // "Save as draft" / "Unpublish" hide it from the app; "Save & preview" keeps a published lesson published
@@ -96,18 +128,16 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
     fd.append('published', String(publish));
     fd.append('removeVideo', String(form.removeVideo));
     fd.append('examples', JSON.stringify(examples.filter((x) => x.label || x.explain || x.output || x.code)));
-    if (video) fd.append('video', video);
+    if (sent !== null) { setErrors(['The video is still uploading. Wait for it to finish, then save.']); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     try {
-      let res: Saved;
-      if (video) {
-        setSent(0);
-        res = await sendWithProgress(isNew ? 'POST' : 'PUT', `${API_URL}/admin/lessons${isNew ? '' : `/${lesson.id}`}`, fd, token, setSent);
-        dispatch(api.util.invalidateTags(['Themes', 'Theme', 'Dashboard', 'Site', ...(lesson.id ? [{ type: 'Lesson' as const, id: lesson.id }] : [])]));
-      } else {
-        const d = isNew ? await create(fd).unwrap() : await update({ id: lesson.id as number, form: fd }).unwrap();
-        res = { ok: d.ok, id: d.id ?? (lesson.id as number), courseId: d.courseId ?? Number(form.courseId), message: d.message };
+      const d = isNew ? await create(fd).unwrap() : await update({ id: lesson.id as number, form: fd }).unwrap();
+      const res: Saved = { ok: d.ok, id: d.id ?? (lesson.id as number), courseId: d.courseId ?? Number(form.courseId), message: d.message };
+      if (isNew && video && !(await uploadVideo(res.id, video))) {
+        // the lesson is saved; only the video failed: open the saved lesson so the video can be chosen again there
+        dispatch(flash('info', 'The lesson was added, but its video did not upload. Choose the video again on this page.'));
+        router.push(`/admin/lessons/${res.id}`);
+        return;
       }
-      setSent(null);
       if (intent === 'preview') {
         dispatch(flash('info', publish ? 'Saved. This is how the lesson looks in the app.' : 'Saved as a draft. This is how the lesson will look in the app.'));
         router.push(`/admin/lessons/${res.id}/preview`);
@@ -169,26 +199,27 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
 
         <div className="card">
           <h2>Video</h2>
-          {lesson.videoFile ? (
+          {onSite.file ? (
             <>
-              <p>Uploaded video: <b>{lesson.videoFile}</b> <span className="muted">({mb(lesson.videoSize)})</span>. Installed apps download it and play it instead of the one inside the app.</p>
-              {lesson.videoUrl ? (
-                <video className="video-preview" controls preload="metadata" onError={() => setSavedBad(true)} onLoadedMetadata={() => setSavedBad(false)}>
-                  {lesson.webmUrl ? <source src={lesson.webmUrl} type="video/webm" /> : null}
-                  <source src={lesson.videoUrl} onError={() => setSavedBad(true)} />
+              <p>Video on the website: <b>{onSite.file}</b> <span className="muted">({mb(onSite.size)})</span>. Installed apps download it and play it instead of the one inside the app.</p>
+              {onSite.url ? (
+                <video key={onSite.file} className="video-preview" controls preload="metadata" onError={() => setSavedBad(true)} onLoadedMetadata={() => setSavedBad(false)}>
+                  {onSite.webm ? <source src={onSite.webm} type="video/webm" /> : null}
+                  <source src={onSite.url} onError={() => setSavedBad(true)} />
                 </video>
               ) : null}
-              <p className="video-note">{lesson.webmUrl ? '✓ The app\'s copy (WebM) is ready: installed apps play this video.'
-                : '⏳ The website is making the copy the app plays (needs ffmpeg on the server). Reload this page in a minute.'}
-                {savedBad && !lesson.webmUrl ? ' This browser can\'t play the original file; the preview works when the app\'s copy is ready.' : ''}</p>
+              <p className="video-note">{onSite.webm ? '✓ The app\'s copy (WebM) is ready: installed apps play this video.'
+                : '⏳ The website is making the copy the app plays (needs ffmpeg on the server). Reload this page in a few minutes.'}
+                {savedBad && !onSite.webm ? ' This browser can\'t play the original file; the preview works when the app\'s copy is ready.' : ''}</p>
               <label className="check" style={{ margin: '12px 0 18px' }}><input type="checkbox" checked={form.removeVideo} onChange={set('removeVideo')} /><span>Remove the uploaded video and go back to the one inside the app</span></label>
             </>
           ) : null}
           <div className="field">
-            <label htmlFor="video">{lesson.videoFile ? 'Replace with a new video' : 'Upload a video'} <span className="muted">(optional: .mp4, .mov, .webm, .mkv…)</span></label>
-            <FilePick id="video" accept={VIDEO_ACCEPT} file={video} onFile={setVideo} button="📁 Choose video" />
-            <span className="help">Use this for new lessons, or to swap a video without releasing a new version of the app. It uploads when you press {isNew ? 'Add lesson' : 'Save lesson'}.</span>
-            {preview ? (
+            <label htmlFor="video">{onSite.file ? 'Replace with a new video' : 'Upload a video'} <span className="muted">(optional: .mp4, .mov, .webm, .mkv…)</span></label>
+            <FilePick id="video" accept={VIDEO_ACCEPT} file={video} onFile={chooseVideo} button="📁 Choose video" />
+            <span className="help">{isNew ? 'The video uploads right after you press Add lesson.' : 'The video uploads as soon as you choose it; you don\'t need to press Save for the video.'}</span>
+            {upMsg ? <p className={upMsg.ok ? 'upload-msg ok' : 'upload-msg bad'} role="status">{upMsg.text}</p> : null}
+            {preview && (isNew || sent !== null) ? (
               <>
                 <video key={preview} className="video-preview" style={{ marginTop: 10 }} src={preview} controls preload="metadata"
                   onError={() => setChosenBad(true)} onLoadedMetadata={() => setChosenBad(false)} />
@@ -198,7 +229,7 @@ export default function LessonForm({ lesson }: { lesson: LessonDetail }) {
             {sent !== null ? (
               <div className="upload-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(sent * 100)}>
                 <div className="upload-bar"><span style={{ width: `${Math.round(sent * 100)}%` }} /></div>
-                <span>{sent < 1 ? `Uploading the video… ${Math.round(sent * 100)}%` : 'Saving the lesson…'}</span>
+                <span>{sent < 1 ? `Uploading the video… ${Math.round(sent * 100)}%` : 'Upload finished, the website is storing it…'}</span>
               </div>
             ) : null}
           </div>
