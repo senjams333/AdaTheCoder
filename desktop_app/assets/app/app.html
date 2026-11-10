@@ -866,6 +866,10 @@ else loggedOutLook(true);                                        // the log-in c
 })();
 </script>
 <style>
+/* buttons and typing boxes use the app's font (browsers otherwise give them their own plain font) */
+button, input, select { font-family: inherit; }
+</style>
+<style>
 /* soft glass buttons: day/night, sound, Home, and the volume control; they blend with the sky (the same on every computer) */
 .round img.emj, .pill.round img.emj, .qbtn.round img.emj { width: 28px; height: 28px; vertical-align: middle; margin: 0; }
 .pill img.emj, .qbtn img.emj { width: 1.2em; height: 1.2em; vertical-align: -0.25em; }

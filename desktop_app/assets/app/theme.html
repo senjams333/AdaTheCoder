@@ -571,6 +571,8 @@ function buildFrame() {
     // the gap between the panels is set the same on every computer, and the code panel's inner padding is smaller
     `.coding-box{width:calc(100% - 12px)!important;gap:0!important}.example-panel{width:345px!important;flex:none}` +
     `.editor-section{margin-left:12px!important;padding-left:10px!important;padding-right:10px!important}` +
+    // buttons (RUN CODE, the examples) use the lesson's font, not the browser's plain one; the code box keeps its own
+    `button,input,select{font-family:inherit}` +
     `.topic-btn.next-glow{outline:none!important;animation:nextGlowRound 1.1s ease-in-out infinite!important}` +
     `@keyframes nextGlowRound{0%,100%{box-shadow:0 0 0 4px #facc15,0 0 14px 4px rgba(250,204,21,.55)}50%{box-shadow:0 0 0 5px #fbbf24,0 0 28px 10px rgba(251,191,36,.8)}}` +
     `.example-panel::-webkit-scrollbar{width:10px}.example-panel::-webkit-scrollbar-button{display:none;height:0}` +
@@ -1093,8 +1095,6 @@ function sizeVideo() {
   box.style.flex = "none"; box.style.width = (iw + b) + "px"; box.style.height = (ih + b) + "px";
   if (c) c.style.width = (iw + b) + "px";
 }
-// "Skip video" sits in the control bar (at its right end) instead of in a row of its own below it
-(function () { const c = document.querySelector("#vstage .vctrl"), s = $("vStop"); if (c && s) c.appendChild(s); })();
 let sizeFrame = 0;   // once per frame while the window changes size
 addEventListener("resize", () => { cancelAnimationFrame(sizeFrame); sizeFrame = requestAnimationFrame(sizeVideo); });
 $("introVid").addEventListener("loadedmetadata", sizeVideo);
@@ -1225,6 +1225,10 @@ buildScene(); renderApp(); fit(); logout();
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 })();
 </script>
+<style>
+/* buttons and typing boxes use the app's font (browsers otherwise give them their own plain font) */
+button, input, select { font-family: var(--font-kid); }
+</style>
 <style>
 /* soft glass buttons: day/night, sound, Home, and the volume control; they blend with the sky (the same on every computer) */
 .round img.emj, .pill.round img.emj, .qbtn.round img.emj { width: 28px; height: 28px; vertical-align: middle; margin: 0; }
