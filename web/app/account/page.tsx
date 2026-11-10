@@ -171,7 +171,7 @@ function AccountInner() {
                             <>
                               <div className="acct-price acct-owned-line">✓ Purchased <span>yours to keep</span></div>
                               <button type="button" className="acct-get acct-see acct-btn-block" onClick={() => setLicenceOf({ name: c.name, code: c.licence as string })}>See Licence</button>
-                              <span className="acct-pay-note">Unlocks every lesson in the app</span>
+                              <span className="acct-pay-note" aria-hidden="true">&nbsp;</span>
                             </>
                           ) : (
                             <>
