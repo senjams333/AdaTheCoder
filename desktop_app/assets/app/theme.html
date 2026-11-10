@@ -202,7 +202,9 @@ body.vfull-body .top, body.vfull-body .menu, body.vfull-body .side { visibility:
   border-radius: 25px; cursor: pointer; }
 .vstop:hover { background: #0284c7; color: #fff; }
 /* the bar under the coding page: "See video" */
-.lbar { position: absolute; z-index: 6; left: calc(50% + 70px); bottom: 2px; transform: translateX(-50%); display: flex; align-items: center; white-space: nowrap; }
+.lbar { position: absolute; z-index: 6; left: 50%; bottom: 2px; transform: translateX(-50%); display: flex; align-items: center; white-space: nowrap; }
+/* "Skip video" sits exactly where "See video" is: the same spot at the bottom middle of the lesson area */
+#vstage #vStop { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); margin: 0; }
 .lbar[hidden], .seevid[hidden] { display: none; }
 .seevid { white-space: nowrap; }
 /* the success / oops cartoon: over the lesson list on the right, inside the window */
@@ -569,8 +571,8 @@ function buildFrame() {
     `#code{height:54%!important;max-height:none!important}.output{margin-top:12px!important}` +
     // wider code and output: the panels use the space at their sides (still clear of the lesson list's >> button),
     // the gap between the panels is set the same on every computer, and the code panel's inner padding is smaller
-    `.coding-box{width:calc(100% - 12px)!important;gap:0!important}.example-panel{width:375px!important;flex:none}` +
-    `.editor-section{margin-left:12px!important;padding-left:10px!important;padding-right:10px!important}` +
+    `.coding-box{width:calc(100% - 12px)!important;gap:0!important}.example-panel{width:388px!important;flex:none}` +
+    `.editor-section{margin-left:6px!important;padding-left:10px!important;padding-right:10px!important}` +
     // buttons (RUN CODE, the examples) use the lesson's font, not the browser's plain one; the code box keeps its own
     `button,input,select{font-family:inherit}` +
     // Nunito, a little bolder: the title, the subtitle and the buttons
@@ -1091,8 +1093,11 @@ function sizeVideo() {
     padR = tr && tr.left < r.right ? Math.max(6, (r.right - tr.left) / sc + 8) : 6;
   }
   st.style.paddingLeft = padL + "px"; st.style.paddingRight = padR + "px";
-  const below = (c ? c.offsetHeight + 8 : 0) + (!full && stop && !(c && c.contains(stop)) ? stop.offsetHeight + 8 : 0);
-  const W = st.clientWidth - padL - padR - (full ? 12 : 0) - b, H = st.clientHeight - top - (full ? 12 : 0) - below - b;
+  // "Skip video" has its own strip at the bottom (the same spot as "See video"); the video and its controls stay above it
+  const padB = !full && stop ? stop.offsetHeight + 10 : 0;
+  if (!full) st.style.paddingBottom = padB + "px";
+  const below = c ? c.offsetHeight + 8 : 0;
+  const W = st.clientWidth - padL - padR - (full ? 12 : 0) - b, H = st.clientHeight - top - padB - (full ? 12 : 0) - below - b;
   if (W <= 0 || H <= 0) return;
   const iw = Math.min(W, H * ar), ih = iw / ar;
   box.style.flex = "none"; box.style.width = (iw + b) + "px"; box.style.height = (ih + b) + "px";
