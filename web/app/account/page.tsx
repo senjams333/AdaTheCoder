@@ -157,7 +157,7 @@ function AccountInner() {
                     <article key={c.id} className={`acct-card theme-${c.pack}${wanted === c.slug ? ' acct-card-wanted' : ''}`} id={`theme-${c.slug}`}>
                       <div className={`acct-card-image${c.images.length > 1 ? ' many' : ''}`}>
                         {!c.premium ? <span className="acct-tag acct-tag-free">FREE</span>
-                          : c.licence ? <span className="acct-tag acct-tag-owned">✓ OWNED</span> : <span className="acct-tag">UPGRADE</span>}
+                          : c.licence ? <span className="acct-tag acct-tag-owned">✓ PURCHASED</span> : <span className="acct-tag">UPGRADE</span>}
                         {c.images.map((img) => <img key={img} src={img} alt="" />)}
                       </div>
                       <div className="acct-card-body">
@@ -169,7 +169,7 @@ function AccountInner() {
                             <p className="acct-free-note">Free in the app: open Ada The Coder and choose this theme.</p>
                           ) : c.licence ? (
                             <>
-                              <div className="acct-price acct-owned-line">✓ Purchased <span>yours to keep</span></div>
+                              <div className="acct-price" aria-hidden="true">&nbsp;</div>
                               <button type="button" className="acct-get acct-see acct-btn-block" onClick={() => setLicenceOf({ name: c.name, code: c.licence as string })}>See Licence</button>
                               <span className="acct-pay-note" aria-hidden="true">&nbsp;</span>
                             </>
