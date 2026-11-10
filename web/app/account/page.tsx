@@ -27,6 +27,7 @@ function AccountInner() {
   const { data, error, isLoading } = useGetAccountQuery(undefined, { skip: !allowed });
   const { data: site } = useGetSiteQuery();
   const [modal, setModal] = useState<ModalName>(null);
+  const [licenceOf, setLicenceOf] = useState<{ name: string; code: string } | null>(null);   // See Licence pop-up
   const [mine, setMine] = useState<'windows' | 'mac' | null>(null);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -167,7 +168,11 @@ function AccountInner() {
                           {!c.premium ? (
                             <p className="acct-free-note">Free in the app: open Ada The Coder and choose this theme.</p>
                           ) : c.licence ? (
-                            <LicenceBox code={c.licence} />
+                            <>
+                              <div className="acct-price acct-owned-line">✓ Purchased <span>yours to keep</span></div>
+                              <button type="button" className="acct-get acct-see acct-btn-block" onClick={() => setLicenceOf({ name: c.name, code: c.licence as string })}>See Licence</button>
+                              <span className="acct-pay-note">Unlocks every lesson in the app</span>
+                            </>
                           ) : (
                             <>
                               <div className="acct-price">{c.price} <span>one-time</span></div>
@@ -182,6 +187,9 @@ function AccountInner() {
                 </div>
               </section>
 
+              <Modal open={licenceOf !== null} onClose={() => setLicenceOf(null)} title={licenceOf ? `Your licence: ${licenceOf.name}` : 'Your licence'} id="lic-title">
+                {licenceOf ? <LicenceBox code={licenceOf.code} /> : null}
+              </Modal>
               <Modal open={modal === 'install'} onClose={() => setModal(null)} title="How to install Ada The Coder" id="inst-title" wide>
                 <InstallHelp contact={contact} onDone={() => setModal(null)} />
               </Modal>
