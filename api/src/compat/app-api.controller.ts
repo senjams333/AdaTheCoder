@@ -145,12 +145,16 @@ export class AppApiController {
     const s = await this.settings.all();
     const n = Number.parseInt(s.break_minutes ?? '30', 10);
     const minutes = Number.isNaN(n) ? 30 : Math.max(0, Math.min(240, n));     // 0 = no break reminder
+    const lm = Number.parseInt(s.break_lock_minutes ?? '5', 10);
+    const lockMinutes = Number.isNaN(lm) ? 5 : Math.max(1, Math.min(30, lm));
     const steps = (s.break_steps || '').split('\n').map((line) => line.split('|').map((x) => x.trim()))
       .filter((p) => p.some(Boolean)).slice(0, 8)
       .map((p) => (p.length >= 3 ? { emoji: p[0], title: p[1], text: p.slice(2).join(' | ') } : { emoji: '⭐', title: p[0] || '', text: p[1] || '' }));
     return { message: s.app_message || '', welcome: s.app_welcome || '', home_theme: s.app_home_theme || '',
       // the break reminder, as the admin set it (minutes 0 = no reminder)
-      break: { minutes, title: s.break_title || '', intro: (s.break_intro || '').replace(/\{minutes\}/g, String(minutes)), steps, button: s.break_button || '' } };
+      break: { minutes, title: s.break_title || '', intro: (s.break_intro || '').replace(/\{minutes\}/g, String(minutes)), steps, button: s.break_button || '',
+        // the break stays on the screen for lock_minutes before it can be closed (lock false: it can be closed at once)
+        lock: (s.break_lock ?? '1') === '1', lock_minutes: lockMinutes } };
   }
 
   private text(err: unknown): string {

@@ -18,7 +18,7 @@ export const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 export const SETTING_FIELDS = [
   'hero_title', 'hero_subtitle', 'site_banner', 'app_message', 'parents_note', 'contact_email', 'author_name', 'author_note',
   'app_welcome', 'app_home_theme', 'business_details',
-  'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button', 'policy_purchases',
+  'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button', 'break_lock', 'break_lock_minutes', 'policy_purchases',
   'install_video_url', 'social_youtube', 'social_x', 'social_facebook',
 ] as const;
 
@@ -43,6 +43,9 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
     '🎈 | 3. Breathe (Mind) | Take 3 balloon breaths: breathe in deep to fill your belly, then blow it out slowly.\n' +
     '💧 | 4. Drink (Hydration) | Take 3 big sips of water. It keeps your brain happy and running smoothly.',
   break_button: 'I did it! Back to coding 🚀',
+  // '1': the break can't be closed for break_lock_minutes (children really rest); '0': they can close it at once
+  break_lock: '1',
+  break_lock_minutes: '5',
   // "Purchases and cancellation" on the Policies page: an empty line between paragraphs, "- " starts a bullet,
   // "Title: text" in a bullet makes the title bold, {email} becomes the contact email
   policy_purchases:

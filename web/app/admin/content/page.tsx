@@ -82,6 +82,19 @@ export default function AdminContent() {
           <span className="help">Each line: <code>emoji | title | what to do</code>, for example <code>💧 | 4. Drink (Hydration) | Take 3 big sips of water.</code> Up to 8 steps.</span>
         </div>
         <div className="field"><label htmlFor="break_button">Button</label><input id="break_button" type="text" value={form.break_button || ''} onChange={set('break_button')} /></div>
+        <div className="field">
+          <label className="check"><input type="checkbox" checked={(form.break_lock ?? '1') === '1'}
+            onChange={(e) => setForm({ ...form, break_lock: e.target.checked ? '1' : '0' })} />
+            <span>Lock the app during the break: children can&apos;t close it until the break time is over (good for their eyes and health)</span></label>
+          <span className="help">Untick to let children close the break at once and carry on coding.</span>
+        </div>
+        {(form.break_lock ?? '1') === '1' ? (
+          <div className="field">
+            <label htmlFor="break_lock_minutes">Break length (minutes)</label>
+            <input id="break_lock_minutes" type="number" min={1} max={30} value={form.break_lock_minutes ?? '5'} onChange={set('break_lock_minutes')} />
+            <span className="help">5 is the default. The button shows a countdown and works when it reaches 0.</span>
+          </div>
+        ) : null}
         {(() => {
           const steps = (form.break_steps || '').split('\n').map((l) => l.split('|').map((x) => x.trim())).filter((p) => p.some(Boolean)).slice(0, 8);
           return (
