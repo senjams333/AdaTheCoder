@@ -43,6 +43,12 @@ body { margin: 0; background: var(--page); color: var(--ink); font: 14px var(--u
 .brk-card { width: min(760px, 92%); background: linear-gradient(180deg, #fffdf2, #f0f9ff); border: 5px solid #facc15; border-radius: 34px; padding: 24px 30px 22px;
   box-shadow: 0 0 50px rgba(250, 204, 21, .55); text-align: center; color: #0c4a6e; }
 .brk-card h2 { margin: 0; font-size: 30px; color: #7b4dff; }
+/* Teddy sits on the card's top-right corner and sways gently */
+.brk-card { position: relative; }
+.brk-teddy { position: absolute; top: -100px; right: -34px; width: 150px; pointer-events: none; transform-origin: 50% 95%;
+  filter: drop-shadow(0 8px 10px rgba(12, 74, 110, .3)); animation: teddySway 3.2s ease-in-out infinite; }
+.brk-teddy[src=""] { display: none; }
+@keyframes teddySway { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(5deg) translateY(-6px); } }
 .brk-card .brk-sub { margin: 4px 0 16px; font-size: 16px; color: #0369a1; font-weight: 700; }
 .brk-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; text-align: left; }
 .brk-step { display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 3px solid #bae6fd; border-radius: 20px; padding: 12px 14px; }
@@ -274,6 +280,7 @@ body.night { background: #070b24; }
 <div class="win" id="win">
   <div class="brk" id="breakBox" hidden role="dialog" aria-modal="true" aria-labelledby="breakTitle">
     <div class="brk-card">
+      <img class="brk-teddy" id="breakTeddy" src="" alt="" draggable="false">
       <h2 id="breakTitle">⏰ Time for The Quick Reset!</h2>
       <p class="brk-sub" id="breakIntro">You've been coding for 30 minutes. Super work! Let's give your eyes, body and brain a little break. 🌟</p>
       <div class="brk-steps" id="breakSteps">
@@ -568,6 +575,7 @@ function breakEvery() {
 }
 let breakUntil = 0, breakTick = 0;     // the locked break's end time, and its countdown
 function renderBreak() {
+  if (!$("breakTeddy").getAttribute("src")) $("breakTeddy").src = img("teddy.png");
   const b = D.home && D.home.break;
   if (!b) return;                      // the app's own words (as written above)
   if (b.title) $("breakTitle").textContent = b.title;
