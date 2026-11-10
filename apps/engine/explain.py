@@ -330,6 +330,9 @@ def _syntax(error, n, line=""):
     if "forgot a comma" in msg:
         return ("comma", "Things inside brackets are separated by commas, like print(\"Hi\", name).",
                 f"Add a comma between the things{at}.")
+    if ("invalid character" in msg or "invalid non-printable" in msg) and re.search(r"'[^'\"]*\w'\w", line):
+        return ("apostrophe", "The words have an apostrophe ' (like it's) inside ' quotes, so Python thinks the words end there.",
+                f"Put the words between double quotes instead, like print(\"it's fun\"){at}.")
     if "invalid character" in msg or "invalid non-printable" in msg:
         if any(c in line for c in "“”‘’") or re.search(r"'[“”‘’]'", msg):
             return ("strange", "This line has curly quotes “ ” (from a document or phone). Python only knows straight quotes.",

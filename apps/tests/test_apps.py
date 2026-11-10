@@ -217,6 +217,7 @@ class ExplainMistakes(unittest.TestCase):
             'if 1 && 2:\n    pass': "and instead of &&",
             'if !True:\n    pass': "not instead of !",
             "print('it's fun')": "double quotes",
+            "print('it's my turn 🐍')": "double quotes",
             'print("He said "hi"")': "' inside",
             'print(Hello World)': 'print("Hello World")',
             'x = 3 x 4': "Use * to multiply",
