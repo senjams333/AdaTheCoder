@@ -169,6 +169,43 @@ class ExplainMistakes(unittest.TestCase):
         for code, expected in cases.items():
             self.assertIn(expected, self.run_code(code)[0], code)
 
+    def test_more_mistakes_children_make(self):
+        cases = {
+            "print('Hi\")": "same quote",
+            'print("Hi"))': "There is an extra bracket",
+            'print "Hi"': "print needs brackets",
+            'x = [1, 2, 3': "closing bracket ]",
+            'd = {"a": 1': "closing bracket }",
+            'x = [1, 2)': "Change ) to ]",
+            'while True\n    break': "start with while must end with a colon",
+            'x = 1\nif x:\n    pass\nelse\n    pass': "📍 Line 4",
+            'x = 1\nif x > 0:\n    print(1)\nelse if x < 0:\n    print(2)': "elif",
+            'If 5 > 3:\n    print(1)': "Write if instead of If",
+            'whlie True:\n    break': "Did you mean while?",
+            'for i range(5):\n    print(i)': "The word in is missing",
+            'class = 5': "That name is a Python word",
+            'my name = "Tom"': "my_name",
+            '1age = 5': "can't start with a number",
+            'print(“Hi”)': "curly quotes",
+            'print("Hi" name)': "A comma is missing",
+            'name = "Tom"\nprint("Hi" + )': "Something is missing here",
+            'return 5': "only works inside a def function",
+            'break': "only works inside a for or while loop",
+            'try:\n    x = 1\nprint(x)': "try needs an except",
+            'print("""hi)': 'three quotes',
+            'a = "5"\nif a > 3:\n    pass': "int(input(",
+            'print(len(5))': "That has no length",
+            'x = 5\nprint(x[0])': "That can't use [ ]",
+            'for i in 5:\n    pass': "range(",
+            'def f():\n    pass\nprint(f() + 1)': "return",
+            'a, b = 1, 2, 3': "as many names as values",
+            'print("hi".uppr())': "Did you mean .upper()?",
+            'x = 1\ndef f():\n    x = x + 1\nf()': "before it gets a value",
+            'def f():\n    f()\nf()': "never stops",
+        }
+        for code, expected in cases.items():
+            self.assertIn(expected, self.run_code(code)[0], code)
+
     def test_the_input_program_runner_explains_too(self):
         import subprocess
         src = open(os.path.join(APPS, "engine", "explain.py"), encoding="utf-8").read()
