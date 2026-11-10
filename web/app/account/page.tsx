@@ -169,9 +169,7 @@ function AccountInner() {
                             <p className="acct-free-note">Free in the app: open Ada The Coder and choose this theme.</p>
                           ) : c.licence ? (
                             <>
-                              <div className="acct-price" aria-hidden="true">&nbsp;</div>
                               <button type="button" className="acct-get acct-see acct-btn-block" onClick={() => setLicenceOf({ name: c.name, code: c.licence as string })}>See Licence</button>
-                              <span className="acct-pay-note" aria-hidden="true">&nbsp;</span>
                             </>
                           ) : (
                             <>

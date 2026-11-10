@@ -955,3 +955,9 @@ a.course-pic img { transition: transform .2s; }
 .acct-owned-line { color: #0b6e4f; }
 .acct-see { border: 0; cursor: pointer; width: 100%; background: var(--grape); }
 .acct-see:hover { background: var(--grape-dark); }
+/* shorter account cards: a lower picture band and tighter spacing */
+.acct-card .acct-card-image { height: 150px; }
+.acct-card-body { padding: 14px 16px 16px; }
+.acct-card-body .acct-features { margin-bottom: 10px; }
+.acct-card-actions { gap: 8px; }
+.acct-card .acct-pay-note { margin-top: 0; }
