@@ -152,7 +152,7 @@ ensure_tom_image()
 BASE_CSS = """
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; overflow-x:hidden; overflow-y:auto; font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, 'Fredoka', 'Segoe UI Emoji', 'Apple Color Emoji', cursive, sans-serif; background: transparent; transition:0.5s; }
+html, body { width:100%; height:100%; overflow-x:hidden; overflow-y:auto; font-family:'Quicksand', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Segoe UI Emoji', 'Apple Color Emoji', cursive, sans-serif; background: transparent; transition:0.5s; }
 
 .sun { 
     position:fixed; 
