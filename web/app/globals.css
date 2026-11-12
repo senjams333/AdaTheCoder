@@ -210,13 +210,13 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 @media (max-width: 1240px) {
   /* (sizes come from the stage's width above, so Twinkle never reaches into the welcome text) */
 }
-@media (max-width: 1100px) {   /* tablets and phones: Ada and the code editor first, then the words under them */
+@media (max-width: 1100px) {   /* tablets and phones: Twinkle and Ada first, then the words, then the code editor */
   .hero { padding-top: 24px; }
-  .hero .wrap { grid-template-columns: 1fr; }
-  .hero-text { padding-bottom: 0; }
-  .stage { order: -1; height: auto; padding-bottom: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "editor editor" "twinkle ada"; margin: 0 0 8px; }
+  .hero .wrap { grid-template-columns: 1fr 1fr; grid-template-areas: "twinkle ada" "text text" "editor editor"; column-gap: 12px; }
+  .hero-text { grid-area: text; padding-bottom: 0; margin-top: 8px; }
+  .stage { display: contents; }   /* its three pictures take their own places in the layout above */
   .stage .tablet, .stage .twinkle, .stage .ada { position: static; transform: none; }
-  .stage .tablet { grid-area: editor; justify-self: center; width: min(100%, 480px); margin-bottom: 8px; }
+  .stage .tablet { grid-area: editor; justify-self: center; width: min(100%, 480px); margin: 28px 0 8px; }
   .stage .twinkle { grid-area: twinkle; height: auto; width: 100%; max-height: 260px; justify-self: center; align-self: center; }
   .stage .ada { grid-area: ada; height: auto; width: 100%; max-width: none; max-height: 290px; justify-self: center; }
 }
