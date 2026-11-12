@@ -78,8 +78,8 @@ export default function HomePage() {
             <div className="friend friend-tom">
               <div className="pic"><img src="/img/tom-friend.webp" alt="Tom, a smiling boy in a blue hoodie, waving" /></div>
               <h3>Tom</h3>
-              <p className="role">The cheer buddy</p>
-              <p>Every time a challenge is solved, Tom jumps in with a big wave and a shiny star to celebrate.</p>
+              <p className="role">The cheer &amp; fix-it buddy</p>
+              <p>When the code works, Tom cheers with a big wave. When something goes wrong, he pops up to show what to fix.</p>
             </div>
           </div>
         </div>
