@@ -9,7 +9,7 @@ import { API_URL } from '@/lib/config';
 import { errorList } from '@/lib/errors';
 import { flash } from '@/lib/flashSlice';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import type { Settings } from '@/lib/types';
+import type { Done, Settings } from '@/lib/types';
 import { sendFile } from '@/lib/upload';
 
 type Item = Record<string, string>;
@@ -123,7 +123,7 @@ export default function AdminPages() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     try {
-      const res = (await save(form!).unwrap()) as { settings?: Settings };
+      const res = (await save(form!).unwrap()) as Done & { settings?: Settings };
       if (res.settings) setForm(res.settings);   // empty boxes come back with the original text
       setErrors([]);
       dispatch(flash('success', 'Saved. The website shows the new text straight away.'));
