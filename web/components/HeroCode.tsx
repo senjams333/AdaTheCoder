@@ -35,12 +35,13 @@ function colour(line: string): ReactNode[] {
 export default function HeroCode({ file, code, output, animate = false }: { file?: string; code?: string; output?: string; animate?: boolean }) {
   const name = (file || '').trim() || HERO_CODE_DEFAULTS.file;
   const lines = ((code || '').replace(/\r/g, '').replace(/\t/g, '    ').trimEnd() || HERO_CODE_DEFAULTS.code).split('\n').slice(0, 8);
-  while (lines.length < 4) lines.push(' ');                 // the window keeps its size with short code
+  const real = lines.length;
+  while (lines.length < 4) lines.push(' ');                 // the window keeps its size with short code (not on phones)
   const shown = ((output || '').replace(/\r/g, '').trimEnd() || HERO_CODE_DEFAULTS.output).split('\n').slice(0, 6);
   return (
     <div className={animate ? 'screen animate' : 'screen'}>
       <div className="bar"><span>{name}</span><span className="run">▶ Run</span></div>
-      {lines.map((l, i) => <div className="line" key={i}>{l.trim() ? colour(l) : ' '}</div>)}
+      {lines.map((l, i) => <div className={i >= real ? 'line line-pad' : 'line'} key={i}>{l.trim() ? colour(l) : ' '}</div>)}
       <div className="out">
         <div className="out-label">What it shows</div>
         {shown.map((l, i) => <Fragment key={i}>{l}<br /></Fragment>)}

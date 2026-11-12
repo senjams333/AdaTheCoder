@@ -230,12 +230,12 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
   /* (sizes come from the stage's width above, so Twinkle never reaches into the welcome text) */
 }
 @media (max-width: 1100px) {   /* tablets and phones: Twinkle and Ada, the headline, the code editor, the explanation, then Try Free */
-  .hero { padding-top: 24px; }
-  .hero .wrap { grid-template-columns: 1fr 1fr; column-gap: 12px;
+  .hero { padding-top: 12px; }
+  .hero .wrap { grid-template-columns: 1fr 1fr; column-gap: 12px; row-gap: 0;
     grid-template-areas: "twinkle ada" "title title" "editor editor" "lede lede" "cta cta" "print print"; }
   .hero-text, .hero-text > div, .stage { display: contents; }   /* their parts take their own places in the order above */
-  .hero h1 { grid-area: title; margin: 10px 0 18px; }
-  .hero .lede { grid-area: lede; margin: 20px 0 0; }
+  .hero h1 { grid-area: title; margin: 2px 0 14px; }   /* close under the fairy and Ada, so the editor fits on the first screen */
+  .hero .lede { grid-area: lede; margin: 24px 0 0; }
   .hero .actions { grid-area: cta; }
   .hero .small-print { grid-area: print; }
   .stage .tablet, .stage .twinkle, .stage .ada { position: static; transform: none; }
@@ -1027,9 +1027,17 @@ a.course-pic img { transition: transform .2s; }
 
 /* the big headline on phones and tablets: two even lines, each kept on one line, the size set to fit the screen */
 @media (max-width: 1100px) {
-  .hero h1.h1-two { max-width: none; font-size: clamp(1.3rem, 10.8vw, 3.6rem); line-height: 1.08; }
+  .hero h1.h1-two { max-width: none; font-size: clamp(1.3rem, min(10.8vw, 6.4vh), 3.6rem); line-height: 1.08; }
   /* the fairy and Ada a little smaller on short phone screens, so the code editor still fits on the first screen */
-  .stage .twinkle { max-height: min(260px, 24vh); }
-  .stage .ada { max-height: min(290px, 26vh); }
+  .stage .twinkle { max-height: min(260px, 20vh); }
+  .stage .ada { max-height: min(290px, 22vh); }
+  .screen .line-pad { display: none; }   /* no empty filler lines in the editor on phones */
   .hero h1.h1-two .h1-line { display: block; white-space: nowrap; }
+}
+/* short phone screens (iPhone SE and the like): the fairy and Ada a bit smaller still, so the editor fits */
+@media (max-width: 1100px) and (max-height: 620px) {
+  .hero { padding-top: 6px; }
+  .stage .twinkle { max-height: 16vh; }
+  .stage .ada { max-height: 18vh; }
+  .hero h1 { margin-bottom: 10px; }
 }
