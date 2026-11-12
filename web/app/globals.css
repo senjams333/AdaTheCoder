@@ -982,3 +982,5 @@ a.course-pic img { transition: transform .2s; }
 .acct-tag-main { background: var(--pink); }
 .acct-main-label { align-self: flex-start; margin-bottom: 6px; background: var(--pink-soft); color: var(--pink-dark); font: 800 .78rem var(--font-body);
   letter-spacing: .02em; padding: 3px 10px; border-radius: 999px; }
+/* the Free Trial card's text: straight left and right edges */
+.acct-card-trial .acct-card-body > p { text-align: justify; hyphens: auto; }

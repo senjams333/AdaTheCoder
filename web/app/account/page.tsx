@@ -144,7 +144,8 @@ function AccountInner() {
                     <div className="acct-card-body">
                       <span className="acct-main-label">⭐ The main app: start here</span>
                       <h3>Free Trial</h3>
-                      <p>Download Ada The Coder free. Every theme opens inside it, and new lessons arrive by themselves.</p>
+                      {/* short words (and soft hyphens, \u00AD) so the justified lines never get long gaps */}
+                      <p>{'Get Ada The Cod\u00ADer free. Ev\u00ADery theme opens in it, and new les\u00ADsons ar\u00ADrive on their own.'}</p>
                       <div className="acct-card-actions">
                         {(['windows', 'mac'] as const).map((key) => (
                           <DownloadButton key={key} platform={key} label={PLATFORM_LABELS[key]} release={data.releases[key]} yours={mine === key} />
