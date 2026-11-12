@@ -28,8 +28,11 @@ async function bootstrap() {
     }
     next();
   });
-  app.useStaticAssets(uploadDir('videos'), { prefix: '/media/videos/' });
-  app.useStaticAssets(uploadDir('courses'), { prefix: '/media/courses/' });
+  // the website's /learn page is "cross-origin isolated" (it runs Python in the browser): it may show these pictures and
+  // videos even when its address differs slightly from the API's (adathecoder.com and www.adathecoder.com)
+  const corp = { setHeaders: (res: Response) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin') };
+  app.useStaticAssets(uploadDir('videos'), { prefix: '/media/videos/', ...corp });
+  app.useStaticAssets(uploadDir('courses'), { prefix: '/media/courses/', ...corp });
   const port = Number(process.env.PORT || 3000);
   const host = process.env.HOST || '127.0.0.1';
   await app.listen(port, host);

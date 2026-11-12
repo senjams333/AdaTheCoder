@@ -152,6 +152,8 @@ function AccountInner() {
                         ))}
                       </div>
                       <button type="button" className="acct-help-btn" onClick={() => setModal('install')}>How to install</button>
+                      {/* a plain link (a full page load): /learn needs its own page headers to run Python */}
+                      <a className="acct-learn" href="/learn">📱 No computer? Learn in the browser</a>
                     </div>
                   </article>
 

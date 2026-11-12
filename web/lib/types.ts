@@ -81,6 +81,19 @@ export interface SiteData {
   paypal?: boolean;
 }
 
+/** Learning in the browser (/learn): the themes and lessons as the desktop app gets them. */
+export interface LearnExample { label: string; explain: string; code: string; output: string }
+export interface LearnLesson {
+  id: string; position: number; emoji: string; name: string; title: string; subtitle: string; locked?: boolean;
+  video: { url?: string; webm_url?: string }; default_code: string; examples: LearnExample[];
+}
+export interface LearnCourse {
+  id: string; name: string; tagline: string; description: string; premium: boolean; price: string;
+  free_lessons: number | null; buy_url: string; is_new: boolean; cover: { url: string } | null; images: string[];
+  characters: { name: string; url: string }[]; full: boolean; lessons: LearnLesson[];
+}
+export interface LearnData { childName: string; courses: LearnCourse[] }
+
 export interface AccountData {
   user: User;
   themes: (Theme & { licence: string | null })[];
