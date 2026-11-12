@@ -376,6 +376,7 @@ class WebMainWindow(QMainWindow):
                 "pack": c.get("pack") or "friends", "position": c.get("position", 0), "premium": bool(c.get("premium")),
                 "free_lessons": course.free_count(c), "price": c.get("price", ""),
                 "heroPics": [_url(h[1]) for h in hero],
+                "cover": self._cover(c),
             })
         first = self.courses[0] if self.courses else {"lessons": []}
         lessons = [{k: l.get(k) for k in ("id", "emoji", "name", "title", "subtitle", "default_code", "examples", "video")}
@@ -391,6 +392,13 @@ class WebMainWindow(QMainWindow):
             "site": SERVER_URL.rstrip("/"),
             "lastCourse": self.settings["course"] or "",
         }
+
+    @staticmethod
+    def _cover(c):
+        """The card picture the admin uploaded for this theme, once it's on this computer ("" = show its characters)."""
+        cover = c.get("cover") if isinstance(c.get("cover"), dict) else {}
+        name = os.path.basename(cover.get("file") or "")
+        return _url(os.path.join(sync.characters_dir(), name)) if name else ""
 
     def _load_page(self):
         try:

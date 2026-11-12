@@ -181,6 +181,7 @@ button:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(56, 189, 248, .
 .tcard, .tcard:hover, .tcard.cur { border: 3px solid #7dd3fc; box-shadow: 0 8px 20px rgba(14, 116, 144, .16); } .tcard:hover, .tcard.cur { border-color: #38bdf8; }
 .central.night .tcard { background: #1e1745; color: #f5f3ff; border-color: #7dd3fc; }
 .tcard .pics { display: flex; justify-content: center; margin-top: 8px; } .tcard .pics img { width: 108px; height: 108px; object-fit: contain; margin: 0 -6px; }
+.tcard .pics img.cover { width: 100%; height: 108px; object-fit: contain; margin: 0; border-radius: 14px; }
 /* at most 3 lines (…), so a long description never pushes Try free out of the card */
 .tcard .about { font-size: 14.5px; line-height: 1.35; color: #4c4a7a; flex: none; margin-bottom: 6px; height: calc(1.35em * 3); overflow: hidden;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
@@ -439,7 +440,9 @@ function renderHome() {
     const pk = D.packs[c.pack] || D.packs.friends, cur = c.id === course.id, own = owned(c);
     const bought = freeCount(c) !== null && own;
     const badge = bought ? "✓ Purchased" : own ? "Free" : "";
-    return `<div class="tcard${cur ? " cur" : ""}" data-id="${c.id}"><div class="pics">${heroPics(c).map(u => u ? `<img src="${u}" alt="">` : "").join("")}</div>
+    // the card picture the admin uploaded for the theme; without one, its characters
+    const pics = c.cover ? `<img class="cover" src="${c.cover}" alt="">` : heroPics(c).map(u => u ? `<img src="${u}" alt="">` : "").join("");
+    return `<div class="tcard${cur ? " cur" : ""}" data-id="${c.id}"><div class="pics">${pics}</div>
       <div class="tn">${esc(c.name)}</div><div class="about">${esc(c.description || c.tagline || "")}</div>${badge ? `<span class="badge${bought ? " bought" : " free"}">${esc(badge)}</span>` : ""}<button>✨  Try free</button></div>`;
   }).join(""));
   $("tcards").querySelectorAll(".tcard").forEach(t => t.onclick = () => openKids(t.dataset.id));

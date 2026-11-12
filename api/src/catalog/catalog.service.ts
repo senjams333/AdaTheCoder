@@ -93,6 +93,8 @@ export class CatalogService implements OnApplicationBootstrap {
         price: c.price, free_lessons: c.premium ? c.freeLessons : null,
         buy_url: c.premium ? `${siteUrl()}/account?theme=${encodeURIComponent(c.slug)}` : '',
         characters: this.characters(c),
+        // the card picture the admin uploaded for this theme (the app's theme card shows it; null: the characters)
+        cover: c.imageFile ? { file: c.imageFile, url: mediaUrl('courses', c.imageFile) } : null,
         lessons: (await this.courseLessons(c.id, true)).map((l, i) => (full || i < free ? this.lessonPayload(l) : this.lockedLessonPayload(l))),
         full,
       });

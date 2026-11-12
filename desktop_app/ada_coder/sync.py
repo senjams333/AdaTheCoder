@@ -159,13 +159,14 @@ def sync_courses(force=False):
     wanted, _ = _fetch_videos(data["courses"])
     pictures = characters_dir()
     for course in data["courses"]:
-        for char in course.get("characters") or []:
+        # the theme's own characters, and its card picture (the cover the admin uploaded)
+        for char in (course.get("characters") or []) + ([course["cover"]] if isinstance(course.get("cover"), dict) else []):
             name = os.path.basename(char.get("file") or "")
             if name and char.get("url") and not os.path.exists(os.path.join(pictures, name)):
                 try:
                     _download(char["url"], os.path.join(pictures, name))
                 except NETWORK_ERRORS:
-                    pass  # the theme shows emoji until the picture arrives
+                    pass  # the theme shows emoji (or, for the cover, its characters) until the picture arrives
     _write_json(_cache_path(), {"revision": data.get("revision"), "courses": data["courses"]})
     for name in os.listdir(videos):  # tidy away videos no lesson uses any more
         if name not in wanted:
