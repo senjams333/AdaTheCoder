@@ -78,6 +78,7 @@ export interface SiteData {
   platforms: Record<string, { label: string; extensions: string[] }>;
   packs: Record<string, Pack>;
   countries: string[];
+  paypal?: boolean;
 }
 
 export interface AccountData {

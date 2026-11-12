@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import BusinessDetails, { useContact } from '@/components/BusinessDetails';
+import { useGetSiteQuery } from '@/lib/api';
 
 export default function TermsPage() {
   const { email } = useContact();
+  const paypal = Boolean(useGetSiteQuery().data?.paypal);     // PayPal is mentioned only once it's offered
   return (
     <article className="prose wrap">
       <h1>Terms of use</h1>
@@ -23,7 +25,7 @@ export default function TermsPage() {
       <p>Some themes are free. Paid themes let children try the first lessons free; buying a licence unlocks every lesson of that theme. A licence is for your family&apos;s own, non-commercial use on the computers in your home, is linked to your account and can&apos;t be sold or passed on. Schools and groups: write to us for a group licence.</p>
 
       <h2>5. Prices and payment</h2>
-      <p>Prices are shown on your account page and on the pay page before you pay, in Indian rupees (Razorpay) or US dollars (PayPal), and include any taxes we have to charge. Payments are handled by Razorpay or PayPal; we never see or store your card, UPI or bank details. A licence is a one-time payment, not a subscription: we never charge you again without you choosing to buy something new.</p>
+      <p>Prices are shown on your account page and on the pay page before you pay, {paypal ? 'in Indian rupees (Razorpay) or US dollars (PayPal)' : 'in Indian rupees'}, and include any taxes we have to charge. Payments are handled by {paypal ? 'Razorpay or PayPal' : 'Razorpay'}; we never see or store your card, UPI or bank details. A licence is a one-time payment, not a subscription: we never charge you again without you choosing to buy something new.</p>
       <p>When a payment goes through you get a licence code straight away, shown on screen and on your account page, and the app unlocks the theme by itself.</p>
 
       <h2>6. Purchases</h2>

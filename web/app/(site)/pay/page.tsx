@@ -173,14 +173,14 @@ function PayInner() {
                   <small>UPI · cards · net banking (India)</small>
                 </button>
                 )}
-                <button type="button" className="btn pay-paypal" disabled={!!busy}
-                  onClick={() => (page.methods.paypal ? paypal() : setErrors([
-                    'PayPal isn\'t switched on yet: add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in api/.env, then restart the website.']))}>
-                  {busy === 'paypal' ? 'Going to PayPal…' : `Pay ${page.methods.paypal?.label || page.theme.price} with PayPal`}
+                {page.methods.paypal ? (       /* only once PayPal's keys are set up on the website */
+                <button type="button" className="btn pay-paypal" disabled={!!busy} onClick={() => paypal()}>
+                  {busy === 'paypal' ? 'Going to PayPal…' : `Pay ${page.methods.paypal.label || page.theme.price} with PayPal`}
                   <small>PayPal or any card</small>
                 </button>
+                ) : null}
               </div>
-              <p className="pay-safe">🔒 Payments are handled by Razorpay and PayPal. We never see your card.<br />
+              <p className="pay-safe">🔒 Payments are handled by Razorpay{page.methods.paypal ? ' and PayPal' : ''}. We never see your card.<br />
                 By paying you agree to our <Link href="/terms">terms</Link> and <Link href="/privacy#purchases">policies</Link>. The free lessons are there so your child can try the theme first.</p>
             </>
           )}

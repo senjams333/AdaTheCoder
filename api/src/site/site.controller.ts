@@ -35,6 +35,8 @@ export class SiteController {
       platforms: PLATFORMS,
       packs: PACKS,
       countries: COUNTRIES,
+      // PayPal is offered only once its keys are in api/.env (until then the pages mention Razorpay only)
+      paypal: Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
     };
   }
 

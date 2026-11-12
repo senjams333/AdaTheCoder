@@ -42,7 +42,7 @@
   embedBuyFlow = async function () {
     var r = await dialog({
       title: "Upgrade ⭐", kind: "sunset",
-      body: '<div class="suntitle">🌐 Unlock every lesson</div><p>A grown-up pays on the website with <b>Razorpay</b> or <b>PayPal</b>. ' +
+      body: '<div class="suntitle">🌐 Unlock every lesson</div><p>A grown-up pays on the website with <b>Razorpay</b> (UPI, cards, net banking). ' +
             'As soon as the payment goes through, every lesson opens here by itself.</p>' +
             '<p>Already paid? Press <b>I have a licence 🔑</b> and type the licence from the website or the email.</p>',
       buttons: [{ label: "I have a licence 🔑", value: function () { return "key"; } },
