@@ -5,7 +5,7 @@
 #   bash backup.sh s3 BUCKET  → also copy every backup to that Amazon S3 bucket
 #   bash backup.sh status     → shows the backups and the last runs
 set -uo pipefail
-export AWS_DEFAULT_REGION=ap-south-1
+export AWS_DEFAULT_REGION=ap-south-1 PATH="$PATH:/snap/bin:/usr/local/bin"   # the nightly run has a short PATH
 ADA=~/Ada; OUT=~/backups; CONF=~/.ada-backup.conf; KEEP_DAYS=14; LOG="$OUT/backup.log"
 mkdir -p "$OUT"; chmod 700 "$OUT"
 S3=""; [ -f "$CONF" ] && S3=$(grep -E '^S3_BUCKET=' "$CONF" | cut -d= -f2- | tr -d '\r" ')
