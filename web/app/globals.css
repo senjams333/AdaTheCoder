@@ -182,7 +182,7 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
   font: 600 .9rem var(--font-head); color: #C9C0FF; gap: 8px; }
 .screen .run { background: var(--mint); color: #fff; border-radius: 999px; padding: 2px 12px; white-space: nowrap; }
 .screen .line { white-space: pre; overflow: hidden; }
-.screen .kw { color: #FF9F43; } .screen .fn { color: #7FD8FF; } .screen .str { color: #FFE27A; } .screen .num { color: #FF9ED0; }
+.screen .kw { color: #FF9F43; } .screen .fn { color: #7FD8FF; } .screen .str { color: #FFE27A; } .screen .num { color: #FF9ED0; } .screen .cm { color: #8C84B8; }
 .screen .out { margin-top: 12px; border-top: 2px dashed #4A3F86; padding-top: 10px; color: #8FF0C8; }
 .screen .out-label { color: #C9C0FF; font: 600 .82rem var(--font-head); }
 /* a blinking cursor under the output, as if the program is waiting */
@@ -984,3 +984,9 @@ a.course-pic img { transition: transform .2s; }
   letter-spacing: .02em; padding: 3px 10px; border-radius: 999px; }
 /* the Free Trial card's text: straight left and right edges */
 .acct-card-trial .acct-card-body > p { text-align: justify; hyphens: auto; }
+
+/* admin: the home page's code window, with a live preview */
+.herocode-admin { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.herocode-preview { display: grid; gap: 6px; min-width: 0; }
+.herocode-preview .screen { font: 15px/1.6 var(--font-code, ui-monospace, Menlo, Consolas, monospace); }
+@media (max-width: 900px) { .herocode-admin { grid-template-columns: minmax(0, 1fr); } }

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
+import HeroCode from '@/components/HeroCode';
 import HomeCharacters from '@/components/HomeCharacters';
 import { useAdminSettingsQuery, useSaveSettingsMutation, useThemesQuery } from '@/lib/api';
 import { errorList } from '@/lib/errors';
@@ -49,6 +50,26 @@ export default function AdminContent() {
           <label htmlFor="app_message">Message in the app</label>
           <input id="app_message" type="text" value={form.app_message || ''} onChange={set('app_message')} />
           <span className="help">Kids see this as a pop-up the next time they open the app, once per new message. Keep it short and friendly, or leave it empty for no pop-up.</span>
+        </div>
+        <h2 style={{ marginTop: 26 }}>Home page: the code window next to Ada</h2>
+        <div className="herocode-admin">
+          <div>
+            <div className="field"><label htmlFor="hero_code_file">File name</label><input id="hero_code_file" type="text" maxLength={30} value={form.hero_code_file ?? ''} onChange={set('hero_code_file')} placeholder="stars.py" /></div>
+            <div className="field">
+              <label htmlFor="hero_code">Code</label>
+              <textarea id="hero_code" className="code" rows={5} spellCheck={false} value={form.hero_code ?? ''} onChange={set('hero_code')} />
+              <span className="help">Python, up to about 4 short lines (8 at most). Use 4 spaces to indent. Colours are added by themselves.</span>
+            </div>
+            <div className="field">
+              <label htmlFor="hero_code_output">What it shows</label>
+              <textarea id="hero_code_output" className="code" rows={4} spellCheck={false} value={form.hero_code_output ?? ''} onChange={set('hero_code_output')} />
+              <span className="help">What the code prints, one line per line (6 at most).</span>
+            </div>
+          </div>
+          <div className="herocode-preview" aria-label="Preview of the code window">
+            <span className="muted">Preview</span>
+            <HeroCode file={form.hero_code_file} code={form.hero_code} output={form.hero_code_output} />
+          </div>
         </div>
         <h2 style={{ marginTop: 26 }}>Ada The Coder app: home screen</h2>
         <div className="field">

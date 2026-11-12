@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useGetSiteQuery } from '@/lib/api';
+import HeroCode from '@/components/HeroCode';
 import { useAppSelector } from '@/lib/hooks';
 
 const DownloadIcon = () => (
@@ -42,14 +43,8 @@ export default function HomePage() {
             <img className="twinkle" src="/img/twinkle.webp" alt="Twinkle the fairy waving her star wand" />
             <div className="tablet" aria-label="Example of a short Python program a child can write, and what it shows">
               <div className="tablet-frame">
-                <div className="screen">
-                  <div className="bar"><span>stars.py</span><span className="run">▶ Run</span></div>
-                  <div className="line"><span className="kw">for</span> count_star <span className="kw">in</span> <span className="fn">range</span>(<span className="num">3</span>):</div>
-                  <div className="line">{'    '}<span className="fn">print</span>(<span className="str">&quot;Golden star ⭐&quot;</span>)</div>
-                  <div className="line"> </div>
-                  <div className="line"> </div>
-                  <div className="out"><div className="out-label">What it shows</div>Golden star ⭐<br />Golden star ⭐<br />Golden star ⭐<br /><span className="cursor" aria-hidden="true" /></div>
-                </div>
+                {/* the admin sets the file name, code and output on the Website text page */}
+                <HeroCode file={s.hero_code_file} code={s.hero_code} output={s.hero_code_output} />
               </div>
             </div>
             <img className="ada" src="/img/ada.webp" alt="Ada, a smiling girl with round glasses, waving" />

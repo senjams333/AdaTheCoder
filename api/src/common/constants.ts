@@ -19,7 +19,7 @@ export const SETTING_FIELDS = [
   'hero_title', 'hero_subtitle', 'site_banner', 'app_message', 'parents_note', 'contact_email', 'author_name', 'author_note',
   'app_welcome', 'app_home_theme', 'business_details',
   'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button', 'break_lock', 'break_lock_minutes', 'policy_purchases',
-  'home_char1_name', 'home_char2_name', 'home_char3_name',
+  'home_char1_name', 'home_char2_name', 'home_char3_name', 'hero_code_file', 'hero_code', 'hero_code_output',
   'install_video_url', 'social_youtube', 'social_x', 'social_facebook',
 ] as const;
 
@@ -49,6 +49,10 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   break_lock_minutes: '5',
   // the app's home screen characters (when no theme is chosen for it): the name over each picture, and the picture the
   // admin uploaded ('' = the one built into the app: Tom, Ada, Unicorn). The *_file keys are set only by the uploads.
+  // the little code window on the home page, next to Ada: its file name, the code, and "What it shows"
+  hero_code_file: 'stars.py',
+  hero_code: 'for count_star in range(3):\n    print("Golden star ⭐")',
+  hero_code_output: 'Golden star ⭐\nGolden star ⭐\nGolden star ⭐',
   home_char1_name: 'Tom',
   home_char2_name: 'Ada',
   home_char3_name: 'Unicorn',
