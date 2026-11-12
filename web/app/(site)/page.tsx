@@ -11,6 +11,23 @@ const DownloadIcon = () => (
   </svg>
 );
 
+/** The big headline. On phones it's two even lines, each on one line and sized to fit ("Your child's first" /
+ *  "lines of real code"). A long headline the admin types just wraps as usual. */
+function HeroTitle({ text }: { text: string }) {
+  const words = text.trim().split(/\s+/);
+  let best = 1, bestLen = Infinity;
+  for (let k = 1; k < words.length; k++) {
+    const len = Math.max(words.slice(0, k).join(' ').length, words.slice(k).join(' ').length);
+    if (len < bestLen) { bestLen = len; best = k; }
+  }
+  if (words.length < 2 || bestLen > 22) return <h1>{text}</h1>;
+  return (
+    <h1 className="h1-two">
+      <span className="h1-line">{words.slice(0, best).join(' ')}</span> <span className="h1-line">{words.slice(best).join(' ')}</span>
+    </h1>
+  );
+}
+
 export default function HomePage() {
   const { data } = useGetSiteQuery();
   const user = useAppSelector((s) => s.auth.user);
@@ -26,7 +43,7 @@ export default function HomePage() {
       <section className="hero">
         <div className="wrap">
           <div className="hero-text">
-            <h1>{s.hero_title || "Your child's first lines of real code"}</h1>
+            <HeroTitle text={s.hero_title || "Your child's first lines of real code"} />
             <div>
               <p className="lede">{s.hero_subtitle}</p>
               <div className="actions">

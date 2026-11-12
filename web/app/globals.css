@@ -71,8 +71,27 @@ html { scroll-padding-top: 100px; }
 .nav a.btn, .nav a.btn:hover { color: #fff; }
 .nav form { margin: 0; }
 @media (max-width: 560px) {
+  /* phones: the logo and the Sign in (or My account) button on the first line, the other links under them */
   .site-header .wrap { gap: 8px 16px; padding-block: 10px; }
-  .nav { margin-left: 0; width: 100%; gap: 6px 16px; }
+  .nav { display: contents; }
+  .brand { order: 0; }
+  .nav .btn { order: 1; margin-left: auto; }
+  .site-header .wrap::after { content: ""; order: 2; flex-basis: 100%; height: 0; }   /* the line break */
+  .nav > :not(.btn) { order: 3; }
+}
+@media (max-width: 560px) {
+  .site-header .wrap { column-gap: 12px; }
+  .nav > :not(.btn) { font-size: .95rem; margin-right: 6px; }
+}
+@media (max-width: 440px) {
+  .brand { font-size: 1.22rem; gap: 9px; }
+  .brand img { width: 40px; height: 40px; }
+  .nav .btn { padding: 6px 12px; font-size: .88rem; white-space: nowrap; }
+}
+@media (max-width: 340px) {
+  .brand { font-size: 1.08rem; gap: 7px; }
+  .brand img { width: 34px; height: 34px; }
+  .nav .btn { padding: 5px 10px; font-size: .82rem; }
 }
 
 .banner { background: var(--pink); color: #fff; text-align: center; padding: 10px 16px; font-weight: 800; }
@@ -1004,4 +1023,13 @@ a.course-pic img { transition: transform .2s; }
   .contact-intro > p:first-of-type { order: 3; }
   .contact-page > .contact-card { order: 4; margin: 10px 0 26px; }
   .contact-intro > .contact-mail { order: 5; }
+}
+
+/* the big headline on phones and tablets: two even lines, each kept on one line, the size set to fit the screen */
+@media (max-width: 1100px) {
+  .hero h1.h1-two { max-width: none; font-size: clamp(1.3rem, 10.8vw, 3.6rem); line-height: 1.08; }
+  /* the fairy and Ada a little smaller on short phone screens, so the code editor still fits on the first screen */
+  .stage .twinkle { max-height: min(260px, 24vh); }
+  .stage .ada { max-height: min(290px, 26vh); }
+  .hero h1.h1-two .h1-line { display: block; white-space: nowrap; }
 }
