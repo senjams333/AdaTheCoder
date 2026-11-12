@@ -175,7 +175,7 @@ function AccountInner() {
                             <>
                               <div className="acct-price">{c.price} <span>one-time</span></div>
                               <Link className="acct-get acct-btn-block" href={`/pay?theme=${encodeURIComponent(c.slug)}`}>Get Licence</Link>
-                              <span className="acct-pay-note">{site?.paypal ? 'Razorpay (UPI, cards) or PayPal' : 'UPI, cards or net banking (Razorpay)'}</span>
+                              <span className="acct-pay-note">Razorpay (UPI, cards)</span>
                             </>
                           )}
                         </div>
