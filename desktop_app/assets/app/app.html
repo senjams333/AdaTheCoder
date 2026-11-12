@@ -148,6 +148,8 @@ body { margin: 0; background: var(--page); color: var(--ink); font: 14px var(--u
 .tmore .g4 { bottom: -8px; right: 0; font-size: 12px; animation-delay: 1.2s; }
 .tmore:hover .star { background: radial-gradient(circle at 50% 42%, #fffbe0 0 22%, #ffe066 50%, #ffb800 100%); }
 .tmore[hidden] { display: none; }
+.tmore .arr svg.tm-up, .tmore.tm-back .arr svg.tm-down { display: none; }     /* at the last row the arrow points up */
+.tmore.tm-back .arr svg.tm-up { display: inline; }
 @keyframes tmoreBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(7px) rotate(4deg); } }
 @keyframes tmoreTwinkle { 0%, 100% { opacity: .15; transform: scale(.5) rotate(0deg); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
 @media (prefers-reduced-motion: reduce) { .tmore, .tmore .g { animation: none; } }
@@ -320,7 +322,7 @@ body.night { background: #070b24; }
             <div class="chars" id="chars"></div>
           </div>
           <div class="tcards" id="tcards"></div>
-          <button class="tmore" id="tmore" type="button" title="More themes below" aria-label="More themes below" hidden><span class="star"></span><span class="arr"><svg viewBox="0 0 40 40" width="52" height="52" aria-hidden="true"><path d="M20 6 V29 M9 19 L20 31 L31 19" fill="none" stroke="#c2410c" stroke-opacity=".35" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 1.5)"/><path d="M20 6 V29 M9 19 L20 31 L31 19" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><i class="g g1">✦</i><i class="g g2">✧</i><i class="g g3">✦</i><i class="g g4">✧</i></button>
+          <button class="tmore" id="tmore" type="button" title="More themes below" aria-label="More themes below" hidden><span class="star"></span><span class="arr"><svg class="tm-down" viewBox="0 0 40 40" width="52" height="52" aria-hidden="true"><path d="M20 6 V29 M9 19 L20 31 L31 19" fill="none" stroke="#c2410c" stroke-opacity=".35" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 1.5)"/><path d="M20 6 V29 M9 19 L20 31 L31 19" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="tm-up" viewBox="0 0 40 40" width="52" height="52" aria-hidden="true"><path d="M20 34 V11 M9 21 L20 9 L31 21" fill="none" stroke="#c2410c" stroke-opacity=".35" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 1.5)"/><path d="M20 34 V11 M9 21 L20 9 L31 21" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><i class="g g1">✦</i><i class="g g2">✧</i><i class="g g3">✦</i><i class="g g4">✧</i></button>
         </div>
         <div class="lesson" id="lesson" hidden>
           <div class="lstack">
@@ -421,14 +423,23 @@ const owned = c => freeCount(c) === null || LICENCES.includes(c.id);
 const unlocked = i => owned(course) || i < freeCount(course);
 const doneSet = () => (done[course.id] = done[course.id] || new Set());
 
-// the glowing ⬇ shows while more theme cards are below; it scrolls down one row
+// the glowing ⬇ shows while more theme cards are below and scrolls down one row; at the last row it turns into ⬆
+// and goes back to the first row. With all the cards in view there's no arrow.
 function moreArrow() {
-  const t = $("tcards");
-  $("tmore").hidden = t.hidden || t.scrollHeight - t.clientHeight - t.scrollTop < 6;
+  const t = $("tcards"), b = $("tmore");
+  const scrolls = t.scrollHeight - t.clientHeight > 6, atEnd = t.scrollHeight - t.clientHeight - t.scrollTop < 6;
+  b.hidden = t.hidden || !scrolls;
+  b.classList.toggle("tm-back", scrolls && atEnd);
+  const label = scrolls && atEnd ? "Back to the first themes" : "More themes below";
+  if (b.title !== label) { b.title = label; b.setAttribute("aria-label", label); }
 }
 $("tcards").addEventListener("scroll", moreArrow);
 addEventListener("resize", moreArrow);
-$("tmore").onclick = () => $("tcards").scrollBy({ top: $("tcards").clientHeight, behavior: "smooth" });
+$("tmore").onclick = () => {
+  const t = $("tcards");
+  if ($("tmore").classList.contains("tm-back")) t.scrollTo({ top: 0, behavior: "smooth" });
+  else t.scrollBy({ top: t.clientHeight, behavior: "smooth" });
+};
 function renderHome() {
   const p = pack();
   // the three friends on the home screen: the same for every theme
