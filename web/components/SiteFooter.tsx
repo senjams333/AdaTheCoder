@@ -20,7 +20,7 @@ export default function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="wrap">
-        <span>© Ada The Coder. Made for curious kids and the grown-ups who help them.</span>
+        <span>© {new Date().getFullYear()} Ada The Coder. All rights reserved. Made for curious kids and the grown-ups who help them.</span>
         <span className="socials" aria-label="Follow Ada The Coder">
           {socials.map((x) => (
             <a key={x.label} className={noIcon[x.key] ? x.cls : 'social-img'} aria-label={x.label} href={x.url || '#'} target={x.url ? '_blank' : undefined} rel="noopener noreferrer">
@@ -32,7 +32,7 @@ export default function SiteFooter() {
           ))}
         </span>
         <span>
-          <Link href="/privacy">Privacy Policy</Link> &nbsp; <Link href="/privacy#purchases">Refund &amp; Cancellation</Link> &nbsp; <Link href="/terms">Terms &amp; Conditions</Link> &nbsp; <Link href="/contact">Contact</Link> &nbsp;{' '}
+          <Link href="/privacy">Privacy Policy</Link> &nbsp; <Link href="/privacy#purchases">Refund &amp; Cancellation</Link> &nbsp; <Link href="/terms">Terms &amp; Conditions</Link> &nbsp; <Link href="/terms#copyright">Copyright</Link> &nbsp; <Link href="/contact">Contact</Link> &nbsp;{' '}
         </span>
       </div>
     </footer>

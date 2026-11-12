@@ -114,6 +114,92 @@ Questions about your data or a purchase? Email {email}, or use the [Contact page
 
 const TERMS = `# Terms of use
 
+Last updated: 13 November 2026
+
+These terms are an agreement between you and Ada The Coder for using this website and the Ada The Coder app. Please read them with our [policies](/privacy), which explain how we look after your information and how purchases and refunds work. By creating an account or buying a licence, you agree to these terms.
+
+## 1. Who we are
+
+Ada The Coder ("we", "us") runs this website and the Ada The Coder app, which teach children to write Python. Our details are at the end of this page.
+
+## 2. Who can use it
+
+Accounts are for parents, guardians and teachers aged 18 or over who live in India or elsewhere. Children use the app through a grown-up's account and don't need one of their own. By creating an account you confirm that you are 18 or over, that you are the parent or legal guardian of the children who will use it (or have their parent's permission, for teachers), and that you are responsible for how they use Ada The Coder. We recommend a grown-up stays nearby while young children use any computer.
+
+## 3. Your account
+
+Give true details when you sign up, and keep your password private. You are responsible for what happens with your account. Tell us straight away at {email} if you think someone else has used it. You can delete your account at any time from your account page.
+
+## 4. Free and paid themes
+
+The app is free to download, and some themes are free. Every paid theme opens its first lessons free, so your child can try it first. Buying a licence unlocks every lesson of that theme. A licence is for your family's own, non-commercial use on the computers in your home, is linked to your account, and can't be sold, shared or passed on. Schools and groups: write to us for a group licence.
+
+## 5. Prices and payment
+
+Prices are shown on your account page and on the pay page before you pay, in Indian rupees, and include any taxes we have to charge. Payments are handled by Razorpay; we never see or store your card, UPI or bank details. A licence is a one-time payment, not a subscription: we never charge you again unless you choose to buy something new. If a price is ever shown wrongly, we will tell you before taking any payment.
+
+## 6. Delivery
+
+Themes are digital, so nothing is shipped. When a payment goes through, your licence code is shown on screen straight away, emailed to you and listed on your account page, and the app unlocks the theme by itself within a few minutes. If it doesn't, write to us and we'll unlock it.
+
+## 7. Cancellation and refunds
+
+You can cancel a purchase at any time before the payment is complete. Because a theme is unlocked and yours to keep as soon as its licence is issued, and you can try its free lessons first, we don't refund a purchase because of a change of mind once the licence has been issued. Payment mistakes and problems we can't fix are always refunded: see [purchases, delivery, cancellation and refunds](/privacy#purchases) for exactly when, and how long it takes.
+
+## 8. Using the app and the lessons fairly
+
+The app, lessons, videos, characters, pictures and music belong to us or to the people who licensed them to us, and are protected by copyright (see section 9). You may use them for learning. Children may keep and share the programs they write themselves. Please don't copy, resell, publish or share our lessons, videos or characters, get round the licence checks, or use Ada The Coder for anything unlawful or harmful.
+
+## 9. Copyright, AI-made pictures and credits {#copyright}
+
+© {year} Ada The Coder. All rights reserved. Ada The Coder created and owns its lessons and the order they come in, the explanations, example programs, exercises and challenges, the friendly error messages, the way each lesson is put together (its video, worked examples and coding challenge), the lesson videos, the app, this website, and their texts and designs.
+
+Some pictures and characters (such as Ada, Byte, Tom and their friends) and some music were made with the help of AI tools, from our own ideas and descriptions, and were then chosen, edited and put together by Ada The Coder. The characters, their names and the way they appear in Ada The Coder belong to Ada The Coder as far as the law allows. "Ada The Coder", its logo and its characters' names are our trade marks.
+
+You may use Ada The Coder to learn, and children may keep and share the programs they write themselves. Please don't copy, record, publish, sell or share our lessons, videos, pictures, characters or app, in whole or in part, or use them to make other courses or apps, or to train AI, without our written permission. To ask, write to {email}.
+
+Ada The Coder also uses free software and artwork made by others, under their own licences: Python and Pyodide (which runs Python in the browser), fonts from Google Fonts (SIL Open Font License), and emoji pictures from Microsoft Fluent Emoji (MIT License) and Google Noto Emoji (SIL Open Font License). They remain the work of their owners.
+
+## 10. Your computer
+
+The app needs a supported computer (shown on the website) and an internet connection to download lessons and check licences. It runs the Python programs children write on your computer, in a folder of its own.
+
+## 11. Availability and changes
+
+We work to keep the website and the lessons available and correct, and we add new lessons over time. Sometimes the service may be briefly unavailable, for example during updates. We may change or retire a theme; if we ever stop offering a paid theme you have bought, you keep the lessons already on your computer.
+
+## 12. Our responsibility
+
+We provide Ada The Coder with reasonable care and skill. As far as the law allows, we are not responsible for losses that weren't foreseeable, or for problems caused by your computer, internet connection or other software, and our total responsibility to you is limited to what you paid us in the 12 months before the claim. Nothing in these terms limits any responsibility that can't be limited by law, or your rights as a consumer under the Consumer Protection Act, 2019.
+
+## 13. Ending your use
+
+You can stop using Ada The Coder and delete your account at any time. We may suspend or close an account that seriously or repeatedly breaks these terms, after telling you why and giving you a chance to put it right where we can. If we close an account for no fault of yours, we will refund any licence you bought in the previous 12 months.
+
+## 14. Complaints
+
+If something isn't right, please tell us first so we can fix it. Our Grievance Officer acknowledges every complaint within 48 hours and resolves it within 30 days:
+
+{grievance_officer}
+
+You can also contact the National Consumer Helpline (call 1915, or visit consumerhelpline.gov.in), or file a complaint with a Consumer Commission.
+
+## 15. Law
+
+These terms are governed by the laws of India. Disputes are decided by the courts {courts}, without affecting your right to approach a Consumer Commission or any rights you have under the laws of the country where you live.
+
+## 16. Changes to these terms
+
+If we change these terms we'll update the date at the top, and email account holders about important changes before they apply. Changes never affect a licence you have already bought.
+
+## 17. Contact
+
+{business_details}`;
+
+/** The Terms before the Copyright section (12 November 2026): if a website still has them saved unchanged, the
+ *  current Terms are shown instead (an admin's own edited text is always kept). */
+export const LEGACY_POLICY_TERMS = `# Terms of use
+
 Last updated: 12 November 2026
 
 These terms are an agreement between you and Ada The Coder for using this website and the Ada The Coder app. Please read them with our [policies](/privacy), which explain how we look after your information and how purchases and refunds work. By creating an account or buying a licence, you agree to these terms.
