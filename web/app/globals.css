@@ -235,16 +235,16 @@ textarea.code { font: 15px/1.5 var(--font-code); background: var(--code-bg); col
 .friend { border-radius: var(--radius-big); padding: 0 28px 28px; text-align: center; }
 .friend .pic { height: 320px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 18px; }
 .friend .pic img { max-height: 100%; width: auto; }
-/* Ada and Byte are drawn wider than Twinkle: a little smaller, so the three friends look the same size */
-.friend-ada .pic img, .friend-byte .pic img { max-height: 88%; }
+/* Ada, Byte and Tom: a little smaller than the box, so the three friends look the same size */
+.friend-ada .pic img, .friend-byte .pic img, .friend-tom .pic img { max-height: 88%; }
 .friend h3 { font-size: 1.7rem; margin-bottom: .25em; }
 .friend .role { font: 600 1rem var(--font-head); margin-bottom: .7em; }
 .friend p { margin-inline: auto; color: var(--ink-soft); }
 .friend-ada { background: var(--sun-soft); } .friend-ada .role { color: #B07C00; }
 .friend-byte { background: var(--sky-soft); } .friend-byte .role { color: #1B86C2; }
-.friend-twinkle { background: var(--pink-soft); } .friend-twinkle .role { color: var(--pink-dark); }
+.friend-twinkle, .friend-tom { background: var(--pink-soft); } .friend-twinkle .role, .friend-tom .role { color: var(--pink-dark); }
 .friend-ada .pic { padding-top: 22px; }
-.friend-byte .pic, .friend-twinkle .pic { padding-top: 22px; }
+.friend-byte .pic, .friend-twinkle .pic, .friend-tom .pic { padding-top: 22px; }
 @media (max-width: 860px) { .friends { grid-template-columns: 1fr; max-width: 460px; margin-inline: auto; } }
 
 /* Steps intro with Byte the owl */

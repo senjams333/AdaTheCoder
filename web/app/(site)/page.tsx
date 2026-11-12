@@ -75,11 +75,11 @@ export default function HomePage() {
               <p className="role">The helper</p>
               <p>Stuck? Byte gives a hint, and when code goes wrong he explains the bug in words kids understand.</p>
             </div>
-            <div className="friend friend-twinkle">
-              <div className="pic"><img src="/img/twinkle.webp" alt="Twinkle, a fairy with a star wand" /></div>
-              <h3>Twinkle</h3>
-              <p className="role">The star giver</p>
-              <p>Every time a challenge is solved, Twinkle flies in with a shiny star to celebrate.</p>
+            <div className="friend friend-tom">
+              <div className="pic"><img src="/img/tom-friend.webp" alt="Tom, a smiling boy in a blue hoodie, waving" /></div>
+              <h3>Tom</h3>
+              <p className="role">The cheer buddy</p>
+              <p>Every time a challenge is solved, Tom jumps in with a big wave and a shiny star to celebrate.</p>
             </div>
           </div>
         </div>
