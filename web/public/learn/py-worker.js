@@ -56,6 +56,8 @@ sys.stdout = sys.stderr = _Writer()
 class _NoInput(Exception):
     pass
 
+_echo = [True]     # write the child's answer after the question (the app's own lesson page shows it itself: False)
+
 def _input(prompt=''):
     if prompt:
         sys.stdout.write(str(prompt))
@@ -64,14 +66,16 @@ def _input(prompt=''):
     answer = ada_io.read_input(str(prompt))
     if answer is None:
         raise KeyboardInterrupt()
-    sys.stdout.write(answer + '\\n')
+    if _echo[0]:
+        sys.stdout.write(answer + '\\n')
     return answer
 
 builtins.input = _input
 time.sleep = lambda s=0: ada_io.sleep(s)
 
-def _ada_run(src, blocked):
+def _ada_run(src, blocked, echo=True):
     _Writer.n = 0
+    _echo[0] = bool(echo)
     scope = {'__name__': '__main__', '__builtins__': builtins}
     try:
         exec(compile(src, '<lesson>', 'exec'), scope)
@@ -106,6 +110,11 @@ async function init(msg) {
   py.FS.writeFile('/home/pyodide/explain.py', src);
   py.registerJsModule('ada_io', { write: out, read_input: readInput, sleep, can_input: Boolean(ctrl) });
   py.runPython(SETUP);
+  if (msg.appweb) {                      // the desktop app's own pages (adathecoder.com/learn)
+    const zip = await (await fetch('/appweb/app.zip')).arrayBuffer();
+    py.unpackArchive(zip, 'zip', { extractDir: '/' });
+    py.runPython("import sys\nsys.path.insert(0, '/app')\nimport webhost");
+  }
 }
 
 let ready = null;
@@ -115,13 +124,23 @@ self.onmessage = async (e) => {
     ready = init(m).then(() => postMessage({ type: 'ready' }), (err) => postMessage({ type: 'failed', error: String(err) }));
     return;
   }
+  if (m.type === 'call') {               // webhost.<fn>(arg) -> text (the app's pages)
+    await ready;
+    try {
+      const f = py.pyimport('webhost')[m.fn];
+      postMessage({ type: 'answer', id: m.id, ok: true, value: String(f(m.arg)) });
+    } catch (err) {
+      postMessage({ type: 'answer', id: m.id, ok: false, value: String(err) });
+    }
+    return;
+  }
   if (m.type === 'run') {
     await ready;
     let result = ['error', '❌ Python could not start in this browser.', 'Oops! Something went wrong 💡'];
     try {
       const run = py.globals.get('_ada_run');
       const blocked = py.toPy(BLOCKED);
-      const r = run(m.code, blocked);
+      const r = run(m.code, blocked, m.echo !== false);
       result = r.toJs();
       r.destroy(); blocked.destroy(); run.destroy();
     } catch (err) {

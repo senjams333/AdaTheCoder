@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { API_URL } from './config';
 import type {
-  AccountData, LearnData, AdminThemeDetail, AdminThemeRow, AuthAnswer, Dashboard, Done, LessonDetail, ParentsData, Release, Settings, SiteData, User,
+  AccountData, AdminThemeDetail, AdminThemeRow, AuthAnswer, Dashboard, Done, LessonDetail, ParentsData, Release, Settings, SiteData, User,
 } from './types';
 
 /** Every call to the API. Components use the generated hooks, e.g. useGetSiteQuery(). */
@@ -45,7 +45,6 @@ export const api = createApi({
 
     // ---------------------------------------------------------------- parent's account
     getAccount: b.query<AccountData, void>({ query: () => 'account', providesTags: ['Account'] }),
-    getLearn: b.query<LearnData, void>({ query: () => 'account/learn', providesTags: ['Account'] }),
     updateAccount: b.mutation<{ ok: boolean; user: User }, { name: string; city: string; country: string }>({
       query: (body) => ({ url: 'account', method: 'PATCH', body }),
       invalidatesTags: ['Account'],
@@ -146,7 +145,7 @@ export const api = createApi({
 
 export const {
   useGetSiteQuery, useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useForgotPasswordMutation, useResetPasswordMutation, useMeQuery, useSetupStatusQuery, useSetupAdminMutation,
-  useGetAccountQuery, useGetLearnQuery, useUpdateAccountMutation, useChangePasswordMutation, useDeleteAccountMutation, useDownloadLinkMutation,
+  useGetAccountQuery, useUpdateAccountMutation, useChangePasswordMutation, useDeleteAccountMutation, useDownloadLinkMutation,
   useDashboardQuery, useAdminSettingsQuery, useSaveSettingsMutation,
   useThemesQuery, useThemeQuery, useCreateThemeMutation, useUpdateThemeMutation, useDeleteThemeMutation, useCopyLessonsMutation, usePublishThemeMutation,
   useLessonQuery, useBlankLessonQuery, useCreateLessonMutation, useUpdateLessonMutation, useDeleteLessonMutation, useMoveLessonMutation, usePublishLessonMutation,

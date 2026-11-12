@@ -16,6 +16,8 @@ const nextConfig = {
       { source: '/learn', headers: iso },
       { source: '/learn/:path*', headers: iso },
       { source: '/pyodide/:path*', headers: [...iso, { key: 'Cache-Control', value: 'public, max-age=604800' }] },
+      // the desktop app's screens, pictures and emojis for /learn (desktop_app/webhost/build.py)
+      { source: '/appweb/:path*', headers: [...iso, { key: 'Cache-Control', value: 'public, max-age=86400' }] },
     ];
   },
   async rewrites() {

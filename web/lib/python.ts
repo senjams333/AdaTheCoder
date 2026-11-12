@@ -14,6 +14,11 @@ export class PythonRunner {
   private sleepBuf: SharedArrayBuffer | null = null;
   private pending: { id: number; resolve: (r: RunResult) => void; h: Handlers } | null = null;
   private nextId = 1;
+  private calls = new Map<number, { resolve: (v: string) => void; reject: (e: Error) => void }>();
+  /** setup and set_courses, given again to a fresh Python (after Stop had to restart it) */
+  private kept = new Map<string, string>();
+  /** appweb: also load the desktop app's own pages (web/public/appweb), for call() */
+  constructor(private readonly appweb = false) {}
   onStatus: (s: 'loading' | 'ready' | 'failed') => void = () => undefined;
 
   /** True when input(), sleep and Stop work fully (the page is cross-origin isolated). */
@@ -36,6 +41,10 @@ export class PythonRunner {
         const m = e.data;
         if (m.type === 'ready') { this.onStatus('ready'); resolve(); }
         else if (m.type === 'failed') { this.onStatus('failed'); reject(new Error(m.error)); }
+        else if (m.type === 'answer') {
+          const c = this.calls.get(m.id); this.calls.delete(m.id);
+          if (c) { if (m.ok) c.resolve(m.value); else c.reject(new Error(m.value)); }
+        }
         else if (m.type === 'out') this.pending?.h.onOut(m.text);
         else if (m.type === 'input') this.pending?.h.onInput(m.prompt);
         else if (m.type === 'done' && this.pending && this.pending.id === m.id) {
@@ -45,20 +54,44 @@ export class PythonRunner {
       };
       w.onerror = (e) => { this.onStatus('failed'); reject(new Error(e.message || 'Python could not start.')); };
     });
-    w.postMessage({ type: 'init', inputBuf: this.inputBuf, stopBuf: this.stopBuf, sleepBuf: this.sleepBuf });
+    w.postMessage({ type: 'init', inputBuf: this.inputBuf, stopBuf: this.stopBuf, sleepBuf: this.sleepBuf, appweb: this.appweb });
+    for (const [fn, arg] of this.kept) this.send(fn, arg).catch(() => undefined);   // queued after init
     return this.ready;
   }
 
-  async run(code: string, h: Handlers): Promise<RunResult> {
+  async run(code: string, h: Handlers, echo = true): Promise<RunResult> {
     await this.start();
-    if (this.pending) this.stop();
+    if (this.pending) {                     // a program is still running: stop it and wait until it has stopped
+      this.stop();
+      for (let i = 0; this.pending && i < 150; i++) await new Promise((r) => setTimeout(r, 20));
+      if (this.pending) { const p = this.pending; this.pending = null; this.worker?.terminate(); this.worker = null; this.ready = null; p.resolve({ result: 'stopped', text: '', short: '' }); await this.start(); }
+    }
     if (this.stopBuf) new Uint8Array(this.stopBuf)[0] = 0;
     const id = this.nextId++;
     return new Promise((resolve) => {
       this.pending = { id, resolve, h };
-      this.worker!.postMessage({ type: 'run', id, code });
+      this.worker!.postMessage({ type: 'run', id, code, echo });
     });
   }
+
+  /** webhost.<fn>(arg) in Python (the desktop app's pages): its answer as text. */
+  async call(fn: string, arg: unknown): Promise<string> {
+    const text = typeof arg === 'string' ? arg : JSON.stringify(arg);
+    if (fn === 'setup' || fn === 'set_courses') this.kept.set(fn, text);
+    await this.start();
+    return this.send(fn, text);
+  }
+
+  private send(fn: string, arg: string): Promise<string> {
+    const id = this.nextId++;
+    return new Promise((resolve, reject) => {
+      this.calls.set(id, { resolve, reject });
+      this.worker!.postMessage({ type: 'call', id, fn, arg });
+    });
+  }
+
+  /** True while a program is running (or waiting for an answer). */
+  get busy(): boolean { return this.pending !== null; }
 
   /** The child's answer to input(). */
   answer(text: string) {

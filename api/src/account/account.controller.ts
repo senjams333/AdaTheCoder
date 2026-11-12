@@ -39,16 +39,14 @@ export class AccountController {
     };
   }
 
-  /** Learning in the browser (adathecoder.com/learn, for tablets and phones): every theme with its lessons, as the
-   *  desktop app gets them. A paid theme the family hasn't bought has only its free lessons in full; the others are
-   *  names only (no examples, code or video), exactly as in the app. */
-  @Get('learn')
+  /** Learning in the browser (adathecoder.com/learn): the desktop app's own screens, already logged in. The same
+   *  answer as the app's log-in (/api/v3/login), for the parent who is logged in to the website. */
+  @Get('app-login')
   @UseGuards(AuthGuard)
-  async learn(@CurrentUser() user: User) {
-    const owned = new Set(await this.catalog.licencedSlugs(user.id));
-    const cards = new Map((await this.catalog.allCourses(true)).map((c) => [c.slug, this.catalog.card(c)]));
-    const courses = (await this.catalog.appCourses(owned)).map((c) => ({ ...c, images: cards.get(c.id)?.images || [] }));
-    return { childName: user.childName || '', courses };
+  async appLogin(@CurrentUser() user: User) {
+    return { ok: true, name: user.name, email: user.email, child_name: user.childName || '',
+      licences: await this.catalog.licencedSlugs(user.id), licence_codes: await this.catalog.licenceCodes(user.id),
+      app_licence: this.auth.appLicence(user), app_token: this.auth.appToken(user) };
   }
 
   @Patch()
