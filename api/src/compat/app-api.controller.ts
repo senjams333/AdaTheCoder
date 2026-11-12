@@ -103,6 +103,11 @@ export class AppApiController {
   /** The app's sign-up: 201 { ok, name, email, licences: [] } · 400/409/429 { ok: false, errors } */
   @Post('v3/register')
   async register(@Body() body: Record<string, unknown>, @Ip() ip: string, @Res() res: Response) {
+    // Accounts are made on the website only, where the parent's email is checked with a code and they give consent
+    // as the Privacy Policy describes. Old apps that still sign up here are sent there instead.
+    if (process.env.APP_SIGNUP !== 'on') {
+      return res.status(400).json({ ok: false, errors: [`Please create your account on the website: ${siteUrl()}/register (it takes a minute), then log in here.`] });
+    }
     const key = ip || 'unknown';
     const recent = (this.signups.get(key) || []).filter((t) => Date.now() - t < 15 * 60 * 1000);
     if (recent.length >= 8) {

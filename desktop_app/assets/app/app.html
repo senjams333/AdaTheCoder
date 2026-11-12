@@ -19,6 +19,8 @@
 .lf input { font: 600 17px var(--ui); border: 3px solid #bae6fd; border-radius: 16px; padding: 9px 14px; color: #1e1b4b; background: #fff; }
 .lf input:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 4px rgba(56, 189, 248, .2); }
 .login-hint { margin: 2px 0 0; font-size: 12.5px; color: #4c4a7a; text-align: center; }
+.login-legal { margin: 4px 0 0; font-size: 12.5px; color: #4c4a7a; text-align: center; }
+.login-legal a, .legal-links a { color: #0284c7; font-weight: 700; }
 .login-status { margin: 0; min-height: 20px; text-align: center; font-weight: 700; font-size: 14px; }
 .login-go { font: 700 19px var(--font-kid); background: #ffd23f; color: #1e1b4b; border: 0; border-bottom: 4px solid #f2b500; border-radius: 22px; padding: 12px; cursor: pointer; }
 .login-go:hover { background: #ffdc5e; } .login-go:disabled { opacity: .7; cursor: wait; }
@@ -370,6 +372,7 @@ body.night { background: #070b24; }
         <button class="login-go" id="loginGo" type="submit">🚀  Let's code!</button>
         <button class="login-link" id="loginSwitch" type="button" hidden>Have an account? Log in 🔑</button>
         <button class="login-link" id="loginSignup" type="button">Grown-up? Create an account 📝</button>
+        <p class="login-legal"><a href="#" data-site="/privacy">Privacy Policy</a> · <a href="#" data-site="/terms">Terms</a></p>
       </form>
     </div>
     <div class="kload" id="kload" hidden><div class="kload-card"><img id="kloadImg" alt=""><div id="kloadText">Opening…</div><div class="kbar"><i></i></div></div></div>
@@ -737,7 +740,7 @@ function license() {
     [["🎫 License Key", D.appLicence || "ADA-FREE-XXXX-XXXX"], ["👤 Licensed To", u.full_name || ""], ["📧 Email", u.email || ""],
      ["🎯 Plan", "Free · Personal & Educational"], ["⭐ Themes bought", String(LICENCES.length)],
      ["⚡ Status", "Active ✅"], ["🔢 Version", D.version || ""]],
-    `<p><b>📜 License:</b> Personal &amp; educational use only. The free lessons of every theme are included.</p><p>A theme you buy has its own licence: open the theme, then 📜 License.</p><p>This software is provided "as is", without warranty of any kind.</p>`, "", true);
+    `<p><b>📜 License:</b> Personal &amp; educational use only. The free lessons of every theme are included.</p><p>A theme you buy has its own licence: open the theme, then 📜 License.</p><p class="legal-links">📄 <a href="#" data-site="/terms">Terms of use</a> · <a href="#" data-site="/privacy">Privacy Policy</a> · <a href="#" data-site="/privacy#purchases">Refunds</a></p>`, "", true);
 }
 function upgrade() {
   stopVideo();
@@ -826,6 +829,13 @@ function loginStatus(text, colour) { $("loginStatus").textContent = text; $("log
 $("loginSwitch").onclick = () => setLoginMode(loginMode === "login" ? "register" : "login");
 // "Create an account" opens the website's registration page (www.adathecoder.com/register); here, the website preview's
 $("loginSignup").onclick = () => host && host.openUrl((D.site || "") + "/register");
+// the website's Privacy Policy, Terms and Refunds open in the browser (links marked data-site="/privacy" and so on)
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("[data-site]");
+  if (!a) return;
+  e.preventDefault();
+  host && host.openUrl((D.site || "") + a.getAttribute("data-site"));
+});
 // Forgot password: the website's "Forgot your password?" page opens with the email filled in; it emails a link to choose a new one
 $("loginForgot").onclick = () => {
   if (host) { host.forgotPassword($("emailIn").value.trim()); loginStatus("🔑 The website opens in your browser: it emails you a link to choose a new password.", "#0369a1"); }
