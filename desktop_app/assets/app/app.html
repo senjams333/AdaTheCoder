@@ -438,6 +438,9 @@ function moreArrow() {
   const scrolls = t.scrollHeight - t.clientHeight > 6, atEnd = t.scrollHeight - t.clientHeight - t.scrollTop < 6;
   b.hidden = t.hidden || !scrolls;
   b.classList.toggle("tm-back", scrolls && atEnd);
+  // at the last row the ⬆ star moves up, level with the top of the theme cards (by the top of the scroll bar)
+  b.style.top = scrolls && atEnd ? (t.offsetTop + 6) + "px" : "";
+  b.style.bottom = scrolls && atEnd ? "auto" : "";
   const label = scrolls && atEnd ? "Back to the first themes" : "More themes below";
   if (b.title !== label) { b.title = label; b.setAttribute("aria-label", label); }
 }
