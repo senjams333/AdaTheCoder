@@ -994,3 +994,14 @@ a.course-pic img { transition: transform .2s; }
 .herocode-preview { display: grid; gap: 6px; min-width: 0; }
 .herocode-preview .screen { font: 15px/1.6 var(--font-code, ui-monospace, Menlo, Consolas, monospace); }
 @media (max-width: 900px) { .herocode-admin { grid-template-columns: minmax(0, 1fr); } }
+/* Contact on phones: Ada, the heading and "we'll reply by email", then the form, then the email address and details */
+@media (max-width: 880px) {
+  .contact-page { row-gap: 0; }
+  .contact-intro { display: contents; }
+  .contact-intro > * { order: 6; }
+  .contact-intro > img { order: 1; justify-self: start; }
+  .contact-intro > h1 { order: 2; }
+  .contact-intro > p:first-of-type { order: 3; }
+  .contact-page > .contact-card { order: 4; margin: 10px 0 26px; }
+  .contact-intro > .contact-mail { order: 5; }
+}
