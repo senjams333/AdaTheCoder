@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 
 /** The step-by-step install guide (Windows and Mac tabs). Opens on the tab for this computer. */
-export default function InstallHelp({ contact, onDone }: { contact: string; onDone: () => void }) {
+/** macReady: a Mac version is uploaded (admin → App versions); until then the Mac tab says it's coming soon. */
+export default function InstallHelp({ contact, onDone, macReady = true }: { contact: string; onDone: () => void; macReady?: boolean }) {
   const [tab, setTab] = useState<'windows' | 'mac'>('windows');
   useEffect(() => {
     if (/Macintosh|Mac OS X/i.test(navigator.userAgent)) setTab('mac');
@@ -27,6 +28,11 @@ export default function InstallHelp({ contact, onDone }: { contact: string; onDo
             <li className="step"><span className="step-num">3</span><div className="step-body"><h3>Follow the installer</h3><p>Click <b>Next</b>, tick <b>Create a desktop shortcut</b>, then <b>Install</b> and <b>Finish</b>.</p></div></li>
             <li className="step"><span className="step-num">4</span><div className="step-body"><h3>Start coding!</h3><p>Open <b>Ada The Coder</b> from the desktop or Start menu and begin the first lesson.</p></div></li>
           </ol>
+        </div>
+      ) : !macReady ? (
+        <div className="install-pane">
+          <p className="install-need">🍎 The Mac version is coming soon.</p>
+          <p className="acct-text">For now, Ada The Coder runs on Windows 10 or 11. We&apos;ll show the Mac download here as soon as it&apos;s ready.</p>
         </div>
       ) : (
         <div className="install-pane">

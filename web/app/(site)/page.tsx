@@ -14,6 +14,7 @@ export default function HomePage() {
   const { data } = useGetSiteQuery();
   const user = useAppSelector((s) => s.auth.user);
   const s = data?.settings || {};
+  const mac = Boolean(data?.releases?.mac);      // a Mac version is uploaded (until then: "Mac coming soon")
   const paragraphs = (s.author_note || '').split('\n\n').map((p) => p.trim()).filter(Boolean);
   // the app's break reminder, as the admin set it (0 = off); parents are told about it below
   const breakN = Number.parseInt(s.break_minutes ?? '30', 10);
@@ -33,7 +34,7 @@ export default function HomePage() {
                   {user ? 'Download the app' : 'Try Free!'}
                 </Link>
               </div>
-              <p className="small-print">For Windows 10 or newer and macOS 11 or newer.</p>
+              <p className="small-print">{mac ? 'For Windows 10 or newer and macOS 11 or newer.' : 'For Windows 10 or newer. Mac: Coming Soon.'}</p>
             </div>
           </div>
 
@@ -143,7 +144,7 @@ export default function HomePage() {
             </li>
             <li>
               <h3>Install the app</h3>
-              <p>Download Ada The Coder for Windows or Mac from your account page and install it like any other program. After that, it works even without the internet.</p>
+              <p>Download Ada The Coder for {mac ? 'Windows or Mac' : 'Windows (Mac coming soon)'} from your account page and install it like any other program. After that, it works even without the internet.</p>
             </li>
             <li>
               <h3>Let them create</h3>
@@ -213,7 +214,7 @@ export default function HomePage() {
             <div className="faq-col">
               <details>
                 <summary>Which computers does it work on?</summary>
-                <p>Windows 10 or 11, and Mac computers running macOS 11 or newer. iPads, iPhones and Chromebooks aren&apos;t supported yet.</p>
+                <p>{mac ? 'Windows 10 or 11, and Mac computers running macOS 11 or newer.' : 'Windows 10 or 11. The Mac version is coming soon.'} iPads, iPhones and Chromebooks aren&apos;t supported yet.</p>
               </details>
               <details>
                 <summary>What information do you keep about my child?</summary>

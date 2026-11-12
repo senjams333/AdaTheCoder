@@ -190,7 +190,7 @@ function AccountInner() {
                 {licenceOf ? <LicenceBox code={licenceOf.code} /> : null}
               </Modal>
               <Modal open={modal === 'install'} onClose={() => setModal(null)} title="How to install Ada The Coder" id="inst-title" wide>
-                <InstallHelp contact={contact} onDone={() => setModal(null)} />
+                <InstallHelp contact={contact} macReady={Boolean(data?.releases?.mac)} onDone={() => setModal(null)} />
               </Modal>
               <footer className="acct-footer">
                 <span>© Ada The Coder. Made for curious kids and the grown-ups who help them.</span>
@@ -212,7 +212,7 @@ function DownloadButton({ platform, label, release, yours }: {
   const [getLink, { isLoading }] = useDownloadLinkMutation();
   const dispatch = useAppDispatch();
   if (!release) {
-    return <div className="acct-dl"><span className="acct-btn acct-btn-block is-off" aria-disabled="true">{label}: coming soon</span></div>;
+    return <div className="acct-dl"><span className="acct-btn acct-btn-block is-off" aria-disabled="true">{label}: Coming Soon</span></div>;
   }
   async function download() {
     try {
