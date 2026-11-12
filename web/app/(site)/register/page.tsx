@@ -154,7 +154,7 @@ export default function RegisterPage() {
             <div className="field">
               <label className="check">
                 <input type="checkbox" checked={form.consent} onChange={set('consent')} />
-                <span>I&apos;m the parent or legal guardian, and I agree to the <Link href="/terms" target="_blank">terms</Link> and have read the <Link href="/privacy" target="_blank">privacy page</Link>.</span>
+                <span>I am 18 or over and the parent or legal guardian of the child who will use Ada The Coder. I agree to the <Link href="/terms" target="_blank">terms</Link>, and I consent to my details and my child&apos;s first name and age (if I add them) being used as described in the <Link href="/privacy" target="_blank">privacy policy</Link>.</span>
               </label>
             </div>
             <button className="btn" type="submit" disabled={isLoading}>{isLoading ? 'Sending your code…' : 'Create account'}</button>

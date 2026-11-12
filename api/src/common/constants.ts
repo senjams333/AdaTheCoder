@@ -19,7 +19,7 @@ export const SETTING_FIELDS = [
   'hero_title', 'hero_subtitle', 'site_banner', 'app_message', 'parents_note', 'contact_email', 'author_name', 'author_note',
   'app_welcome', 'app_home_theme', 'business_details',
   'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button', 'break_lock', 'break_lock_minutes', 'policy_purchases',
-  'home_char1_name', 'home_char2_name', 'home_char3_name', 'hero_code_file', 'hero_code', 'hero_code_output',
+  'home_char1_name', 'home_char2_name', 'home_char3_name', 'grievance_name', 'grievance_email', 'legal_city', 'hero_code_file', 'hero_code', 'hero_code_output',
   'install_video_url', 'social_youtube', 'social_x', 'social_facebook',
 ] as const;
 
@@ -62,7 +62,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   // "Purchases and cancellation" on the Policies page: an empty line between paragraphs, "- " starts a bullet,
   // "Title: text" in a bullet makes the title bold, {email} becomes the contact email
   policy_purchases:
-    "We keep our themes affordable, and every paid theme opens its first lessons free, so your child can explore it fully before you decide.\n\nBecause a theme is yours to keep the moment it is unlocked, we are not able to offer refunds once its licence has been issued. We hope the free lessons make it easy to be sure the theme is the right fit first.\n\nIf anything ever goes wrong with a payment, we will always make it right. Write to {email} with your account's email and the payment reference from Razorpay or PayPal:\n- Charged twice for the same theme: the extra payment is returned to you.\n- Charged, but the theme didn't unlock: we unlock it for you straight away, and if we can't, your payment is returned.\n\nAny money returned goes back the way you paid (card, UPI, bank or PayPal) within 2 working days of us confirming it; your bank or PayPal usually shows it within 5 to 7 working days.\n\nThere is nothing to cancel: licences are one-time payments, not subscriptions, so you will never be charged again. You can close your account at any time from your account page.",
+    "Every paid theme opens its first lessons free, so your child can try it properly before you decide. Prices are shown in Indian rupees before you pay, include any taxes we have to charge, and are one-time payments: there is no subscription, and you are never charged again unless you choose to buy another theme.\n\n- Delivery: Themes are digital, so nothing is shipped. As soon as your payment goes through, your licence code is shown on screen, emailed to you and listed on your account page, and the app unlocks the theme by itself within a few minutes.\n- Cancellation: You can cancel at any time before the payment is complete, just by closing the payment window: nothing is charged. Once a licence is issued the purchase is complete, and there is nothing further to cancel.\n- No refunds once a licence is issued: A theme is unlocked and yours to keep as soon as its licence is issued, and you can try its free lessons first, so we don't refund a purchase because of a change of mind after the licence has been issued.\n\nWe will always put things right in these cases. Write to {email} with your account's email and the Razorpay payment reference:\n- Charged twice for the same theme: the extra payment is refunded in full.\n- Charged, but no licence was issued: we issue it, and if we can't do that within 2 working days, your payment is refunded in full.\n- The theme doesn't work as described on a supported computer: if we can't fix it within 7 days of your report, your payment is refunded in full.\n- Money left your account but the payment failed: your bank or payment provider reverses this by itself, under the Reserve Bank of India's rules for failed transactions (usually within 1 to 5 working days). If it doesn't come back, write to us and we'll help.\n\nRefunds go back the way you paid (card, UPI or net banking). We start them within 2 working days of confirming the problem, and banks usually show the money within 5 to 7 working days.\n\nNothing in this policy takes away your rights as a consumer under the Consumer Protection Act, 2019.",
   // links: the installation tutorial (Byte's bubble on the home page) and the footer's YouTube, X and Facebook buttons
   // ('' = the button is shown but goes nowhere yet)
   install_video_url: '',
@@ -71,6 +71,11 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   social_facebook: '',
   // on the Terms and Policies pages (payment providers ask for a legal name and address)
   business_details: 'Ada The Coder\n(Your legal name)\n(Your address, city, PIN code, India)\nPhone: (your phone number)',
+  // the Grievance Officer named on the Policies and Terms pages (Indian law asks for a name and a way to reach them);
+  // empty: the author's name and the contact email are shown. legal_city: the city whose courts the Terms name.
+  grievance_name: '',
+  grievance_email: '',
+  legal_city: '',
   parents_note:
     'There are no ads, no chat and no strangers in Ada The Coder. Your child never needs an account, and their ' +
     'progress is saved on your own computer.',
@@ -106,3 +111,7 @@ export const DEFAULT_COURSES = [
     features: 'Ada and Byte the owl\nAll 17 beginner lessons\nFree with the app',
   },
 ];
+
+/** The purchases text shipped before 12 November 2026. If a website still has it saved unchanged, the current text
+ *  above is shown instead (an admin's own edited text is always kept as it is). */
+export const LEGACY_POLICY_PURCHASES = "We keep our themes affordable, and every paid theme opens its first lessons free, so your child can explore it fully before you decide.\n\nBecause a theme is yours to keep the moment it is unlocked, we are not able to offer refunds once its licence has been issued. We hope the free lessons make it easy to be sure the theme is the right fit first.\n\nIf anything ever goes wrong with a payment, we will always make it right. Write to {email} with your account's email and the payment reference from Razorpay or PayPal:\n- Charged twice for the same theme: the extra payment is returned to you.\n- Charged, but the theme didn't unlock: we unlock it for you straight away, and if we can't, your payment is returned.\n\nAny money returned goes back the way you paid (card, UPI, bank or PayPal) within 2 working days of us confirming it; your bank or PayPal usually shows it within 5 to 7 working days.\n\nThere is nothing to cancel: licences are one-time payments, not subscriptions, so you will never be charged again. You can close your account at any time from your account page.";

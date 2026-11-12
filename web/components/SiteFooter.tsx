@@ -32,7 +32,7 @@ export default function SiteFooter() {
           ))}
         </span>
         <span>
-          <Link href="/privacy">Policies</Link> &nbsp; <Link href="/terms">Terms &amp; Conditions</Link> &nbsp; <Link href="/contact">Contact</Link> &nbsp;{' '}
+          <Link href="/privacy">Privacy Policy</Link> &nbsp; <Link href="/privacy#purchases">Refund &amp; Cancellation</Link> &nbsp; <Link href="/terms">Terms &amp; Conditions</Link> &nbsp; <Link href="/contact">Contact</Link> &nbsp;{' '}
         </span>
       </div>
     </footer>

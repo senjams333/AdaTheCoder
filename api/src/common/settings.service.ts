@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { DEFAULT_SETTINGS, SETTING_FIELDS } from './constants';
+import { DEFAULT_SETTINGS, LEGACY_POLICY_PURCHASES, SETTING_FIELDS } from './constants';
 import { Setting } from '../entities';
 
 @Injectable()
@@ -11,6 +11,8 @@ export class SettingsService {
   async all(): Promise<Record<string, string>> {
     const out: Record<string, string> = { ...DEFAULT_SETTINGS };
     for (const s of await this.settings.find()) out[s.key] = s.value;
+    // the old purchases text, saved unchanged, gives way to the current one (an edited text is kept)
+    if ((out.policy_purchases || '').trim() === LEGACY_POLICY_PURCHASES.trim()) out.policy_purchases = DEFAULT_SETTINGS.policy_purchases;
     return out;
   }
 

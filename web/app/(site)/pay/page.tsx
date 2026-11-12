@@ -182,6 +182,7 @@ function PayInner() {
                 ) : null}
               </div>
               <p className="pay-safe">🔒 Payments are handled by Razorpay{page.methods.paypal ? ' and PayPal' : ''}. We never see your card.<br />
+                <b>One-time payment, delivered instantly:</b> the licence unlocks every lesson of this theme straight away. Once it is issued it can&apos;t be refunded for a change of mind; payment mistakes are always refunded (<Link href="/privacy#purchases">refund policy</Link>).<br />
                 By paying you agree to our <Link href="/terms">terms</Link> and <Link href="/privacy#purchases">policies</Link>. The free lessons are there so your child can try the theme first.</p>
             </>
           )}

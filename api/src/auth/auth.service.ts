@@ -64,7 +64,7 @@ export class AuthService {
     let user: User;
     try {
       user = await this.users.save(this.users.create({
-        ...d, role: 'parent', plan: 'free', isActive: true, lastLogin: new Date(),
+        ...d, role: 'parent', plan: 'free', isActive: true, lastLogin: new Date(), consentAt: new Date(),   // sign-up needs the consent tick
       }));
     } catch (err) {
       // two sign-ups with the same email at the same moment: the database's unique index wins

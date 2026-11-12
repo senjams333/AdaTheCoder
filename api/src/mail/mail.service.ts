@@ -78,7 +78,7 @@ export class MailService {
         this.log.error(`Brevo refused the email to ${toEmail}: ${res.status} ${await res.text()}`);
         return false;
       }
-      this.log.log(`Email "${email.subject}" sent to ${toEmail}`);
+      this.log.log(`Email "${email.subject.replace(/\b\d{6}\b/g, '******')}" sent to ${toEmail}`);   // codes aren't written to the logs
       return true;
     } catch (err) {
       this.log.error(`Couldn't reach Brevo to email ${toEmail}: ${(err as Error).message}`);

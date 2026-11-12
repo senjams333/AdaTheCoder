@@ -151,6 +151,21 @@ export default function AdminContent() {
           <textarea id="business_details" rows={4} value={form.business_details || ''} onChange={set('business_details')} />
           <span className="help">Your legal name, postal address and phone, one per line. Shown on the Terms and Policies pages (Razorpay and PayPal ask for these).</span>
         </div>
+        <div className="row-3" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+          <div className="field">
+            <label htmlFor="grievance_name">Grievance Officer&apos;s name</label>
+            <input id="grievance_name" type="text" maxLength={80} value={form.grievance_name || ''} onChange={set('grievance_name')} placeholder={form.author_name || 'Your full name'} />
+          </div>
+          <div className="field">
+            <label htmlFor="grievance_email">Grievance Officer&apos;s email</label>
+            <input id="grievance_email" type="email" maxLength={160} value={form.grievance_email || ''} onChange={set('grievance_email')} placeholder={form.contact_email || ''} />
+          </div>
+          <div className="field">
+            <label htmlFor="legal_city">City for legal disputes</label>
+            <input id="legal_city" type="text" maxLength={60} value={form.legal_city || ''} onChange={set('legal_city')} placeholder="e.g. Bengaluru" />
+          </div>
+        </div>
+        <p className="help muted" style={{ marginTop: -8 }}>Indian law asks the website to name a Grievance Officer (usually you) and how to reach them; they are shown on the Policies and Terms pages, which promise to acknowledge complaints within 48 hours and resolve them within 30 days. Empty: the author&apos;s name and the contact email are used. The city is where your business is registered: the Terms name its courts.</p>
         <div className="field">
           <label htmlFor="policy_purchases">Purchases and cancellation (Policies page)</label>
           <textarea id="policy_purchases" rows={12} value={form.policy_purchases || ''} onChange={set('policy_purchases')} />

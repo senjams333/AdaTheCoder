@@ -43,6 +43,11 @@ export class User {
   @Column({ name: 'last_login', type: 'datetime', nullable: true })
   lastLogin!: Date | null;
 
+  /** When the parent confirmed, at sign-up, that they are an adult and the child's parent or guardian and consented
+   *  to the Privacy Policy (kept as a record of that consent; null for accounts made before it was recorded). */
+  @Column({ name: 'consent_at', type: 'datetime', nullable: true })
+  consentAt!: Date | null;
+
   @OneToMany(() => Licence, (l) => l.user)
   licences!: Licence[];
 
