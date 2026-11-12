@@ -173,7 +173,7 @@ function clearOutput() {
 
 /* ------------------------------------------------------------------ sounds */
 let audio = null, musicOn = false, musicTimer = null;
-const NOTES = [523.25, 659.25, 783.99, 987.77, 1046.5];
+const NOTES = [659.25, 783.99, 987.77, 1046.5];      // the twinkles (the low C, 523 Hz, is left out: it sounded too heavy)
 
 function ensureAudio() {
   try {

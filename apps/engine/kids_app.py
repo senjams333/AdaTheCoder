@@ -607,7 +607,7 @@ function createConfetti(){
 }
 
 let bgAudioContext, musicPlaying = false, musicLoop;
-const magicalNotes = [523.25, 659.25, 783.99, 987.77, 1046.50];
+const magicalNotes = [659.25, 783.99, 987.77, 1046.50];   // the twinkles (the low C, 523 Hz, is left out: it sounded too heavy)
 
 function ensureAudioContext() {
     if(!bgAudioContext) {
