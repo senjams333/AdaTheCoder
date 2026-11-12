@@ -140,10 +140,11 @@ function AccountInner() {
 
                 <div className="acct-shelf" tabIndex={0} aria-label="Apps and themes, scroll to see more">
                   <article className="acct-card acct-card-trial">
-                    <div className="acct-card-image"><span className="acct-tag acct-tag-free">FREE</span><img src="/img/ada.webp" alt="" /></div>
+                    <div className="acct-card-image"><span className="acct-tag acct-tag-main">FREE DOWNLOAD</span><img src="/img/ada.webp" alt="" /></div>
                     <div className="acct-card-body">
+                      <span className="acct-main-label">⭐ The main app: start here</span>
                       <h3>Free Trial</h3>
-                      <p>Try Ada The Coder for free. New lessons arrive by themselves.</p>
+                      <p>Download Ada The Coder free. Every theme opens inside it, and new lessons arrive by themselves.</p>
                       <div className="acct-card-actions">
                         {(['windows', 'mac'] as const).map((key) => (
                           <DownloadButton key={key} platform={key} label={PLATFORM_LABELS[key]} release={data.releases[key]} yours={mine === key} />

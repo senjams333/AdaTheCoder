@@ -975,3 +975,10 @@ a.course-pic img { transition: transform .2s; }
 .homechar-name { background: #fff; color: #1e1b4b; border-radius: 22px; padding: 4px 16px; font-weight: 800; box-shadow: 0 3px 10px rgba(0, 0, 0, .12);
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .homechar-reset { justify-self: start; }
+
+/* the Free Trial card is the main app (the free download): a pink border so parents see it first */
+.acct-card.acct-card-trial { border: 3px solid var(--pink); box-shadow: 0 0 0 4px var(--pink-soft), 0 10px 26px rgba(226, 61, 139, .22); }
+.acct-card.acct-card-trial:hover { box-shadow: 0 0 0 4px var(--pink-soft), 0 14px 30px rgba(226, 61, 139, .3); }
+.acct-tag-main { background: var(--pink); }
+.acct-main-label { align-self: flex-start; margin-bottom: 6px; background: var(--pink-soft); color: var(--pink-dark); font: 800 .78rem var(--font-body);
+  letter-spacing: .02em; padding: 3px 10px; border-radius: 999px; }
