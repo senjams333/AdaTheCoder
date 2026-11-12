@@ -152,8 +152,9 @@ function PayInner() {
             <>
               <h1>Unlock {page.theme.name}</h1>
               <div className="pay-pics">{page.theme.images.slice(0, 3).map((i) => <img key={i} src={i} alt="" />)}</div>
-              <p className="sub">{page.theme.tagline}</p>
-              <ul className="pay-features">{page.theme.featureList.map((f) => <li key={f}>{f}</li>)}</ul>
+              {/* the theme's name is the heading: a tagline or feature that only repeats it isn't shown again */}
+              {page.theme.tagline && !sameAsName(page.theme.tagline, page.theme.name) ? <p className="sub">{page.theme.tagline}</p> : null}
+              <ul className="pay-features">{page.theme.featureList.filter((f) => !sameAsName(f, page.theme.name)).map((f) => <li key={f}>{f}</li>)}</ul>
               <p className="sub">One payment, every lesson, for <b>{page.user.email}</b>. No subscription.</p>
               <FormErrors errors={errors} />
               <div className="pay-methods">
@@ -206,6 +207,12 @@ function RazorpayPaymentButton({ id }: { id: string }) {
   }, [id]);
   return <form ref={form} />;
 }
+
+/** "Data", "data " or "• Data" is the same as the theme's name "Data". */
+const sameAsName = (text: string, name: string) => {
+  const tidy = (x: string) => x.replace(/^[\s•*\-–]+/, '').trim().toLowerCase();
+  return tidy(text) === tidy(name);
+};
 
 export default function PayPage() {
   return (
