@@ -89,6 +89,21 @@ export class AdminController {
     return { ok: true, message: 'Back to the picture built into the app.' };
   }
 
+  /** A picture for the website's home page (a friend in "Meet your coding friends"). It is used once the admin
+   *  saves the website text. */
+  @Post('site-picture')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('picture', uploadOptions))
+  async sitePicture(@File() picture?: UploadedFile) {
+    if (!picture) throw new BadRequestException(['No picture arrived. Choose the picture again.']);
+    if (!IMAGE_EXTENSIONS.includes(ext(picture.originalname))) {
+      await discard(picture);
+      throw new BadRequestException(['Pictures must be .png, .jpg or .webp files (a .png or .webp with a see-through background looks best).']);
+    }
+    const name = await keep(picture, 'courses', 'site-pic');
+    return { ok: true, file: name, url: mediaUrl('courses', name), message: 'Picture added. Click Save website text to show it on the website.' };
+  }
+
   private withPictures(s: Record<string, string>) {
     const out: Record<string, string> = { ...s };
     for (const i of [1, 2, 3]) {

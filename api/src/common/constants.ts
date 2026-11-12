@@ -1,3 +1,4 @@
+import { SITE_TEXT_DEFAULTS, SITE_TEXT_FIELDS } from './site-text';
 /** Character packs built into the desktop app. Each theme picks one; "custom" uses uploaded pictures. */
 export const PACKS: Record<string, { label: string; images: string[]; note: string }> = {
   friends: { label: 'Tom, Penny & Teddy', images: ['tom.webp', 'penny.webp', 'teddy.webp'], note: 'Teddy celebrates, Tom explains mistakes' },
@@ -21,9 +22,11 @@ export const SETTING_FIELDS = [
   'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button', 'break_lock', 'break_lock_minutes', 'policy_purchases',
   'home_char1_name', 'home_char2_name', 'home_char3_name', 'grievance_name', 'grievance_email', 'legal_city', 'hero_code_file', 'hero_code', 'hero_code_output',
   'install_video_url', 'social_youtube', 'social_x', 'social_facebook',
+  ...SITE_TEXT_FIELDS,
 ] as const;
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
+  ...SITE_TEXT_DEFAULTS,
   hero_title: "Your child's first lines of real code",
   hero_subtitle:
     'Ada The Coder teaches Python to children aged 6 to 11 with short, playful lessons. Grown-ups sign up and install ' +

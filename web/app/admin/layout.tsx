@@ -14,6 +14,7 @@ import { useRequireLogin } from '@/lib/useRequireLogin';
 const NAV = [
   { href: '/admin', label: 'Overview', match: (p: string) => p === '/admin' },
   { href: '/admin/content', label: 'Website text', match: (p: string) => p.startsWith('/admin/content') },
+  { href: '/admin/pages', label: 'Home & policy pages', match: (p: string) => p.startsWith('/admin/pages') },
   { href: '/admin/themes', label: 'Themes & lessons', match: (p: string) => p.startsWith('/admin/themes') || p.startsWith('/admin/lessons') },
   { href: '/admin/releases', label: 'App versions', match: (p: string) => p.startsWith('/admin/releases') },
   { href: '/admin/parents', label: 'Parents', match: (p: string) => p.startsWith('/admin/parents') },

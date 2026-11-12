@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
 import HeroCode from '@/components/HeroCode';
@@ -131,11 +132,7 @@ export default function AdminContent() {
         })()}
 
         <h2 style={{ marginTop: 26 }}>Website</h2>
-        <div className="field">
-          <label htmlFor="parents_note">Note for parents</label>
-          <textarea id="parents_note" rows={3} value={form.parents_note || ''} onChange={set('parents_note')} />
-          <span className="help">Shown in the &quot;Made with parents in mind&quot; section on the home page.</span>
-        </div>
+        <p className="help muted">The home page sections (friends, lessons, steps, parents, questions) and the Policies, Refund &amp; Cancellation and Terms pages are on the <Link href="/admin/pages">Home &amp; policy pages</Link> page.</p>
         <div className="field">
           <label htmlFor="author_name">Author&apos;s name</label>
           <input id="author_name" type="text" value={form.author_name || ''} onChange={set('author_name')} />
@@ -166,11 +163,6 @@ export default function AdminContent() {
           </div>
         </div>
         <p className="help muted" style={{ marginTop: -8 }}>Indian law asks the website to name a Grievance Officer (usually you) and how to reach them; they are shown on the Policies and Terms pages, which promise to acknowledge complaints within 48 hours and resolve them within 30 days. Empty: the author&apos;s name and the contact email are used. The city is where your business is registered: the Terms name its courts.</p>
-        <div className="field">
-          <label htmlFor="policy_purchases">Purchases and cancellation (Policies page)</label>
-          <textarea id="policy_purchases" rows={12} value={form.policy_purchases || ''} onChange={set('policy_purchases')} />
-          <span className="help">Leave an empty line between paragraphs. Start a line with &quot;- &quot; for a bullet point; &quot;Title: text&quot; in a bullet makes the title bold. Write {'{email}'} where the contact email should go.</span>
-        </div>
         <div className="field">
           <label htmlFor="install_video_url">Installation tutorial video (YouTube link)</label>
           <input id="install_video_url" type="url" placeholder="https://www.youtube.com/watch?v=…" value={form.install_video_url || ''} onChange={set('install_video_url')} />
