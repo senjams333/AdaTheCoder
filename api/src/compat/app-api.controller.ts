@@ -10,7 +10,7 @@ import { AppTokenGuard, CurrentUser, OptionalAppTokenGuard } from '../auth/guard
 import { CatalogService } from '../catalog/catalog.service';
 import { PLATFORMS } from '../common/constants';
 import { SettingsService } from '../common/settings.service';
-import { revisionOf, siteUrl, versionNewer } from '../common/util';
+import { mediaUrl, revisionOf, siteUrl, versionNewer } from '../common/util';
 import { Release, User } from '../entities';
 import { PaymentsService } from '../payments/payments.service';
 
@@ -150,7 +150,12 @@ export class AppApiController {
     const steps = (s.break_steps || '').split('\n').map((line) => line.split('|').map((x) => x.trim()))
       .filter((p) => p.some(Boolean)).slice(0, 8)
       .map((p) => (p.length >= 3 ? { emoji: p[0], title: p[1], text: p.slice(2).join(' | ') } : { emoji: '⭐', title: p[0] || '', text: p[1] || '' }));
-    return { message: s.app_message || '', welcome: s.app_welcome || '', home_theme: s.app_home_theme || '',
+    // the home characters the admin named and pictured (used when no theme is chosen for the home screen)
+    const homeChars = [1, 2, 3].map((i) => {
+      const file = s[`home_char${i}_file`] || '';
+      return { name: (s[`home_char${i}_name`] || '').trim(), file, url: file ? mediaUrl('courses', file) : '' };
+    });
+    return { message: s.app_message || '', welcome: s.app_welcome || '', home_theme: s.app_home_theme || '', home_chars: homeChars,
       // the break reminder, as the admin set it (minutes 0 = no reminder)
       break: { minutes, title: s.break_title || '', intro: (s.break_intro || '').replace(/\{minutes\}/g, String(minutes)), steps, button: s.break_button || '',
         // the break stays on the screen for lock_minutes before it can be closed (lock false: it can be closed at once)

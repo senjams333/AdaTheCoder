@@ -65,6 +65,10 @@ export class Course {
   @Column({ default: true })
   published!: boolean;
 
+  /** "NEW" on the theme's card in the app (and it comes second in the first row), until the admin unticks it */
+  @Column({ name: 'is_new', default: false })
+  isNew!: boolean;
+
   @OneToMany(() => Lesson, (l) => l.course)
   lessons!: Lesson[];
 

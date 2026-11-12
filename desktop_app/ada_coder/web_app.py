@@ -377,13 +377,14 @@ class WebMainWindow(QMainWindow):
                 "free_lessons": course.free_count(c), "price": c.get("price", ""),
                 "heroPics": [_url(h[1]) for h in hero],
                 "cover": self._cover(c),
+                "is_new": bool(c.get("is_new")),          # "NEW" on its card, second in the first row
             })
         first = self.courses[0] if self.courses else {"lessons": []}
         lessons = [{k: l.get(k) for k in ("id", "emoji", "name", "title", "subtitle", "default_code", "examples", "video")}
                    for l in first.get("lessons", [])]
         home = sync.home_screen()
         chosen = next((c for c in self.courses if c["id"] == home["theme"]), None) if home["theme"] else None
-        chars = course.characters(chosen)["hero"] if chosen else HOME_CHARACTERS
+        chars = course.characters(chosen)["hero"] if chosen else self._home_characters(home)
         return {
             "courses": courses, "packs": packs, "images": images, "lessons": lessons, "version": APP_VERSION,
             "home": {"welcome": home["welcome"], "chars": [[n, _url(p), e] for n, p, e in chars], "break": home.get("break")},
@@ -392,6 +393,19 @@ class WebMainWindow(QMainWindow):
             "site": SERVER_URL.rstrip("/"),
             "lastCourse": self.settings["course"] or "",
         }
+
+    @staticmethod
+    def _home_characters(home):
+        """Tom, Ada and Unicorn, with the names and pictures the admin set on the website (a picture shows once it's
+        downloaded; until then, or with none set, the one built into the app)."""
+        mine = home.get("chars") or []
+        out = []
+        for i, (name, picture, emoji) in enumerate(HOME_CHARACTERS):
+            ch = mine[i] if i < len(mine) and isinstance(mine[i], dict) else {}
+            file = os.path.basename(ch.get("file") or "")
+            path = os.path.join(sync.characters_dir(), file) if file else ""
+            out.append((ch.get("name") or name, path if path and os.path.exists(path) else picture, emoji))
+        return out
 
     @staticmethod
     def _cover(c):

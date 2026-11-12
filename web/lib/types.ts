@@ -47,6 +47,7 @@ export interface Theme {
   razorpayButton?: string;
   premium: boolean;
   freeLessons: number;
+  isNew?: boolean;
   imageFile: string;
   imageUrl: string | null;
   characters: Character[];

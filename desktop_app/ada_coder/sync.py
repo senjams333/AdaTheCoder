@@ -303,13 +303,32 @@ def new_announcement():
     return message
 
 
+def _home_pictures(chars):
+    """Downloads the home characters' pictures the admin uploaded, if they aren't here yet. True if one arrived.
+    Until a picture arrives (or with none set) the app shows the one built into it; a failed download is tried again."""
+    got = False
+    for ch in chars:
+        name = os.path.basename(ch.get("file") or "")
+        if name and ch.get("url") and not os.path.exists(os.path.join(characters_dir(), name)):
+            try:
+                _download(ch["url"], os.path.join(characters_dir(), name))
+                got = True
+            except NETWORK_ERRORS:
+                pass
+    return got
+
+
 def _save_home(answer):
-    """Keeps the home screen the admin set on the website. Returns True if it changed."""
+    """Keeps the home screen the admin set on the website (greeting, characters with their names and pictures, the
+    break), and downloads the characters' pictures. Returns True if anything changed."""
     state = _read_json(_state_path(), {})
+    chars = [{"name": str(c.get("name") or "").strip()[:30], "file": str(c.get("file") or ""), "url": str(c.get("url") or "")}
+             for c in (answer.get("home_chars") or []) if isinstance(c, dict)][:3]
     home = {"welcome": (answer.get("welcome") or "").strip(), "theme": (answer.get("home_theme") or "").strip(),
-            "break": answer.get("break") if isinstance(answer.get("break"), dict) else None}
+            "break": answer.get("break") if isinstance(answer.get("break"), dict) else None, "chars": chars}
+    arrived = _home_pictures(chars)
     if home == state.get("home"):
-        return False
+        return arrived
     state["home"] = home
     _write_json(_state_path(), state)
     return True
@@ -327,7 +346,8 @@ def home_screen():
     """The greeting and the theme whose characters stand on the home screen, as the admin last set them."""
     home = _read_json(_state_path(), {}).get("home") or {}
     return {"welcome": home.get("welcome") or "Welcome to Ada The Coder", "theme": home.get("theme") or "",
-            "break": home.get("break")}       # the break reminder the admin set (None: the app's own, every 30 minutes)
+            "break": home.get("break"),       # the break reminder the admin set (None: the app's own, every 30 minutes)
+            "chars": home.get("chars") or []}  # the home characters' names and pictures the admin set
 
 
 def run_checks():

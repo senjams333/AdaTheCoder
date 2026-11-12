@@ -56,7 +56,7 @@ export class CatalogService implements OnApplicationBootstrap {
       features: c.features, featureList: (c.features || '').split('\n').map((f) => f.trim()).filter(Boolean),
       pack: c.pack, packLabel: label, price: c.price, priceInr: c.priceInr, razorpayButton: c.razorpayButton, premium: c.premium, freeLessons: c.freeLessons,
       imageFile: c.imageFile, imageUrl: c.imageFile ? mediaUrl('courses', c.imageFile) : null,
-      characters: chars, images, position: c.position, published: c.published, updatedAt: c.updatedAt,
+      characters: chars, images, position: c.position, published: c.published, isNew: c.isNew, updatedAt: c.updatedAt,
     };
   }
 
@@ -93,6 +93,8 @@ export class CatalogService implements OnApplicationBootstrap {
         price: c.price, free_lessons: c.premium ? c.freeLessons : null,
         buy_url: c.premium ? `${siteUrl()}/account?theme=${encodeURIComponent(c.slug)}` : '',
         characters: this.characters(c),
+        // "NEW" on the theme's card in the app (it then comes second in the first row)
+        is_new: Boolean(c.isNew),
         // the card picture the admin uploaded for this theme (the app's theme card shows it; null: the characters)
         cover: c.imageFile ? { file: c.imageFile, url: mediaUrl('courses', c.imageFile) } : null,
         lessons: (await this.courseLessons(c.id, true)).map((l, i) => (full || i < free ? this.lessonPayload(l) : this.lockedLessonPayload(l))),

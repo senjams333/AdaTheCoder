@@ -27,7 +27,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
     name: theme?.name || '', slug: theme?.slug || '', tagline: theme?.tagline || '', description: theme?.description || '',
     features: theme?.features || '', pack: theme?.pack || 'friends', price: theme?.price || '', priceInr: theme?.priceInr || '', razorpayButton: theme?.razorpayButton || '', premium: theme?.premium ?? true,
     freeLessons: String(theme?.freeLessons ?? 1), position: String(theme?.position ?? nextPosition),
-    published: theme?.published ?? false, removeImage: false, copyFrom: '',
+    published: theme?.published ?? false, isNew: theme?.isNew ?? true, removeImage: false, copyFrom: '',
   });
   const [names, setNames] = useState<string[]>(Array.from({ length: SLOTS }, (_, i) => theme?.characters[i]?.name || ''));
   const [charFiles, setCharFiles] = useState<(File | null)[]>(Array(SLOTS).fill(null));
@@ -48,6 +48,7 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
     const fd = new FormData();
     for (const k of ['name', 'slug', 'tagline', 'description', 'features', 'pack', 'price', 'priceInr', 'razorpayButton', 'freeLessons', 'position'] as const) fd.append(k, String(form[k]));
     fd.append('premium', String(form.premium));
+    fd.append('isNew', String(form.isNew));
     fd.append('published', String(publish));
     fd.append('removeImage', String(form.removeImage));
     if (!theme && copyFrom !== 'none') fd.append('copyFrom', copyFrom);
@@ -144,6 +145,8 @@ export default function ThemeForm({ theme }: { theme?: Theme }) {
         <div className="card">
           <h2>Price and picture</h2>
           <div className="field"><label className="check"><input type="checkbox" checked={form.premium} onChange={set('premium')} /><span>Paid theme: children try the first lessons free, then parents buy a licence on their account page</span></label></div>
+          <div className="field"><label className="check"><input type="checkbox" checked={form.isNew} onChange={set('isNew')} /><span>Show <b className="pill-new">NEW</b> on this theme in the app, and put it second in the first row of themes</span></label>
+            <span className="help">Ticked by itself for a new theme. Untick it when the theme isn&apos;t new any more.</span></div>
           <div className="row-3e">
             <div className="field"><label htmlFor="price">Price</label><input id="price" type="text" value={form.price} onChange={set('price')} placeholder="$3.69" /><span className="help">Shown on the cards, and what PayPal charges.</span></div>
             <div className="field"><label htmlFor="price_inr">Price in rupees <span className="muted">(Razorpay, India)</span></label><input id="price_inr" type="text" inputMode="decimal" value={form.priceInr} onChange={set('priceInr')} placeholder="299" /><span className="help">Empty: Razorpay isn&apos;t offered for this theme.</span></div>

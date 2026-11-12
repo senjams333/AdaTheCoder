@@ -123,6 +123,7 @@ export class AdminThemesController {
       features: String(body.features || '').replace(/\r\n/g, '\n').trim(),
       pack: trimmed(body.pack, 30), price: trimmed(body.price, 30), priceInr: trimmed(body.priceInr, 30).replace(/^₹\s*/, ''), razorpayButton: trimmed(body.razorpayButton, 40), premium: truthy(body.premium),
       position: trimmed(body.position || '0'), freeLessons: trimmed(body.freeLessons ?? '1') || '1', published: truthy(body.published),
+      isNew: truthy(body.isNew),
     };
     const errors: string[] = [];
     if (!data.name) errors.push('Give the theme a name, like Learn Coding in Space.');

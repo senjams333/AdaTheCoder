@@ -150,7 +150,7 @@ body { margin: 0; background: var(--page); color: var(--ink); font: 14px var(--u
 .tmore[hidden] { display: none; }
 .tmore .arr svg.tm-up, .tmore.tm-back .arr svg.tm-down { display: none; }     /* at the last row the arrow points up */
 .tmore.tm-back .arr svg.tm-up { display: inline; }
-@keyframes tmoreBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(7px) rotate(4deg); } }
+@keyframes tmoreBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }   /* bobs, never tilts */
 @keyframes tmoreTwinkle { 0%, 100% { opacity: .15; transform: scale(.5) rotate(0deg); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
 @media (prefers-reduced-motion: reduce) { .tmore, .tmore .g { animation: none; } }
 /* no focus box round buttons after a click (keyboard focus still shows a soft blue ring) */
@@ -195,6 +195,11 @@ button:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(56, 189, 248, .
 /* Free / Purchased / the price, in the card's top right corner */
 .tcard .badge { position: absolute; top: 10px; right: 10px; z-index: 1; font-size: 16px !important; font-weight: 800 !important; padding: 5px 13px !important; border-radius: 999px !important; box-shadow: 0 2px 6px rgba(0, 0, 0, .1); }
 .tcard .badge.free { background: #e0f2fe; color: #0369a1; }
+/* NEW: top left of the card, bright pink, with a little shine */
+.tcard .tnew { position: absolute; top: 10px; left: 10px; z-index: 1; background: linear-gradient(180deg, #ff7cbc, #ff3d95); color: #fff;
+  font: 800 16px var(--font-kid); letter-spacing: .06em; padding: 5px 13px; border-radius: 999px; box-shadow: 0 2px 8px rgba(255, 61, 149, .45);
+  animation: tnewGlow 1.6s ease-in-out infinite alternate; }
+@keyframes tnewGlow { from { box-shadow: 0 2px 8px rgba(255, 61, 149, .45); } to { box-shadow: 0 2px 16px rgba(255, 61, 149, .9); } }
 .tcard .badge { align-self: flex-start; background: #f4f1ff; color: #5b2fe0; border-radius: 9px; padding: 2px 9px; font-size: 12px; font-weight: 700; }
 .central.night .tcard .badge { background: #2a2160; color: #c4b5fd; }
 .tcard button { margin-top: auto; align-self: center; min-width: 160px; font: 700 16.5px var(--font-kid); background: #7b4dff; color: #fff; border: 0; border-radius: 22px; padding: 10px 30px; cursor: pointer; box-shadow: 0 4px 0 rgba(43, 34, 87, .18); }
@@ -447,14 +452,17 @@ function renderHome() {
   const HOME = (D.home && D.home.chars) || [["Tom", img("tom.png"), "🧒"], ["Ada", img("girl_wave.png"), "👧"], ["Unicorn", img("unicorn.png"), "🦄"]];
   setHTML($("chars"), HOME.map(([n, pic, e]) => `<div class="char"><div class="nm">${e} ${esc(n)}</div>${pic ? `<img src="${pic}" alt="${esc(n)}">` : `<div style="font-size:120px">${e}</div>`}</div>`).join(""));
   // the theme being played first (top left), then the free themes, then the others in the admin's order
-  setHTML($("tcards"), D.courses.slice().sort((a, b) => (b.id === course.id) - (a.id === course.id) || (a.premium ? 1 : 0) - (b.premium ? 1 : 0) || (a.position || 0) - (b.position || 0)).map(c => {
+  // a theme the admin marked NEW comes second (right after the first card), so children see it in the first row
+  const order = D.courses.slice().sort((a, b) => (b.id === course.id) - (a.id === course.id) || (a.premium ? 1 : 0) - (b.premium ? 1 : 0) || (a.position || 0) - (b.position || 0));
+  const cards = order.slice(0, 1).concat(order.slice(1).filter(c => c.is_new), order.slice(1).filter(c => !c.is_new));
+  setHTML($("tcards"), cards.map(c => {
     const pk = D.packs[c.pack] || D.packs.friends, cur = c.id === course.id, own = owned(c);
     const bought = freeCount(c) !== null && own;
     const badge = bought ? "✓ Purchased" : own ? "Free" : "";
     // the card picture the admin uploaded for the theme; without one, its characters
     const pics = c.cover ? `<img class="cover" src="${c.cover}" alt="">` : heroPics(c).map(u => u ? `<img src="${u}" alt="">` : "").join("");
     return `<div class="tcard${cur ? " cur" : ""}" data-id="${c.id}"><div class="pics">${pics}</div>
-      <div class="tn">${esc(c.name)}</div><div class="about">${esc(c.description || c.tagline || "")}</div>${badge ? `<span class="badge${bought ? " bought" : " free"}">${esc(badge)}</span>` : ""}<button>✨  Try free</button></div>`;
+      ${c.is_new ? '<span class="tnew">NEW</span>' : ""}<div class="tn">${esc(c.name)}</div><div class="about">${esc(c.description || c.tagline || "")}</div>${badge ? `<span class="badge${bought ? " bought" : " free"}">${esc(badge)}</span>` : ""}<button>✨  Try free</button></div>`;
   }).join(""));
   $("tcards").querySelectorAll(".tcard").forEach(t => t.onclick = () => openKids(t.dataset.id));
   setTimeout(moreArrow, 0);

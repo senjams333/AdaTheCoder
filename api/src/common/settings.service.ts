@@ -21,4 +21,9 @@ export class SettingsService {
     }
     return this.all();
   }
+
+  /** One setting on its own (the uploaded home pictures: the form's Save never touches these). */
+  async setOne(key: string, value: string) {
+    await this.settings.save({ key, value });
+  }
 }

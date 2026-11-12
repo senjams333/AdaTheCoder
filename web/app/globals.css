@@ -961,3 +961,17 @@ a.course-pic img { transition: transform .2s; }
 .acct-card-body .acct-features { margin-bottom: 10px; }
 .acct-card-actions { gap: 8px; }
 .acct-card .acct-pay-note { margin-top: 0; }
+
+/* "NEW" (a theme the admin marked as new) */
+.pill-new { background: #ff5fa8; color: #fff; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 1px 9px; }
+
+/* admin: the app's home characters */
+.homechars { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 16px; margin: 6px 0 20px; }
+.homechar { border: 2px solid var(--line); border-radius: 18px; padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.homechar .field { margin: 0; }
+.homechar-stage { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 8px 4px; border-radius: 14px;
+  background: linear-gradient(180deg, #bfe6ff, #e7f6ff 70%, #c9f0c8); }
+.homechar-stage img { height: 150px; max-width: 100%; object-fit: contain; }
+.homechar-name { background: #fff; color: #1e1b4b; border-radius: 22px; padding: 4px 16px; font-weight: 800; box-shadow: 0 3px 10px rgba(0, 0, 0, .12);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.homechar-reset { justify-self: start; }

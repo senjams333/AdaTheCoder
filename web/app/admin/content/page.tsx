@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { FormErrors } from '@/components/Flashes';
+import HomeCharacters from '@/components/HomeCharacters';
 import { useAdminSettingsQuery, useSaveSettingsMutation, useThemesQuery } from '@/lib/api';
 import { errorList } from '@/lib/errors';
 import { flash } from '@/lib/flashSlice';
@@ -58,11 +59,12 @@ export default function AdminContent() {
         <div className="field">
           <label htmlFor="app_home_theme">Characters on the home screen</label>
           <select id="app_home_theme" value={form.app_home_theme || ''} onChange={set('app_home_theme')}>
-            <option value="">Tom, Ada and Unicorn (built into the app)</option>
+            <option value="">Your home characters (below)</option>
             {(themes || []).map((t) => <option key={t.slug} value={t.slug}>{t.name}&apos;s characters</option>)}
           </select>
           <span className="help">Pick a theme to show its characters instead. New themes are added on the Themes page: tick &quot;Show this theme in the app&quot; and give it at least one live lesson, and it appears in every installed app the next time the app checks the website (at start, then every few minutes).</span>
         </div>
+        <HomeCharacters form={form} patch={(changes) => setForm((f) => ({ ...(f || {}), ...changes }))} />
         <h2 style={{ marginTop: 26 }}>Ada The Coder app: break reminder</h2>
         <p className="muted">After this many minutes of using the app, children see a short break (&quot;The Quick Reset&quot;). Installed apps pick up changes within a minute.</p>
         <div className="field">

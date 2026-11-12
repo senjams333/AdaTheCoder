@@ -33,6 +33,7 @@ export default function AdminThemes() {
                 <span className="pill">{c.packLabel}</span>
                 <span className="pill pill-sun">{c.live} of {c.total} lessons live</span>
                 {c.premium ? <span className="pill">{c.freeLessons} free to try</span> : null}
+                {c.isNew ? <span className="pill pill-new">NEW</span> : null}
                 {c.published && c.live ? <span className="pill pill-green">In the app</span>
                   : !c.published ? <span className="pill pill-red">⚠️ Hidden from the app</span>
                   : <span className="pill pill-red">⚠️ No live lessons: not in the app</span>}
