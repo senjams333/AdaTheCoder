@@ -42,6 +42,11 @@ export default function LearnPage() {
     window.location.reload();
   }, []);
 
+  // keeps the app on the phone or tablet (public/learn-sw.js): after the first time it opens and runs offline
+  useEffect(() => {
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/learn-sw.js').catch(() => undefined);
+  }, []);
+
   // the app's window, scaled to fit the screen
   useEffect(() => {
     const fit = () => {

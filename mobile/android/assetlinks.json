@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.adathecoder.app",
+      "sha256_cert_fingerprints": ["PUT:THE:SHA256:FINGERPRINT:HERE"]
+    }
+  }
+]

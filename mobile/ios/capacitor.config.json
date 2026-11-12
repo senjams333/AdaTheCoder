@@ -1,0 +1,14 @@
+{
+  "appId": "com.adathecoder.app",
+  "appName": "Ada The Coder",
+  "webDir": "www",
+  "server": {
+    "url": "https://www.adathecoder.com/learn",
+    "allowNavigation": ["www.adathecoder.com", "adathecoder.com"]
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#bae6fd",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}

@@ -16,6 +16,8 @@ const nextConfig = {
       { source: '/learn', headers: iso },
       { source: '/learn/:path*', headers: iso },
       { source: '/pyodide/:path*', headers: [...iso, { key: 'Cache-Control', value: 'public, max-age=604800' }] },
+      // the part that keeps the app on phones and tablets: always the newest
+      { source: '/learn-sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }, { key: 'Service-Worker-Allowed', value: '/' }] },
       // the desktop app's screens, pictures and emojis for /learn (desktop_app/webhost/build.py)
       { source: '/appweb/:path*', headers: [...iso, { key: 'Cache-Control', value: 'public, max-age=86400' }] },
     ];
