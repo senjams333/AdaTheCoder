@@ -221,15 +221,16 @@ function MobileApps({ releases, mine }: { releases: Partial<Record<'windows' | '
   const items = [
     { key: 'android' as const, store: (s.play_store_url || '').trim(), storeLabel: 'Google Play' },
     { key: 'ios' as const, store: (s.app_store_url || '').trim(), storeLabel: /testflight/i.test(s.app_store_url || '') ? 'TestFlight' : 'App Store' },
-  ].filter((x) => x.store || releases[x.key]);
-  if (!items.length) return null;
+  ];  // always shown: a store link, a download, or "Coming soon" until one is added in admin
   return (
     <div className="acct-mobile">
       <span className="acct-small">Phones and tablets:</span>
       <div className="acct-card-actions acct-dl-row">
         {items.map((x) => x.store
           ? <div className="acct-dl" key={x.key}><a className="acct-btn acct-btn-block" href={x.store} target="_blank" rel="noopener noreferrer">{PLATFORM_LABELS[x.key]}: {x.storeLabel}</a></div>
-          : <DownloadButton key={x.key} platform={x.key} label={PLATFORM_LABELS[x.key]} release={releases[x.key]} yours={mine === x.key} />)}
+          : !releases[x.key]
+            ? <div className="acct-dl" key={x.key}><span className="acct-btn acct-btn-block is-off" aria-disabled="true">{PLATFORM_LABELS[x.key]}</span><span className="acct-small">Coming soon</span></div>
+            : <DownloadButton key={x.key} platform={x.key} label={PLATFORM_LABELS[x.key]} release={releases[x.key]} yours={mine === x.key} />)}
       </div>
     </div>
   );
