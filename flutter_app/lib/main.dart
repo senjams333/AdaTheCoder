@@ -33,9 +33,36 @@ class AdaApp extends StatelessWidget {
   }
 }
 
-class AppScreen extends StatelessWidget {
+class AppScreen extends StatefulWidget {
   const AppScreen({super.key, required this.server});
   final LocalServer server;
+
+  @override
+  State<AppScreen> createState() => _AppScreenState();
+}
+
+class _AppScreenState extends State<AppScreen> with WidgetsBindingObserver {
+  LocalServer get server => widget.server;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      server.ensureRunning();
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
+  }
 
   static Future<void> _openOutside(Uri url) async {
     await launchUrl(url, mode: LaunchMode.externalApplication);

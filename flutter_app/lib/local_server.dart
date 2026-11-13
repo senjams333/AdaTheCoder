@@ -26,12 +26,30 @@ class LocalServer {
   Future<void> start() async {
     _cache = Directory('${(await getApplicationSupportDirectory()).path}/ada-cache');
     await _cache.create(recursive: true);
-    _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    await _bind(0);
+  }
+
+  Future<void> _bind(int port) async {
+    _server = await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: true);
     _server.listen((req) => _handle(req).catchError((Object e) => _send(req, 500, 'text/plain', utf8.encode('$e'))));
+  }
+
+  /// When the app comes back to the front: the phone may have closed the server while the app was away (iOS does),
+  /// so check it answers, and if not, start it again on the same address (the page keeps working).
+  Future<void> ensureRunning() async {
+    final port = _server.port;
+    try {
+      final r = await _client.get('127.0.0.1', port, '/__ada/ping').timeout(const Duration(seconds: 2));
+      await (await r.close()).drain<void>();
+    } catch (_) {
+      try { await _server.close(force: true); } catch (_) {}
+      await _bind(port);
+    }
   }
 
   Future<void> _handle(HttpRequest req) async {
     final path = req.uri.path;
+    if (path == '/__ada/ping') return _json(req, {'ok': true});
     if (path == '/__ada/input') {
       _input?.complete({'stop': true});
       final c = _input = Completer<Map<String, dynamic>>();
@@ -77,7 +95,7 @@ class LocalServer {
   File _kept(String key) => File('${_cache.path}/${base64Url.encode(utf8.encode(key)).replaceAll('=', '')}');
 
   Future<void> _api(HttpRequest req) async {
-    final key = 'api ${req.uri}';
+    final key = 'api ${req.uri} ${req.headers.value('authorization') ?? ''}';
     final body = req.method == 'GET' ? <int>[] : await req.fold<List<int>>(<int>[], (a, b) => a..addAll(b));
     try {
       final r = await _client.openUrl(req.method, Uri.parse('$site${req.uri}'));
