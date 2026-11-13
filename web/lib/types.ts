@@ -74,7 +74,7 @@ export interface SiteData {
   settings: Settings;
   themes: Theme[];
   lessons: { id: number; slug: string; position: number; emoji: string; name: string; title: string; subtitle: string }[];
-  releases: Partial<Record<'windows' | 'mac', ReleaseInfo>>;
+  releases: Partial<Record<'windows' | 'mac' | 'android' | 'ios', ReleaseInfo>>;
   platforms: Record<string, { label: string; extensions: string[] }>;
   packs: Record<string, Pack>;
   countries: string[];
@@ -84,12 +84,12 @@ export interface SiteData {
 export interface AccountData {
   user: User;
   themes: (Theme & { licence: string | null })[];
-  releases: Partial<Record<'windows' | 'mac', ReleaseInfo>>;
+  releases: Partial<Record<'windows' | 'mac' | 'android' | 'ios', ReleaseInfo>>;
 }
 
 export interface Dashboard {
   stats: { parents: number; newParents: number; downloads: number; lessons: number; drafts: number; themes: number };
-  releases: Partial<Record<'windows' | 'mac', { version: string; downloads: number; createdAt: string }>>;
+  releases: Partial<Record<'windows' | 'mac' | 'android' | 'ios', { version: string; downloads: number; createdAt: string }>>;
   recent: { name: string; email: string; childAge: number | null; city: string; country: string; createdAt: string }[];
 }
 
@@ -147,7 +147,7 @@ export interface LessonDetail {
 
 export interface Release {
   id: number;
-  platform: 'windows' | 'mac';
+  platform: 'windows' | 'mac' | 'android' | 'ios';
   version: string;
   notes: string;
   filename: string;

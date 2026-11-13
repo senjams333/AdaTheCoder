@@ -1092,3 +1092,7 @@ textarea.sec-policy { width: 100%; font-size: .9rem; line-height: 1.5; margin-bo
 .acct-learn { display: block; margin-top: 10px; text-align: center; font-weight: 800; font-size: .95rem; color: var(--grape-dark);
   background: var(--lilac-soft); border-radius: 999px; padding: 8px 12px; text-decoration: none; }
 .acct-learn:hover { background: #E3D8FF; }
+
+/* account page: the phone and tablet apps under the Free Trial downloads */
+.acct-mobile { margin-top: 12px; padding-top: 10px; border-top: 2px dashed var(--line); }
+.acct-mobile > .acct-small { display: block; margin-bottom: 6px; font-weight: 700; }

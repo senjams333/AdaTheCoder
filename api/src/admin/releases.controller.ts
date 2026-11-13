@@ -29,7 +29,7 @@ export class AdminReleasesController {
   async upload(@Body() body: Record<string, string>, @File() file?: UploadedFile) {
     const platform = trimmed(body.platform, 20), version = trimmed(body.version, 20), minSupported = trimmed(body.minSupported, 20);
     const errors: string[] = [];
-    if (!PLATFORMS[platform]) errors.push('Choose Windows or Mac.');
+    if (!PLATFORMS[platform]) errors.push('Choose Windows, Mac, Android or iPhone & iPad.');
     if (!VERSION_RE.test(version)) errors.push('Write the version as three numbers, like 1.2.0.');
     if (minSupported && !VERSION_RE.test(minSupported)) errors.push('Write the oldest allowed version as three numbers, like 1.0.0, or leave it empty.');
     if (!file) errors.push('Choose the installer file to upload.');

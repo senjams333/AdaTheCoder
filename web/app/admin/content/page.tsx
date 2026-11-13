@@ -168,6 +168,18 @@ export default function AdminContent() {
           <input id="install_video_url" type="url" placeholder="https://www.youtube.com/watch?v=…" value={form.install_video_url || ''} onChange={set('install_video_url')} />
           <span className="help">Linked from Byte&apos;s bubble next to &quot;Up and coding in three steps&quot; on the home page.</span>
         </div>
+        <h2 style={{ marginTop: 26 }}>Phone and tablet apps</h2>
+        <div className="row-2">
+          <div className="field">
+            <label htmlFor="play_store_url">Google Play link (Android)</label>
+            <input id="play_store_url" type="url" placeholder="https://play.google.com/store/apps/details?id=com.adathecoder.app" value={form.play_store_url || ''} onChange={set('play_store_url')} />
+          </div>
+          <div className="field">
+            <label htmlFor="app_store_url">App Store or TestFlight link (iPhone &amp; iPad)</label>
+            <input id="app_store_url" type="url" placeholder="https://apps.apple.com/app/... or https://testflight.apple.com/join/..." value={form.app_store_url || ''} onChange={set('app_store_url')} />
+          </div>
+        </div>
+        <p className="help muted" style={{ marginTop: -8 }}>Shown on parents&apos; account pages. Without a link, the account page offers the app file uploaded under App versions (Android .apk, iPhone &amp; iPad .ipa), if there is one.</p>
         <div className="row-3" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
           <div className="field"><label htmlFor="social_youtube">YouTube channel link</label><input id="social_youtube" type="url" value={form.social_youtube || ''} onChange={set('social_youtube')} /></div>
           <div className="field"><label htmlFor="social_x">X (Twitter) link</label><input id="social_x" type="url" value={form.social_x || ''} onChange={set('social_x')} /></div>

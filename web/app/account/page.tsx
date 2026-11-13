@@ -19,7 +19,7 @@ import { useAppDispatch } from '@/lib/hooks';
 import { useRequireLogin } from '@/lib/useRequireLogin';
 import { LicenceCopy } from '@/components/PaidCard';
 
-const PLATFORM_LABELS = { windows: 'Windows', mac: 'Mac' } as const;
+const PLATFORM_LABELS = { windows: 'Windows', mac: 'Mac', android: 'Android', ios: 'iPhone & iPad' } as const;
 type ModalName = 'details' | 'password' | 'delete' | 'install' | null;
 
 function AccountInner() {
@@ -151,6 +151,7 @@ function AccountInner() {
                           <DownloadButton key={key} platform={key} label={PLATFORM_LABELS[key]} release={data.releases[key]} yours={mine === key} />
                         ))}
                       </div>
+                      <MobileApps releases={data.releases} />
                       <button type="button" className="acct-help-btn" onClick={() => setModal('install')}>How to install</button>
                       {/* a plain link (a full page load): /learn needs its own page headers to run Python */}
                       <a className="acct-learn" href="/learn">📱 No computer? Learn in the browser</a>
@@ -209,8 +210,30 @@ function AccountInner() {
   );
 }
 
+/** The phone and tablet apps: the store link the admin set (Website text), else the uploaded app file (App versions).
+ *  Shown only when there is one. */
+function MobileApps({ releases }: { releases: Partial<Record<'windows' | 'mac' | 'android' | 'ios', { version: string; size: number }>> }) {
+  const { data } = useGetSiteQuery();
+  const s = data?.settings || {};
+  const items = [
+    { key: 'android' as const, store: (s.play_store_url || '').trim(), storeLabel: 'Google Play' },
+    { key: 'ios' as const, store: (s.app_store_url || '').trim(), storeLabel: /testflight/i.test(s.app_store_url || '') ? 'TestFlight' : 'App Store' },
+  ].filter((x) => x.store || releases[x.key]);
+  if (!items.length) return null;
+  return (
+    <div className="acct-mobile">
+      <span className="acct-small">Phones and tablets:</span>
+      <div className="acct-card-actions">
+        {items.map((x) => x.store
+          ? <div className="acct-dl" key={x.key}><a className="acct-btn acct-btn-block" href={x.store} target="_blank" rel="noopener noreferrer">{PLATFORM_LABELS[x.key]}: {x.storeLabel}</a></div>
+          : <DownloadButton key={x.key} platform={x.key} label={PLATFORM_LABELS[x.key]} release={releases[x.key]} yours={false} />)}
+      </div>
+    </div>
+  );
+}
+
 function DownloadButton({ platform, label, release, yours }: {
-  platform: 'windows' | 'mac'; label: string; release?: { version: string; size: number }; yours: boolean;
+  platform: 'windows' | 'mac' | 'android' | 'ios'; label: string; release?: { version: string; size: number }; yours: boolean;
 }) {
   const [getLink, { isLoading }] = useDownloadLinkMutation();
   const dispatch = useAppDispatch();

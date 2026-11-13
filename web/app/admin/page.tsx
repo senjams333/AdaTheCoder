@@ -9,7 +9,7 @@ import { flash } from '@/lib/flashSlice';
 import { day } from '@/lib/format';
 import { useAppDispatch } from '@/lib/hooks';
 
-const PLATFORMS = [['windows', 'Windows'], ['mac', 'Mac']] as const;
+const PLATFORMS = [['windows', 'Windows'], ['mac', 'Mac'], ['android', 'Android'], ['ios', 'iPhone & iPad']] as const;
 
 export default function AdminDashboard() {
   const { data, error } = useDashboardQuery();
@@ -29,7 +29,7 @@ export default function AdminDashboard() {
       <div className="card">
         <h2>Current app versions</h2>
         <div className="table-wrap"><table>
-          <thead><tr><th>Computer</th><th>Version</th><th>Released</th><th>Downloads</th></tr></thead>
+          <thead><tr><th>Device</th><th>Version</th><th>Released</th><th>Downloads</th></tr></thead>
           <tbody>
             {PLATFORMS.map(([key, label]) => {
               const r = data.releases[key];

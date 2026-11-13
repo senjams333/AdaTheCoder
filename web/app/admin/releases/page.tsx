@@ -8,7 +8,7 @@ import { flash } from '@/lib/flashSlice';
 import { day, mb } from '@/lib/format';
 import { useAppDispatch } from '@/lib/hooks';
 
-const LABELS: Record<string, string> = { windows: 'Windows', mac: 'Mac' };
+const LABELS: Record<string, string> = { windows: 'Windows', mac: 'Mac', android: 'Android', ios: 'iPhone & iPad' };
 
 export default function AdminReleases() {
   const { data: releases } = useReleasesQuery();
@@ -61,11 +61,15 @@ export default function AdminReleases() {
         <FormErrors errors={errors} />
         <div className="row-2">
           <div className="field">
-            <label htmlFor="platform">Computer</label>
+            <label htmlFor="platform">Device</label>
             <select id="platform" value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })}>
               <option value="windows">Windows (.exe, .msi or .zip)</option>
               <option value="mac">Mac (.dmg, .pkg or .zip)</option>
+              <option value="android">Android phone or tablet (.apk)</option>
+              <option value="ios">iPhone &amp; iPad (.ipa)</option>
             </select>
+            {form.platform === 'android' ? <span className="help">The .apk from <code>bubblewrap build</code> (app-release-signed.apk). Parents can install it straight from their account page. The Play Store link goes on the Website text page.</span> : null}
+            {form.platform === 'ios' ? <span className="help">An .ipa installs only on iPhones and iPads registered in your Apple Developer account. For families, put the App Store or TestFlight link on the Website text page: the account page then shows that link instead.</span> : null}
           </div>
           <div className="field">
             <label htmlFor="version">Version number</label>
@@ -93,7 +97,7 @@ export default function AdminReleases() {
         <h2>All versions</h2>
         {releases?.length ? (
           <table>
-            <thead><tr><th>Computer</th><th>Version</th><th>Uploaded</th><th>Size</th><th>Downloads</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Device</th><th>Version</th><th>Uploaded</th><th>Size</th><th>Downloads</th><th>Status</th><th></th></tr></thead>
             <tbody>
               {releases.map((r) => (
                 <tr key={r.id}>

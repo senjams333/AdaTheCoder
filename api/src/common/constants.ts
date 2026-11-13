@@ -11,6 +11,10 @@ export const CHARACTER_SLOTS = 3;
 export const PLATFORMS: Record<string, { label: string; extensions: string[] }> = {
   windows: { label: 'Windows', extensions: ['.exe', '.msi', '.zip'] },
   mac: { label: 'Mac', extensions: ['.dmg', '.pkg', '.zip'] },
+  // phones and tablets: the Android app's .apk (installs straight from the website) and the iPhone/iPad app's .ipa
+  // (installs only on devices registered in the Apple Developer account; families use the App Store / TestFlight link)
+  android: { label: 'Android', extensions: ['.apk'] },
+  ios: { label: 'iPhone & iPad', extensions: ['.ipa'] },
 };
 /** Lesson videos the admin can upload; the API makes the WebM copy the app plays from any of them (ffmpeg). */
 export const VIDEO_EXTENSIONS = ['.mp4', '.m4v', '.mov', '.webm', '.mkv', '.avi'];
@@ -21,7 +25,7 @@ export const SETTING_FIELDS = [
   'app_welcome', 'app_home_theme', 'business_details',
   'break_minutes', 'break_title', 'break_intro', 'break_steps', 'break_button', 'break_lock', 'break_lock_minutes', 'policy_purchases',
   'home_char1_name', 'home_char2_name', 'home_char3_name', 'grievance_name', 'grievance_email', 'legal_city', 'hero_code_file', 'hero_code', 'hero_code_output',
-  'install_video_url', 'social_youtube', 'social_x', 'social_facebook',
+  'install_video_url', 'app_store_url', 'play_store_url', 'social_youtube', 'social_x', 'social_facebook',
   ...SITE_TEXT_FIELDS,
 ] as const;
 

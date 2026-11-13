@@ -78,7 +78,7 @@ export class AccountController {
   @HttpCode(200)
   @UseGuards(AuthGuard)
   async downloadLink(@CurrentUser() user: User, @Param('platform') platform: string) {
-    if (!PLATFORMS[platform]) throw new NotFoundException('Choose Windows or Mac.');
+    if (!PLATFORMS[platform]) throw new NotFoundException('Choose Windows, Mac, Android or iPhone & iPad.');
     const release = await this.releases.findOne({ where: { platform, isLatest: true } });
     if (!release) throw new NotFoundException(`The ${PLATFORMS[platform].label} app isn't available yet. Check back soon.`);
     const ticket = this.jwt.sign({ dl: release.id, sub: user.id }, { expiresIn: '5m' });
