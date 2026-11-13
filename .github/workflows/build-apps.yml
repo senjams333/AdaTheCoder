@@ -78,7 +78,7 @@ jobs:
   # ---------------------------------------------------------------- macOS (every MacBook: an Intel app, Apple chips run it through Rosetta)
   mac:
     needs: test
-    runs-on: macos-latest
+    runs-on: macos-15-intel     # an Intel Mac: the app is an Intel app (Apple chips run it through Rosetta)
     steps:
       - uses: actions/checkout@v4
         with: { lfs: true }
@@ -134,6 +134,8 @@ jobs:
           # the icons from this repository (the website may not have them yet)
           RAW="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/web/public/icons"
           sed -i "s#https://www.adathecoder.com/icons/#${RAW}/#g" twa-manifest.json
+          # build from this file only (not the live website's manifest, which may be older)
+          sed -i '/"webManifestUrl"/d' twa-manifest.json
           yes "" | bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json
           bubblewrap build --skipPwaValidation
           bubblewrap fingerprint generateAssetLinks || true
@@ -148,7 +150,7 @@ jobs:
 
   # ---------------------------------------------------------------- iPhone & iPad (Capacitor, mobile/ios)
   ios:
-    runs-on: macos-latest
+    runs-on: macos-15-intel
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
     steps:
