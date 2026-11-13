@@ -1,6 +1,6 @@
 # Builds Ada The Coder for every device on GitHub's own machines:
-#   Windows installer (.exe) · Mac disk image (.dmg, every MacBook, macOS 11+) · Android app (.apk + .aab)
-#   iPhone & iPad app (a simulator build always; with Apple keys also uploaded to TestFlight)
+#   Windows installer (.exe) · Mac disk image (.dmg, every MacBook, macOS 11+)
+#   Android app (.apk) and iPhone & iPad app (unsigned) from the Flutter app in flutter_app/
 #
 # Start it: GitHub → Actions → "Build apps" → Run workflow (choose the branch), or push a tag like v1.5.2.
 # Download the files from the run's "Artifacts" (or the Release made for a tag) and upload them in the website
@@ -8,10 +8,7 @@
 #
 # Optional secrets (GitHub → Settings → Secrets and variables → Actions). Without them everything still builds:
 #   Windows signing (SSL.com eSigner): ES_USERNAME, ES_PASSWORD, ES_TOTP_SECRET
-#   Android signing key (keep the same one for ever, the Play Store needs it):
-#       ANDROID_KEYSTORE_BASE64 (base64 of android.keystore), ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_PASSWORD
-#       (without them: a throwaway test key, fine for trying the APK on your own phone)
-#   iOS upload to TestFlight: APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64 (App Store Connect API key)
+#   (Android and iOS signing for the Play Store / App Store come later.)
 name: Build apps
 
 on:
@@ -104,102 +101,64 @@ jobs:
           name: AdaTheCoder-Mac
           path: desktop_app/dist/AdaTheCoder-*-Mac.dmg
 
-  # ---------------------------------------------------------------- Android (Trusted Web Activity, mobile/android)
+  # ---------------------------------------------------------------- Android (Flutter: flutter_app/)
   android:
     if: ${{ github.event_name == 'push' || inputs.only == 'all' || inputs.only == 'android' }}
     runs-on: ubuntu-latest
+    permissions: { contents: write }      # to keep the generated android/ and ios/ folders in the repository
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
-      - name: Bubblewrap
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - name: Put the app inside (screens, Python, pictures) and make the Android/iOS folders
+        run: bash flutter_app/tool/prepare.sh
+      - name: Keep the new android/ and ios/ folders in the repository (first time only)
+        if: ${{ github.ref_type == 'branch' }}
         run: |
-          npm install -g @bubblewrap/cli
-          mkdir -p ~/.bubblewrap
-          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
-      - name: Signing key
-        env:
-          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        working-directory: mobile/android
-        run: |
-          if [ -n "$KS" ]; then
-            echo "$KS" | base64 -d > ada-upload-key.keystore
-            echo "BUBBLEWRAP_KEYSTORE_PASSWORD=$KS_PASS" >> "$GITHUB_ENV"
-            echo "BUBBLEWRAP_KEY_PASSWORD=$KEY_PASS" >> "$GITHUB_ENV"
-          else
-            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret: signing with a throwaway test key (fine for trying the APK; not for the Play Store)."
-            keytool -genkeypair -keystore ada-upload-key.keystore -alias ada -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass testtest -keypass testtest -dname "CN=Ada The Coder test, O=Ada The Coder, C=IN"
-            echo "BUBBLEWRAP_KEYSTORE_PASSWORD=testtest" >> "$GITHUB_ENV"
-            echo "BUBBLEWRAP_KEY_PASSWORD=testtest" >> "$GITHUB_ENV"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flutter_app/android flutter_app/ios flutter_app/analysis_options.yaml flutter_app/.metadata flutter_app/README.md 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Flutter app: the android/ and ios/ folders (made by flutter create, set up by tool/prepare.sh)"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
-      - name: Build APK and App Bundle
-        working-directory: mobile/android
-        run: |
-          # the icons from this repository (the website may not have them yet)
-          RAW="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/web/public/icons"
-          sed -i "s#https://www.adathecoder.com/icons/#${RAW}/#g" twa-manifest.json
-          # build from this file only (not the live website's manifest, which may be older)
-          sed -i '/"webManifestUrl"/d' twa-manifest.json
-          yes "" | bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json
-          bubblewrap build --skipPwaValidation
-          bubblewrap fingerprint generateAssetLinks || true
-          ls -la
+      - name: Build the Android app (APK)
+        working-directory: flutter_app
+        run: flutter build apk --release
+      - name: Name it
+        run: cp flutter_app/build/app/outputs/flutter-apk/app-release.apk AdaTheCoder-Android.apk
       - uses: actions/upload-artifact@v4
         with:
           name: AdaTheCoder-Android
-          path: |
-            mobile/android/app-release-signed.apk
-            mobile/android/app-release-bundle.aab
-            mobile/android/assetlinks.json
+          path: AdaTheCoder-Android.apk
 
-  # ---------------------------------------------------------------- iPhone & iPad (Capacitor, mobile/ios)
+  # ---------------------------------------------------------------- iPhone & iPad (Flutter: flutter_app/)
   ios:
     if: ${{ github.event_name == 'push' || inputs.only == 'all' || inputs.only == 'ios' }}
     runs-on: macos-15-intel
-    env:
-      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - name: Make the Xcode project
-        working-directory: mobile/ios
-        run: |
-          npm install
-          npx cap add ios --packagemanager SPM
-          npx cap sync ios
-          bash finish-ios.sh
-      - name: Build for the iPhone/iPad simulator (checks that it builds)
-        working-directory: mobile/ios
-        run: |
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tail -5
-          cd build/Build/Products/Debug-iphonesimulator && zip -qr "$GITHUB_WORKSPACE/AdaTheCoder-iOS-Simulator.zip" App.app
-      - name: Upload to TestFlight (only with the Apple secrets)
-        if: ${{ env.ASC_KEY_ID != '' }}
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
-        working-directory: mobile/ios
-        run: |
-          echo "$ASC_KEY_P8_BASE64" | base64 -d > "$RUNNER_TEMP/key.p8"
-          AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$RUNNER_TEMP/key.p8" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
-            -archivePath build/AdaTheCoder.xcarchive DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic \
-            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" "${AUTH[@]}" archive | tail -5
-          sed "s/YOUR_TEAM_ID/$APPLE_TEAM_ID/" ExportOptions-testflight.plist > "$RUNNER_TEMP/export.plist"
-          xcodebuild -exportArchive -archivePath build/AdaTheCoder.xcarchive -exportPath build/ipa \
-            -exportOptionsPlist "$RUNNER_TEMP/export.plist" "${AUTH[@]}" | tail -5
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - name: Put the app inside (screens, Python, pictures), set up the iOS folder
+        run: bash flutter_app/tool/prepare.sh
+      - name: Build the iPhone/iPad app (not signed; signing needs your Apple Developer account)
+        working-directory: flutter_app
+        run: flutter build ios --release --no-codesign
+      - name: Pack it
+        run: cd flutter_app/build/ios/iphoneos && zip -qr "$GITHUB_WORKSPACE/AdaTheCoder-iOS-unsigned.zip" Runner.app
       - uses: actions/upload-artifact@v4
         with:
-          name: AdaTheCoder-iOS-Simulator
-          path: AdaTheCoder-iOS-Simulator.zip
+          name: AdaTheCoder-iOS-unsigned
+          path: AdaTheCoder-iOS-unsigned.zip
 
   # ---------------------------------------------------------------- a GitHub Release with every file (for a v* tag)
   release:

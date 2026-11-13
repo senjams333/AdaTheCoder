@@ -1,0 +1,31 @@
+name: ada_the_coder
+description: "Ada The Coder for Android and iOS: the Windows app's own screens and Python, on the phone or tablet."
+publish_to: "none"
+version: 1.5.2+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_inappwebview: ^6.1.5
+  path_provider: ^2.1.4
+  url_launcher: ^6.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  # made by tool/prepare.sh from the website and the desktop app (not kept in git)
+  assets:
+    - assets/www/
+    - assets/www/pyodide/
+    - assets/www/learn/
+    - assets/www/appweb/
+    - assets/www/appweb/assets/images/
+    - assets/www/appweb/assets/emoji/
+    - assets/www/appweb/assets/video/

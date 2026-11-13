@@ -19,6 +19,8 @@ export class PythonRunner {
   private kept = new Map<string, string>();
   /** appweb: also load the desktop app's own pages (web/public/appweb), for call() */
   constructor(private readonly appweb = false) {}
+  /** In the Flutter app (flutter_app/): input(), sleep and Stop go through its little web server (/__ada/...). */
+  viaServer = false;
   onStatus: (s: 'loading' | 'ready' | 'failed') => void = () => undefined;
 
   /** True when input(), sleep and Stop work fully (the page is cross-origin isolated). */
@@ -54,7 +56,7 @@ export class PythonRunner {
       };
       w.onerror = (e) => { this.onStatus('failed'); reject(new Error(e.message || 'Python could not start.')); };
     });
-    w.postMessage({ type: 'init', inputBuf: this.inputBuf, stopBuf: this.stopBuf, sleepBuf: this.sleepBuf, appweb: this.appweb });
+    w.postMessage({ type: 'init', inputBuf: this.inputBuf, stopBuf: this.stopBuf, sleepBuf: this.sleepBuf, appweb: this.appweb, viaServer: this.viaServer });
     for (const [fn, arg] of this.kept) this.send(fn, arg).catch(() => undefined);   // queued after init
     return this.ready;
   }
@@ -95,6 +97,7 @@ export class PythonRunner {
 
   /** The child's answer to input(). */
   answer(text: string) {
+    if (this.viaServer) { void fetch('/__ada/answer', { method: 'POST', body: JSON.stringify({ text }) }); return; }
     if (!this.inputBuf) return;
     const ctrl = new Int32Array(this.inputBuf, 0, 2);
     const bytes = new Uint8Array(this.inputBuf, 8);
@@ -107,6 +110,7 @@ export class PythonRunner {
 
   /** Stop the running program (a loop that never ends, or waiting for an answer). */
   stop() {
+    if (this.viaServer) void fetch('/__ada/answer', { method: 'POST', body: JSON.stringify({ stop: true }) }).catch(() => undefined);
     if (!this.pending) return;
     if (this.stopBuf && this.inputBuf) {
       new Uint8Array(this.stopBuf)[0] = 2;                 // Python stops at its next step (KeyboardInterrupt)

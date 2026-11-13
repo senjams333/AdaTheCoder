@@ -10,12 +10,26 @@
 importScripts('/pyodide/pyodide.js');
 
 let py = null, ctrl = null, bytes = null, sleeper = null;
+let viaServer = false;      // the Flutter app (flutter_app/): input() and sleep() wait on its little web server instead
+
+/* the Flutter app's server answers when the child has typed the answer (or Stop was pressed) */
+function ask(path) {
+  const x = new XMLHttpRequest();
+  x.open('GET', path, false);              // a worker may wait like this; the page itself stays free
+  x.send();
+  try { return JSON.parse(x.responseText || '{}'); } catch (e) { return {}; }
+}
 const BLOCKED = ['cv2', 'numpy', 'turtle', 'tkinter', 'pygame', 'matplotlib', 'PIL'];
 
 function out(text) { postMessage({ type: 'out', text: String(text) }); }
 
 /* input(): ask the page, then wait (without using the processor) until the child has typed the answer */
 function readInput(prompt) {
+  if (viaServer) {
+    postMessage({ type: 'input', prompt: String(prompt || '') });
+    const a = ask('/__ada/input?prompt=' + encodeURIComponent(String(prompt || '')));
+    return a.stop ? null : String(a.text ?? '');
+  }
   if (!ctrl) return null;
   Atomics.store(ctrl, 0, 0);
   postMessage({ type: 'input', prompt: String(prompt || '') });
@@ -28,7 +42,8 @@ function readInput(prompt) {
 /* time.sleep(): really waits (the rocket countdown counts down), and Stop still works */
 function sleep(seconds) {
   const ms = Math.max(0, Math.min(Number(seconds) || 0, 30) * 1000);
-  if (sleeper) Atomics.wait(sleeper, 0, 0, ms);
+  if (viaServer) { if (ms > 0 && ask('/__ada/sleep?ms=' + Math.round(ms)).stop) throw new Error('stopped'); }
+  else if (sleeper) Atomics.wait(sleeper, 0, 0, ms);
   else { const end = Date.now() + Math.min(ms, 2000); while (Date.now() < end) { /* no shared memory: a short busy wait */ } }
 }
 
@@ -103,12 +118,13 @@ async function init(msg) {
     bytes = new Uint8Array(msg.inputBuf, 8);
   }
   if (msg.sleepBuf) sleeper = new Int32Array(msg.sleepBuf);
+  viaServer = Boolean(msg.viaServer);
   py = await loadPyodide({ indexURL: '/pyodide/' });
   if (msg.stopBuf) py.setInterruptBuffer(new Uint8Array(msg.stopBuf));
   const src = await (await fetch('/learn/explain.py')).text();
   py.FS.mkdirTree('/home/pyodide');
   py.FS.writeFile('/home/pyodide/explain.py', src);
-  py.registerJsModule('ada_io', { write: out, read_input: readInput, sleep, can_input: Boolean(ctrl) });
+  py.registerJsModule('ada_io', { write: out, read_input: readInput, sleep, can_input: Boolean(ctrl) || viaServer });
   py.runPython(SETUP);
   if (msg.appweb) {                      // the desktop app's own pages (adathecoder.com/learn)
     const zip = await (await fetch('/appweb/app.zip')).arrayBuffer();

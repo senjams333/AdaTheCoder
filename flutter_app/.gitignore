@@ -1,0 +1,10 @@
+# made by tool/prepare.sh (from the website and the desktop app)
+assets/www/
+# Flutter's own
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.iml
+.idea/
