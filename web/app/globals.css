@@ -1107,3 +1107,21 @@ textarea.sec-policy { width: 100%; font-size: .9rem; line-height: 1.5; margin-bo
   .acct-dl-row .acct-btn-block { font-size: .84rem; padding: 9px 4px; white-space: normal; line-height: 1.2; }
   .acct-dl-row .acct-small { font-size: .7rem; }
 }
+
+/* Admin → Parents: unlock a theme by hand (paid but no licence, a gift...): a window in the middle of the screen */
+.unlock-alert { border: 3px solid #F5B83D; background: #FFF8E6; padding: 12px 16px; margin-bottom: 16px; }
+.pill-warn { background: #FFF1CC; color: #8A5A00; margin-left: 6px; white-space: nowrap; }
+.unlock-edit summary { list-style: none; white-space: nowrap; } .unlock-edit summary::-webkit-details-marker { display: none; }
+.unlock-backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(43,34,87,.35); }
+.unlock-edit[open] form { position: fixed; z-index: 41; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px); overflow: auto; background: #fff; border: 3px solid var(--line); border-radius: 18px; padding: 22px;
+  box-shadow: 0 20px 50px rgba(43,34,87,.25); text-align: left; }
+.unlock-edit h3 { margin: 0; font-size: 1.15rem; padding-right: 30px; }
+.unlock-sub { margin: 2px 0 14px; font-size: .88rem; }
+.unlock-close { position: absolute; top: 12px; right: 14px; border: 0; background: none; font-size: 1.1rem; cursor: pointer; color: var(--ink-soft); }
+.unlock-edit .check { display: flex; gap: 8px; align-items: center; margin: 4px 0 14px; font-size: .9rem; }
+.unlock-history { margin-top: 16px; padding-top: 12px; border-top: 2px dashed var(--line); font-size: .85rem; }
+.unlock-history ul { margin: 6px 0 0; padding-left: 18px; }
+.unlock-history li { margin-bottom: 6px; }
+.unlock-history li.warn { color: #8A5A00; font-weight: 700; }
+.unlock-history small { color: var(--ink-soft); word-break: break-all; font-weight: 400; }

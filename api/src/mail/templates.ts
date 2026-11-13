@@ -187,6 +187,37 @@ export function licenceEmail(p: Purchase, siteUrl: string): Email {
   return { subject: `Your Ada The Coder licence for ${p.theme}`, html, text };
 }
 
+export interface Unlocked {
+  name: string;
+  email: string;
+  theme: string;
+  licence: string;
+  /** true: they paid but the licence wasn't made (the email says sorry); false: unlocked for them (paid another way, a gift) */
+  paid: boolean;
+}
+
+/** Sent to the parent when the admin unlocks a theme by hand (admin → Parents → Unlock). */
+export function unlockedEmail(p: Unlocked, siteUrl: string): Email {
+  const site = siteUrl.replace(/\/$/, '');
+  const first = esc(p.name.split(' ')[0] || 'there');
+  const why = p.paid
+    ? `sorry for the wait: your payment went through, but your licence wasn't made at the time. We've fixed it, and every lesson of <b>${esc(p.theme)}</b> is now open in the Ada The Coder app.`
+    : `we've unlocked <b>${esc(p.theme)}</b> for you. Every lesson is now open in the Ada The Coder app.`;
+  const box = `<div style="margin:0 0 18px;text-align:center;"><span style="display:inline-block;background:#ECFDF5;border:2px dashed #22C997;border-radius:16px;padding:12px 22px;font-size:22px;font-weight:bold;letter-spacing:2px;color:#2B2257;font-family:Consolas,monospace;">${esc(p.licence)}</span></div>`;
+  const html = layout(
+    'Your licence',
+    `<h1 style="margin:0 0 12px;font-size:22px;color:#2B2257;">${esc(p.theme)} is unlocked 🎉</h1>
+<p style="margin:0 0 14px;">Hi ${first}, ${why} It unlocks by itself the next time the app opens (or within a minute if it's open).</p>
+<p style="margin:0 0 8px;">Your licence:</p>${box}
+<p style="margin:0 0 18px;font-size:14px;color:#6B6890;">If the app doesn't unlock by itself: open the theme → <b>Upgrade ⭐</b> → <b>I have a licence 🔑</b> and paste the licence. It's also on your account page.</p>
+<p style="margin:0 0 18px;">${button(`${site}/account`, 'Open my account')}</p>
+<p style="margin:0;font-size:13px;color:#6B6890;">Something still not right? Just reply to this email.</p>`,
+    siteUrl,
+  );
+  const text = `${p.theme} is unlocked.\n\n${p.paid ? "Sorry for the wait: your payment went through, but your licence wasn't made at the time. We've fixed it." : "We've unlocked it for you."}\nYour licence: ${p.licence}\n\nIt unlocks by itself in the Ada The Coder app. If it doesn't: open the theme, Upgrade, I have a licence, and paste it.\nYour account: ${site}/account`;
+  return { subject: `${p.theme} is unlocked: your Ada The Coder licence`, html, text };
+}
+
 /** Sent to the admin when a payment goes through. */
 export function adminPaymentEmail(p: Purchase, siteUrl: string): Email {
   const rows: [string, string][] = [

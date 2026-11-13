@@ -1,7 +1,8 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 /** One try at buying a theme (table "payments"): created when the parent picks Razorpay or PayPal,
- *  "paid" once the payment provider confirms it (then the family gets the theme's licence). */
+ *  "paid" once the payment provider confirms it (then the family gets the theme's licence).
+ *  provider "admin": a theme the admin unlocked by hand (a payment whose licence wasn't made, a gift...). */
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn()
@@ -36,6 +37,10 @@ export class Payment {
   /** The provider's payment / capture id, once paid */
   @Column({ name: 'payment_id', length: 80, default: '' })
   paymentId!: string;
+
+  /** Set when the admin unlocked the theme by hand (admin → Parents → Unlock): why, and when */
+  @Column({ length: 255, default: '' })
+  note!: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

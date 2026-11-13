@@ -136,6 +136,10 @@ export const api = createApi({
       query: ({ id, ...body }) => ({ url: `admin/parents/${id}/plan`, method: 'PUT', body }),
       invalidatesTags: ['Parents'],
     }),
+    unlockTheme: b.mutation<Done & { licence?: string }, { id: number; courseId: number; reason: string; paymentId: number | null; reference: string; note: string; email: boolean }>({
+      query: ({ id, ...body }) => ({ url: `admin/parents/${id}/unlock`, method: 'POST', body }),
+      invalidatesTags: ['Parents', 'Dashboard'],
+    }),
     deleteParent: b.mutation<Done, number>({
       query: (id) => ({ url: `admin/parents/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Parents', 'Dashboard'],
@@ -150,5 +154,5 @@ export const {
   useThemesQuery, useThemeQuery, useCreateThemeMutation, useUpdateThemeMutation, useDeleteThemeMutation, useCopyLessonsMutation, usePublishThemeMutation,
   useLessonQuery, useBlankLessonQuery, useCreateLessonMutation, useUpdateLessonMutation, useDeleteLessonMutation, useMoveLessonMutation, usePublishLessonMutation,
   useReleasesQuery, useUploadReleaseMutation, useMakeLatestMutation, useDeleteReleaseMutation,
-  useParentsQuery, useToggleParentMutation, useSaveParentPlanMutation, useDeleteParentMutation,
+  useParentsQuery, useToggleParentMutation, useSaveParentPlanMutation, useUnlockThemeMutation, useDeleteParentMutation,
 } = api;

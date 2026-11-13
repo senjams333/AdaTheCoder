@@ -173,11 +173,29 @@ export interface ParentRow {
   lastLogin: string | null;
   downloads: number;
   licences: Record<string, string>;
+  payments: ParentPayment[];
+}
+
+/** A parent's try at paying for a theme (admin → Parents). unlocked: they have that theme's licence. */
+export interface ParentPayment {
+  id: number;
+  courseId: number;
+  theme: string;
+  provider: string;
+  orderId: string;
+  paymentId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  note: string;
+  createdAt: string;
+  unlocked: boolean;
 }
 
 export interface ParentsData {
   parents: ParentRow[];
   paidThemes: { id: number; name: string; slug: string }[];
+  unlockReasons: Record<string, string>;
 }
 
 export interface Done {
