@@ -9,7 +9,7 @@ import { flash } from '@/lib/flashSlice';
 import { day } from '@/lib/format';
 import { useAppDispatch } from '@/lib/hooks';
 
-const PLATFORMS = [['windows', 'Windows'], ['mac', 'Mac'], ['android', 'Android'], ['ios', 'iPhone & iPad']] as const;
+const PLATFORMS = [['windows', 'Windows'], ['mac', 'Mac']] as const;
 
 export default function AdminDashboard() {
   const { data, error } = useDashboardQuery();

@@ -179,7 +179,7 @@ export default function AdminContent() {
             <input id="app_store_url" type="url" placeholder="https://apps.apple.com/app/... or https://testflight.apple.com/join/..." value={form.app_store_url || ''} onChange={set('app_store_url')} />
           </div>
         </div>
-        <p className="help muted" style={{ marginTop: -8 }}>Shown on parents&apos; account pages. Without a link, the account page offers the app file uploaded under App versions (Android .apk, iPhone &amp; iPad .ipa), if there is one.</p>
+        <p className="help muted" style={{ marginTop: -8 }}>The Android and iPhone &amp; iPad buttons on parents&apos; account pages open these links (Google Play, App Store or TestFlight). Without a link, the button shows &quot;Coming soon&quot;.</p>
         <div className="row-3" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
           <div className="field"><label htmlFor="social_youtube">YouTube channel link</label><input id="social_youtube" type="url" value={form.social_youtube || ''} onChange={set('social_youtube')} /></div>
           <div className="field"><label htmlFor="social_x">X (Twitter) link</label><input id="social_x" type="url" value={form.social_x || ''} onChange={set('social_x')} /></div>

@@ -11,10 +11,7 @@ export const CHARACTER_SLOTS = 3;
 export const PLATFORMS: Record<string, { label: string; extensions: string[] }> = {
   windows: { label: 'Windows', extensions: ['.exe', '.msi', '.zip'] },
   mac: { label: 'Mac', extensions: ['.dmg', '.pkg', '.zip'] },
-  // phones and tablets: the Android app's .apk (installs straight from the website) and the iPhone/iPad app's .ipa
-  // (installs only on devices registered in the Apple Developer account; families use the App Store / TestFlight link)
-  android: { label: 'Android', extensions: ['.apk'] },
-  ios: { label: 'iPhone & iPad', extensions: ['.ipa'] },
+  // phones and tablets are not uploaded here: their Google Play and App Store links are set in admin → Website text
 };
 /** Lesson videos the admin can upload; the API makes the WebM copy the app plays from any of them (ffmpeg). */
 export const VIDEO_EXTENSIONS = ['.mp4', '.m4v', '.mov', '.webm', '.mkv', '.avi'];

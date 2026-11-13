@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useRef, useState } from 'react';
+import Link from 'next/link';
 import { FormErrors } from '@/components/Flashes';
 import { useDeleteReleaseMutation, useMakeLatestMutation, useReleasesQuery, useUploadReleaseMutation } from '@/lib/api';
 import { errorList } from '@/lib/errors';
@@ -65,11 +66,8 @@ export default function AdminReleases() {
             <select id="platform" value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })}>
               <option value="windows">Windows (.exe, .msi or .zip)</option>
               <option value="mac">Mac (.dmg, .pkg or .zip)</option>
-              <option value="android">Android phone or tablet (.apk)</option>
-              <option value="ios">iPhone &amp; iPad (.ipa)</option>
             </select>
-            {form.platform === 'android' ? <span className="help">The .apk from <code>bubblewrap build</code> (app-release-signed.apk). Parents can install it straight from their account page. The Play Store link goes on the Website text page.</span> : null}
-            {form.platform === 'ios' ? <span className="help">An .ipa installs only on iPhones and iPads registered in your Apple Developer account. For families, put the App Store or TestFlight link on the Website text page: the account page then shows that link instead.</span> : null}
+            <span className="help">Android and iPhone &amp; iPad are not uploaded here: add their Google Play and App Store links under <Link href="/admin/content">Website text</Link> → Phone and tablet apps.</span>
           </div>
           <div className="field">
             <label htmlFor="version">Version number</label>
