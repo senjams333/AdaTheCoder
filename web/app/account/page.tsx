@@ -28,7 +28,7 @@ function AccountInner() {
   const { data: site } = useGetSiteQuery();
   const [modal, setModal] = useState<ModalName>(null);
   const [licenceOf, setLicenceOf] = useState<{ name: string; code: string } | null>(null);   // See Licence pop-up
-  const [mine, setMine] = useState<'windows' | 'mac' | null>(null);
+  const [mine, setMine] = useState<'windows' | 'mac' | 'android' | 'ios' | null>(null);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const params = useSearchParams();
@@ -48,7 +48,10 @@ function AccountInner() {
 
   useEffect(() => {
     const ua = navigator.userAgent;
-    setMine(/Windows/i.test(ua) ? 'windows' : /Macintosh|Mac OS X/i.test(ua) ? 'mac' : null);
+    // phones and tablets first: iPhones say "like Mac OS X", and iPads ask for the Mac page (but have a touch screen)
+    const ipad = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+    setMine(/Android/i.test(ua) ? 'android' : /iPhone|iPad|iPod/i.test(ua) || ipad ? 'ios'
+      : /Windows/i.test(ua) ? 'windows' : /Macintosh|Mac OS X/i.test(ua) ? 'mac' : null);
     // The left panel's height comes from the screen size and changes only when the window width changes.
     let lastWidth = 0;
     const size = () => {
@@ -151,7 +154,7 @@ function AccountInner() {
                           <DownloadButton key={key} platform={key} label={PLATFORM_LABELS[key]} release={data.releases[key]} yours={mine === key} />
                         ))}
                       </div>
-                      <MobileApps releases={data.releases} />
+                      <MobileApps releases={data.releases} mine={mine} />
                       <button type="button" className="acct-help-btn" onClick={() => setModal('install')}>How to install</button>
                       {/* a plain link (a full page load): /learn needs its own page headers to run Python */}
                       <a className="acct-learn" href="/learn">📱 No computer? Learn in the browser</a>
@@ -212,7 +215,7 @@ function AccountInner() {
 
 /** The phone and tablet apps: the store link the admin set (Website text), else the uploaded app file (App versions).
  *  Shown only when there is one. */
-function MobileApps({ releases }: { releases: Partial<Record<'windows' | 'mac' | 'android' | 'ios', { version: string; size: number }>> }) {
+function MobileApps({ releases, mine }: { releases: Partial<Record<'windows' | 'mac' | 'android' | 'ios', { version: string; size: number }>>; mine: string | null }) {
   const { data } = useGetSiteQuery();
   const s = data?.settings || {};
   const items = [
@@ -226,7 +229,7 @@ function MobileApps({ releases }: { releases: Partial<Record<'windows' | 'mac' |
       <div className="acct-card-actions">
         {items.map((x) => x.store
           ? <div className="acct-dl" key={x.key}><a className="acct-btn acct-btn-block" href={x.store} target="_blank" rel="noopener noreferrer">{PLATFORM_LABELS[x.key]}: {x.storeLabel}</a></div>
-          : <DownloadButton key={x.key} platform={x.key} label={PLATFORM_LABELS[x.key]} release={releases[x.key]} yours={false} />)}
+          : <DownloadButton key={x.key} platform={x.key} label={PLATFORM_LABELS[x.key]} release={releases[x.key]} yours={mine === x.key} />)}
       </div>
     </div>
   );
@@ -253,7 +256,7 @@ function DownloadButton({ platform, label, release, yours }: {
       <button type="button" className="acct-btn acct-btn-block" onClick={download} disabled={isLoading}>
         <span aria-hidden="true">⬇</span> {label}
       </button>
-      <span className="acct-small">Version {release.version}, {mb(release.size)}{yours ? <span className="yours"> · your computer</span> : null}</span>
+      <span className="acct-small">Version {release.version}, {mb(release.size)}{yours ? <span className="yours"> · {platform === 'android' || platform === 'ios' ? 'this device' : 'your computer'}</span> : null}</span>
     </div>
   );
 }
