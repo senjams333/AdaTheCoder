@@ -214,12 +214,14 @@ function AccountInner() {
 /** The phone and tablet apps: the store link the admin set (Website text), else the uploaded app file (App versions).
  *  Shown only when there is one. */
 function MobileApps() {
-  const { data } = useGetSiteQuery();
+  // fetched fresh each time the account page opens, so a store link added or removed in admin shows straight away
+  const { data } = useGetSiteQuery(undefined, { refetchOnMountOrArgChange: true });
   const s = data?.settings || {};
+  const link = (v?: string) => (/^https?:\/\/\S+$/i.test((v || '').trim()) ? (v || '').trim() : '');
   // active only when the store link is added in admin (Content → Phone and tablet apps); "Coming soon" until then
   const items = [
-    { key: 'android' as const, store: (s.play_store_url || '').trim(), storeLabel: 'Get it on Google Play' },
-    { key: 'ios' as const, store: (s.app_store_url || '').trim(), storeLabel: /testflight/i.test(s.app_store_url || '') ? 'Get it on TestFlight' : 'Get it on the App Store' },
+    { key: 'android' as const, store: link(s.play_store_url), storeLabel: 'Get it on Google Play' },
+    { key: 'ios' as const, store: link(s.app_store_url), storeLabel: /testflight/i.test(s.app_store_url || '') ? 'Get it on TestFlight' : 'Get it on the App Store' },
   ];
   return (
     <div className="acct-mobile">

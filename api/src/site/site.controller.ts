@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpException, HttpStatus, Ip, Post, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, HttpCode, HttpException, HttpStatus, Ip, Post, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PACKS, PLATFORMS } from '../common/constants';
@@ -22,6 +22,7 @@ export class SiteController {
   private readonly recent = new Map<string, number[]>();
 
   @Get()
+  @Header('Cache-Control', 'no-store')  // always the newest settings (e.g. a store link the admin just removed)
   async site() {
     const courses = await this.catalog.allCourses(true);
     const first = courses[0];
