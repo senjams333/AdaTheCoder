@@ -149,7 +149,7 @@ function AccountInner() {
                       <h3>Free Trial</h3>
                       {/* short words (and soft hyphens, \u00AD) so the justified lines never get long gaps */}
                       <p>{'Get Ada The Cod\u00ADer free. Ev\u00ADery theme opens in it, and new les\u00ADsons ar\u00ADrive on their own.'}</p>
-                      <div className="acct-card-actions">
+                      <div className="acct-card-actions acct-dl-row">
                         {(['windows', 'mac'] as const).map((key) => (
                           <DownloadButton key={key} platform={key} label={PLATFORM_LABELS[key]} release={data.releases[key]} yours={mine === key} />
                         ))}
@@ -226,7 +226,7 @@ function MobileApps({ releases, mine }: { releases: Partial<Record<'windows' | '
   return (
     <div className="acct-mobile">
       <span className="acct-small">Phones and tablets:</span>
-      <div className="acct-card-actions">
+      <div className="acct-card-actions acct-dl-row">
         {items.map((x) => x.store
           ? <div className="acct-dl" key={x.key}><a className="acct-btn acct-btn-block" href={x.store} target="_blank" rel="noopener noreferrer">{PLATFORM_LABELS[x.key]}: {x.storeLabel}</a></div>
           : <DownloadButton key={x.key} platform={x.key} label={PLATFORM_LABELS[x.key]} release={releases[x.key]} yours={mine === x.key} />)}

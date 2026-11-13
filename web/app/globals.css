@@ -1096,3 +1096,14 @@ textarea.sec-policy { width: 100%; font-size: .9rem; line-height: 1.5; margin-bo
 /* account page: the phone and tablet apps under the Free Trial downloads */
 .acct-mobile { margin-top: 12px; padding-top: 10px; border-top: 2px dashed var(--line); }
 .acct-mobile > .acct-small { display: block; margin-bottom: 6px; font-weight: 700; }
+
+/* account page: Windows + Mac side by side, then Android + iPhone & iPad side by side */
+.acct-card-actions.acct-dl-row { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.acct-dl-row .acct-dl { min-width: 0; }
+.acct-dl-row .acct-btn-block { width: 100%; white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+.acct-dl-row .acct-small { font-size: .78rem; }
+@media (max-width: 520px) {
+  .acct-card-actions.acct-dl-row { gap: 8px 6px; }
+  .acct-dl-row .acct-btn-block { font-size: .84rem; padding: 9px 4px; white-space: normal; line-height: 1.2; }
+  .acct-dl-row .acct-small { font-size: .7rem; }
+}
