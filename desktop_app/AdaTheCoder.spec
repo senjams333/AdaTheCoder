@@ -46,10 +46,12 @@ if sys.platform == "darwin":
         coll,
         name=f"{APP_NAME}.app",
         icon=icon_mac if os.path.exists(icon_mac) else None,
-        bundle_identifier="com.adathecoder.app",
+        bundle_identifier="com.adathecoder.mac",          # the iPhone/iPad app is com.adathecoder.app
         info_plist={
             "CFBundleShortVersionString": APP_VERSION,
             "CFBundleVersion": APP_VERSION,
+            "LSMinimumSystemVersion": "11.0",                 # macOS 11 Big Sur and every newer macOS
+            "LSApplicationCategoryType": "public.app-category.education",
             "NSHighResolutionCapable": True,
             "NSCameraUsageDescription": "Some lessons let children use the camera with OpenCV.",
         },
