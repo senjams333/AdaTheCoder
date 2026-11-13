@@ -5,7 +5,7 @@
 import { AppWindow, MIN_H, MIN_W } from '../../web/lib/appWindow';
 import { PythonRunner } from '../../web/lib/python';
 
-declare global { interface Window { flutter_inappwebview?: { callHandler: (name: string, ...args: unknown[]) => Promise<unknown> } } }
+declare global { interface Window { AdaApp?: { postMessage: (message: string) => void } } }
 
 const SITE = 'https://www.adathecoder.com';
 const frame = document.getElementById('app') as HTMLIFrameElement;
@@ -14,7 +14,7 @@ const wait = document.getElementById('wait') as HTMLDivElement;
 // pages of the website (pay, account, forgot password) open in the phone's browser, never inside the app
 window.open = ((url?: string | URL) => {
   const u = String(url || '');
-  if (/^https?:/.test(u)) void window.flutter_inappwebview?.callHandler('openExternal', u);
+  if (/^https?:/.test(u)) window.AdaApp?.postMessage(u);         // lib/main.dart opens it outside the app
   return null;
 }) as typeof window.open;
 
