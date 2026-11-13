@@ -18,6 +18,12 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      only:
+        description: "Which app to build"
+        type: choice
+        options: [all, windows, mac, android, ios]
+        default: all
 
 env:
   SITE: https://www.adathecoder.com
@@ -36,6 +42,7 @@ jobs:
   # ---------------------------------------------------------------- Windows
   windows:
     needs: test
+    if: ${{ github.event_name == 'push' || inputs.only == 'all' || inputs.only == 'windows' }}
     runs-on: windows-latest
     env:
       ES_USERNAME: ${{ secrets.ES_USERNAME }}
@@ -78,6 +85,7 @@ jobs:
   # ---------------------------------------------------------------- macOS (every MacBook: an Intel app, Apple chips run it through Rosetta)
   mac:
     needs: test
+    if: ${{ github.event_name == 'push' || inputs.only == 'all' || inputs.only == 'mac' }}
     runs-on: macos-15-intel     # an Intel Mac: the app is an Intel app (Apple chips run it through Rosetta)
     steps:
       - uses: actions/checkout@v4
@@ -98,6 +106,7 @@ jobs:
 
   # ---------------------------------------------------------------- Android (Trusted Web Activity, mobile/android)
   android:
+    if: ${{ github.event_name == 'push' || inputs.only == 'all' || inputs.only == 'android' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -150,6 +159,7 @@ jobs:
 
   # ---------------------------------------------------------------- iPhone & iPad (Capacitor, mobile/ios)
   ios:
+    if: ${{ github.event_name == 'push' || inputs.only == 'all' || inputs.only == 'ios' }}
     runs-on: macos-15-intel
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
