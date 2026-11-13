@@ -57,6 +57,17 @@ C. IN XCODE
    open it again: it should open and run code.
 
 ==========================================================================================
+C2. OR ALL FROM THE TERMINAL (no clicking)
+==========================================================================================
+cd ~/mobile/ios
+npx cap run ios                          # choose a simulator or a connected iPhone/iPad from the list: builds and runs it
+bash build-ipa.sh YOUR_TEAM_ID testflight   # builds the installer and uploads it to TestFlight (needs step D1 once)
+bash build-ipa.sh YOUR_TEAM_ID adhoc        # or: an .ipa file for your own registered iPhones/iPads
+                                            #     (~/ada-ios-build/ipa/App.ipa; install it with Apple Configurator
+                                            #      or Xcode -> Window -> Devices and Simulators -> "+")
+Team ID: developer.apple.com -> Account -> Membership details. Sign in to Xcode once (A3) so it can sign.
+
+==========================================================================================
 D. TESTFLIGHT (install on any iPhone/iPad without a cable) AND THE APP STORE
 ==========================================================================================
 1. appstoreconnect.apple.com -> Apps -> "+" New App -> iOS, name "Ada The Coder", Bundle ID com.adathecoder.app,
