@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { lfs: true }
-      - name: Rosetta and Python 3.11 from python.org (universal2: runs as Intel under Rosetta)
+      - name: "Rosetta and Python 3.11 from python.org (universal2, runs as Intel under Rosetta)"
         run: |
           sudo softwareupdate --install-rosetta --agree-to-license || true
           curl -sSLo py.pkg https://www.python.org/ftp/python/3.11.9/python-3.11.9-macos11.pkg
