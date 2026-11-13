@@ -1,13 +1,14 @@
 {
   "name": "ada-the-coder-ios",
   "private": true,
-  "description": "Ada The Coder for iPhone and iPad: the app opens adathecoder.com/learn (the Windows app's own screens) full screen, sideways.",
+  "description": "Ada The Coder for iPhone and iPad: the Windows app's own screens (adathecoder.com/learn), kept on the device and working offline, full screen and sideways.",
   "scripts": {
-    "setup": "npx cap add ios && npx cap sync ios && bash landscape.sh",
-    "sync": "npx cap sync ios && bash landscape.sh",
+    "setup": "npx cap add ios --packagemanager SPM && npx cap sync ios && bash finish-ios.sh",
+    "sync": "npx cap sync ios && bash finish-ios.sh",
     "open": "npx cap open ios"
   },
   "dependencies": {
+    "@capacitor/browser": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "@capacitor/ios": "^7.0.0"
   },

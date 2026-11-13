@@ -1,0 +1,93 @@
+ADA THE CODER FOR iPHONE AND iPAD: BUILD STEPS
+(13 November 2026)
+
+WHAT THIS APP IS
+- The Windows app's own screens (home, themes, lessons, RUN CODE, Byte's help, confetti), the same as on the
+  computer, made by the app's own Python running ON the iPhone/iPad.
+- Installed from TestFlight / the App Store: Ada icon, full screen, sideways only.
+- First opening needs internet: it saves the app, Python, pictures and lessons on the device. After that it opens
+  and runs OFFLINE. With internet it fetches new lessons and licences (like the Windows app).
+- Parents log in with their website account. Buying a theme opens the website in Safari's in-app browser.
+
+NEEDED
+- The website update v39 (or newer) deployed on the server.
+- A Mac with Xcode: your own Mac, or the AWS Mac (see Ada-The-Coder-Mac-Build-on-AWS.txt, sections A-B and D).
+  On the AWS Mac a Mac1 (Intel) or Mac2 (Apple chip) both work for iOS apps.
+- An Apple Developer account ($99 a year), to install on real iPhones/iPads and publish.
+- This folder: AdaTheCoder-Mobile-Apps.zip -> mobile/ios
+
+==========================================================================================
+A. ON THE MAC, ONCE
+==========================================================================================
+1. Xcode: App Store -> Xcode -> Get (about 10 GB). Open it once, accept the licence, let it install the extra parts.
+   Then Xcode -> Settings -> Platforms -> iOS: download the iOS simulator if offered.
+   In Terminal:  sudo xcode-select -s /Applications/Xcode.app
+2. Node.js 20: nodejs.org -> download the macOS installer (.pkg) -> install.
+   (AWS Mac over ssh:  curl -LO https://nodejs.org/dist/v20.18.0/node-v20.18.0.pkg && sudo installer -pkg node-v20.18.0.pkg -target / )
+3. Xcode -> Settings -> Accounts -> "+" -> Apple ID: sign in with your Apple Developer account.
+
+==========================================================================================
+B. MAKE THE XCODE PROJECT
+==========================================================================================
+# laptop -> Mac (AWS Mac: replace MAC-IP; own Mac: copy the folder any way you like)
+scp -i Ada55555.pem AdaTheCoder-Mobile-Apps.zip ec2-user@MAC-IP:~
+
+# on the Mac (Terminal)
+cd ~ && unzip -o AdaTheCoder-Mobile-Apps.zip && cd mobile/ios
+npm install
+npm run setup          # = npx cap add ios --packagemanager SPM, npx cap sync ios, bash finish-ios.sh
+npm run open           # opens the project in Xcode
+
+finish-ios.sh prints: "Info.plist: landscape only, full screen, App-Bound Domains (offline) set."
+
+==========================================================================================
+C. IN XCODE
+==========================================================================================
+1. Left: click "App" (blue icon) -> TARGETS "App" -> tab "Signing & Capabilities":
+     Team: your Apple Developer team.   Bundle Identifier: com.adathecoder.app
+2. Tab "General": Display Name: Ada The Coder · Version: 1.0.0 · Build: 1
+   Supported Destinations: iPhone and iPad.
+3. Try it: top bar -> choose "iPad Pro" (simulator) -> press ▶.
+   The app opens sideways: log in with a parent account -> open a theme -> a lesson -> RUN CODE ->
+   a lesson with a question (input) -> answer it.
+4. On your own iPhone/iPad: connect it with a cable (trust the Mac on the device), choose it at the top, press ▶.
+   First time: on the device, Settings -> General -> VPN & Device Management -> trust your developer profile;
+   Settings -> Privacy & Security -> Developer Mode -> On (restart).
+5. Offline check: open the app once with internet, open a theme and a lesson, close it, turn on Airplane mode,
+   open it again: it should open and run code.
+
+==========================================================================================
+D. TESTFLIGHT (install on any iPhone/iPad without a cable) AND THE APP STORE
+==========================================================================================
+1. appstoreconnect.apple.com -> Apps -> "+" New App -> iOS, name "Ada The Coder", Bundle ID com.adathecoder.app,
+   SKU adathecoder-ios.
+2. Xcode: top bar -> "Any iOS Device (arm64)" -> menu Product -> Archive -> (Organizer opens) -> Distribute App ->
+   App Store Connect -> Upload.
+3. App Store Connect -> your app -> TestFlight: after a few minutes the build appears. Add yourself (and family) as
+   testers. On the iPhone/iPad install "TestFlight" from the App Store and accept the invitation.
+4. Publishing (later): App Store Connect -> App Store tab: screenshots (iPad and iPhone, sideways), description,
+   privacy policy URL https://www.adathecoder.com/privacy, age rating, Kids category (ages 6-8 / 9-11),
+   App Privacy: no tracking, data: name and email (account). Then "Add for Review".
+5. New app versions later: raise Version/Build in Xcode -> Archive -> Upload. New lessons and themes NEVER need a
+   new app version: they come from the website.
+
+==========================================================================================
+BEFORE "ADD FOR REVIEW" (IMPORTANT)
+==========================================================================================
+- Apple doesn't allow paying for digital content outside Apple's in-app purchase, or pay links inside apps, and
+  Kids-category apps need a "parental gate" before any link that leaves the app. Before submitting for review, ask
+  Claude for the "store version": in the iPhone/iPad app, Upgrade then says that a grown-up can unlock the theme on
+  the website, with no pay link. Families buy on the website; the app unlocks what the account owns.
+- In the review notes, say: "Ada The Coder runs Python code on the device and works offline after the first start;
+  lessons are downloaded from our website. Demo account: <email> / <password>" (make a demo parent account with a
+  bought theme for Apple's reviewer).
+- TestFlight for your own family and testers is fine without the store version.
+
+IF SOMETHING GOES WRONG
+- "npm: command not found": install Node.js (A2) and open a new Terminal.
+- npm run setup says ios already exists: run  npm run sync  instead.
+- Xcode "Signing requires a development team": C1.
+- The app shows "Ada The Coder couldn't start here": check the internet the first time, and that the website
+  update v39 is deployed (https://www.adathecoder.com/learn works in Safari on the Mac).
+- Questions (input) say the answer box can't be shown: tell Claude (this depends on iOS's web engine version).
+- Send Claude the last lines of Terminal / the red error in Xcode (no passwords).

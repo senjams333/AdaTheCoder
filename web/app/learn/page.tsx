@@ -175,7 +175,13 @@ class AppWindow {
   }
 
   private onFocus = () => { if (this.payUntil > Date.now()) void this.checkLicences(false); };
-  private openUrl(url: string) { window.open(url, '_blank', 'noopener'); }
+  /** A website page (pay, account, forgot password): a new browser tab; in the iPhone/iPad app (Capacitor), Safari's
+   *  in-app browser (the Browser plugin), so the child never loses the app. */
+  private openUrl(url: string) {
+    const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean; Plugins?: { Browser?: { open: (o: { url: string }) => Promise<void> } } } }).Capacitor;
+    if (cap?.isNativePlatform?.() && cap.Plugins?.Browser) { void cap.Plugins.Browser.open({ url }).catch(() => window.open(url, '_blank')); return; }
+    window.open(url, '_blank', 'noopener');
+  }
 
   private async push() {
     this.host.dataChanged.emit(await this.py.call('data', this.state()));

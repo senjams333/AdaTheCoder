@@ -86,31 +86,13 @@ Open **Ada Coder**: log in with the parent account once; it remembers it.
 
 ## iPhone and iPad
 
-### 1. On the Mac (once)
-- Xcode from the App Store (open it once and accept the licence).
-- Node.js 20: download the macOS installer from nodejs.org, or `brew install node`.
-- An Apple Developer account ($99 a year) to install on real devices and publish.
-
-### 2. Make the Xcode project
-Copy the `ios` folder to the Mac (e.g. `scp -r mobile/ios ec2-user@MAC-IP:~/ada-ios`), then:
+Full step-by-step guide: **`ios/BUILD-IOS.txt`**. In short, on a Mac with Xcode and Node.js 20:
 ```
-cd ~/ada-ios
+cd mobile/ios
 npm install
-npx cap add ios --packagemanager SPM
-npx cap sync ios
-bash landscape.sh
-npx cap open ios
+npm run setup     # makes the Xcode project, then finish-ios.sh: landscape, full screen, offline (App-Bound Domains), icon
+npm run open      # Xcode: choose your Team, press ▶ on an iPad simulator or your device; Product → Archive for TestFlight
 ```
-`landscape.sh` makes the app sideways only and full screen.
-
-### 3. In Xcode
-1. Select **App** (left) → *Signing & Capabilities* → Team: your Apple Developer team. Bundle identifier
-   `com.adathecoder.app`.
-2. *General → App Icons*: drag `web/public/icons/ada-512.png` (Xcode makes the sizes; or use an icon generator for a
-   1024×1024 PNG without transparency).
-3. Choose an **iPad** or **iPhone simulator** at the top and press ▶ to try it. Or plug in your iPhone/iPad and choose it.
-4. To give it to testers or publish: *Product → Archive → Distribute App → App Store Connect* → then **TestFlight**
-   (testers install the TestFlight app) or submit for review.
 
 ---
 
